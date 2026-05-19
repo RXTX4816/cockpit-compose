@@ -60,7 +60,7 @@ jobs:
           cp src/main.js src/main.css src/manifest.json src/index.html README.md cockpit-compose/
           tar -czf cockpit-compose-0.0.0.tar.gz cockpit-compose/
       - name: Install DEB tools
-        run: sudo apt-get install -y devscripts debhelper dpkg-dev
+        run: sudo apt-get install -y devscripts debhelper dpkg-dev build-essential
       - name: Build DEB
         run: |
           mkdir -p cockpit-compose-0.0.0
@@ -102,7 +102,7 @@ jobs:
         run: |
           useradd builder
           chown -R builder .
-          su builder -c "cd $(pwd) && makepkg -s --noconfirm"
+          su builder -c "cd $(pwd) && makepkg --nodeps --noconfirm"
       - name: Verify package contents
         run: |
           PKG=$(find . -name "*.pkg.tar.*" | head -1)
