@@ -24,36 +24,38 @@ jobs:
       - name: Determine next version
         id: version
         run: |
-          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "0.0.0")
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "NONE")
           echo "Last tag: $LAST_TAG"
 
-          if [ "$LAST_TAG" = "0.0.0" ]; then
-            COMMITS=$(git log --format='%s')
+          if [ "$LAST_TAG" = "NONE" ]; then
+            NEXT_VERSION="v0.2.0"
+            CHANGE_TYPE="initial"
+            echo "No prior tag — using initial version $NEXT_VERSION"
           else
             COMMITS=$(git log "${LAST_TAG}..HEAD" --format='%s')
-          fi
 
-          if [ -z "$COMMITS" ]; then
-            echo "No commits since last tag. Nothing to release."
-            exit 1
-          fi
+            if [ -z "$COMMITS" ]; then
+              echo "No commits since last tag. Nothing to release."
+              exit 1
+            fi
 
-          echo "Commits since last tag:"
-          echo "$COMMITS"
+            echo "Commits since last tag:"
+            echo "$COMMITS"
 
-          MAJOR=$(echo "$LAST_TAG" | cut -d. -f1 | sed 's/v//')
-          MINOR=$(echo "$LAST_TAG" | cut -d. -f2)
-          PATCH=$(echo "$LAST_TAG" | cut -d. -f3 | cut -d- -f1)
+            MAJOR=$(echo "$LAST_TAG" | cut -d. -f1 | sed 's/v//')
+            MINOR=$(echo "$LAST_TAG" | cut -d. -f2)
+            PATCH=$(echo "$LAST_TAG" | cut -d. -f3 | cut -d- -f1)
 
-          if echo "$COMMITS" | grep -qi "BREAKING CHANGE"; then
-            NEXT_VERSION="v$((MAJOR + 1)).0.0"
-            CHANGE_TYPE="major"
-          elif echo "$COMMITS" | grep -qi "^feat"; then
-            NEXT_VERSION="v${MAJOR}.$((MINOR + 1)).0"
-            CHANGE_TYPE="minor"
-          else
-            NEXT_VERSION="v${MAJOR}.${MINOR}.$((PATCH + 1))"
-            CHANGE_TYPE="patch"
+            if echo "$COMMITS" | grep -qi "BREAKING CHANGE"; then
+              NEXT_VERSION="v$((MAJOR + 1)).0.0"
+              CHANGE_TYPE="major"
+            elif echo "$COMMITS" | grep -qi "^feat"; then
+              NEXT_VERSION="v${MAJOR}.$((MINOR + 1)).0"
+              CHANGE_TYPE="minor"
+            else
+              NEXT_VERSION="v${MAJOR}.${MINOR}.$((PATCH + 1))"
+              CHANGE_TYPE="patch"
+            fi
           fi
 
           echo "Next version: $NEXT_VERSION ($CHANGE_TYPE bump)"
