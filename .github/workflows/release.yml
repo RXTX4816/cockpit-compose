@@ -88,3 +88,25 @@ jobs:
             "${TARBALL}" "${CHECKSUM}" "${RPM}" "${DEB}" --clobber
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # ── AUR ─────────────────────────────────────────────────────────────
+      - name: Get SHA256 for AUR
+        run: |
+          SHA256=$(cat "cockpit-compose-${VERSION_CLEAN}.tar.gz.sha256" | awk '{print $1}')
+          echo "SHA256=${SHA256}" >> "$GITHUB_ENV"
+
+      - name: Update PKGBUILD
+        run: |
+          sed -i "s/^pkgver=.*/pkgver=${VERSION_CLEAN}/" PKGBUILD
+          sed -i "s/^pkgrel=.*/pkgrel=1/" PKGBUILD
+          sed -i "s/sha256sums=('.*')/sha256sums=('${SHA256}')/" PKGBUILD
+
+      - uses: KSXGitHub/github-actions-deploy-aur@v3
+        with:
+          pkgname: cockpit-compose
+          pkgbuild: ./PKGBUILD
+          commit_username: RXTX4816
+          commit_email: RXTX4816@proton.me
+          ssh_private_key: ${{ secrets.AUR_SSH_KEY }}
+          commit_message: "Update to ${{ env.VERSION_CLEAN }}"
+          force_push: true
