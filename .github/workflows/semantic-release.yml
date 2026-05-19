@@ -76,7 +76,11 @@ jobs:
         env:
           NEXT_VERSION: ${{ steps.version.outputs.next_version }}
           CHANGE_TYPE: ${{ steps.version.outputs.change_type }}
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
         run: |
-          git tag -a "$NEXT_VERSION" -m "Release $NEXT_VERSION ($CHANGE_TYPE bump)"
-          git push origin "$NEXT_VERSION"
+          SHA=$(git rev-parse HEAD)
+          gh api repos/${{ github.repository }}/git/refs \
+            --method POST \
+            -f ref="refs/tags/${NEXT_VERSION}" \
+            -f sha="${SHA}"
           echo "Created tag $NEXT_VERSION — release.yml will trigger automatically"
