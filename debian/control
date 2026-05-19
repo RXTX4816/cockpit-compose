@@ -1,0 +1,18 @@
+Source: cockpit-compose
+Section: admin
+Priority: optional
+Maintainer: RXTX4816 <RXTX4816@proton.me>
+Build-Depends: debhelper-compat (= 13)
+Standards-Version: 4.6.2
+Homepage: https://github.com/RXTX4816/cockpit-compose
+Rules-Requires-Root: no
+
+Package: cockpit-compose
+Architecture: all
+Depends: ${misc:Depends}, cockpit
+Description: Docker Compose management plugin for Cockpit
+ A Cockpit plugin for managing Docker Compose stacks from the Cockpit
+ web interface. Start, stop, restart stacks, view live container logs,
+ and edit compose YAML files with syntax validation.
+ .
+ Requires Docker with the Compose plugin (docker compose v2+).

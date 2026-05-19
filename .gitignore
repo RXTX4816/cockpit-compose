@@ -1,0 +1,55 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build artifacts
+dist/
+build/
+src/main.js
+src/main.css
+src/*.map
+*.tar.gz
+*.tar.gz.sha256
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.bak
+.tmp/
+
+# AI tooling — developer-local, not part of project
+CLAUDE.md
+.claude/
+
+# Packaging build artifacts
+*.rpm
+*.deb
+*.dsc
+*.changes
+*.buildinfo
+rpmbuild/
+debian/.debhelper/
+debian/cockpit-compose/
+debian/files

@@ -1,0 +1,84 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and Upload Release Assets
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Get version from tag
+        run: |
+          echo "VERSION=${GITHUB_REF_NAME}" >> "$GITHUB_ENV"
+          echo "VERSION_CLEAN=${GITHUB_REF_NAME#v}" >> "$GITHUB_ENV"
+
+      - run: npm ci
+      - run: npm run build
+
+      # ── Tarball ─────────────────────────────────────────────────────────
+      - name: Package release tarball
+        run: |
+          mkdir -p cockpit-compose
+          cp src/main.js src/main.css src/manifest.json src/index.html README.md cockpit-compose/
+          tar -czf "cockpit-compose-${VERSION_CLEAN}.tar.gz" cockpit-compose/
+          sha256sum "cockpit-compose-${VERSION_CLEAN}.tar.gz" > "cockpit-compose-${VERSION_CLEAN}.tar.gz.sha256"
+          rm -rf cockpit-compose
+
+      # ── RPM ─────────────────────────────────────────────────────────────
+      - name: Install RPM build tools
+        run: sudo apt-get install -y rpm
+
+      - name: Build RPM
+        run: |
+          mkdir -p rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+          cp "cockpit-compose-${VERSION_CLEAN}.tar.gz" rpmbuild/SOURCES/
+          cp cockpit-compose.spec rpmbuild/SPECS/
+          rpmbuild \
+            --define "_topdir $(pwd)/rpmbuild" \
+            --define "version ${VERSION_CLEAN}" \
+            -bb rpmbuild/SPECS/cockpit-compose.spec
+
+      # ── DEB ─────────────────────────────────────────────────────────────
+      - name: Install DEB build tools
+        run: sudo apt-get install -y devscripts debhelper dpkg-dev
+
+      - name: Build DEB
+        run: |
+          mkdir -p "cockpit-compose-${VERSION_CLEAN}"
+          tar -xzf "cockpit-compose-${VERSION_CLEAN}.tar.gz" \
+              -C "cockpit-compose-${VERSION_CLEAN}"
+          cp -r debian "cockpit-compose-${VERSION_CLEAN}/"
+          printf 'cockpit-compose (%s-1) unstable; urgency=low\n\n  * Release %s.\n\n -- RXTX4816 <RXTX4816@proton.me>  %s\n' \
+            "${VERSION_CLEAN}" "${VERSION}" "$(date -R)" \
+            > "cockpit-compose-${VERSION_CLEAN}/debian/changelog"
+          cd "cockpit-compose-${VERSION_CLEAN}"
+          dpkg-buildpackage -us -uc -b
+
+      # ── Upload ──────────────────────────────────────────────────────────
+      - name: Upload release assets
+        run: |
+          RPM=$(find rpmbuild/RPMS -name "*.rpm" | head -1)
+          DEB=$(find . -maxdepth 1 -name "*.deb" | head -1)
+          TARBALL="cockpit-compose-${VERSION_CLEAN}.tar.gz"
+          CHECKSUM="${TARBALL}.sha256"
+          gh release create "${VERSION}" \
+            --title "${VERSION}" \
+            --generate-notes \
+            "${TARBALL}" "${CHECKSUM}" "${RPM}" "${DEB}" \
+          || gh release upload "${VERSION}" \
+            "${TARBALL}" "${CHECKSUM}" "${RPM}" "${DEB}" --clobber
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

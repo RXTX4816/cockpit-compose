@@ -1,0 +1,109 @@
+name: Packaging
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # ── RPM ───────────────────────────────────────────────────────────────
+  rpm:
+    name: RPM
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run build
+      - name: Build tarball
+        run: |
+          mkdir -p cockpit-compose
+          cp src/main.js src/main.css src/manifest.json src/index.html README.md cockpit-compose/
+          tar -czf cockpit-compose-0.0.0.tar.gz cockpit-compose/
+      - name: Install RPM tools
+        run: sudo apt-get install -y rpm
+      - name: Build RPM
+        run: |
+          mkdir -p rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+          cp cockpit-compose-0.0.0.tar.gz rpmbuild/SOURCES/
+          cp cockpit-compose.spec rpmbuild/SPECS/
+          rpmbuild \
+            --define "_topdir $(pwd)/rpmbuild" \
+            --define "version 0.0.0" \
+            -bb rpmbuild/SPECS/cockpit-compose.spec
+      - name: Verify RPM contents
+        run: |
+          RPM=$(find rpmbuild/RPMS -name "*.rpm" | head -1)
+          rpm -qlp "$RPM"
+          rpm -qlp "$RPM" | grep -q "cockpit-compose/main.js"
+          rpm -qlp "$RPM" | grep -q "cockpit-compose/manifest.json"
+
+  # ── DEB ───────────────────────────────────────────────────────────────
+  deb:
+    name: DEB
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run build
+      - name: Build tarball
+        run: |
+          mkdir -p cockpit-compose
+          cp src/main.js src/main.css src/manifest.json src/index.html README.md cockpit-compose/
+          tar -czf cockpit-compose-0.0.0.tar.gz cockpit-compose/
+      - name: Install DEB tools
+        run: sudo apt-get install -y devscripts debhelper dpkg-dev
+      - name: Build DEB
+        run: |
+          mkdir -p cockpit-compose-0.0.0
+          tar -xzf cockpit-compose-0.0.0.tar.gz -C cockpit-compose-0.0.0
+          cp -r debian cockpit-compose-0.0.0/
+          printf 'cockpit-compose (0.0.0-1) unstable; urgency=low\n\n  * CI check.\n\n -- RXTX4816 <RXTX4816@proton.me>  %s\n' \
+            "$(date -R)" > cockpit-compose-0.0.0/debian/changelog
+          cd cockpit-compose-0.0.0
+          dpkg-buildpackage -us -uc -b
+      - name: Verify DEB contents
+        run: |
+          DEB=$(find . -maxdepth 1 -name "*.deb" | head -1)
+          dpkg-deb -c "$DEB"
+          dpkg-deb -c "$DEB" | grep -q "cockpit-compose/main.js"
+          dpkg-deb -c "$DEB" | grep -q "cockpit-compose/manifest.json"
+
+  # ── Arch PKGBUILD ─────────────────────────────────────────────────────
+  arch:
+    name: Arch PKGBUILD
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install build tools
+        run: pacman -Syu --noconfirm base-devel nodejs npm
+      - name: Build tarball for local source
+        run: |
+          npm ci
+          npm run build
+          mkdir -p cockpit-compose
+          cp src/main.js src/main.css src/manifest.json src/index.html README.md cockpit-compose/
+          tar -czf cockpit-compose-0.0.0.tar.gz cockpit-compose/
+      - name: Patch PKGBUILD for local build
+        run: |
+          sed -i 's/^pkgver=.*/pkgver=0.0.0/' PKGBUILD
+          sed -i 's|source=.*|source=("cockpit-compose-0.0.0.tar.gz")|' PKGBUILD
+          sed -i "s/sha256sums=.*/sha256sums=('$(sha256sum cockpit-compose-0.0.0.tar.gz | awk '{print $1}')')/" PKGBUILD
+      - name: Build package
+        run: |
+          useradd builder
+          chown -R builder .
+          su builder -c "cd $(pwd) && makepkg -s --noconfirm"
+      - name: Verify package contents
+        run: |
+          PKG=$(find . -name "*.pkg.tar.*" | head -1)
+          tar -tf "$PKG" | grep -q "usr/share/cockpit/cockpit-compose/main.js"
