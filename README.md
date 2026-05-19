@@ -18,6 +18,20 @@ Docker Compose management for [Cockpit](https://cockpit-project.org) — start, 
 - Cockpit 300+
 - Docker with the Compose plugin (`docker compose` v2+)
 
+## Prerequisites
+
+Docker is not installed by default on most distros. Install it and make sure it is running and add your user to the docker group.
+
+```bash
+sudo usermod -aG docker $USER
+```
+
+Cockpit comes pre-installed on Fedora and most RHEL-based systems. On other distros it might need to be installed and started:
+
+```bash
+sudo systemctl enable --now cockpit.socket
+```
+
 ## Installation
 
 ### Arch Linux
@@ -43,7 +57,18 @@ Download the `.deb` from the [Releases](https://github.com/RXTX4816/cockpit-comp
 sudo apt install ./cockpit-compose_X.Y.Z-1_all.deb
 ```
 
-(`apt install ./` handles the `cockpit` dependency automatically.)
+(`apt install ./` resolves the `cockpit` dependency automatically.)
+
+If you are logged in as root, omit `sudo`:
+
+```bash
+apt install ./cockpit-compose_X.Y.Z-1_all.deb
+```
+
+> **Note:** If `apt` or `dpkg` is not found, your root session was started with `su` instead of `su -` and is missing the standard PATH. Either switch to `su -`, or set it manually:
+> ```bash
+> export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+> ```
 
 ### Manual
 
