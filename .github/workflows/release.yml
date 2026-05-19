@@ -53,7 +53,7 @@ jobs:
 
       # ── DEB ─────────────────────────────────────────────────────────────
       - name: Install DEB build tools
-        run: sudo apt-get install -y devscripts debhelper dpkg-dev
+        run: sudo apt-get install -y devscripts debhelper dpkg-dev build-essential
 
       - name: Build DEB
         run: |
