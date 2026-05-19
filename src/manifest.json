@@ -11,10 +11,5 @@
             "order": 77
         }
     },
-    "content-security-policy": "script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' 'unsafe-hashes'; img-src 'self' data:; font-src 'self'; connect-src 'self'",
-    "conditions": [
-        {
-            "path-exists": "/usr/lib/docker/cli-plugins/docker-compose"
-        }
-    ]
+    "content-security-policy": "script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' 'unsafe-hashes'; img-src 'self' data:; font-src 'self'; connect-src 'self'"
 }

@@ -1,6 +1,29 @@
 import { load as loadYaml } from "js-yaml";
 export { parseDockerBytes, formatBytes } from "./lib/bytes";
 
+let composePrefix: string[] = ["docker", "compose"];
+let composeDetected = false;
+
+export async function detectComposeCommand(): Promise<void> {
+  if (composeDetected) return;
+  composeDetected = true;
+  try {
+    await cockpit.spawn(["docker", "compose", "version"], { err: "message" });
+    composePrefix = ["docker", "compose"];
+  } catch {
+    try {
+      await cockpit.spawn(["docker-compose", "version"], { err: "message" });
+      composePrefix = ["docker-compose"];
+    } catch {
+      composePrefix = ["docker", "compose"];
+    }
+  }
+}
+
+function compose(...args: string[]): string[] {
+  return [...composePrefix, ...args];
+}
+
 export interface ComposeStack {
   Name: string;
   Status: string;
@@ -52,42 +75,42 @@ export function parseJsonOutput<T>(raw: string): T[] {
 }
 
 export function listStacks(): CockpitProcess {
-  return cockpit.spawn(["docker", "compose", "ls", "--all", "--format", "json"], {
+  return cockpit.spawn(compose("ls", "--all", "--format", "json"), {
     err: "message",
   });
 }
 
 export function listContainers(project: string): CockpitProcess {
   return cockpit.spawn(
-    ["docker", "compose", "-p", project, "ps", "--all", "--format", "json"],
+    compose("-p", project, "ps", "--all", "--format", "json"),
     { err: "message" },
   );
 }
 
 export function startStack(project: string, configFile: string): CockpitProcess {
   return cockpit.spawn(
-    ["docker", "compose", "-p", project, "-f", configFile, "up", "-d"],
+    compose("-p", project, "-f", configFile, "up", "-d"),
     { superuser: "try", err: "message" },
   );
 }
 
 export function stopStack(project: string, configFile: string): CockpitProcess {
   return cockpit.spawn(
-    ["docker", "compose", "-p", project, "-f", configFile, "stop"],
+    compose("-p", project, "-f", configFile, "stop"),
     { superuser: "try", err: "message" },
   );
 }
 
 export function restartStack(project: string, configFile: string): CockpitProcess {
   return cockpit.spawn(
-    ["docker", "compose", "-p", project, "-f", configFile, "restart"],
+    compose("-p", project, "-f", configFile, "restart"),
     { superuser: "try", err: "message" },
   );
 }
 
 export function streamLogs(project: string): CockpitProcess {
   return cockpit.spawn(
-    ["docker", "compose", "-p", project, "logs", "--follow", "--tail", "200", "--timestamps"],
+    compose("-p", project, "logs", "--follow", "--tail", "200", "--timestamps"),
     { err: "message" },
   );
 }
@@ -165,7 +188,7 @@ export function parsePorts(portsStr: string): string[] {
 
 export function downStack(project: string, configFile: string): CockpitProcess {
   return cockpit.spawn(
-    ["docker", "compose", "-p", project, "-f", configFile, "down"],
+    compose("-p", project, "-f", configFile, "down"),
     { superuser: "try", err: "message" },
   );
 }
@@ -173,7 +196,7 @@ export function downStack(project: string, configFile: string): CockpitProcess {
 export function pullStack(project: string, configFile: string): CockpitProcess {
   // err:"out" merges stderr (where Docker sends progress) into the streamable stdout
   return cockpit.spawn(
-    ["docker", "compose", "--progress", "plain", "-p", project, "-f", configFile, "pull"],
+    compose("--progress", "plain", "-p", project, "-f", configFile, "pull"),
     { superuser: "try", err: "out" },
   );
 }
