@@ -32,7 +32,14 @@ interface YamlEditorProps {
 function YamlEditor({ content, onChange, readOnly = false, onDiagnosticsChange }: YamlEditorProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const editorRef = useRef<EditorView | null>(null);
-  const diagnosticsRef = useRef<Diagnostic[]>([]);
+  const onChangeRef = useRef(onChange);
+  const onDiagnosticsChangeRef = useRef(onDiagnosticsChange);
+
+  // Keep callback refs current without recreating the editor
+  useEffect(() => {
+    onChangeRef.current = onChange;
+    onDiagnosticsChangeRef.current = onDiagnosticsChange;
+  }, [onChange, onDiagnosticsChange]);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -57,8 +64,7 @@ function YamlEditor({ content, onChange, readOnly = false, onDiagnosticsChange }
             message: error.message || "Invalid YAML",
           });
         }
-        diagnosticsRef.current = diagnostics;
-        onDiagnosticsChange?.(diagnostics);
+        onDiagnosticsChangeRef.current?.(diagnostics);
         return diagnostics;
       }
 
@@ -77,8 +83,7 @@ function YamlEditor({ content, onChange, readOnly = false, onDiagnosticsChange }
         }
       }
 
-      diagnosticsRef.current = diagnostics;
-      onDiagnosticsChange?.(diagnostics);
+      onDiagnosticsChangeRef.current?.(diagnostics);
       return diagnostics;
     });
 
@@ -89,7 +94,7 @@ function YamlEditor({ content, onChange, readOnly = false, onDiagnosticsChange }
     } else {
       const updateListener = EditorView.updateListener.of((update) => {
         if (update.docChanged) {
-          onChange(update.state.doc.toString());
+          onChangeRef.current(update.state.doc.toString());
         }
       });
       extensions.push(updateListener);
@@ -114,8 +119,25 @@ function YamlEditor({ content, onChange, readOnly = false, onDiagnosticsChange }
 
     return () => {
       editor.destroy();
+      editorRef.current = null;
     };
-  }, [onChange, readOnly, content, onDiagnosticsChange]);
+  // content is intentionally omitted: it's only the initial doc value.
+  // Callbacks are accessed via refs so they don't trigger recreation either.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [readOnly]);
+
+  // Sync externally-driven content changes (e.g. snapshot restore) into the
+  // live editor without recreating it. Skips the dispatch when the editor
+  // already holds the same text (e.g. after the user just typed a character).
+  useEffect(() => {
+    const editor = editorRef.current;
+    if (!editor) return;
+    if (editor.state.doc.toString() !== content) {
+      editor.dispatch({
+        changes: { from: 0, to: editor.state.doc.length, insert: content },
+      });
+    }
+  }, [content]);
 
   return (
     <div
