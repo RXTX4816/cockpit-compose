@@ -28,6 +28,7 @@ import { PullConfirmModal } from "../PullConfirmModal";
 import { EventsModal } from "../EventsModal";
 import { TopModal } from "../TopModal";
 import { ExecModal } from "../ExecModal";
+import { PruneModal } from "../PruneModal";
 import { StackRow } from "./StackRow";
 import "./StacksView.css";
 
@@ -42,6 +43,7 @@ export function StacksView() {
   const [eventsTarget, setEventsTarget] = useState<ComposeStack | null>(null);
   const [topTarget, setTopTarget] = useState<ComposeStack | null>(null);
   const [execTarget, setExecTarget] = useState<ComposeStack | null>(null);
+  const [pruneTarget, setPruneTarget] = useState<ComposeStack | null>(null);
   // Counts how many stack actions are currently in flight.
   // We pause the auto-refresh while any action is running so that Docker
   // being temporarily busy (e.g. mid-restart) never causes a spurious error.
@@ -120,6 +122,7 @@ export function StacksView() {
               onEvents={() => setEventsTarget(stack)}
               onTop={() => setTopTarget(stack)}
               onExec={() => setExecTarget(stack)}
+              onPrune={() => setPruneTarget(stack)}
               onActingChange={onActingChange}
             />
           ))}
@@ -140,6 +143,13 @@ export function StacksView() {
       {eventsTarget && <EventsModal stack={eventsTarget} onClose={() => setEventsTarget(null)} />}
       {topTarget && <TopModal stack={topTarget} onClose={() => setTopTarget(null)} />}
       {execTarget && <ExecModal stack={execTarget} onClose={() => setExecTarget(null)} />}
+      {pruneTarget && (
+        <PruneModal
+          stack={pruneTarget}
+          onClose={() => setPruneTarget(null)}
+          onSuccess={refresh}
+        />
+      )}
 
       {downTarget && (
         <Modal

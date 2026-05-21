@@ -34,6 +34,11 @@ vi.mock("../PullConfirmModal", () => ({
     </div>
   ),
 }));
+vi.mock("../PruneModal", () => ({
+  PruneModal: ({ stack }: { stack: { Name: string } }) => (
+    <div data-testid="prune-modal">PruneModal:{stack.Name}</div>
+  ),
+}));
 
 import { useComposeStacks } from "../../hooks/useComposeStacks";
 import { useStackActions } from "../../hooks/useStackActions";
@@ -219,6 +224,20 @@ describe("StacksView", () => {
     expect(screen.queryByTestId("pull-modal")).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /Confirm pull/i }));
     expect(screen.getByTestId("pull-modal")).toBeInTheDocument();
+  });
+
+  it("Prune item opens PruneModal", () => {
+    mockUseComposeStacks.mockReturnValue({
+      stacks: [{ Name: "myapp", Status: "running(1)", ConfigFiles: "/path/compose.yml" }],
+      loading: false,
+      error: null,
+      refresh: noopRefresh,
+    });
+    render(<StacksView />);
+    fireEvent.click(screen.getByRole("button", { name: /More actions for myapp/i }));
+    fireEvent.click(screen.getByRole("menuitem", { name: /^Prune$/i }));
+    expect(screen.getByTestId("prune-modal")).toBeInTheDocument();
+    expect(screen.getByText(/PruneModal:myapp/i)).toBeInTheDocument();
   });
 
   it("Down modal Down button calls performDown", async () => {

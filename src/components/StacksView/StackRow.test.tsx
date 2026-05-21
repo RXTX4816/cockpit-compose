@@ -37,6 +37,7 @@ const defaultProps = {
   onEvents: vi.fn(),
   onTop: vi.fn(),
   onExec: vi.fn(),
+  onPrune: vi.fn(),
   onActingChange: vi.fn(),
 };
 
@@ -229,6 +230,28 @@ describe("StackRow", () => {
     fireEvent.click(screen.getByRole("button", { name: /More actions for myapp/i }));
     fireEvent.click(screen.getByRole("menuitem", { name: /^Shell$/i }));
     expect(onExec).toHaveBeenCalledOnce();
+  });
+
+  it("calls onPrune when Prune item clicked", () => {
+    const onPrune = vi.fn();
+    render(<StackRow {...defaultProps} onPrune={onPrune} />);
+    fireEvent.click(screen.getByRole("button", { name: /More actions for myapp/i }));
+    fireEvent.click(screen.getByRole("menuitem", { name: /^Prune$/i }));
+    expect(onPrune).toHaveBeenCalledOnce();
+  });
+
+  it("shows Prune item in danger section of kebab menu", () => {
+    render(<StackRow {...defaultProps} />);
+    fireEvent.click(screen.getByRole("button", { name: /More actions for myapp/i }));
+    const pruneItem = screen.getByRole("menuitem", { name: /^Prune$/i });
+    expect(pruneItem).toBeInTheDocument();
+    // Prune appears before Kill and Down in the menu
+    const items = screen.getAllByRole("menuitem");
+    const pruneIdx = items.findIndex(el => /^Prune$/i.test(el.textContent ?? ""));
+    const killIdx = items.findIndex(el => /^Kill$/i.test(el.textContent ?? ""));
+    const downIdx = items.findIndex(el => /^Down/i.test(el.textContent ?? ""));
+    expect(pruneIdx).toBeLessThan(killIdx);
+    expect(pruneIdx).toBeLessThan(downIdx);
   });
 
   it("shows Pause in kebab when running", () => {
