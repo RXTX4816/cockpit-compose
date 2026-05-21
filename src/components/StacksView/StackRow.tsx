@@ -39,6 +39,7 @@ interface StackRowProps {
   onInfo: () => void;
   onDown: () => void;
   onKill: () => void;
+  onUp: () => void;
   onPull: () => void;
   onEvents: () => void;
   onTop: () => void;
@@ -47,7 +48,7 @@ interface StackRowProps {
   onActingChange: (delta: 1 | -1) => void;
 }
 
-export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, onDown, onKill, onPull, onEvents, onTop, onExec, onPrune, onActingChange }: StackRowProps) {
+export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, onDown, onKill, onUp, onPull, onEvents, onTop, onExec, onPrune, onActingChange }: StackRowProps) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const status = parseStackStatus(stack.Status);
@@ -113,8 +114,7 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
                 <Button
                   variant="primary"
                   size="sm"
-                  onClick={() => void doAction("start", afterAction)}
-                  isLoading={acting}
+                  onClick={onUp}
                   isDisabled={acting}
                 >
                   ↑ Up

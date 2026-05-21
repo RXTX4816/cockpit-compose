@@ -33,6 +33,7 @@ const defaultProps = {
   onInfo: vi.fn(),
   onDown: vi.fn(),
   onKill: vi.fn(),
+  onUp: vi.fn(),
   onPull: vi.fn(),
   onEvents: vi.fn(),
   onTop: vi.fn(),
@@ -139,12 +140,11 @@ describe("StackRow", () => {
     expect(screen.getByText(/No containers found/i)).toBeInTheDocument();
   });
 
-  it("calls doAction with start when Up button clicked", () => {
-    const doAction = vi.fn();
-    mockUseStackActions.mockReturnValue({ acting: false, actionError: null, doAction });
-    render(<StackRow {...defaultProps} />);
+  it("calls onUp when Up button clicked", () => {
+    const onUp = vi.fn();
+    render(<StackRow {...defaultProps} onUp={onUp} />);
     fireEvent.click(screen.getByRole("button", { name: /Up/i }));
-    expect(doAction).toHaveBeenCalledWith("start", expect.any(Function));
+    expect(onUp).toHaveBeenCalledOnce();
   });
 
   it("calls doAction with stop when Stop button clicked", () => {
@@ -287,16 +287,16 @@ describe("StackRow", () => {
   it("afterAction clears containers when not expanded", async () => {
     const clearContainers = vi.fn();
     const loadContainers = vi.fn().mockResolvedValue(undefined);
-    let capturedCallback: ((action: string, cb: () => Promise<void>) => void) | null = null;
+    let capturedCallback: (() => Promise<void>) | null = null;
     const doAction = vi.fn().mockImplementation((_action: string, cb: () => Promise<void>) => {
-      capturedCallback = cb as unknown as typeof capturedCallback;
+      capturedCallback = cb;
       return Promise.resolve();
     });
     mockUseStackActions.mockReturnValue({ acting: false, actionError: null, doAction });
     mockUseStackContainers.mockReturnValue({ containers: [], loading: false, load: loadContainers, clear: clearContainers });
     render(<StackRow {...defaultProps} expanded={false} />);
-    fireEvent.click(screen.getByRole("button", { name: /Up/i }));
-    await act(async () => { await (capturedCallback as unknown as () => Promise<void>)?.(); });
+    fireEvent.click(screen.getByRole("button", { name: /Stop/i }));
+    await act(async () => { await capturedCallback?.(); });
     expect(clearContainers).toHaveBeenCalled();
     expect(loadContainers).not.toHaveBeenCalled();
   });
@@ -312,7 +312,7 @@ describe("StackRow", () => {
     mockUseStackActions.mockReturnValue({ acting: false, actionError: null, doAction });
     mockUseStackContainers.mockReturnValue({ containers: [], loading: false, load: loadContainers, clear: clearContainers });
     render(<StackRow {...defaultProps} expanded />);
-    fireEvent.click(screen.getByRole("button", { name: /Up/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Stop/i }));
     await act(async () => { await capturedCallback?.(); });
     expect(clearContainers).toHaveBeenCalled();
     expect(loadContainers).toHaveBeenCalled();
