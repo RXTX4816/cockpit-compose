@@ -1,0 +1,66 @@
+.sim-section {
+  margin-bottom: 1.5rem;
+}
+
+.sim-section-label {
+  font-weight: 600;
+  font-size: var(--pf-t--global--font--size--sm);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--pf-t--global--text--color--subtle);
+  margin-bottom: 0.5rem;
+}
+
+.sim-config-file {
+  font-size: var(--pf-t--global--font--size--sm);
+  word-break: break-all;
+}
+
+.sim-no-containers {
+  color: var(--pf-t--global--text--color--subtle);
+  font-size: var(--pf-t--global--font--size--sm);
+}
+
+.sim-container-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.sim-container-card {
+  padding: 0.75rem 1rem;
+  background: var(--pf-t--global--background--color--secondary--default);
+  border-radius: var(--pf-t--global--border--radius--200);
+  border: 1px solid var(--pf-t--global--border--color--default);
+}
+
+.sim-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.sim-card-service {
+  font-weight: 600;
+}
+
+.sim-card-grid {
+  display: grid;
+  grid-template-columns: 6rem 1fr;
+  gap: 0.2rem 0.5rem;
+  font-size: var(--pf-t--global--font--size--sm);
+  color: var(--pf-t--global--text--color--subtle);
+}
+
+.sim-card-code {
+  word-break: break-all;
+  color: inherit;
+}
+
+.sim-card-ports {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.6rem;
+}

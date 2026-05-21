@@ -1,0 +1,6 @@
+.ye-editor {
+  border: 1px solid var(--pf-t--global--border--color--default);
+  border-radius: var(--pf-t--global--border--radius--200);
+  height: 55vh;
+  font-size: 0.85rem;
+}

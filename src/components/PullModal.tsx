@@ -10,6 +10,7 @@ import {
 import { type ComposeStack } from "../api";
 import { kindColor } from "../lib/pullParser";
 import { usePullStream } from "../hooks/usePullStream";
+import "./PullModal.css";
 
 interface Props {
   stack: ComposeStack;
@@ -34,13 +35,7 @@ export function PullModal({ stack, onClose }: Props) {
     <Modal isOpen onClose={handleClose} variant="medium" aria-label={`Pull — ${stack.Name}`}>
       <ModalHeader title={`Pull — ${stack.Name}`} />
       <ModalBody>
-        <div style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "0.6rem",
-          marginBottom: "0.75rem",
-          fontSize: "0.875rem",
-        }}>
+        <div className="pm-header">
           {!done && <Spinner size="sm" />}
           {!done && (
             <span style={{ color: "var(--pf-t--global--text--color--subtle)" }}>
@@ -48,10 +43,10 @@ export function PullModal({ stack, onClose }: Props) {
             </span>
           )}
           {done && !failed && (
-            <span style={{ color: "#56d364", fontWeight: 600 }}>✓ Pull complete</span>
+            <span className="pm-status-ok">✓ Pull complete</span>
           )}
           {done && failed && (
-            <span style={{ color: "#f85149", fontWeight: 600 }}>✗ Pull failed</span>
+            <span className="pm-status-failed">✗ Pull failed</span>
           )}
         </div>
 
@@ -59,23 +54,9 @@ export function PullModal({ stack, onClose }: Props) {
           <Alert variant="danger" isInline title={errorMsg} style={{ marginBottom: "0.75rem" }} />
         )}
 
-        <div
-          ref={logRef}
-          style={{
-            overflowY: "auto",
-            height: "50vh",
-            padding: "0.6rem 0.75rem",
-            background: "var(--pf-t--global--background--color--secondary--default)",
-            borderRadius: "var(--pf-t--global--border--radius--200)",
-            fontFamily: "var(--pf-t--global--font--family--mono)",
-            fontSize: "0.78rem",
-            lineHeight: "1.55",
-          }}
-        >
+        <div ref={logRef} className="pm-log-viewer">
           {lines.length === 0 ? (
-            <span style={{ color: "var(--pf-t--global--text--color--subtle)" }}>
-              Starting pull…
-            </span>
+            <span className="pm-log-empty">Starting pull…</span>
           ) : (
             lines.map((entry, i) => (
               <div key={i} style={{ color: kindColor[entry.kind] }}>
@@ -85,7 +66,7 @@ export function PullModal({ stack, onClose }: Props) {
           )}
         </div>
 
-        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "0.75rem" }}>
+        <div className="pm-footer">
           {!done ? (
             <Button variant="secondary" onClick={handleClose}>Cancel</Button>
           ) : (

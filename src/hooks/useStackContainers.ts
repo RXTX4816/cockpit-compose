@@ -5,8 +5,8 @@ import {
   listContainers,
   readComposeFile,
   getServicesFromCompose,
+  parseJsonOutput,
 } from "../api";
-import { parseJsonOutput } from "../lib/parseJsonOutput";
 
 export function useStackContainers(stackName: string, configFile: string, status: StackStatus) {
   const [containers, setContainers] = useState<ComposeContainer[]>([]);

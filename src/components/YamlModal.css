@@ -1,0 +1,38 @@
+.ym-snapshots-panel {
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: var(--pf-t--global--background--color--secondary--default);
+  border-radius: var(--pf-t--global--border--radius--200);
+}
+
+.ym-snapshots-title {
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.ym-snapshot-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--pf-t--global--border--color--default);
+}
+
+.ym-snapshot-name {
+  font-size: var(--pf-t--global--font--size--sm);
+}
+
+.ym-snapshot-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.ym-loading {
+  display: flex;
+  justify-content: center;
+  padding: 3rem;
+}
+
+.ym-confirm-note {
+  margin-top: 1rem;
+}

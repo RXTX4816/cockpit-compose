@@ -1,0 +1,68 @@
+.lm-log-viewer {
+  overflow-y: auto;
+  height: 62vh;
+  padding: 0.4rem 0;
+  background: #0d1117;
+  border-radius: var(--pf-t--global--border--radius--200);
+}
+
+.lm-empty-state {
+  padding: 1rem 0.75rem;
+  color: #6e7681;
+  font-family: var(--pf-t--global--font--family--mono);
+  font-size: 0.78rem;
+}
+
+.lm-limit-notice {
+  font-size: 0.75rem;
+  color: #6e7681;
+}
+
+/* LogLine */
+.lm-line-raw {
+  padding: 0.1rem 0.75rem;
+  font-family: var(--pf-t--global--font--family--mono);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: #6e7681;
+  font-style: italic;
+}
+
+.lm-line-parsed {
+  display: grid;
+  grid-template-columns: 10rem 5.5rem 1fr;
+  gap: 0 0.5rem;
+  padding: 0.1rem 0.75rem;
+  font-family: var(--pf-t--global--font--family--mono);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.lm-line-service {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lm-line-timestamp {
+  color: #6e7681;
+  font-size: 0.7rem;
+  align-self: center;
+  white-space: nowrap;
+}
+
+.lm-line-message {
+  word-break: break-all;
+}
+
+/* Level-based backgrounds */
+.lm-bg-error { background: rgba(248, 81, 73, 0.10); }
+.lm-bg-warn  { background: rgba(227, 179, 65, 0.08); }
+.lm-bg-even  { background: transparent; }
+.lm-bg-odd   { background: rgba(255, 255, 255, 0.015); }
+
+/* Level-based message colours */
+.lm-msg-error { color: #f85149; }
+.lm-msg-warn  { color: #e3b341; }
+.lm-msg-default { color: #e6edf3; }

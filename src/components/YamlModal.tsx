@@ -18,6 +18,7 @@ import { validateComposeSpec } from "../compose-schema";
 import { type ComposeStack, readComposeFile, saveComposeFile, saveSnapshot } from "../api";
 import { YamlEditor } from "./YamlEditor";
 import { useSnapshots } from "../hooks/useSnapshots";
+import "./YamlModal.css";
 
 interface Props {
   stack: ComposeStack;
@@ -163,12 +164,12 @@ export function YamlModal({ stack, onClose }: Props) {
         )}
 
         {showSnapshots && snapshots.length > 0 && (
-          <div style={{ marginBottom: "1rem", padding: "0.75rem", background: "var(--pf-t--global--background--color--secondary--default)", borderRadius: "var(--pf-t--global--border--radius--200)" }}>
-            <div style={{ marginBottom: "0.5rem", fontWeight: 600 }}>Snapshots</div>
+          <div className="ym-snapshots-panel">
+            <div className="ym-snapshots-title">Snapshots</div>
             {snapshots.map(snap => (
-              <div key={snap.timestamp} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0.5rem", borderBottom: "1px solid var(--pf-t--global--border--color--default)" }}>
-                <span style={{ fontSize: "var(--pf-t--global--font--size--sm)" }}>{snap.name}</span>
-                <div style={{ display: "flex", gap: "0.5rem" }}>
+              <div key={snap.timestamp} className="ym-snapshot-row">
+                <span className="ym-snapshot-name">{snap.name}</span>
+                <div className="ym-snapshot-actions">
                   <Button variant="link" size="sm" onClick={() => handleRestoreSnapshot(snap.path)}>Restore</Button>
                   <Button variant="link" size="sm" onClick={() => handleDeleteSnapshot(snap.path)}>Delete</Button>
                 </div>
@@ -178,7 +179,7 @@ export function YamlModal({ stack, onClose }: Props) {
         )}
 
         {loading ? (
-          <div style={{ display: "flex", justifyContent: "center", padding: "3rem" }}>
+          <div className="ym-loading">
             <Spinner />
           </div>
         ) : error && !editing ? (
@@ -220,7 +221,7 @@ export function YamlModal({ stack, onClose }: Props) {
               There {diagnostics.filter(d => d.severity === "warning").length === 1 ? "is" : "are"} {diagnostics.filter(d => d.severity === "warning").length} warning(s) in your compose file.
             </Alert>
           )}
-          <p style={{ marginTop: "1rem" }}>Do you want to save anyway?</p>
+          <p className="ym-confirm-note">Do you want to save anyway?</p>
         </ModalBody>
         <ModalFooter>
           <Button variant="secondary" onClick={() => setConfirmSave(false)}>

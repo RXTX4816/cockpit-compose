@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import {
   Toolbar,
   ToolbarContent,
@@ -17,12 +17,14 @@ import {
 } from "@patternfly/react-core";
 import { type ComposeStack } from "../../api";
 import { useComposeStacks } from "../../hooks/useComposeStacks";
+import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import { useDownStack } from "../../hooks/useDownStack";
 import { LogsModal } from "../LogsModal";
 import { YamlModal } from "../YamlModal";
 import { StackInfoModal } from "../StackInfoModal";
 import { PullModal } from "../PullModal";
 import { StackRow } from "./StackRow";
+import "./StacksView.css";
 
 export function StacksView() {
   const { stacks, loading, error, refresh } = useComposeStacks();
@@ -52,14 +54,10 @@ export function StacksView() {
     });
   }, []);
 
-  useEffect(() => {
-    // Pause completely while Docker is busy with an action.
-    // Keep polling (at a slower rate) even when error is set so the UI
-    // auto-recovers without requiring a manual Retry click.
-    if (activeOps > 0) return;
-    const interval = setInterval(refresh, error ? 2000 : 500);
-    return () => clearInterval(interval);
-  }, [refresh, error, activeOps]);
+  // Pause completely while Docker is busy with an action.
+  // Keep polling (at a slower rate) even when error is set so the UI
+  // auto-recovers without requiring a manual Retry click.
+  useAutoRefresh(refresh, error ? 2000 : 500, activeOps > 0);
 
   return (
     <>
@@ -84,7 +82,7 @@ export function StacksView() {
       )}
 
       {!error && (loading && stacks.length === 0 ? (
-        <div style={{ display: "flex", justifyContent: "center", padding: "4rem" }}>
+        <div className="sv-loading">
           <Spinner />
         </div>
       ) : stacks.length === 0 ? (

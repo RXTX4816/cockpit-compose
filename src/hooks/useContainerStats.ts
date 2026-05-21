@@ -1,8 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { listContainers, getContainerStats, parsePorts } from "../api";
+import { listContainers, getContainerStats, parsePorts, parseJsonOutput, parseDockerBytes } from "../api";
 import type { ComposeContainer, ContainerStats, StackStatus } from "../api";
-import { parseJsonOutput } from "../lib/parseJsonOutput";
-import { parseDockerBytes } from "../lib/bytes";
 
 export function useContainerStats(stackName: string, status: StackStatus) {
   const [ports, setPorts] = useState<string[]>([]);

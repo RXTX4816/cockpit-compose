@@ -1,0 +1,23 @@
+.sc-empty {
+  color: var(--pf-t--global--text--color--subtle);
+  font-size: var(--pf-t--global--font--size--sm);
+}
+
+.sc-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.sc-ports {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.sc-metrics {
+  display: flex;
+  gap: 0.75rem;
+  font-size: 0.75rem;
+  color: var(--pf-t--global--text--color--subtle);
+}

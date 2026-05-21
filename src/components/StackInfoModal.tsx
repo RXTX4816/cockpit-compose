@@ -1,4 +1,4 @@
-import { useState, useEffect, type CSSProperties } from "react";
+import { useState, useEffect } from "react";
 import {
   Modal,
   ModalHeader,
@@ -14,6 +14,7 @@ import {
   parseJsonOutput,
   parsePorts,
 } from "../api";
+import "./StackInfoModal.css";
 
 interface Props {
   stack: ComposeStack;
@@ -26,7 +27,6 @@ export function StackInfoModal({ stack, onClose }: Props) {
   const [error, setError] = useState<string | null>(null);
 
   const configFile = stack.ConfigFiles.split(",")[0].trim();
-
   useEffect(() => {
     let raw = "";
     const proc = listContainers(stack.Name);
@@ -42,71 +42,44 @@ export function StackInfoModal({ stack, onClose }: Props) {
       });
   }, [stack.Name]);
 
-  const sectionLabel: CSSProperties = {
-    fontWeight: 600,
-    fontSize: "var(--pf-t--global--font--size--sm)",
-    textTransform: "uppercase",
-    letterSpacing: "0.06em",
-    color: "var(--pf-t--global--text--color--subtle)",
-    marginBottom: "0.5rem",
-  };
-
   return (
     <Modal isOpen onClose={onClose} variant="medium" aria-label={`Info — ${stack.Name}`}>
       <ModalHeader title={`${stack.Name} — info`} />
       <ModalBody>
-        <section style={{ marginBottom: "1.5rem" }}>
-          <div style={sectionLabel}>Compose file</div>
-          <code style={{ fontSize: "var(--pf-t--global--font--size--sm)", wordBreak: "break-all" }}>
-            {configFile}
-          </code>
+        <section className="sim-section">
+          <div className="sim-section-label">Compose file</div>
+          <code className="sim-config-file">{configFile}</code>
         </section>
 
         <section>
-          <div style={sectionLabel}>Services</div>
+          <div className="sim-section-label">Services</div>
 
           {loading ? (
             <Spinner size="md" />
           ) : error ? (
             <Alert variant="warning" isInline title="Could not load container info">{error}</Alert>
           ) : containers.length === 0 ? (
-            <span style={{ color: "var(--pf-t--global--text--color--subtle)", fontSize: "var(--pf-t--global--font--size--sm)" }}>
-              No containers found.
-            </span>
+            <span className="sim-no-containers">No containers found.</span>
           ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+            <div className="sim-container-list">
               {containers.map(c => {
                 const isRunning = c.State?.toLowerCase() === "running";
                 const ports = parsePorts(c.Ports);
                 return (
-                  <div
-                    key={c.ID || c.Name}
-                    style={{
-                      padding: "0.75rem 1rem",
-                      background: "var(--pf-t--global--background--color--secondary--default)",
-                      borderRadius: "var(--pf-t--global--border--radius--200)",
-                      border: "1px solid var(--pf-t--global--border--color--default)",
-                    }}
-                  >
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
+                  <div key={c.ID || c.Name} className="sim-container-card">
+                    <div className="sim-card-header">
                       <Label color={isRunning ? "green" : "grey"} isCompact>{c.State || "unknown"}</Label>
-                      <span style={{ fontWeight: 600 }}>{c.Service || c.Name}</span>
+                      <span className="sim-card-service">{c.Service || c.Name}</span>
                     </div>
 
-                    <div style={{
-                      display: "grid",
-                      gridTemplateColumns: "6rem 1fr",
-                      gap: "0.2rem 0.5rem",
-                      fontSize: "var(--pf-t--global--font--size--sm)",
-                      color: "var(--pf-t--global--text--color--subtle)",
-                    }}>
+                    <div className="sim-card-grid">
                       <span>Image</span>
-                      <code style={{ wordBreak: "break-all", color: "inherit" }}>{c.Image || "—"}</code>
+                      <code className="sim-card-code">{c.Image || "—"}</code>
 
                       {c.ID && (
                         <>
                           <span>Container ID</span>
-                          <code style={{ color: "inherit" }}>{c.ID.slice(0, 12)}</code>
+                          <code className="sim-card-code">{c.ID.slice(0, 12)}</code>
                         </>
                       )}
 
@@ -119,7 +92,7 @@ export function StackInfoModal({ stack, onClose }: Props) {
                     </div>
 
                     {ports.length > 0 && (
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: "0.3rem", marginTop: "0.6rem" }}>
+                      <div className="sim-card-ports">
                         {ports.map(p => (
                           <Label
                             key={p}

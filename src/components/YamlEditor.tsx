@@ -7,6 +7,7 @@ import { oneDark } from "@codemirror/theme-one-dark";
 import { load } from "js-yaml";
 import type { Diagnostic } from "@codemirror/lint";
 import { validateComposeSpec } from "../compose-schema";
+import "./YamlEditor.css";
 
 interface YamlEditorProps {
   content: string;
@@ -125,15 +126,5 @@ export function YamlEditor({ content, onChange, readOnly = false, onDiagnosticsC
     }
   }, [content]);
 
-  return (
-    <div
-      ref={containerRef}
-      style={{
-        border: "1px solid var(--pf-t--global--border--color--default)",
-        borderRadius: "var(--pf-t--global--border--radius--200)",
-        height: "55vh",
-        fontSize: "0.85rem",
-      }}
-    />
-  );
+  return <div ref={containerRef} className="ye-editor" />;
 }

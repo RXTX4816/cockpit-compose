@@ -1,7 +1,8 @@
 import { Label, Spinner } from "@patternfly/react-core";
 import type { StackStatus } from "../../api";
+import { formatBytes } from "../../api";
 import { useContainerStats } from "../../hooks/useContainerStats";
-import { formatBytes } from "../../lib/bytes";
+import "./StatsCell.css";
 
 interface StatsCellProps {
   stackName: string;
@@ -12,15 +13,13 @@ export function StatsCell({ stackName, status }: StatsCellProps) {
   const { ports, stats } = useContainerStats(stackName, status);
 
   if (status === "down" || status === "unknown") {
-    return (
-      <span style={{ color: "var(--pf-t--global--text--color--subtle)", fontSize: "var(--pf-t--global--font--size--sm)" }}>—</span>
-    );
+    return <span className="sc-empty">—</span>;
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
+    <div className="sc-cell">
       {ports.length > 0 && (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.25rem" }}>
+        <div className="sc-ports">
           {ports.map(p => (
             <Label
               key={p}
@@ -34,7 +33,7 @@ export function StatsCell({ stackName, status }: StatsCellProps) {
         </div>
       )}
       {stats && (
-        <div style={{ display: "flex", gap: "0.75rem", fontSize: "0.75rem", color: "var(--pf-t--global--text--color--subtle)" }}>
+        <div className="sc-metrics">
           <span>CPU {stats.cpu.toFixed(1)}%</span>
           <span>Mem {formatBytes(stats.mem)}</span>
         </div>

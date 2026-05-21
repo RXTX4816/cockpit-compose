@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import {
   DataListItem,
   DataListItemRow,
@@ -27,6 +27,7 @@ import { useStackContainers } from "../../hooks/useStackContainers";
 import { StatusLabel } from "./StatusLabel";
 import { StatsCell } from "./StatsCell";
 import { ContainerTable } from "./ContainerTable";
+import "./StackRow.css";
 
 interface StackRowProps {
   stack: ComposeStack;
@@ -58,10 +59,10 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
     }
   };
 
-  const afterAction = async () => {
+  const afterAction = useCallback(async () => {
     clearContainers();
     if (expanded) await loadContainers();
-  };
+  }, [clearContainers, expanded, loadContainers]);
 
   return (
     <DataListItem isExpanded={expanded} aria-labelledby={`stack-${stack.Name}`}>
@@ -75,7 +76,7 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
         <DataListItemCells
           dataListCells={[
             <DataListCell key="name" width={2}>
-              <span style={{ display: "flex", alignItems: "center", gap: "0.6rem", flexWrap: "wrap" }}>
+              <span className="sr-name-cell">
                 <StatusLabel status={status} />
                 <Label
                   color={health === "healthy" ? "green" : health === "partial" ? "orange" : "grey"}
@@ -90,7 +91,7 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
             </DataListCell>,
 
             <DataListCell key="services" width={1}>
-              <span style={{ color: "var(--pf-t--global--text--color--subtle)", fontSize: "var(--pf-t--global--font--size--sm)" }}>
+              <span className="sr-services-count">
                 {count} {count === 1 ? "service" : "services"}
               </span>
             </DataListCell>,
@@ -100,7 +101,7 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
             </DataListCell>,
 
             <DataListCell key="actions" width={2} alignRight>
-              <span style={{ display: "flex", gap: "0.35rem", flexWrap: "nowrap", justifyContent: "flex-end", alignItems: "center" }}>
+              <span className="sr-actions-cell">
                 <Button
                   variant="primary"
                   size="sm"
@@ -184,13 +185,11 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
         isHidden={!expanded}
         hasNoPadding
       >
-        <div style={{ padding: "0.75rem 1rem 1rem 3.5rem" }}>
+        <div className="sr-containers-panel">
           {loadingContainers ? (
             <Spinner size="md" />
           ) : containers.length === 0 ? (
-            <span style={{ color: "var(--pf-t--global--text--color--subtle)", fontSize: "var(--pf-t--global--font--size--sm)" }}>
-              No containers found.
-            </span>
+            <span className="sr-no-containers">No containers found.</span>
           ) : (
             <ContainerTable containers={containers} />
           )}
