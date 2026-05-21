@@ -1,7 +1,12 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { mockSpawn } from "../test/setup";
 import { mockProcess } from "../test/helpers";
-import { listStacks, startStack, stopStack, restartStack, streamLogs, downStack, pullStack } from "./stacks";
+import {
+  listStacks, startStack, stopStack, restartStack, streamLogs, downStack, pullStack,
+  listProjectContainerImageRefs, listImagesByRepo, listAllContainerImages, removeImages,
+  listStoppedContainers, listDanglingVolumes, listProjectNetworks,
+  pruneContainers, pruneVolumes, pruneNetworks,
+} from "./stacks";
 
 beforeEach(() => { mockSpawn.mockReset(); });
 
@@ -86,5 +91,123 @@ describe("pullStack", () => {
     pullStack("myapp", "/path/compose.yml");
     const opts = mockSpawn.mock.calls[0][1] as { err: string };
     expect(opts.err).toBe("out");
+  });
+});
+
+describe("listProjectContainerImageRefs", () => {
+  it("lists image refs from all project containers by label", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    listProjectContainerImageRefs("myapp");
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args).toContain("ps");
+    expect(args).toContain("-a");
+    expect(args.join(" ")).toContain("com.docker.compose.project=myapp");
+    expect(args.join(" ")).toContain("{{.Image}}");
+  });
+});
+
+describe("listImagesByRepo", () => {
+  it("lists all images for the given repo with name and size columns", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    listImagesByRepo("docker.gitea.com/gitea");
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args).toContain("images");
+    expect(args).toContain("docker.gitea.com/gitea");
+    expect(args.join(" ")).toContain("{{.Repository}}:{{.Tag}}");
+    expect(args.join(" ")).toContain("{{.Size}}");
+  });
+});
+
+describe("listAllContainerImages", () => {
+  it("lists image names for all containers using {{.Image}} (compatible with all Docker versions)", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    listAllContainerImages();
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args).toContain("ps");
+    expect(args).toContain("-a");
+    expect(args.join(" ")).toContain("{{.Image}}");
+    expect(args.join(" ")).not.toContain("{{.ImageID}}");
+  });
+});
+
+describe("removeImages", () => {
+  it("runs docker rmi with the given IDs", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    removeImages(["abc123", "def456"]);
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args).toContain("rmi");
+    expect(args).toContain("abc123");
+    expect(args).toContain("def456");
+  });
+});
+
+describe("listStoppedContainers", () => {
+  it("filters stopped containers by compose project label", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    listStoppedContainers("myapp");
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args).toContain("ps");
+    expect(args).toContain("-a");
+    expect(args).toContain("status=exited");
+    expect(args.join(" ")).toContain("com.docker.compose.project=myapp");
+  });
+});
+
+describe("listDanglingVolumes", () => {
+  it("filters dangling volumes by compose project label", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    listDanglingVolumes("myapp");
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args).toContain("volume");
+    expect(args).toContain("ls");
+    expect(args).toContain("dangling=true");
+    expect(args.join(" ")).toContain("com.docker.compose.project=myapp");
+  });
+});
+
+describe("listProjectNetworks", () => {
+  it("lists networks by compose project label", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    listProjectNetworks("myapp");
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args).toContain("network");
+    expect(args).toContain("ls");
+    expect(args.join(" ")).toContain("com.docker.compose.project=myapp");
+  });
+});
+
+describe("pruneContainers", () => {
+  it("runs docker container prune with project label filter", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    pruneContainers("myapp");
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args).toContain("container");
+    expect(args).toContain("prune");
+    expect(args).toContain("-f");
+    expect(args.join(" ")).toContain("com.docker.compose.project=myapp");
+  });
+});
+
+describe("pruneVolumes", () => {
+  it("runs docker volume prune with project label filter", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    pruneVolumes("myapp");
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args).toContain("volume");
+    expect(args).toContain("prune");
+    expect(args).toContain("-f");
+    expect(args.join(" ")).toContain("com.docker.compose.project=myapp");
+  });
+});
+
+describe("pruneNetworks", () => {
+  it("runs docker network prune with project label filter", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    pruneNetworks("myapp");
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args).toContain("network");
+    expect(args).toContain("prune");
+    expect(args).toContain("-f");
+    expect(args.join(" ")).toContain("com.docker.compose.project=myapp");
   });
 });

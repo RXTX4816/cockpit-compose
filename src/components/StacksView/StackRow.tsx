@@ -42,10 +42,11 @@ interface StackRowProps {
   onEvents: () => void;
   onTop: () => void;
   onExec: () => void;
+  onPrune: () => void;
   onActingChange: (delta: 1 | -1) => void;
 }
 
-export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, onDown, onKill, onPull, onEvents, onTop, onExec, onActingChange }: StackRowProps) {
+export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, onDown, onKill, onPull, onEvents, onTop, onExec, onPrune, onActingChange }: StackRowProps) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const status = parseStackStatus(stack.Status);
@@ -198,6 +199,9 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
                       Shell
                     </DropdownItem>
                     <Divider key="div1" component="li" />
+                    <DropdownItem key="prune" isDanger onClick={() => { setMenuOpen(false); onPrune(); }}>
+                      Prune
+                    </DropdownItem>
                     <DropdownItem key="kill" isDanger onClick={() => { setMenuOpen(false); onKill(); }}>
                       Kill
                     </DropdownItem>

@@ -101,3 +101,80 @@ export function composeVersion(): CockpitProcess {
     { err: "message" },
   );
 }
+
+// Returns image refs (e.g. "docker.gitea.com/gitea:1.26.2") for all containers
+// belonging to the project, running or stopped.
+export function listProjectContainerImageRefs(project: string): CockpitProcess {
+  return cockpit.spawn(
+    ["docker", "ps", "-a", "--filter", `label=com.docker.compose.project=${project}`, "--format", "{{.Image}}"],
+    { err: "message" },
+  );
+}
+
+// Returns lines of "<repo>:<tag>\t<size>" for every image matching the repo.
+export function listImagesByRepo(repo: string): CockpitProcess {
+  return cockpit.spawn(
+    ["docker", "images", repo, "--format", "{{.Repository}}:{{.Tag}}\t{{.Size}}"],
+    { err: "message" },
+  );
+}
+
+// Returns image names (e.g. "nginx:latest") for every container on the host (running + stopped).
+// Uses {{.Image}} instead of {{.ImageID}} — the latter is unavailable on older Docker / Podman.
+export function listAllContainerImages(): CockpitProcess {
+  return cockpit.spawn(
+    ["docker", "ps", "-a", "--format", "{{.Image}}"],
+    { err: "message" },
+  );
+}
+
+export function removeImages(ids: string[]): CockpitProcess {
+  return cockpit.spawn(
+    ["docker", "rmi", ...ids],
+    { superuser: "try", err: "message" },
+  );
+}
+
+export function listStoppedContainers(project: string): CockpitProcess {
+  return cockpit.spawn(
+    ["docker", "ps", "-a", "--filter", "status=exited", "--filter", `label=com.docker.compose.project=${project}`, "--format", "{{.Names}} — {{.Status}}"],
+    { err: "message" },
+  );
+}
+
+export function listDanglingVolumes(project: string): CockpitProcess {
+  return cockpit.spawn(
+    ["docker", "volume", "ls", "--filter", "dangling=true", "--filter", `label=com.docker.compose.project=${project}`, "--format", "{{.Name}}"],
+    { err: "message" },
+  );
+}
+
+export function listProjectNetworks(project: string): CockpitProcess {
+  return cockpit.spawn(
+    ["docker", "network", "ls", "--filter", `label=com.docker.compose.project=${project}`, "--format", "{{.Name}}"],
+    { err: "message" },
+  );
+}
+
+
+
+export function pruneContainers(project: string): CockpitProcess {
+  return cockpit.spawn(
+    ["docker", "container", "prune", "-f", "--filter", `label=com.docker.compose.project=${project}`],
+    { superuser: "try", err: "message" },
+  );
+}
+
+export function pruneVolumes(project: string): CockpitProcess {
+  return cockpit.spawn(
+    ["docker", "volume", "prune", "-f", "--filter", `label=com.docker.compose.project=${project}`],
+    { superuser: "try", err: "message" },
+  );
+}
+
+export function pruneNetworks(project: string): CockpitProcess {
+  return cockpit.spawn(
+    ["docker", "network", "prune", "-f", "--filter", `label=com.docker.compose.project=${project}`],
+    { superuser: "try", err: "message" },
+  );
+}
