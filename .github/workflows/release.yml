@@ -32,6 +32,10 @@ jobs:
           echo "VERSION_CLEAN=${VERSION#v}" >> "$GITHUB_ENV"
 
       - run: npm ci
+
+      - name: Set version in package.json
+        run: npm pkg set version="${VERSION_CLEAN}"
+
       - run: npm run build
 
       # ── Tarball ─────────────────────────────────────────────────────────
