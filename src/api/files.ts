@@ -43,7 +43,7 @@ export async function deleteSnapshot(snapshotPath: string): Promise<void> {
 }
 
 export async function readEnvFile(path: string): Promise<{ content: string; exists: boolean }> {
-  const content = await cockpit.file(path, { superuser: "try" }).read<string>();
+  const content = await cockpit.file(path, { superuser: "try" }).read() as string | null;
   return content === null
     ? { content: "", exists: false }
     : { content, exists: true };
