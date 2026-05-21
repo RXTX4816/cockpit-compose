@@ -15,8 +15,9 @@ import {
   ModalBody,
   ModalFooter,
 } from "@patternfly/react-core";
-import { type ComposeStack, downStack } from "../../api";
+import { type ComposeStack } from "../../api";
 import { useComposeStacks } from "../../hooks/useComposeStacks";
+import { useDownStack } from "../../hooks/useDownStack";
 import { LogsModal } from "../LogsModal";
 import { YamlModal } from "../YamlModal";
 import { StackInfoModal } from "../StackInfoModal";
@@ -29,9 +30,6 @@ export function StacksView() {
   const [logsTarget, setLogsTarget] = useState<ComposeStack | null>(null);
   const [yamlTarget, setYamlTarget] = useState<ComposeStack | null>(null);
   const [infoTarget, setInfoTarget] = useState<ComposeStack | null>(null);
-  const [downTarget, setDownTarget] = useState<ComposeStack | null>(null);
-  const [downing, setDowning] = useState(false);
-  const [downError, setDownError] = useState<string | null>(null);
   const [pullTarget, setPullTarget] = useState<ComposeStack | null>(null);
   // Counts how many stack actions are currently in flight.
   // We pause the auto-refresh while any action is running so that Docker
@@ -41,6 +39,9 @@ export function StacksView() {
   const onActingChange = useCallback((delta: 1 | -1) => {
     setActiveOps(n => Math.max(0, n + delta));
   }, []);
+
+  const { target: downTarget, downing, error: downError, open: openDown, close: closeDown, execute: performDown }
+    = useDownStack(refresh, onActingChange);
 
   const toggle = useCallback((name: string) => {
     setExpanded(prev => {
@@ -59,24 +60,6 @@ export function StacksView() {
     const interval = setInterval(refresh, error ? 2000 : 500);
     return () => clearInterval(interval);
   }, [refresh, error, activeOps]);
-
-  const performDown = async () => {
-    if (!downTarget) return;
-    const configFile = downTarget.ConfigFiles.split(",")[0].trim();
-    setDowning(true);
-    setActiveOps(n => n + 1);
-    setDownError(null);
-    try {
-      await downStack(downTarget.Name, configFile);
-      setDownTarget(null);
-      refresh();
-    } catch (ex: unknown) {
-      setDownError(ex instanceof Error ? ex.message : String(ex));
-    } finally {
-      setDowning(false);
-      setActiveOps(n => Math.max(0, n - 1));
-    }
-  };
 
   return (
     <>
@@ -121,7 +104,7 @@ export function StacksView() {
               onLogs={() => setLogsTarget(stack)}
               onYaml={() => setYamlTarget(stack)}
               onInfo={() => setInfoTarget(stack)}
-              onDown={() => { setDownError(null); setDownTarget(stack); }}
+              onDown={() => openDown(stack)}
               onPull={() => setPullTarget(stack)}
               onActingChange={onActingChange}
             />
@@ -138,7 +121,7 @@ export function StacksView() {
         <Modal
           isOpen
           variant="small"
-          onClose={() => { if (!downing) { setDownTarget(null); setDownError(null); } }}
+          onClose={() => { if (!downing) closeDown(); }}
           aria-label="Confirm down"
         >
           <ModalHeader title={`Remove "${downTarget.Name}"?`} />
@@ -155,7 +138,7 @@ export function StacksView() {
             <Button variant="danger" onClick={() => void performDown()} isLoading={downing}>
               Down (remove)
             </Button>
-            <Button variant="link" onClick={() => { setDownTarget(null); setDownError(null); }} isDisabled={downing}>
+            <Button variant="link" onClick={closeDown} isDisabled={downing}>
               Cancel
             </Button>
           </ModalFooter>

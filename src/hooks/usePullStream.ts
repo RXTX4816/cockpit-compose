@@ -1,0 +1,51 @@
+import { useState, useEffect, useRef, useCallback } from "react";
+import { pullStack } from "../api";
+import { stripAnsi, classifyLine, type LineEntry } from "../lib/pullParser";
+
+export function usePullStream(stackName: string, configFile: string) {
+  const [lines, setLines] = useState<LineEntry[]>([]);
+  const [done, setDone] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+  const bufRef = useRef("");
+  const procRef = useRef<CockpitProcess | null>(null);
+
+  useEffect(() => {
+    const proc = pullStack(stackName, configFile);
+    procRef.current = proc;
+
+    proc.stream(data => {
+      // Strip ANSI, then handle \r (terminal overwrite) within each chunk
+      const clean = stripAnsi(data);
+      bufRef.current += clean;
+      const parts = bufRef.current.split("\n");
+      bufRef.current = parts.pop() ?? "";
+      const newLines: LineEntry[] = parts
+        // Handle \r within a line — take the last segment (what would be shown in terminal)
+        .map(line => line.split("\r").pop() ?? "")
+        .filter(line => line.trim() !== "")
+        .map(text => ({ text, kind: classifyLine(text) }));
+      if (newLines.length > 0) {
+        setLines(prev => [...prev, ...newLines]);
+      }
+    });
+
+    proc
+      .then(() => { setDone(true); setFailed(false); procRef.current = null; })
+      .catch((ex: unknown) => {
+        setDone(true);
+        setFailed(true);
+        setErrorMsg(ex instanceof Error ? ex.message : String(ex));
+        procRef.current = null;
+      });
+
+    return () => { proc.close(); };
+  }, [stackName, configFile]);
+
+  const cancel = useCallback(() => {
+    procRef.current?.close();
+    procRef.current = null;
+  }, []);
+
+  return { lines, done, failed, errorMsg, cancel };
+}

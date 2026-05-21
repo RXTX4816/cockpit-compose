@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import {
   Modal,
   ModalHeader,
@@ -7,8 +7,9 @@ import {
   Spinner,
   Alert,
 } from "@patternfly/react-core";
-import { type ComposeStack, pullStack } from "../api";
-import { stripAnsi, classifyLine, kindColor, type LineEntry } from "../lib/pullParser";
+import { type ComposeStack } from "../api";
+import { kindColor } from "../lib/pullParser";
+import { usePullStream } from "../hooks/usePullStream";
 
 interface Props {
   stack: ComposeStack;
@@ -16,67 +17,23 @@ interface Props {
 }
 
 export function PullModal({ stack, onClose }: Props) {
-  const [lines, setLines] = useState<LineEntry[]>([]);
-  const [done, setDone] = useState(false);
-  const [failed, setFailed] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
-  const logRef = useRef<HTMLDivElement>(null);
-  const bufRef = useRef("");
-  const procRef = useRef<CockpitProcess | null>(null);
-
   const configFile = stack.ConfigFiles.split(",")[0].trim();
+  const { lines, done, failed, errorMsg, cancel } = usePullStream(stack.Name, configFile);
+  const logRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const proc = pullStack(stack.Name, configFile);
-    procRef.current = proc;
-
-    proc.stream(data => {
-      // Strip ANSI, then handle \r (terminal overwrite) within each chunk
-      const clean = stripAnsi(data);
-      bufRef.current += clean;
-
-      // Split on newlines; keep incomplete last line in buffer
-      const parts = bufRef.current.split("\n");
-      bufRef.current = parts.pop() ?? "";
-
-      const newLines: LineEntry[] = parts
-        // Handle \r within a line — take the last segment (what would be shown in terminal)
-        .map(line => line.split("\r").pop() ?? "")
-        .filter(line => line.trim() !== "")
-        .map(text => ({ text, kind: classifyLine(text) }));
-
-      if (newLines.length > 0) {
-        setLines(prev => [...prev, ...newLines]);
-      }
-    });
-
-    proc
-      .then(() => { setDone(true); setFailed(false); })
-      .catch((ex: unknown) => {
-        setDone(true);
-        setFailed(true);
-        setErrorMsg(ex instanceof Error ? ex.message : String(ex));
-      });
-
-    return () => { proc.close(); };
-  }, [stack.Name, configFile]);
-
-  useEffect(() => {
-    if (logRef.current) {
-      logRef.current.scrollTop = logRef.current.scrollHeight;
-    }
+    if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight;
   }, [lines]);
 
-  const cancel = () => {
-    procRef.current?.close();
+  const handleClose = () => {
+    cancel();
     onClose();
   };
 
   return (
-    <Modal isOpen onClose={cancel} variant="medium" aria-label={`Pull — ${stack.Name}`}>
+    <Modal isOpen onClose={handleClose} variant="medium" aria-label={`Pull — ${stack.Name}`}>
       <ModalHeader title={`Pull — ${stack.Name}`} />
       <ModalBody>
-        {/* Status bar */}
         <div style={{
           display: "flex",
           alignItems: "center",
@@ -102,7 +59,6 @@ export function PullModal({ stack, onClose }: Props) {
           <Alert variant="danger" isInline title={errorMsg} style={{ marginBottom: "0.75rem" }} />
         )}
 
-        {/* Log output */}
         <div
           ref={logRef}
           style={{
@@ -129,12 +85,11 @@ export function PullModal({ stack, onClose }: Props) {
           )}
         </div>
 
-        {/* Footer buttons */}
         <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "0.75rem" }}>
           {!done ? (
-            <Button variant="secondary" onClick={cancel}>Cancel</Button>
+            <Button variant="secondary" onClick={handleClose}>Cancel</Button>
           ) : (
-            <Button variant="primary" onClick={onClose}>Close</Button>
+            <Button variant="primary" onClick={handleClose}>Close</Button>
           )}
         </div>
       </ModalBody>

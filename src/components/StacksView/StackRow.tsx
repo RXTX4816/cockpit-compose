@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState } from "react";
 import {
   DataListItem,
   DataListItemRow,
@@ -18,17 +18,12 @@ import {
 } from "@patternfly/react-core";
 import {
   type ComposeStack,
-  type ComposeContainer,
-  type StackStatus,
   parseStackStatus,
   parseServiceCount,
-  parseJsonOutput,
   getHealthStatus,
-  listContainers,
-  readComposeFile,
-  getServicesFromCompose,
 } from "../../api";
 import { useStackActions } from "../../hooks/useStackActions";
+import { useStackContainers } from "../../hooks/useStackContainers";
 import { StatusLabel } from "./StatusLabel";
 import { StatsCell } from "./StatsCell";
 import { ContainerTable } from "./ContainerTable";
@@ -46,11 +41,7 @@ interface StackRowProps {
 }
 
 export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, onDown, onPull, onActingChange }: StackRowProps) {
-  const [containers, setContainers] = useState<ComposeContainer[]>([]);
-  const [loadingContainers, setLoadingContainers] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const cachedServiceNamesRef = useRef<string[]>([]);
-  const prevParsedStatusRef = useRef<StackStatus>("unknown");
 
   const status = parseStackStatus(stack.Status);
   const health = getHealthStatus(stack.Status);
@@ -58,62 +49,18 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
   const configFile = stack.ConfigFiles.split(",")[0].trim();
 
   const { acting, actionError, doAction } = useStackActions(stack.Name, configFile, onActingChange);
-
-  const loadContainers = useCallback(async () => {
-    setLoadingContainers(true);
-    try {
-      let raw = "";
-      const proc = listContainers(stack.Name);
-      proc.stream(d => { raw += d; });
-      await proc;
-      const running = parseJsonOutput<ComposeContainer>(raw);
-
-      let composeContent = "";
-      const cp = readComposeFile(configFile);
-      cp.stream(d => { composeContent += d; });
-      await cp;
-      const serviceNames = getServicesFromCompose(composeContent);
-      cachedServiceNamesRef.current = serviceNames;
-
-      setContainers(serviceNames.map(name => {
-        const c = running.find(r => r.Service === name);
-        return c ?? { ID: "", Name: name, Image: "", State: "down", Status: "down", Ports: "", Service: name };
-      }));
-    } catch {
-      try {
-        let composeContent = "";
-        const cp2 = readComposeFile(configFile);
-        cp2.stream(d => { composeContent += d; });
-        await cp2;
-        const serviceNames = getServicesFromCompose(composeContent);
-        cachedServiceNamesRef.current = serviceNames;
-        setContainers(serviceNames.map(name => ({
-          ID: "", Name: name, Image: "", State: "down", Status: "down", Ports: "", Service: name,
-        })));
-      } catch {
-        const cached = cachedServiceNamesRef.current;
-        setContainers(cached.length > 0
-          ? cached.map(name => ({ ID: "", Name: name, Image: "", State: "down", Status: "down", Ports: "", Service: name }))
-          : []);
-      }
-    } finally {
-      setLoadingContainers(false);
-    }
-  }, [stack.Name, configFile]);
-
-  // Clear stale container state when the stack's status changes
-  useEffect(() => {
-    if (prevParsedStatusRef.current !== status) {
-      prevParsedStatusRef.current = status;
-      setContainers([]);
-    }
-  }, [status]);
+  const { containers, loading: loadingContainers, load: loadContainers, clear: clearContainers } = useStackContainers(stack.Name, configFile, status);
 
   const handleToggle = () => {
     onToggle();
     if (!expanded && containers.length === 0) {
       void loadContainers();
     }
+  };
+
+  const afterAction = async () => {
+    clearContainers();
+    if (expanded) await loadContainers();
   };
 
   return (
@@ -157,7 +104,7 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
                 <Button
                   variant="primary"
                   size="sm"
-                  onClick={() => void doAction("start", async () => { setContainers([]); if (expanded) await loadContainers(); })}
+                  onClick={() => void doAction("start", afterAction)}
                   isLoading={acting}
                   isDisabled={acting}
                 >
@@ -168,7 +115,7 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
                   <Button
                     variant="secondary"
                     size="sm"
-                    onClick={() => void doAction("stop", async () => { setContainers([]); if (expanded) await loadContainers(); })}
+                    onClick={() => void doAction("stop", afterAction)}
                     isLoading={acting}
                     isDisabled={acting}
                   >
@@ -204,10 +151,7 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
                     <DropdownItem
                       key="restart"
                       isDisabled={status === "down" || status === "unknown"}
-                      onClick={() => {
-                        setMenuOpen(false);
-                        void doAction("restart", async () => { setContainers([]); if (expanded) await loadContainers(); });
-                      }}
+                      onClick={() => { setMenuOpen(false); void doAction("restart", afterAction); }}
                     >
                       Restart
                     </DropdownItem>

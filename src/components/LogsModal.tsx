@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useEffect, useRef, useMemo } from "react";
 import {
   Modal,
   ModalHeader,
@@ -9,15 +9,14 @@ import {
   ToolbarItem,
   Spinner,
 } from "@patternfly/react-core";
-import { type ComposeStack, streamLogs } from "../api";
+import { type ComposeStack } from "../api";
 import {
   serviceColor,
   highlightMessage,
   parseLine,
   type ParsedLine,
 } from "../lib/logParser";
-
-const MAX_LINES = 500;
+import { useLogStream, LOG_MAX_LINES } from "../hooks/useLogStream";
 
 // ── LogLine component ──────────────────────────────────────────────────────────
 
@@ -60,7 +59,6 @@ function LogLine({ parsed, index }: { parsed: ParsedLine; index: number }) {
       lineHeight: "1.5",
       background: bg,
     }}>
-      {/* service — colored by hash, always distinct */}
       <span style={{
         color: serviceColor(parsed.service),
         fontWeight: 600,
@@ -70,8 +68,6 @@ function LogLine({ parsed, index }: { parsed: ParsedLine; index: number }) {
       }}>
         {parsed.service}
       </span>
-
-      {/* timestamp — always muted grey, never inherits line color */}
       <span style={{
         color: "#6e7681",
         fontSize: "0.7rem",
@@ -80,8 +76,6 @@ function LogLine({ parsed, index }: { parsed: ParsedLine; index: number }) {
       }}>
         {parsed.timestamp}
       </span>
-
-      {/* message — base color depends on level, tokens highlighted inline */}
       <span style={{
         wordBreak: "break-all",
         color: parsed.level === "error" ? "#f85149"
@@ -102,43 +96,14 @@ interface Props {
 }
 
 export function LogsModal({ stack, onClose }: Props) {
-  const [lines, setLines] = useState<string[]>([]);
-  const [streaming, setStreaming] = useState(true);
-  const procRef = useRef<CockpitProcess | null>(null);
+  const { lines, streaming, stop } = useLogStream(stack.Name);
   const logRef = useRef<HTMLDivElement>(null);
-  const bufRef = useRef("");
-
-  useEffect(() => {
-    bufRef.current = "";
-    setLines([]);
-    const proc = streamLogs(stack.Name);
-    procRef.current = proc;
-    proc.stream(data => {
-      bufRef.current += data;
-      const parts = bufRef.current.split("\n");
-      bufRef.current = parts.pop() ?? "";
-      if (parts.length > 0) {
-        setLines(prev => {
-          const next = [...prev, ...parts.filter(Boolean)];
-          return next.length > MAX_LINES ? next.slice(next.length - MAX_LINES) : next;
-        });
-      }
-    });
-    proc.then(() => setStreaming(false)).catch(() => setStreaming(false));
-    return () => { proc.close(); };
-  }, [stack.Name]);
 
   useEffect(() => {
     if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight;
   }, [lines]);
 
   const parsedLines = useMemo(() => lines.map(parseLine), [lines]);
-
-  const stop = () => {
-    procRef.current?.close();
-    procRef.current = null;
-    setStreaming(false);
-  };
 
   return (
     <Modal isOpen onClose={onClose} variant="large" aria-label={`Logs — ${stack.Name}`}>
@@ -156,13 +121,13 @@ export function LogsModal({ stack, onClose }: Props) {
             )}
             {lines.length > 0 && (
               <ToolbarItem>
-                <Button variant="plain" size="sm" onClick={() => setLines([])}>Clear</Button>
+                <Button variant="plain" size="sm" onClick={() => stop()}>Clear</Button>
               </ToolbarItem>
             )}
-            {lines.length >= MAX_LINES && (
+            {lines.length >= LOG_MAX_LINES && (
               <ToolbarItem>
                 <span style={{ fontSize: "0.75rem", color: "#6e7681" }}>
-                  showing last {MAX_LINES} lines
+                  showing last {LOG_MAX_LINES} lines
                 </span>
               </ToolbarItem>
             )}
