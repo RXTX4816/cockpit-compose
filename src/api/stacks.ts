@@ -101,3 +101,59 @@ export function composeVersion(): CockpitProcess {
     { err: "message" },
   );
 }
+
+export function listDanglingImages(project: string): CockpitProcess {
+  return cockpit.spawn(
+    ["docker", "images", "--filter", "dangling=true", "--filter", `label=com.docker.compose.project=${project}`, "--format", "{{.Repository}}:{{.Tag}} ({{.Size}})"],
+    { err: "message" },
+  );
+}
+
+export function listStoppedContainers(project: string): CockpitProcess {
+  return cockpit.spawn(
+    ["docker", "ps", "-a", "--filter", "status=exited", "--filter", `label=com.docker.compose.project=${project}`, "--format", "{{.Names}} — {{.Status}}"],
+    { err: "message" },
+  );
+}
+
+export function listDanglingVolumes(project: string): CockpitProcess {
+  return cockpit.spawn(
+    ["docker", "volume", "ls", "--filter", "dangling=true", "--filter", `label=com.docker.compose.project=${project}`, "--format", "{{.Name}}"],
+    { err: "message" },
+  );
+}
+
+export function listProjectNetworks(project: string): CockpitProcess {
+  return cockpit.spawn(
+    ["docker", "network", "ls", "--filter", `label=com.docker.compose.project=${project}`, "--format", "{{.Name}}"],
+    { err: "message" },
+  );
+}
+
+export function pruneImages(project: string): CockpitProcess {
+  return cockpit.spawn(
+    ["docker", "image", "prune", "-f", "--filter", `label=com.docker.compose.project=${project}`],
+    { superuser: "try", err: "message" },
+  );
+}
+
+export function pruneContainers(project: string): CockpitProcess {
+  return cockpit.spawn(
+    ["docker", "container", "prune", "-f", "--filter", `label=com.docker.compose.project=${project}`],
+    { superuser: "try", err: "message" },
+  );
+}
+
+export function pruneVolumes(project: string): CockpitProcess {
+  return cockpit.spawn(
+    ["docker", "volume", "prune", "-f", "--filter", `label=com.docker.compose.project=${project}`],
+    { superuser: "try", err: "message" },
+  );
+}
+
+export function pruneNetworks(project: string): CockpitProcess {
+  return cockpit.spawn(
+    ["docker", "network", "prune", "-f", "--filter", `label=com.docker.compose.project=${project}`],
+    { superuser: "try", err: "message" },
+  );
+}
