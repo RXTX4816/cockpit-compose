@@ -1,12 +1,16 @@
 .lm-log-viewer {
   overflow-y: auto;
-  height: 62vh;
+  height: calc(100vh - 220px);
   padding: 0.4rem 0;
   background: #0d1117;
   border-radius: var(--pf-t--global--border--radius--200);
+  display: grid;
+  grid-template-columns: minmax(0, 12rem) max-content 1fr;
+  align-content: start;
 }
 
 .lm-empty-state {
+  grid-column: 1 / -1;
   padding: 1rem 0.75rem;
   color: #6e7681;
   font-family: var(--pf-t--global--font--family--mono);
@@ -20,6 +24,7 @@
 
 /* LogLine */
 .lm-line-raw {
+  grid-column: 1 / -1;
   padding: 0.1rem 0.75rem;
   font-family: var(--pf-t--global--font--family--mono);
   font-size: 0.78rem;
@@ -29,20 +34,21 @@
 }
 
 .lm-line-parsed {
-  display: grid;
-  grid-template-columns: 10rem 5.5rem 1fr;
-  gap: 0 0.5rem;
-  padding: 0.1rem 0.75rem;
+  display: contents;
+}
+
+.lm-line-parsed > * {
   font-family: var(--pf-t--global--font--family--mono);
   font-size: 0.78rem;
   line-height: 1.5;
+  padding: 0.1rem 0;
 }
 
 .lm-line-service {
   font-weight: 600;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  word-break: break-all;
+  padding-left: 0.75rem;
+  padding-right: 0.5rem;
 }
 
 .lm-line-timestamp {
@@ -50,10 +56,12 @@
   font-size: 0.7rem;
   align-self: center;
   white-space: nowrap;
+  padding-right: 0.5rem;
 }
 
 .lm-line-message {
   word-break: break-all;
+  padding-right: 0.75rem;
 }
 
 /* Level-based backgrounds */
