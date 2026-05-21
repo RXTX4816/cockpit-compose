@@ -134,64 +134,66 @@ export function YamlModal({ stack, onClose }: Props) {
     <>
     <Modal isOpen onClose={onClose} variant="large" aria-label={`Compose file — ${stack.Name}`}>
       <ModalHeader title={`${stack.Name} — compose file`} />
-      <ModalBody>
-        {!loading && (
-          <Toolbar style={{ paddingInline: 0, marginBottom: "0.75rem" }}>
-            <ToolbarContent>
-              <ToolbarItem>
-                <code className="ym-config-file">{configFile}</code>
-              </ToolbarItem>
-              <ToolbarItem align={{ default: "alignEnd" }}>
-                {snapshots.length > 0 && (
-                  <Button variant="plain" size="sm" onClick={() => setShowSnapshots(!showSnapshots)}>
-                    History ({snapshots.length})
-                  </Button>
-                )}
-                {!editing ? (
-                  <Button variant="plain" size="sm" onClick={() => setEditing(true)} icon={<LockIcon />}>
-                    Edit
-                  </Button>
-                ) : (
-                  <Button variant="plain" size="sm" onClick={() => setEditing(false)} icon={<LockOpenIcon />}>
-                    Lock
-                  </Button>
-                )}
-              </ToolbarItem>
-            </ToolbarContent>
-          </Toolbar>
-        )}
+      <ModalBody style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}>
+        <div className="ym-body">
+          {!loading && (
+            <Toolbar style={{ paddingInline: 0, marginBottom: "0.75rem", flexShrink: 0 }}>
+              <ToolbarContent>
+                <ToolbarItem>
+                  <code className="ym-config-file">{configFile}</code>
+                </ToolbarItem>
+                <ToolbarItem align={{ default: "alignEnd" }}>
+                  {snapshots.length > 0 && (
+                    <Button variant="plain" size="sm" onClick={() => setShowSnapshots(!showSnapshots)}>
+                      History ({snapshots.length})
+                    </Button>
+                  )}
+                  {!editing ? (
+                    <Button variant="plain" size="sm" onClick={() => setEditing(true)} icon={<LockIcon />}>
+                      Edit
+                    </Button>
+                  ) : (
+                    <Button variant="plain" size="sm" onClick={() => setEditing(false)} icon={<LockOpenIcon />}>
+                      Lock
+                    </Button>
+                  )}
+                </ToolbarItem>
+              </ToolbarContent>
+            </Toolbar>
+          )}
 
-        {showSnapshots && snapshots.length > 0 && (
-          <div className="ym-snapshots-panel">
-            <div className="ym-snapshots-title">Snapshots</div>
-            {snapshots.map(snap => (
-              <div key={snap.timestamp} className="ym-snapshot-row">
-                <span className="ym-snapshot-name">{snap.name}</span>
-                <div className="ym-snapshot-actions">
-                  <Button variant="link" size="sm" onClick={() => handleRestoreSnapshot(snap.path)}>Restore</Button>
-                  <Button variant="link" size="sm" onClick={() => handleDeleteSnapshot(snap.path)}>Delete</Button>
+          {showSnapshots && snapshots.length > 0 && (
+            <div className="ym-snapshots-panel" style={{ flexShrink: 0 }}>
+              <div className="ym-snapshots-title">Snapshots</div>
+              {snapshots.map(snap => (
+                <div key={snap.timestamp} className="ym-snapshot-row">
+                  <span className="ym-snapshot-name">{snap.name}</span>
+                  <div className="ym-snapshot-actions">
+                    <Button variant="link" size="sm" onClick={() => handleRestoreSnapshot(snap.path)}>Restore</Button>
+                    <Button variant="link" size="sm" onClick={() => handleDeleteSnapshot(snap.path)}>Delete</Button>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
 
-        {loading ? (
-          <div className="ym-loading">
-            <Spinner />
-          </div>
-        ) : error && !editing ? (
-          <Alert variant="danger" isInline title="Could not read file">{error}</Alert>
-        ) : (
-          <>
-            {error && editing && (
-              <Alert variant="danger" isInline title="Save failed" style={{ marginBottom: "1rem" }}>
-                {error}
-              </Alert>
-            )}
-            <YamlEditor content={editing ? editedContent : content} onChange={editing ? setEditedContent : () => {}} readOnly={!editing} onDiagnosticsChange={setDiagnostics} />
-          </>
-        )}
+          {loading ? (
+            <div className="ym-loading">
+              <Spinner />
+            </div>
+          ) : error && !editing ? (
+            <Alert variant="danger" isInline title="Could not read file">{error}</Alert>
+          ) : (
+            <>
+              {error && editing && (
+                <Alert variant="danger" isInline title="Save failed" style={{ marginBottom: "1rem", flexShrink: 0 }}>
+                  {error}
+                </Alert>
+              )}
+              <YamlEditor content={editing ? editedContent : content} onChange={editing ? setEditedContent : () => {}} readOnly={!editing} onDiagnosticsChange={setDiagnostics} />
+            </>
+          )}
+        </div>
       </ModalBody>
       {editing && (
         <ModalFooter>
