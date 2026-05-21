@@ -9,11 +9,11 @@ Docker Compose management for [Cockpit](https://cockpit-project.org) — start, 
 
 ## Features
 
-- Dashboard listing all stacks with live status and container stats
-- Start / stop / restart stacks with one click
-- Live log viewer per container
-- YAML editor with syntax validation and auto-snapshot before saving
-- Snapshot restore — roll back a compose file to any previous version
+- Dashboard listing all stacks with live status and container stats (auto-refreshing)
+- Start, stop, restart, pause/unpause, pull, prune and kill stacks with one click
+- Live log viewer per stack
+- Interactive shell into any running service
+- YAML editor with syntax validation and auto-snapshot before saving + .ENV editor
 
 ## Requirements
 
@@ -58,19 +58,6 @@ Download the `.deb` from the [Releases](https://github.com/RXTX4816/cockpit-comp
 ```bash
 sudo apt install ./cockpit-compose_X.Y.Z-1_all.deb
 ```
-
-(`apt install ./` resolves the `cockpit` dependency automatically.)
-
-If you are logged in as root, omit `sudo`:
-
-```bash
-apt install ./cockpit-compose_X.Y.Z-1_all.deb
-```
-
-> **Note:** If `apt` or `dpkg` is not found, your root session was started with `su` instead of `su -` and is missing the standard PATH. Either switch to `su -`, or set it manually:
-> ```bash
-> export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-> ```
 
 ### Manual
 
