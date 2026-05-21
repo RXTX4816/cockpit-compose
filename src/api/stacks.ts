@@ -127,7 +127,7 @@ export function listImagesByRepo(repo: string): CockpitProcess {
   );
 }
 
-// Returns image names (e.g. "nginx:latest") for every container on the host (running + stopped).
+// Returns image names for every container on the host (running + stopped).
 // Uses {{.Image}} instead of {{.ImageID}} — the latter is unavailable on older Docker / Podman.
 export function listAllContainerImages(): CockpitProcess {
   return cockpit.spawn(
@@ -160,6 +160,14 @@ export function listDanglingVolumes(project: string): CockpitProcess {
 export function listProjectNetworks(project: string): CockpitProcess {
   return cockpit.spawn(
     ["docker", "network", "ls", "--filter", `label=com.docker.compose.project=${project}`, "--format", "{{.Name}}"],
+    { err: "message" },
+  );
+}
+
+// Returns lines of "<name>\t<container-count>" for each of the given networks.
+export function inspectNetworkContainerCounts(names: string[]): CockpitProcess {
+  return cockpit.spawn(
+    ["docker", "network", "inspect", ...names, "--format", "{{.Name}}\t{{len .Containers}}"],
     { err: "message" },
   );
 }

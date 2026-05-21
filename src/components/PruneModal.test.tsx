@@ -58,12 +58,13 @@ const stoppedStack: ComposeStack = {
 };
 
 // Default mock setup: project has one container using gitea:1.26.2.
-// The repo has two versions; 1.25.2 is not in the global in-use name list → unused.
+// listImagesByRepo returns fully-qualified names (as some Docker/Podman versions do);
+// listAllContainerImages returns short names (as docker ps typically does) — exercises normalization.
 function setupDefaultImageMocks() {
   mockListProjectContainerImageRefs.mockImplementation(() =>
     mockProcess("docker.gitea.com/gitea:1.26.2\n")
   );
-  // Format: "repo:tag\tsize" — parsed into name + display by findUnusedProjectImages.
+  // Format: "repo:tag\tsize" — repo may be fully qualified.
   mockListImagesByRepo.mockImplementation(() =>
     mockProcess("docker.gitea.com/gitea:1.26.2\t248MB\ndocker.gitea.com/gitea:1.25.2\t262MB\n")
   );
@@ -197,6 +198,59 @@ describe("PruneModal — preview step", () => {
     await waitFor(() =>
       expect(screen.getByText(/Nothing to remove/i)).toBeInTheDocument()
     );
+  });
+
+  it("treats docker.io/library/caddy:latest and caddy:latest as the same image", async () => {
+    // docker images returns fully-qualified name; docker ps returns short name — must not show as unused
+    mockListProjectContainerImageRefs.mockImplementation(() =>
+      mockProcess("caddy:latest\n")
+    );
+    mockListImagesByRepo.mockImplementation(() =>
+      mockProcess("docker.io/library/caddy:latest\t50MB\n")
+    );
+    mockListAllContainerImages.mockImplementation(() =>
+      mockProcess("caddy:latest\n")
+    );
+    await goToPreview();
+    await waitFor(() =>
+      expect(screen.getByText(/Nothing to remove/i)).toBeInTheDocument()
+    );
+  });
+
+  it("treats tagless 'caddy' from docker ps as matching 'caddy:latest' from docker images", async () => {
+    // Some Docker/Podman versions omit the tag in {{.Image}} output for running containers.
+    mockListProjectContainerImageRefs.mockImplementation(() =>
+      mockProcess("caddy\n")
+    );
+    mockListImagesByRepo.mockImplementation(() =>
+      mockProcess("caddy:latest\t50MB\n")
+    );
+    mockListAllContainerImages.mockImplementation(() =>
+      mockProcess("caddy\n")
+    );
+    await goToPreview();
+    await waitFor(() =>
+      expect(screen.getByText(/Nothing to remove/i)).toBeInTheDocument()
+    );
+  });
+
+  it("still shows older tagged version as removable when docker ps returns a tagged ref for the newer one", async () => {
+    // docker ps returns "gitea:1.26.2" (tagged) — only that exact version is blocked,
+    // so gitea:1.25.2 must still appear as removable.
+    mockListProjectContainerImageRefs.mockImplementation(() =>
+      mockProcess("docker.gitea.com/gitea:1.26.2\n")
+    );
+    mockListImagesByRepo.mockImplementation(() =>
+      mockProcess("docker.gitea.com/gitea:1.26.2\t248MB\ndocker.gitea.com/gitea:1.25.2\t262MB\n")
+    );
+    mockListAllContainerImages.mockImplementation(() =>
+      mockProcess("docker.gitea.com/gitea:1.26.2\n")
+    );
+    await goToPreview();
+    await waitFor(() =>
+      expect(screen.getByText(/gitea:1\.25\.2/)).toBeInTheDocument()
+    );
+    expect(screen.queryByText(/gitea:1\.26\.2/)).toBeNull();
   });
 
   it("shows Nothing to remove when project has no containers (stack never started)", async () => {

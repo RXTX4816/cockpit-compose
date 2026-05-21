@@ -19,6 +19,7 @@ import {
   listStoppedContainers,
   listDanglingVolumes,
   listProjectNetworks,
+  inspectNetworkContainerCounts,
   pruneContainers,
   pruneVolumes,
   pruneNetworks,
@@ -55,10 +56,26 @@ async function fetchLines(proc: CockpitProcess): Promise<string[]> {
     .filter(l => l.length > 0);
 }
 
+// Strips registry hostname and "library/" prefix so that "docker.io/library/caddy:latest"
+// and "caddy:latest" compare equal. Docker/Podman versions differ in whether {{.Image}}
+// from "docker ps" and {{.Repository}} from "docker images" return the short or long form.
+function normalizeImageRef(ref: string): string {
+  const slash = ref.indexOf("/");
+  if (slash !== -1) {
+    const first = ref.slice(0, slash);
+    if (first.includes(".") || first.includes(":")) {
+      const rest = ref.slice(slash + 1);
+      return rest.startsWith("library/") ? rest.slice("library/".length) : rest;
+    }
+  }
+  return ref;
+}
+
 // Finds images belonging to the project's repos that no container (anywhere) currently uses.
 // Strategy: get image refs from project containers → extract repos → list all versions of
 // those repos → subtract any name that appears in a running-or-stopped container globally.
-// Compares by image name (repo:tag) rather than ID so it works on all Docker/Podman versions.
+// Both sides are normalized before comparison to handle short vs. fully-qualified name differences
+// between "docker ps {{.Image}}" and "docker images {{.Repository}}:{{.Tag}}".
 async function findUnusedProjectImages(project: string): Promise<{ name: string; display: string }[]> {
   const imageRefs = await fetchLines(listProjectContainerImageRefs(project));
   if (imageRefs.length === 0) return [];
@@ -66,8 +83,19 @@ async function findUnusedProjectImages(project: string): Promise<{ name: string;
   // Strip tag/digest to get the repo name, deduplicate.
   const repos = [...new Set(imageRefs.map(ref => ref.split(":")[0]))];
 
-  // Build a set of all image names currently in use by any container on the host.
-  const usedNames = new Set(await fetchLines(listAllContainerImages()));
+  // Build sets of in-use image refs from all containers on the host.
+  // "docker ps {{.Image}}" sometimes omits the tag (e.g. "caddy" instead of "caddy:latest").
+  // We track tagless refs separately so they match any version of that repo, while tagged
+  // refs (e.g. "gitea:1.26.2") only block that exact version — leaving older ones visible.
+  const rawUsed = await fetchLines(listAllContainerImages());
+  const usedExact = new Set<string>();    // normalized "repo:tag" refs
+  const usedBareRepo = new Set<string>(); // bare repo names from tagless docker ps output
+
+  for (const ref of rawUsed) {
+    const normalized = normalizeImageRef(ref);
+    usedExact.add(normalized);
+    if (!normalized.includes(":")) usedBareRepo.add(normalized);
+  }
 
   const unused: { name: string; display: string }[] = [];
   for (const repo of repos) {
@@ -75,9 +103,13 @@ async function findUnusedProjectImages(project: string): Promise<{ name: string;
     for (const line of lines) {
       const tab = line.indexOf("\t");
       if (tab === -1) continue;
-      const name = line.slice(0, tab);       // "repo:tag"
+      const name = line.slice(0, tab);       // "repo:tag" (possibly fully qualified)
       const size = line.slice(tab + 1);      // "248MB"
-      if (!usedNames.has(name)) unused.push({ name, display: `${name} (${size})` });
+      const normalizedName = normalizeImageRef(name);
+      const colon = normalizedName.indexOf(":");
+      const bareRepo = colon !== -1 ? normalizedName.slice(0, colon) : normalizedName;
+      if (!usedExact.has(normalizedName) && !usedBareRepo.has(bareRepo))
+        unused.push({ name, display: `${name} (${size})` });
     }
   }
   return unused;
@@ -106,12 +138,21 @@ export function PruneModal({ stack, onClose, onSuccess }: Props) {
     setLoadingPreview(true);
     setPreviewError(null);
     try {
-      const [unusedImages, containers, volumes, networks] = await Promise.all([
+      const [unusedImages, containers, volumes, allNetworks] = await Promise.all([
         selection.images ? findUnusedProjectImages(stack.Name) : Promise.resolve([]),
         selection.containers ? fetchLines(listStoppedContainers(stack.Name)) : Promise.resolve([]),
         selection.volumes ? fetchLines(listDanglingVolumes(stack.Name)) : Promise.resolve([]),
         selection.networks ? fetchLines(listProjectNetworks(stack.Name)) : Promise.resolve([]),
       ]);
+      // Exclude networks that have connected containers — docker network prune skips them
+      // anyway, but showing them in the preview is misleading (e.g. gitea_gitea while running).
+      let networks: string[] = [];
+      if (allNetworks.length > 0) {
+        const counts = await fetchLines(inspectNetworkContainerCounts(allNetworks));
+        networks = counts
+          .filter(line => line.endsWith("\t0"))
+          .map(line => line.slice(0, line.indexOf("\t")));
+      }
       setPreview({
         images: unusedImages.map(i => i.display),
         imageIds: unusedImages.map(i => i.name),

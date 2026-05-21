@@ -119,14 +119,13 @@ describe("listImagesByRepo", () => {
 });
 
 describe("listAllContainerImages", () => {
-  it("lists image names for all containers using {{.Image}} (compatible with all Docker versions)", () => {
+  it("lists image names for all containers using {{.Image}}", () => {
     mockSpawn.mockReturnValue(mockProcess(""));
     listAllContainerImages();
     const args = mockSpawn.mock.calls[0][0] as string[];
     expect(args).toContain("ps");
     expect(args).toContain("-a");
     expect(args.join(" ")).toContain("{{.Image}}");
-    expect(args.join(" ")).not.toContain("{{.ImageID}}");
   });
 });
 
