@@ -86,7 +86,7 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
                   color={health === "healthy" ? "green" : health === "partial" ? "orange" : "grey"}
                   isCompact
                 >
-                  {health === "healthy" ? "✓ Healthy" : health === "partial" ? "⚠ Partial" : "✗ Unhealthy"}
+                  {health === "healthy" ? "✓ Healthy" : health === "partial" ? "⚠ Partial" : "Unhealthy"}
                 </Label>
                 <span id={`stack-${stack.Name}`} className="sr-stack-name">
                   {stack.Name}
