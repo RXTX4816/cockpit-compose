@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { ContainerTable } from "./StacksView";
-import type { ComposeContainer } from "../api";
+import { ContainerTable } from "./ContainerTable";
+import type { ComposeContainer } from "../../api";
 
 const runningContainer: ComposeContainer = {
   ID: "abc123",

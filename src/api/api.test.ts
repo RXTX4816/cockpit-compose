@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { parseJsonOutput, parseStackStatus, parseServiceCount, getHealthStatus, parsePorts, getServicesFromCompose } from "./api";
+import { parseJsonOutput, parseStackStatus, parseServiceCount, getHealthStatus, parsePorts, getServicesFromCompose } from ".";
 
 describe("parseJsonOutput", () => {
   it("parses JSON array format", () => {

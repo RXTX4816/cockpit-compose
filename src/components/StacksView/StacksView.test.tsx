@@ -1,13 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { StacksView } from "./StacksView";
+import { StacksView } from ".";
 
 // Mock the hook so component tests don't depend on cockpit.spawn
-vi.mock("../hooks/useComposeStacks", () => ({
+vi.mock("../../hooks/useComposeStacks", () => ({
   useComposeStacks: vi.fn(),
 }));
 
-import { useComposeStacks } from "../hooks/useComposeStacks";
+import { useComposeStacks } from "../../hooks/useComposeStacks";
 const mockUseComposeStacks = vi.mocked(useComposeStacks);
 
 const noopRefresh = vi.fn();
