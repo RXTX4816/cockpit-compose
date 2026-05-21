@@ -214,8 +214,7 @@ describe("StacksView", () => {
       refresh: noopRefresh,
     });
     render(<StacksView />);
-    fireEvent.click(screen.getByRole("button", { name: /More actions for myapp/i }));
-    fireEvent.click(screen.getByRole("menuitem", { name: /Pull latest images/i }));
+    fireEvent.click(screen.getByRole("button", { name: /^Pull$/i }));
     expect(screen.getByTestId("pull-confirm-modal")).toBeInTheDocument();
     expect(screen.queryByTestId("pull-modal")).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /Confirm pull/i }));

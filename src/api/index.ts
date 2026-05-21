@@ -1,7 +1,7 @@
-export type { ComposeStack, ComposeContainer, StackStatus, ContainerStats, Snapshot } from "./types";
-export { detectComposeCommand } from "./cockpit";
+export type { ComposeStack, ComposeContainer, StackStatus, ContainerStats, Snapshot, ComposeImage, ComposeVolume, ComposeEvent, ComposeTopEntry, ComposeVersion } from "./types";
+export { detectComposeCommand, compose } from "./cockpit";
 export { parseStackStatus, parseServiceCount, getHealthStatus, parsePorts, getServicesFromCompose } from "./parsing";
-export { listStacks, startStack, stopStack, restartStack, streamLogs, downStack, pullStack } from "./stacks";
+export { listStacks, startStack, stopStack, restartStack, streamLogs, downStack, pullStack, pauseStack, unpauseStack, killStack, listImages, listVolumes, streamEvents, composeTop, composeVersion } from "./stacks";
 export { listContainers, getContainerStats } from "./containers";
 export { readComposeFile, saveComposeFile, saveSnapshot, listSnapshots, restoreSnapshot, deleteSnapshot } from "./files";
 export { parseJsonOutput } from "../lib/parseJsonOutput";

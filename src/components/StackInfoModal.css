@@ -64,3 +64,28 @@
   gap: 0.3rem;
   margin-top: 0.6rem;
 }
+
+.sim-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--pf-t--global--font--size--sm);
+}
+
+.sim-table th {
+  text-align: left;
+  padding: 0.3rem 0.5rem;
+  color: var(--pf-t--global--text--color--subtle);
+  font-weight: 600;
+  border-bottom: 1px solid var(--pf-t--global--border--color--default);
+}
+
+.sim-table td {
+  padding: 0.3rem 0.5rem;
+  border-bottom: 1px solid var(--pf-t--global--border--color--default);
+  word-break: break-all;
+}
+
+.sim-mountpoint {
+  font-size: 0.75rem;
+  color: var(--pf-t--global--text--color--subtle);
+}

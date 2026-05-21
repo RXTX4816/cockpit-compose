@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { startStack, stopStack, restartStack } from "../api";
+import { startStack, stopStack, restartStack, pauseStack, unpauseStack } from "../api";
 
 export function useStackActions(
   stackName: string,
@@ -10,7 +10,7 @@ export function useStackActions(
   const [actionError, setActionError] = useState<string | null>(null);
 
   const doAction = useCallback(async (
-    action: "start" | "stop" | "restart",
+    action: "start" | "stop" | "restart" | "pause" | "unpause",
     onSuccess?: () => Promise<void>,
   ) => {
     setActing(true);
@@ -19,7 +19,9 @@ export function useStackActions(
     try {
       if (action === "start") await startStack(stackName, configFile);
       else if (action === "stop") await stopStack(stackName, configFile);
-      else await restartStack(stackName, configFile);
+      else if (action === "restart") await restartStack(stackName, configFile);
+      else if (action === "pause") await pauseStack(stackName, configFile);
+      else await unpauseStack(stackName, configFile);
       await onSuccess?.();
     } catch (ex: unknown) {
       setActionError(ex instanceof Error ? ex.message : String(ex));

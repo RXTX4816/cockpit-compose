@@ -11,6 +11,10 @@ vi.mock("./StacksView", () => ({
   StacksView: () => <div>StacksView rendered</div>,
 }));
 
+vi.mock("./AppFooter", () => ({
+  AppFooter: () => <div>AppFooter</div>,
+}));
+
 import { detectComposeCommand } from "../api";
 const mockDetect = vi.mocked(detectComposeCommand);
 

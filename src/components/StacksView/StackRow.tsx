@@ -37,11 +37,15 @@ interface StackRowProps {
   onYaml: () => void;
   onInfo: () => void;
   onDown: () => void;
+  onKill: () => void;
   onPull: () => void;
+  onEvents: () => void;
+  onTop: () => void;
+  onExec: () => void;
   onActingChange: (delta: 1 | -1) => void;
 }
 
-export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, onDown, onPull, onActingChange }: StackRowProps) {
+export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, onDown, onKill, onPull, onEvents, onTop, onExec, onActingChange }: StackRowProps) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const status = parseStackStatus(stack.Status);
@@ -134,6 +138,10 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
                   </Button>
                 )}
 
+                <Button variant="plain" size="sm" onClick={onPull} title="Pull latest images">
+                  Pull
+                </Button>
+
                 <Button variant="plain" size="sm" onClick={onLogs} title="View logs">
                   Logs
                 </Button>
@@ -170,10 +178,29 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
                     >
                       Restart
                     </DropdownItem>
-                    <DropdownItem key="pull" onClick={() => { setMenuOpen(false); onPull(); }}>
-                      Pull latest images
+                    <DropdownItem
+                      key="pause"
+                      isDisabled={status === "stopped" || status === "unknown"}
+                      onClick={() => {
+                        setMenuOpen(false);
+                        void doAction(status === "paused" ? "unpause" : "pause", afterAction);
+                      }}
+                    >
+                      {status === "paused" ? "Unpause" : "Pause"}
+                    </DropdownItem>
+                    <DropdownItem key="events" onClick={() => { setMenuOpen(false); onEvents(); }}>
+                      Events
+                    </DropdownItem>
+                    <DropdownItem key="top" onClick={() => { setMenuOpen(false); onTop(); }}>
+                      Top
+                    </DropdownItem>
+                    <DropdownItem key="exec" onClick={() => { setMenuOpen(false); onExec(); }}>
+                      Shell
                     </DropdownItem>
                     <Divider key="div1" component="li" />
+                    <DropdownItem key="kill" isDanger onClick={() => { setMenuOpen(false); onKill(); }}>
+                      Kill
+                    </DropdownItem>
                     <DropdownItem key="down" isDanger onClick={() => { setMenuOpen(false); onDown(); }}>
                       Down (remove)
                     </DropdownItem>

@@ -10,9 +10,14 @@ import {
 import {
   type ComposeStack,
   type ComposeContainer,
+  type ComposeImage,
+  type ComposeVolume,
   listContainers,
+  listImages,
+  listVolumes,
   parseJsonOutput,
   parsePorts,
+  formatBytes,
 } from "../api";
 import "./StackInfoModal.css";
 
@@ -23,10 +28,20 @@ interface Props {
 
 export function StackInfoModal({ stack, onClose }: Props) {
   const [containers, setContainers] = useState<ComposeContainer[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [loadingContainers, setLoadingContainers] = useState(true);
+  const [containerError, setContainerError] = useState<string | null>(null);
+
+  const [images, setImages] = useState<ComposeImage[]>([]);
+  const [loadingImages, setLoadingImages] = useState(true);
+  const [imageError, setImageError] = useState<string | null>(null);
+
+  const [volumes, setVolumes] = useState<ComposeVolume[]>([]);
+  const [loadingVolumes, setLoadingVolumes] = useState(true);
+  const [volumeError, setVolumeError] = useState<string | null>(null);
+  const [volumesUnavailable, setVolumesUnavailable] = useState(false);
 
   const configFile = stack.ConfigFiles.split(",")[0].trim();
+
   useEffect(() => {
     let raw = "";
     const proc = listContainers(stack.Name);
@@ -34,13 +49,49 @@ export function StackInfoModal({ stack, onClose }: Props) {
     proc
       .then(() => {
         setContainers(parseJsonOutput<ComposeContainer>(raw));
-        setLoading(false);
+        setLoadingContainers(false);
       })
       .catch((ex: unknown) => {
-        setError(ex instanceof Error ? ex.message : String(ex));
-        setLoading(false);
+        setContainerError(ex instanceof Error ? ex.message : String(ex));
+        setLoadingContainers(false);
       });
   }, [stack.Name]);
+
+  useEffect(() => {
+    let raw = "";
+    const proc = listImages(stack.Name, configFile);
+    proc.stream(d => { raw += d; });
+    proc
+      .then(() => {
+        setImages(parseJsonOutput<ComposeImage>(raw));
+        setLoadingImages(false);
+      })
+      .catch((ex: unknown) => {
+        setImageError(ex instanceof Error ? ex.message : String(ex));
+        setLoadingImages(false);
+      });
+  }, [stack.Name, configFile]);
+
+  useEffect(() => {
+    let raw = "";
+    const proc = listVolumes(stack.Name, configFile);
+    proc.stream(d => { raw += d; });
+    proc
+      .then(() => {
+        setVolumes(parseJsonOutput<ComposeVolume>(raw));
+        setLoadingVolumes(false);
+      })
+      .catch((ex: unknown) => {
+        const msg = ex instanceof Error ? ex.message : String(ex);
+        // docker compose volumes is not available on all Docker versions
+        if (msg.includes("unknown command") || msg.includes("unknown flag") || msg.includes("Usage:")) {
+          setVolumesUnavailable(true);
+        } else {
+          setVolumeError(msg);
+        }
+        setLoadingVolumes(false);
+      });
+  }, [stack.Name, configFile]);
 
   return (
     <Modal isOpen onClose={onClose} variant="medium" aria-label={`Info — ${stack.Name}`}>
@@ -51,13 +102,13 @@ export function StackInfoModal({ stack, onClose }: Props) {
           <code className="sim-config-file">{configFile}</code>
         </section>
 
-        <section>
+        <section className="sim-section">
           <div className="sim-section-label">Services</div>
 
-          {loading ? (
+          {loadingContainers ? (
             <Spinner size="md" />
-          ) : error ? (
-            <Alert variant="warning" isInline title="Could not load container info">{error}</Alert>
+          ) : containerError ? (
+            <Alert variant="warning" isInline title="Could not load container info">{containerError}</Alert>
           ) : containers.length === 0 ? (
             <span className="sim-no-containers">No containers found.</span>
           ) : (
@@ -109,6 +160,74 @@ export function StackInfoModal({ stack, onClose }: Props) {
                 );
               })}
             </div>
+          )}
+        </section>
+
+        <section className="sim-section">
+          <div className="sim-section-label">Images</div>
+
+          {loadingImages ? (
+            <Spinner size="md" />
+          ) : imageError ? (
+            <Alert variant="warning" isInline title="Could not load images">{imageError}</Alert>
+          ) : images.length === 0 ? (
+            <span className="sim-no-containers">No images found.</span>
+          ) : (
+            <table className="sim-table">
+              <thead>
+                <tr>
+                  <th>Service</th>
+                  <th>Repository</th>
+                  <th>Tag</th>
+                  <th>Size</th>
+                  <th>Created</th>
+                </tr>
+              </thead>
+              <tbody>
+                {images.map((img, i) => (
+                  <tr key={img.ID || i}>
+                    <td>{img.ContainerName || "—"}</td>
+                    <td><code>{img.Repository || "—"}</code></td>
+                    <td><code>{img.Tag || "—"}</code></td>
+                    <td>{img.Size != null ? formatBytes(Number(img.Size)) : "—"}</td>
+                    <td>{img.CreatedAt || "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </section>
+
+        <section className="sim-section">
+          <div className="sim-section-label">Volumes</div>
+
+          {loadingVolumes ? (
+            <Spinner size="md" />
+          ) : volumesUnavailable ? (
+            <span className="sim-no-containers">Not available on this Docker Compose version.</span>
+          ) : volumeError ? (
+            <Alert variant="warning" isInline title="Could not load volumes">{volumeError}</Alert>
+          ) : volumes.length === 0 ? (
+            <span className="sim-no-containers">No volumes found.</span>
+          ) : (
+            <table className="sim-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Driver</th>
+                  <th>Mountpoint</th>
+                </tr>
+              </thead>
+              <tbody>
+                {volumes.map((vol, i) => (
+                  <tr key={vol.Name || i}>
+                    <td><code>{vol.Name || "—"}</code></td>
+                    <td>{vol.Driver || "—"}</td>
+                    <td><code className="sim-mountpoint">{vol.Mountpoint || "—"}</code></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           )}
         </section>
       </ModalBody>

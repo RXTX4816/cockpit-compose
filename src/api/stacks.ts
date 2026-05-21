@@ -48,3 +48,56 @@ export function pullStack(project: string, configFile: string): CockpitProcess {
     { superuser: "try", err: "out" },
   );
 }
+
+export function pauseStack(project: string, configFile: string): CockpitProcess {
+  return cockpit.spawn(
+    compose("-p", project, "-f", configFile, "pause"),
+    { superuser: "try", err: "message" },
+  );
+}
+
+export function unpauseStack(project: string, configFile: string): CockpitProcess {
+  return cockpit.spawn(
+    compose("-p", project, "-f", configFile, "unpause"),
+    { superuser: "try", err: "message" },
+  );
+}
+
+export function killStack(project: string, configFile: string): CockpitProcess {
+  return cockpit.spawn(
+    compose("-p", project, "-f", configFile, "kill"),
+    { superuser: "try", err: "message" },
+  );
+}
+
+export function listImages(project: string, configFile: string): CockpitProcess {
+  return cockpit.spawn(
+    compose("-p", project, "-f", configFile, "images", "--format", "json"),
+    { err: "message" },
+  );
+}
+
+export function listVolumes(project: string, configFile: string): CockpitProcess {
+  return cockpit.spawn(
+    compose("-p", project, "-f", configFile, "volumes", "--format", "json"),
+    { err: "message" },
+  );
+}
+
+export function streamEvents(project: string): CockpitProcess {
+  return cockpit.spawn(compose("-p", project, "events", "--json"), { err: "message" });
+}
+
+export function composeTop(project: string): CockpitProcess {
+  return cockpit.spawn(
+    compose("-p", project, "top"),
+    { err: "message" },
+  );
+}
+
+export function composeVersion(): CockpitProcess {
+  return cockpit.spawn(
+    compose("version", "--format", "json"),
+    { err: "message" },
+  );
+}

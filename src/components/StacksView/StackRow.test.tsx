@@ -32,7 +32,11 @@ const defaultProps = {
   onYaml: vi.fn(),
   onInfo: vi.fn(),
   onDown: vi.fn(),
+  onKill: vi.fn(),
   onPull: vi.fn(),
+  onEvents: vi.fn(),
+  onTop: vi.fn(),
+  onExec: vi.fn(),
   onActingChange: vi.fn(),
 };
 
@@ -180,11 +184,10 @@ describe("StackRow", () => {
     expect(doAction).toHaveBeenCalledWith("restart", expect.any(Function));
   });
 
-  it("calls onPull when Pull latest images item clicked", () => {
+  it("calls onPull when Pull button clicked", () => {
     const onPull = vi.fn();
     render(<StackRow {...defaultProps} onPull={onPull} />);
-    fireEvent.click(screen.getByRole("button", { name: /More actions for myapp/i }));
-    fireEvent.click(screen.getByRole("menuitem", { name: /Pull latest images/i }));
+    fireEvent.click(screen.getByRole("button", { name: /^Pull$/i }));
     expect(onPull).toHaveBeenCalledOnce();
   });
 
@@ -194,6 +197,68 @@ describe("StackRow", () => {
     fireEvent.click(screen.getByRole("button", { name: /More actions for myapp/i }));
     fireEvent.click(screen.getByRole("menuitem", { name: /Down \(remove\)/i }));
     expect(onDown).toHaveBeenCalledOnce();
+  });
+
+  it("calls onKill when Kill item clicked", () => {
+    const onKill = vi.fn();
+    render(<StackRow {...defaultProps} onKill={onKill} />);
+    fireEvent.click(screen.getByRole("button", { name: /More actions for myapp/i }));
+    fireEvent.click(screen.getByRole("menuitem", { name: /^Kill$/i }));
+    expect(onKill).toHaveBeenCalledOnce();
+  });
+
+  it("calls onEvents when Events item clicked", () => {
+    const onEvents = vi.fn();
+    render(<StackRow {...defaultProps} onEvents={onEvents} />);
+    fireEvent.click(screen.getByRole("button", { name: /More actions for myapp/i }));
+    fireEvent.click(screen.getByRole("menuitem", { name: /^Events$/i }));
+    expect(onEvents).toHaveBeenCalledOnce();
+  });
+
+  it("calls onTop when Top item clicked", () => {
+    const onTop = vi.fn();
+    render(<StackRow {...defaultProps} onTop={onTop} />);
+    fireEvent.click(screen.getByRole("button", { name: /More actions for myapp/i }));
+    fireEvent.click(screen.getByRole("menuitem", { name: /^Top$/i }));
+    expect(onTop).toHaveBeenCalledOnce();
+  });
+
+  it("calls onExec when Shell item clicked", () => {
+    const onExec = vi.fn();
+    render(<StackRow {...defaultProps} onExec={onExec} />);
+    fireEvent.click(screen.getByRole("button", { name: /More actions for myapp/i }));
+    fireEvent.click(screen.getByRole("menuitem", { name: /^Shell$/i }));
+    expect(onExec).toHaveBeenCalledOnce();
+  });
+
+  it("shows Pause in kebab when running", () => {
+    render(<StackRow {...defaultProps} />);
+    fireEvent.click(screen.getByRole("button", { name: /More actions for myapp/i }));
+    expect(screen.getByRole("menuitem", { name: /^Pause$/i })).toBeInTheDocument();
+  });
+
+  it("shows Unpause in kebab when paused", () => {
+    render(<StackRow {...defaultProps} stack={{ ...stack, Status: "paused(2)" }} />);
+    fireEvent.click(screen.getByRole("button", { name: /More actions for myapp/i }));
+    expect(screen.getByRole("menuitem", { name: /^Unpause$/i })).toBeInTheDocument();
+  });
+
+  it("calls doAction with pause when Pause clicked", () => {
+    const doAction = vi.fn();
+    mockUseStackActions.mockReturnValue({ acting: false, actionError: null, doAction });
+    render(<StackRow {...defaultProps} />);
+    fireEvent.click(screen.getByRole("button", { name: /More actions for myapp/i }));
+    fireEvent.click(screen.getByRole("menuitem", { name: /^Pause$/i }));
+    expect(doAction).toHaveBeenCalledWith("pause", expect.any(Function));
+  });
+
+  it("calls doAction with unpause when Unpause clicked", () => {
+    const doAction = vi.fn();
+    mockUseStackActions.mockReturnValue({ acting: false, actionError: null, doAction });
+    render(<StackRow {...defaultProps} stack={{ ...stack, Status: "paused(2)" }} />);
+    fireEvent.click(screen.getByRole("button", { name: /More actions for myapp/i }));
+    fireEvent.click(screen.getByRole("menuitem", { name: /^Unpause$/i }));
+    expect(doAction).toHaveBeenCalledWith("unpause", expect.any(Function));
   });
 
   it("afterAction clears containers when not expanded", async () => {

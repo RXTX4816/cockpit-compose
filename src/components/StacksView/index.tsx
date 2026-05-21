@@ -19,11 +19,15 @@ import { type ComposeStack } from "../../api";
 import { useComposeStacks } from "../../hooks/useComposeStacks";
 import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import { useDownStack } from "../../hooks/useDownStack";
+import { useKillStack } from "../../hooks/useKillStack";
 import { LogsModal } from "../LogsModal";
 import { YamlModal } from "../YamlModal";
 import { StackInfoModal } from "../StackInfoModal";
 import { PullModal } from "../PullModal";
 import { PullConfirmModal } from "../PullConfirmModal";
+import { EventsModal } from "../EventsModal";
+import { TopModal } from "../TopModal";
+import { ExecModal } from "../ExecModal";
 import { StackRow } from "./StackRow";
 import "./StacksView.css";
 
@@ -35,6 +39,9 @@ export function StacksView() {
   const [infoTarget, setInfoTarget] = useState<ComposeStack | null>(null);
   const [pullConfirmTarget, setPullConfirmTarget] = useState<ComposeStack | null>(null);
   const [pullTarget, setPullTarget] = useState<ComposeStack | null>(null);
+  const [eventsTarget, setEventsTarget] = useState<ComposeStack | null>(null);
+  const [topTarget, setTopTarget] = useState<ComposeStack | null>(null);
+  const [execTarget, setExecTarget] = useState<ComposeStack | null>(null);
   // Counts how many stack actions are currently in flight.
   // We pause the auto-refresh while any action is running so that Docker
   // being temporarily busy (e.g. mid-restart) never causes a spurious error.
@@ -46,6 +53,9 @@ export function StacksView() {
 
   const { target: downTarget, downing, error: downError, open: openDown, close: closeDown, execute: performDown }
     = useDownStack(refresh, onActingChange);
+
+  const { target: killTarget, killing, error: killError, open: openKill, close: closeKill, execute: performKill }
+    = useKillStack(refresh, onActingChange);
 
   const toggle = useCallback((name: string) => {
     setExpanded(prev => {
@@ -105,7 +115,11 @@ export function StacksView() {
               onYaml={() => setYamlTarget(stack)}
               onInfo={() => setInfoTarget(stack)}
               onDown={() => openDown(stack)}
+              onKill={() => openKill(stack)}
               onPull={() => setPullConfirmTarget(stack)}
+              onEvents={() => setEventsTarget(stack)}
+              onTop={() => setTopTarget(stack)}
+              onExec={() => setExecTarget(stack)}
               onActingChange={onActingChange}
             />
           ))}
@@ -123,6 +137,9 @@ export function StacksView() {
         />
       )}
       {pullTarget && <PullModal stack={pullTarget} onClose={() => setPullTarget(null)} />}
+      {eventsTarget && <EventsModal stack={eventsTarget} onClose={() => setEventsTarget(null)} />}
+      {topTarget && <TopModal stack={topTarget} onClose={() => setTopTarget(null)} />}
+      {execTarget && <ExecModal stack={execTarget} onClose={() => setExecTarget(null)} />}
 
       {downTarget && (
         <Modal
@@ -146,6 +163,35 @@ export function StacksView() {
               Down (remove)
             </Button>
             <Button variant="link" onClick={closeDown} isDisabled={downing}>
+              Cancel
+            </Button>
+          </ModalFooter>
+        </Modal>
+      )}
+
+      {killTarget && (
+        <Modal
+          isOpen
+          variant="small"
+          onClose={() => { if (!killing) closeKill(); }}
+          aria-label="Confirm kill"
+        >
+          <ModalHeader title={`Kill "${killTarget.Name}"?`} />
+          <ModalBody>
+            <p>
+              Running <code>docker compose kill</code> sends <strong>SIGKILL</strong> to all containers
+              in <strong>{killTarget.Name}</strong>, forcefully terminating them immediately.
+              Unlike Stop, processes have no chance to clean up. Use only when Stop does not respond.
+            </p>
+            {killError && (
+              <Alert variant="danger" isInline title={killError} style={{ marginTop: "1rem" }} />
+            )}
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="danger" onClick={() => void performKill()} isLoading={killing}>
+              Kill all containers
+            </Button>
+            <Button variant="link" onClick={closeKill} isDisabled={killing}>
               Cancel
             </Button>
           </ModalFooter>

@@ -1,0 +1,25 @@
+.em2-config-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 480px;
+}
+
+.em2-select {
+  width: 100%;
+  padding: 0.3rem 0.5rem;
+  font-size: var(--pf-t--global--font--size--md);
+  border: 1px solid var(--pf-t--global--border--color--default);
+  border-radius: var(--pf-t--global--border--radius--100);
+  background: var(--pf-t--global--background--color--primary--default);
+  color: var(--pf-t--global--text--color--regular);
+}
+
+.em2-terminal {
+  height: 55vh;
+  width: 100%;
+  background: #1e1e1e;
+  border-radius: var(--pf-t--global--border--radius--200);
+  overflow: hidden;
+  padding: 4px;
+}

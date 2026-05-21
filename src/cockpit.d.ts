@@ -11,6 +11,13 @@ interface CockpitFile {
   close(): void;
 }
 
+interface CockpitChannel {
+  send(data: string): void;
+  close(options?: { problem?: string }): void;
+  addEventListener(event: "message", handler: (ev: Event, payload: string) => void): void;
+  addEventListener(event: "close", handler: (ev: Event, options: { problem?: string; message?: string; "exit-status"?: number }) => void): void;
+}
+
 declare const cockpit: {
   spawn(
     args: string[],
@@ -24,5 +31,13 @@ declare const cockpit: {
     path: string,
     options?: { superuser?: "try" | "require"; syntax?: { parse: (s: string) => unknown; stringify: (v: unknown) => string } },
   ): CockpitFile;
+  channel(options: {
+    payload: "stream";
+    spawn: string[];
+    pty?: boolean;
+    directory?: string;
+    superuser?: "try" | "require";
+    err?: "out";
+  }): CockpitChannel;
   user(): Promise<{ id: number; name: string; home: string }>;
 };
