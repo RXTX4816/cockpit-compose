@@ -139,9 +139,7 @@ export function YamlModal({ stack, onClose }: Props) {
           <Toolbar style={{ paddingInline: 0, marginBottom: "0.75rem" }}>
             <ToolbarContent>
               <ToolbarItem>
-                <code style={{ fontSize: "var(--pf-t--global--font--size--sm)", color: "var(--pf-t--global--text--color--subtle)" }}>
-                  {configFile}
-                </code>
+                <code className="ym-config-file">{configFile}</code>
               </ToolbarItem>
               <ToolbarItem align={{ default: "alignEnd" }}>
                 {snapshots.length > 0 && (

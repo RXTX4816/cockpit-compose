@@ -6,6 +6,10 @@
   font-size: 0.875rem;
 }
 
+.pm-status-running {
+  color: var(--pf-t--global--text--color--subtle);
+}
+
 .pm-status-ok {
   color: #56d364;
   font-weight: 600;

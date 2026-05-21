@@ -84,7 +84,7 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
                 >
                   {health === "healthy" ? "✓ Healthy" : health === "partial" ? "⚠ Partial" : "✗ Unhealthy"}
                 </Label>
-                <span id={`stack-${stack.Name}`} style={{ fontWeight: 600 }}>
+                <span id={`stack-${stack.Name}`} className="sr-stack-name">
                   {stack.Name}
                 </span>
               </span>

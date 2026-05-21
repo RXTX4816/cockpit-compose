@@ -36,3 +36,8 @@
 .ym-confirm-note {
   margin-top: 1rem;
 }
+
+.ym-config-file {
+  font-size: var(--pf-t--global--font--size--sm);
+  color: var(--pf-t--global--text--color--subtle);
+}

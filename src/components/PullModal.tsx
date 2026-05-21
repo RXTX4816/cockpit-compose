@@ -38,7 +38,7 @@ export function PullModal({ stack, onClose }: Props) {
         <div className="pm-header">
           {!done && <Spinner size="sm" />}
           {!done && (
-            <span style={{ color: "var(--pf-t--global--text--color--subtle)" }}>
+            <span className="pm-status-running">
               Pulling images for <strong>{stack.Name}</strong>…
             </span>
           )}

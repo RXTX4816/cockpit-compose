@@ -26,3 +26,7 @@
   color: var(--pf-t--global--text--color--subtle);
   font-size: var(--pf-t--global--font--size--sm);
 }
+
+.sr-stack-name {
+  font-weight: 600;
+}
