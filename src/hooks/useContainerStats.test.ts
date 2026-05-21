@@ -20,13 +20,13 @@ const statsJson = JSON.stringify({
 
 describe("useContainerStats", () => {
   it("starts with empty ports and null stats", () => {
-    const { result } = renderHook(() => useContainerStats("myapp", "down"));
+    const { result } = renderHook(() => useContainerStats("myapp", "stopped"));
     expect(result.current.ports).toEqual([]);
     expect(result.current.stats).toBeNull();
   });
 
-  it("does not call cockpit.spawn for down status", async () => {
-    renderHook(() => useContainerStats("myapp", "down"));
+  it("does not call cockpit.spawn for stopped status", async () => {
+    renderHook(() => useContainerStats("myapp", "stopped"));
     await act(async () => { await Promise.resolve(); });
     expect(mockSpawn).not.toHaveBeenCalled();
   });

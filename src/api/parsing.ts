@@ -7,7 +7,7 @@ export function parseStackStatus(status: string): StackStatus {
   const hasExited = lower.includes("exit") || lower.includes("stopped");
   if (hasRunning && !hasExited) return "running";
   if (hasRunning && hasExited) return "partial";
-  if (!hasRunning && hasExited) return "down";
+  if (!hasRunning && hasExited) return "stopped";
   return "unknown";
 }
 

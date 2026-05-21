@@ -13,7 +13,7 @@ export function useContainerStats(stackName: string, status: StackStatus) {
   }, []);
 
   const load = useCallback(async () => {
-    if (status === "down" || status === "unknown") {
+    if (status === "stopped" || status === "unknown") {
       if (mountedRef.current) { setPorts([]); setStats(null); }
       return;
     }

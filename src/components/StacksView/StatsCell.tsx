@@ -12,7 +12,7 @@ interface StatsCellProps {
 export function StatsCell({ stackName, status }: StatsCellProps) {
   const { ports, stats } = useContainerStats(stackName, status);
 
-  if (status === "down" || status === "unknown") {
+  if (status === "stopped" || status === "unknown") {
     return <span className="sc-empty">—</span>;
   }
 

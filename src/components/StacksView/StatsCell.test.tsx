@@ -14,8 +14,8 @@ beforeEach(() => {
 });
 
 describe("StatsCell", () => {
-  it("renders dash for down status", () => {
-    const { container } = render(<StatsCell stackName="myapp" status="down" />);
+  it("renders dash for stopped status", () => {
+    const { container } = render(<StatsCell stackName="myapp" status="stopped" />);
     expect(container.textContent).toBe("—");
   });
 

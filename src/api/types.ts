@@ -14,7 +14,7 @@ export interface ComposeContainer {
   Service: string;
 }
 
-export type StackStatus = "running" | "partial" | "down" | "unknown";
+export type StackStatus = "running" | "partial" | "stopped" | "unknown";
 
 export interface ContainerStats {
   id: string;

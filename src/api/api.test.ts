@@ -38,9 +38,9 @@ describe("parseStackStatus", () => {
     expect(parseStackStatus(status)).toBe("partial");
   });
 
-  it("returns 'down' when no services running", () => {
+  it("returns 'stopped' when no services running", () => {
     const status = "exit(2)";
-    expect(parseStackStatus(status)).toBe("down");
+    expect(parseStackStatus(status)).toBe("stopped");
   });
 
   it("returns 'unknown' for invalid status", () => {

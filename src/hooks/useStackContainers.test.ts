@@ -55,7 +55,7 @@ describe("useStackContainers", () => {
       .mockImplementationOnce(lazy(composeYaml));
 
     const { result } = renderHook(() =>
-      useStackContainers("myapp", "/path/compose.yml", "down"),
+      useStackContainers("myapp", "/path/compose.yml", "stopped"),
     );
     void act(() => { void result.current.load(); });
     await waitFor(() => expect(result.current.containers).toHaveLength(2));
@@ -101,14 +101,14 @@ describe("useStackContainers", () => {
       .mockImplementationOnce(lazy(runningContainersJson))
       .mockImplementationOnce(lazy(composeYaml));
 
-    let status: "running" | "down" = "running";
+    let status: "running" | "stopped" = "running";
     const { result, rerender } = renderHook(() =>
       useStackContainers("myapp", "/path/compose.yml", status),
     );
     void act(() => { void result.current.load(); });
     await waitFor(() => expect(result.current.containers).toHaveLength(2));
 
-    status = "down";
+    status = "stopped";
     rerender();
     expect(result.current.containers).toEqual([]);
   });
