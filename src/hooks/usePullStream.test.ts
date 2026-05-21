@@ -64,7 +64,7 @@ describe("usePullStream", () => {
     mockSpawn.mockReturnValue(proc);
     const { result } = renderHook(() => usePullStream("myapp", "/path/compose.yml"));
     result.current.cancel();
-    expect((proc as { close: ReturnType<typeof vi.fn> }).close).toHaveBeenCalled();
+    expect((proc as unknown as { close: ReturnType<typeof vi.fn> }).close).toHaveBeenCalled();
   });
 
   it("closes process on unmount", () => {
@@ -72,6 +72,6 @@ describe("usePullStream", () => {
     mockSpawn.mockReturnValue(proc);
     const { unmount } = renderHook(() => usePullStream("myapp", "/path/compose.yml"));
     unmount();
-    expect((proc as { close: ReturnType<typeof vi.fn> }).close).toHaveBeenCalled();
+    expect((proc as unknown as { close: ReturnType<typeof vi.fn> }).close).toHaveBeenCalled();
   });
 });

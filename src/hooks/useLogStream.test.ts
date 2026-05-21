@@ -97,6 +97,6 @@ describe("useLogStream", () => {
     mockSpawn.mockReturnValue(proc);
     const { unmount } = renderHook(() => useLogStream("myapp"));
     unmount();
-    expect((proc as { close: ReturnType<typeof vi.fn> }).close).toHaveBeenCalled();
+    expect((proc as unknown as { close: ReturnType<typeof vi.fn> }).close).toHaveBeenCalled();
   });
 });
