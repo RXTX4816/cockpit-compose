@@ -99,4 +99,24 @@ describe("useStackActions", () => {
     await act(() => result.current.doAction("stop"));
     await waitFor(() => expect(result.current.actionError).toBeNull());
   });
+
+  it("doAction('pause') calls cockpit.spawn with pause args", async () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    const { result } = renderHook(() =>
+      useStackActions("myapp", "/path/compose.yml", vi.fn()),
+    );
+    await act(() => result.current.doAction("pause"));
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args).toContain("pause");
+  });
+
+  it("doAction('unpause') calls cockpit.spawn with unpause args", async () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    const { result } = renderHook(() =>
+      useStackActions("myapp", "/path/compose.yml", vi.fn()),
+    );
+    await act(() => result.current.doAction("unpause"));
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args).toContain("unpause");
+  });
 });

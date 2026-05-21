@@ -1,0 +1,49 @@
+.tm-toolbar {
+  padding: 0;
+  margin-bottom: 0.75rem;
+}
+
+.tm-service-section {
+  margin-bottom: 1.5rem;
+}
+
+.tm-service-name {
+  font-weight: 600;
+  font-size: var(--pf-t--global--font--size--sm);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--pf-t--global--text--color--subtle);
+  margin-bottom: 0.4rem;
+}
+
+.tm-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--pf-t--global--font--size--sm);
+  font-family: var(--pf-t--global--font--family--mono);
+}
+
+.tm-table th {
+  text-align: left;
+  padding: 0.3rem 0.6rem;
+  background: var(--pf-t--global--background--color--secondary--default);
+  color: var(--pf-t--global--text--color--subtle);
+  font-weight: 600;
+  border-bottom: 1px solid var(--pf-t--global--border--color--default);
+}
+
+.tm-table td {
+  padding: 0.25rem 0.6rem;
+  border-bottom: 1px solid var(--pf-t--global--border--color--default);
+}
+
+.tm-table tr:last-child td {
+  border-bottom: none;
+}
+
+.tm-empty {
+  padding: 2rem;
+  text-align: center;
+  color: var(--pf-t--global--text--color--subtle);
+  font-size: var(--pf-t--global--font--size--sm);
+}

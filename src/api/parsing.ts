@@ -3,6 +3,7 @@ import type { StackStatus } from "./types";
 
 export function parseStackStatus(status: string): StackStatus {
   const lower = status.toLowerCase();
+  if (lower.includes("paused") && !lower.includes("running") && !lower.includes("exit")) return "paused";
   const hasRunning = lower.includes("running");
   const hasExited = lower.includes("exit") || lower.includes("stopped");
   if (hasRunning && !hasExited) return "running";
