@@ -112,7 +112,7 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
                   ↑ Up
                 </Button>
 
-                {(status === "running" || status === "partial") && (
+                {(status === "running" || status === "partial") ? (
                   <Button
                     variant="secondary"
                     size="sm"
@@ -121,6 +121,16 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
                     isDisabled={acting}
                   >
                     ■ Stop
+                  </Button>
+                ) : status === "stopped" && (
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => void doAction("start", afterAction)}
+                    isLoading={acting}
+                    isDisabled={acting}
+                  >
+                    ▶ Start
                   </Button>
                 )}
 
@@ -155,7 +165,7 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
                   <DropdownList>
                     <DropdownItem
                       key="restart"
-                      isDisabled={status === "down" || status === "unknown"}
+                      isDisabled={status === "stopped" || status === "unknown"}
                       onClick={() => { setMenuOpen(false); void doAction("restart", afterAction); }}
                     >
                       Restart

@@ -68,9 +68,10 @@ describe("StackRow", () => {
     expect(screen.getByRole("button", { name: /Stop/i })).toBeInTheDocument();
   });
 
-  it("does not render Stop button when down", () => {
+  it("renders Start button when down", () => {
     render(<StackRow {...defaultProps} stack={{ ...stack, Status: "exit(2)" }} />);
     expect(screen.queryByRole("button", { name: /Stop/i })).toBeNull();
+    expect(screen.getByRole("button", { name: /Start/i })).toBeInTheDocument();
   });
 
   it("renders Logs button", () => {
@@ -147,6 +148,14 @@ describe("StackRow", () => {
     render(<StackRow {...defaultProps} />);
     fireEvent.click(screen.getByRole("button", { name: /Stop/i }));
     expect(doAction).toHaveBeenCalledWith("stop", expect.any(Function));
+  });
+
+  it("calls doAction with start when Start button clicked on a down stack", () => {
+    const doAction = vi.fn();
+    mockUseStackActions.mockReturnValue({ acting: false, actionError: null, doAction });
+    render(<StackRow {...defaultProps} stack={{ ...stack, Status: "exit(2)" }} />);
+    fireEvent.click(screen.getByRole("button", { name: /Start/i }));
+    expect(doAction).toHaveBeenCalledWith("start", expect.any(Function));
   });
 
   it("calls onInfo when Info button clicked", () => {
