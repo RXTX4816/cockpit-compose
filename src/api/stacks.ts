@@ -41,6 +41,14 @@ export function downStack(project: string, configFile: string): CockpitProcess {
   );
 }
 
+export function upStackStream(project: string, configFile: string): CockpitProcess {
+  // err:"out" merges stderr into the streamable stdout so the log viewer gets all output
+  return cockpit.spawn(
+    compose("--progress", "plain", "-p", project, "-f", configFile, "up", "-d"),
+    { superuser: "try", err: "out" },
+  );
+}
+
 export function pullStack(project: string, configFile: string): CockpitProcess {
   // err:"out" merges stderr (where Docker sends progress) into the streamable stdout
   return cockpit.spawn(

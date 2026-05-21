@@ -25,6 +25,8 @@ import { YamlModal } from "../YamlModal";
 import { StackInfoModal } from "../StackInfoModal";
 import { PullModal } from "../PullModal";
 import { PullConfirmModal } from "../PullConfirmModal";
+import { UpModal } from "../UpModal";
+import { UpConfirmModal } from "../UpConfirmModal";
 import { EventsModal } from "../EventsModal";
 import { TopModal } from "../TopModal";
 import { ExecModal } from "../ExecModal";
@@ -38,6 +40,8 @@ export function StacksView() {
   const [logsTarget, setLogsTarget] = useState<ComposeStack | null>(null);
   const [yamlTarget, setYamlTarget] = useState<ComposeStack | null>(null);
   const [infoTarget, setInfoTarget] = useState<ComposeStack | null>(null);
+  const [upConfirmTarget, setUpConfirmTarget] = useState<ComposeStack | null>(null);
+  const [upTarget, setUpTarget] = useState<ComposeStack | null>(null);
   const [pullConfirmTarget, setPullConfirmTarget] = useState<ComposeStack | null>(null);
   const [pullTarget, setPullTarget] = useState<ComposeStack | null>(null);
   const [eventsTarget, setEventsTarget] = useState<ComposeStack | null>(null);
@@ -118,6 +122,7 @@ export function StacksView() {
               onInfo={() => setInfoTarget(stack)}
               onDown={() => openDown(stack)}
               onKill={() => openKill(stack)}
+              onUp={() => setUpConfirmTarget(stack)}
               onPull={() => setPullConfirmTarget(stack)}
               onEvents={() => setEventsTarget(stack)}
               onTop={() => setTopTarget(stack)}
@@ -132,6 +137,19 @@ export function StacksView() {
       {logsTarget && <LogsModal stack={logsTarget} onClose={() => setLogsTarget(null)} />}
       {yamlTarget && <YamlModal stack={yamlTarget} onClose={() => setYamlTarget(null)} />}
       {infoTarget && <StackInfoModal stack={infoTarget} onClose={() => setInfoTarget(null)} />}
+      {upConfirmTarget && (
+        <UpConfirmModal
+          stack={upConfirmTarget}
+          onConfirm={() => { setUpTarget(upConfirmTarget); setUpConfirmTarget(null); }}
+          onClose={() => setUpConfirmTarget(null)}
+        />
+      )}
+      {upTarget && (
+        <UpModal
+          stack={upTarget}
+          onClose={() => { setUpTarget(null); void refresh(); }}
+        />
+      )}
       {pullConfirmTarget && (
         <PullConfirmModal
           stack={pullConfirmTarget}
