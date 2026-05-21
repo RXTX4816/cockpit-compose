@@ -23,6 +23,7 @@ import { LogsModal } from "../LogsModal";
 import { YamlModal } from "../YamlModal";
 import { StackInfoModal } from "../StackInfoModal";
 import { PullModal } from "../PullModal";
+import { PullConfirmModal } from "../PullConfirmModal";
 import { StackRow } from "./StackRow";
 import "./StacksView.css";
 
@@ -32,6 +33,7 @@ export function StacksView() {
   const [logsTarget, setLogsTarget] = useState<ComposeStack | null>(null);
   const [yamlTarget, setYamlTarget] = useState<ComposeStack | null>(null);
   const [infoTarget, setInfoTarget] = useState<ComposeStack | null>(null);
+  const [pullConfirmTarget, setPullConfirmTarget] = useState<ComposeStack | null>(null);
   const [pullTarget, setPullTarget] = useState<ComposeStack | null>(null);
   // Counts how many stack actions are currently in flight.
   // We pause the auto-refresh while any action is running so that Docker
@@ -103,7 +105,7 @@ export function StacksView() {
               onYaml={() => setYamlTarget(stack)}
               onInfo={() => setInfoTarget(stack)}
               onDown={() => openDown(stack)}
-              onPull={() => setPullTarget(stack)}
+              onPull={() => setPullConfirmTarget(stack)}
               onActingChange={onActingChange}
             />
           ))}
@@ -113,6 +115,13 @@ export function StacksView() {
       {logsTarget && <LogsModal stack={logsTarget} onClose={() => setLogsTarget(null)} />}
       {yamlTarget && <YamlModal stack={yamlTarget} onClose={() => setYamlTarget(null)} />}
       {infoTarget && <StackInfoModal stack={infoTarget} onClose={() => setInfoTarget(null)} />}
+      {pullConfirmTarget && (
+        <PullConfirmModal
+          stack={pullConfirmTarget}
+          onConfirm={() => { setPullTarget(pullConfirmTarget); setPullConfirmTarget(null); }}
+          onClose={() => setPullConfirmTarget(null)}
+        />
+      )}
       {pullTarget && <PullModal stack={pullTarget} onClose={() => setPullTarget(null)} />}
 
       {downTarget && (

@@ -26,6 +26,14 @@ vi.mock("../StackInfoModal", () => ({
 vi.mock("../PullModal", () => ({
   PullModal: ({ stack }: { stack: { Name: string } }) => <div data-testid="pull-modal">PullModal:{stack.Name}</div>,
 }));
+vi.mock("../PullConfirmModal", () => ({
+  PullConfirmModal: ({ stack, onConfirm }: { stack: { Name: string }; onConfirm: () => void }) => (
+    <div data-testid="pull-confirm-modal">
+      PullConfirmModal:{stack.Name}
+      <button onClick={onConfirm}>Confirm pull</button>
+    </div>
+  ),
+}));
 
 import { useComposeStacks } from "../../hooks/useComposeStacks";
 import { useStackActions } from "../../hooks/useStackActions";
@@ -198,7 +206,7 @@ describe("StacksView", () => {
     expect(screen.getByTestId("info-modal")).toBeInTheDocument();
   });
 
-  it("Pull latest images opens PullModal", () => {
+  it("Pull latest images opens confirm modal first, then PullModal on confirm", () => {
     mockUseComposeStacks.mockReturnValue({
       stacks: [{ Name: "myapp", Status: "running(1)", ConfigFiles: "/path/compose.yml" }],
       loading: false,
@@ -208,6 +216,9 @@ describe("StacksView", () => {
     render(<StacksView />);
     fireEvent.click(screen.getByRole("button", { name: /More actions for myapp/i }));
     fireEvent.click(screen.getByRole("menuitem", { name: /Pull latest images/i }));
+    expect(screen.getByTestId("pull-confirm-modal")).toBeInTheDocument();
+    expect(screen.queryByTestId("pull-modal")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /Confirm pull/i }));
     expect(screen.getByTestId("pull-modal")).toBeInTheDocument();
   });
 
