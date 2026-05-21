@@ -17,6 +17,7 @@ import type { Diagnostic } from "@codemirror/lint";
 import { validateComposeSpec } from "../compose-schema";
 import { type ComposeStack, readComposeFile, saveComposeFile, saveSnapshot } from "../api";
 import { YamlEditor } from "./YamlEditor";
+import { EnvModal } from "./EnvModal";
 import { useSnapshots } from "../hooks/useSnapshots";
 import "./YamlModal.css";
 
@@ -35,6 +36,7 @@ export function YamlModal({ stack, onClose }: Props) {
   const [diagnostics, setDiagnostics] = useState<Diagnostic[]>([]);
   const [confirmSave, setConfirmSave] = useState(false);
   const [showSnapshots, setShowSnapshots] = useState(false);
+  const [showEnv, setShowEnv] = useState(false);
 
   const configFile = stack.ConfigFiles.split(",")[0].trim();
   const { snapshots, load: loadSnapshots, restore, remove } = useSnapshots(configFile);
@@ -143,6 +145,9 @@ export function YamlModal({ stack, onClose }: Props) {
                   <code className="ym-config-file">{configFile}</code>
                 </ToolbarItem>
                 <ToolbarItem align={{ default: "alignEnd" }}>
+                  <Button variant="plain" size="sm" onClick={() => setShowEnv(true)}>
+                    Env file
+                  </Button>
                   {snapshots.length > 0 && (
                     <Button variant="plain" size="sm" onClick={() => setShowSnapshots(!showSnapshots)}>
                       History ({snapshots.length})
@@ -206,6 +211,8 @@ export function YamlModal({ stack, onClose }: Props) {
         </ModalFooter>
       )}
     </Modal>
+
+    {showEnv && <EnvModal stack={stack} onClose={() => setShowEnv(false)} />}
 
     {confirmSave && (
       <Modal isOpen variant="small" onClose={() => setConfirmSave(false)} aria-label="Confirm save">

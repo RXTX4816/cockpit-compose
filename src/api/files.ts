@@ -41,3 +41,14 @@ export async function restoreSnapshot(snapshotPath: string): Promise<string> {
 export async function deleteSnapshot(snapshotPath: string): Promise<void> {
   await cockpit.spawn(["rm", snapshotPath], { superuser: "try", err: "message" });
 }
+
+export async function readEnvFile(path: string): Promise<{ content: string; exists: boolean }> {
+  const content = await cockpit.file(path, { superuser: "try" }).read() as string | null;
+  return content === null
+    ? { content: "", exists: false }
+    : { content, exists: true };
+}
+
+export async function saveEnvFile(path: string, content: string): Promise<void> {
+  await cockpit.file(path, { superuser: "try" }).replace(content);
+}
