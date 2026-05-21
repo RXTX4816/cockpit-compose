@@ -36,5 +36,7 @@ export function useLogStream(stackName: string) {
     setStreaming(false);
   }, []);
 
-  return { lines, streaming, stop };
+  const clear = useCallback(() => setLines([]), []);
+
+  return { lines, streaming, stop, clear };
 }

@@ -96,7 +96,7 @@ interface Props {
 }
 
 export function LogsModal({ stack, onClose }: Props) {
-  const { lines, streaming, stop } = useLogStream(stack.Name);
+  const { lines, streaming, stop, clear } = useLogStream(stack.Name);
   const logRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -121,7 +121,7 @@ export function LogsModal({ stack, onClose }: Props) {
             )}
             {lines.length > 0 && (
               <ToolbarItem>
-                <Button variant="plain" size="sm" onClick={() => stop()}>Clear</Button>
+                <Button variant="plain" size="sm" onClick={clear}>Clear</Button>
               </ToolbarItem>
             )}
             {lines.length >= LOG_MAX_LINES && (
