@@ -24,6 +24,7 @@ import {
 } from "../../api";
 import { useStackActions } from "../../hooks/useStackActions";
 import { useStackContainers } from "../../hooks/useStackContainers";
+import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import { StatusLabel } from "./StatusLabel";
 import { StatsCell } from "./StatsCell";
 import { ContainerTable } from "./ContainerTable";
@@ -57,9 +58,11 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
   const { acting, actionError, doAction } = useStackActions(stack.Name, configFile, onActingChange);
   const { containers, loading: loadingContainers, load: loadContainers, clear: clearContainers } = useStackContainers(stack.Name, configFile, status);
 
+  useAutoRefresh(loadContainers, 500, !expanded || acting);
+
   const handleToggle = () => {
     onToggle();
-    if (!expanded && containers.length === 0) {
+    if (!expanded) {
       void loadContainers();
     }
   };

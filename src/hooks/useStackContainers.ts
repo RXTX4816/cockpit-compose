@@ -13,17 +13,19 @@ export function useStackContainers(stackName: string, configFile: string, status
   const [loading, setLoading] = useState(false);
   const cachedServiceNamesRef = useRef<string[]>([]);
   const prevStatusRef = useRef<StackStatus>("unknown");
+  const hasDataRef = useRef(false);
 
   // Clear stale container state when the stack's status changes
   useEffect(() => {
     if (prevStatusRef.current !== status) {
       prevStatusRef.current = status;
+      hasDataRef.current = false;
       setContainers([]);
     }
   }, [status]);
 
   const load = useCallback(async () => {
-    setLoading(true);
+    if (!hasDataRef.current) setLoading(true);
     try {
       let raw = "";
       const proc = listContainers(stackName);
@@ -38,6 +40,7 @@ export function useStackContainers(stackName: string, configFile: string, status
       const serviceNames = getServicesFromCompose(composeContent);
       cachedServiceNamesRef.current = serviceNames;
 
+      hasDataRef.current = true;
       setContainers(serviceNames.map(name => {
         const c = running.find(r => r.Service === name);
         return c ?? { ID: "", Name: name, Image: "", State: "down", Status: "down", Ports: "", Service: name };
@@ -64,7 +67,7 @@ export function useStackContainers(stackName: string, configFile: string, status
     }
   }, [stackName, configFile]);
 
-  const clear = useCallback(() => setContainers([]), []);
+  const clear = useCallback(() => { hasDataRef.current = false; setContainers([]); }, []);
 
   return { containers, loading, load, clear };
 }
