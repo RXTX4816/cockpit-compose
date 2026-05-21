@@ -132,6 +132,10 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
                   Edit
                 </Button>
 
+                <Button variant="plain" size="sm" onClick={onInfo} title="Stack info">
+                  Info
+                </Button>
+
                 <Dropdown
                   isOpen={menuOpen}
                   onOpenChange={(o: boolean) => setMenuOpen(o)}
@@ -160,10 +164,6 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
                       Pull latest images
                     </DropdownItem>
                     <Divider key="div1" component="li" />
-                    <DropdownItem key="info" onClick={() => { setMenuOpen(false); onInfo(); }}>
-                      Info
-                    </DropdownItem>
-                    <Divider key="div2" component="li" />
                     <DropdownItem key="down" isDanger onClick={() => { setMenuOpen(false); onDown(); }}>
                       Down (remove)
                     </DropdownItem>
