@@ -41,12 +41,12 @@ function LogLine({ parsed, index }: { parsed: ParsedLine; index: number }) {
     : "lm-msg-default";
 
   return (
-    <div className={`lm-line-parsed ${bgClass}`}>
-      <span className="lm-line-service" style={{ color: serviceColor(parsed.service) }}>
+    <div className="lm-line-parsed">
+      <span className={`lm-line-service ${bgClass}`} style={{ color: serviceColor(parsed.service) }}>
         {parsed.service}
       </span>
-      <span className="lm-line-timestamp">{parsed.timestamp}</span>
-      <span className={`lm-line-message ${msgClass}`}>
+      <span className={`lm-line-timestamp ${bgClass}`}>{parsed.timestamp}</span>
+      <span className={`lm-line-message ${msgClass} ${bgClass}`}>
         {highlightMessage(parsed.message)}
       </span>
     </div>
@@ -71,7 +71,7 @@ export function LogsModal({ stack, onClose }: Props) {
   const parsedLines = useMemo(() => lines.map(parseLine), [lines]);
 
   return (
-    <Modal isOpen onClose={onClose} variant="large" aria-label={`Logs — ${stack.Name}`}>
+    <Modal isOpen onClose={onClose} variant="large" width="95vw" maxWidth="95vw" aria-label={`Logs — ${stack.Name}`}>
       <ModalHeader title={`Logs — ${stack.Name}`} />
       <ModalBody>
         <Toolbar style={{ paddingInline: 0, marginBottom: "0.5rem" }}>
