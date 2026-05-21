@@ -5,6 +5,8 @@
 
 Docker Compose management for [Cockpit](https://cockpit-project.org) — start, stop, and monitor your stacks from a clean web UI.
 
+![Screenshot](docs/assets/overview.png)
+
 ## Features
 
 - Dashboard listing all stacks with live status and container stats
