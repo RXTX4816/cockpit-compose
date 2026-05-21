@@ -39,8 +39,7 @@ sudo systemctl enable --now cockpit.socket
 ### Arch Linux
 
 ```bash
-yay -S cockpit-compose
-# or: paru -S cockpit-compose
+paru -S cockpit-compose
 ```
 
 ### Fedora / RHEL / CentOS Stream / openSUSE
