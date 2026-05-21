@@ -11,6 +11,14 @@ vi.mock("./YamlEditor", () => ({
   ),
 }));
 
+vi.mock("./EnvModal", () => ({
+  EnvModal: ({ onClose }: { onClose: () => void }) => (
+    <div data-testid="env-modal">
+      <button onClick={onClose}>CloseEnv</button>
+    </div>
+  ),
+}));
+
 vi.mock("../hooks/useSnapshots", () => ({
   useSnapshots: vi.fn(),
 }));
@@ -230,5 +238,19 @@ describe("YamlModal", () => {
     fireEvent.click(within(confirmDialog).getByText("Cancel"));
     await waitFor(() => expect(screen.queryByText(/Save with issues\?/i)).toBeNull());
     expect(screen.getByText("Save")).toBeInTheDocument();
+  });
+
+  it("shows Env file button after loading", async () => {
+    mockSpawn.mockReturnValue(mockProcess(composeContent));
+    render(<YamlModal stack={stack} onClose={vi.fn()} />);
+    await waitFor(() => expect(screen.getByRole("button", { name: /Env file/i })).toBeInTheDocument());
+  });
+
+  it("clicking Env file button opens the env modal", async () => {
+    mockSpawn.mockReturnValue(mockProcess(composeContent));
+    render(<YamlModal stack={stack} onClose={vi.fn()} />);
+    await waitFor(() => screen.getByRole("button", { name: /Env file/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Env file/i }));
+    expect(screen.getByTestId("env-modal")).toBeInTheDocument();
   });
 });
