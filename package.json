@@ -1,7 +1,7 @@
 {
   "type": "module",
   "name": "cockpit-compose",
-  "version": "1.0.0-alpha",
+  "version": "dev-local",
   "description": "Docker Compose management plugin for Cockpit",
   "author": "RXTX4816",
   "license": "MIT",

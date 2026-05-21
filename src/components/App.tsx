@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Page, PageSection } from "@patternfly/react-core";
+import { AppFooter } from "./AppFooter";
 import { StacksView } from "./StacksView";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { detectComposeCommand } from "../api";
@@ -20,6 +21,7 @@ export function App() {
           <StacksView />
         </ErrorBoundary>
       </PageSection>
+      <AppFooter />
     </Page>
   );
 }
