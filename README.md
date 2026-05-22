@@ -10,6 +10,7 @@ Docker Compose management for [Cockpit](https://cockpit-project.org) — start, 
 ## Features
 
 - Dashboard listing all stacks with live status and container stats (auto-refreshing)
+- Create new Compose Stacks or import existing ones - directly from the WebUI
 - Start, stop, restart, pause/unpause, pull, prune and kill stacks with one click
 - Live log viewer per stack
 - Interactive shell into any running service
