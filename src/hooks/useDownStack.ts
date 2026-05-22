@@ -4,6 +4,7 @@ import { downStack, type ComposeStack } from "../api";
 export function useDownStack(
   onSuccess: () => void,
   onActingChange: (delta: 1 | -1) => void,
+  onDownComplete?: (stack: ComposeStack) => void,
 ) {
   const [target, setTarget] = useState<ComposeStack | null>(null);
   const [downing, setDowning] = useState(false);
@@ -27,6 +28,7 @@ export function useDownStack(
     setError(null);
     try {
       await downStack(target.Name, configFile);
+      onDownComplete?.(target);
       setTarget(null);
       onSuccess();
     } catch (ex: unknown) {
@@ -35,7 +37,7 @@ export function useDownStack(
       setDowning(false);
       onActingChange(-1);
     }
-  }, [target, onSuccess, onActingChange]);
+  }, [target, onSuccess, onActingChange, onDownComplete]);
 
   return { target, downing, error, open, close, execute };
 }

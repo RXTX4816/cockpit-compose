@@ -76,3 +76,26 @@ describe("deleteSnapshot", () => {
     expect(args).toEqual(["rm", "/path/compose.yml.snapshot.123"]);
   });
 });
+
+describe("findComposeFiles", () => {
+  it("spawns find with maxdepth 2 on the given directory", async () => {
+    const { findComposeFiles } = await import("./files");
+    mockSpawn.mockReturnValue(mockProcess(""));
+    findComposeFiles("/etc/docker/compose");
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args).toContain("find");
+    expect(args).toContain("/etc/docker/compose");
+    expect(args).toContain("-maxdepth");
+    expect(args).toContain("2");
+    expect(args).toContain("compose.yml");
+    expect(args).toContain("docker-compose.yml");
+  });
+
+  it("uses superuser: try", async () => {
+    const { findComposeFiles } = await import("./files");
+    mockSpawn.mockReturnValue(mockProcess(""));
+    findComposeFiles("/etc/docker/compose");
+    const opts = mockSpawn.mock.calls[0][1] as { superuser?: string };
+    expect(opts.superuser).toBe("try");
+  });
+});

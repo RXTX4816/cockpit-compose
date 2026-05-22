@@ -39,6 +39,9 @@ vi.mock("../PruneModal", () => ({
     <div data-testid="prune-modal">PruneModal:{stack.Name}</div>
   ),
 }));
+vi.mock("../DownedStacksSection", () => ({
+  DownedStacksSection: () => <div data-testid="downed-stacks-section" />,
+}));
 
 import { useComposeStacks } from "../../hooks/useComposeStacks";
 import { useStackActions } from "../../hooks/useStackActions";
@@ -64,7 +67,6 @@ describe("StacksView", () => {
       refresh: noopRefresh,
     });
     render(<StacksView />);
-    // PatternFly spinner has role="progressbar"
     expect(screen.getByRole("progressbar")).toBeInTheDocument();
   });
 
@@ -119,6 +121,7 @@ describe("StacksView", () => {
     expect(screen.getByText("↑ Up")).toBeInTheDocument();
     expect(screen.getByText("Logs")).toBeInTheDocument();
     expect(screen.getByText("Edit")).toBeInTheDocument();
+    expect(screen.getByText("↓ Down")).toBeInTheDocument();
   });
 
   it("Retry button in error alert calls refresh", () => {
@@ -147,7 +150,7 @@ describe("StacksView", () => {
     expect(toggleBtn.getAttribute("aria-expanded")).toBe("true");
   });
 
-  it("Down confirmation modal opens when Down (remove) is clicked", () => {
+  it("Down confirmation modal opens when ↓ Down is clicked", () => {
     mockUseComposeStacks.mockReturnValue({
       stacks: [{ Name: "myapp", Status: "running(1)", ConfigFiles: "/path/compose.yml" }],
       loading: false,
@@ -155,8 +158,7 @@ describe("StacksView", () => {
       refresh: noopRefresh,
     });
     render(<StacksView />);
-    fireEvent.click(screen.getByRole("button", { name: /More actions for myapp/i }));
-    fireEvent.click(screen.getByRole("menuitem", { name: /Down \(remove\)/i }));
+    fireEvent.click(screen.getByRole("button", { name: /↓ Down/i }));
     expect(screen.getByText(/Remove "myapp"/i)).toBeInTheDocument();
   });
 
@@ -168,8 +170,7 @@ describe("StacksView", () => {
       refresh: noopRefresh,
     });
     render(<StacksView />);
-    fireEvent.click(screen.getByRole("button", { name: /More actions for myapp/i }));
-    fireEvent.click(screen.getByRole("menuitem", { name: /Down \(remove\)/i }));
+    fireEvent.click(screen.getByRole("button", { name: /↓ Down/i }));
     expect(screen.getByText(/Remove "myapp"/i)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /^Cancel$/i }));
     expect(screen.queryByText(/Remove "myapp"/i)).toBeNull();
@@ -240,6 +241,17 @@ describe("StacksView", () => {
     expect(screen.getByText(/PruneModal:myapp/i)).toBeInTheDocument();
   });
 
+  it("renders DownedStacksSection", () => {
+    mockUseComposeStacks.mockReturnValue({
+      stacks: [],
+      loading: false,
+      error: null,
+      refresh: noopRefresh,
+    });
+    render(<StacksView />);
+    expect(screen.getByTestId("downed-stacks-section")).toBeInTheDocument();
+  });
+
   it("Down modal Down button calls performDown", async () => {
     mockUseComposeStacks.mockReturnValue({
       stacks: [{ Name: "myapp", Status: "running(1)", ConfigFiles: "/path/compose.yml" }],
@@ -251,8 +263,7 @@ describe("StacksView", () => {
     const { mockProcess } = await import("../../test/helpers");
     mockSpawn.mockReturnValue(mockProcess(""));
     render(<StacksView />);
-    fireEvent.click(screen.getByRole("button", { name: /More actions for myapp/i }));
-    fireEvent.click(screen.getByRole("menuitem", { name: /Down \(remove\)/i }));
+    fireEvent.click(screen.getByRole("button", { name: /↓ Down/i }));
     fireEvent.click(screen.getByRole("button", { name: /^Down \(remove\)$/i }));
     expect(mockSpawn).toHaveBeenCalled();
   });

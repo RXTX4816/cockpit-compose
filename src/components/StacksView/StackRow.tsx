@@ -142,6 +142,17 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
                   </Button>
                 )}
 
+                <Button
+                  variant="plain"
+                  size="sm"
+                  onClick={onDown}
+                  isDisabled={acting}
+                  className="sr-down-btn"
+                  title="Down (remove containers)"
+                >
+                  ↓ Down
+                </Button>
+
                 <Button variant="plain" size="sm" onClick={onPull} title="Pull latest images">
                   Pull
                 </Button>
@@ -207,9 +218,6 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
                     </DropdownItem>
                     <DropdownItem key="kill" isDanger onClick={() => { setMenuOpen(false); onKill(); }}>
                       Kill
-                    </DropdownItem>
-                    <DropdownItem key="down" isDanger onClick={() => { setMenuOpen(false); onDown(); }}>
-                      Down (remove)
                     </DropdownItem>
                   </DropdownList>
                 </Dropdown>

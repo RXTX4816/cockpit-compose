@@ -74,6 +74,25 @@ describe("useDownStack", () => {
     expect(onSuccess).not.toHaveBeenCalled();
   });
 
+  it("execute() calls onDownComplete with the stack on success", async () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    const onDownComplete = vi.fn();
+    const { result } = renderHook(() => useDownStack(vi.fn(), vi.fn(), onDownComplete));
+    act(() => { result.current.open(stack); });
+    await act(() => result.current.execute());
+    expect(onDownComplete).toHaveBeenCalledOnce();
+    expect(onDownComplete).toHaveBeenCalledWith(stack);
+  });
+
+  it("execute() does not call onDownComplete on failure", async () => {
+    mockSpawn.mockReturnValue(mockProcess("", "compose down failed"));
+    const onDownComplete = vi.fn();
+    const { result } = renderHook(() => useDownStack(vi.fn(), vi.fn(), onDownComplete));
+    act(() => { result.current.open(stack); });
+    await act(() => result.current.execute());
+    expect(onDownComplete).not.toHaveBeenCalled();
+  });
+
   it("uses first ConfigFile when multiple are listed", async () => {
     mockSpawn.mockReturnValue(mockProcess(""));
     const multiStack: ComposeStack = {

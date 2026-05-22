@@ -14,7 +14,7 @@ import "./UpModal.css";
 
 interface Props {
   stack: ComposeStack;
-  onClose: () => void;
+  onClose: (succeeded: boolean) => void;
 }
 
 export function UpModal({ stack, onClose }: Props) {
@@ -28,7 +28,7 @@ export function UpModal({ stack, onClose }: Props) {
 
   const handleClose = () => {
     cancel();
-    onClose();
+    onClose(done && !failed);
   };
 
   return (

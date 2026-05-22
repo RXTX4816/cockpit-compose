@@ -52,3 +52,33 @@ export async function readEnvFile(path: string): Promise<{ content: string; exis
 export async function saveEnvFile(path: string, content: string): Promise<void> {
   await cockpit.file(path, { superuser: "try" }).replace(content);
 }
+
+export function findComposeFiles(dir: string): CockpitProcess {
+  return cockpit.spawn(
+    ["find", dir, "-maxdepth", "2", "-type", "f",
+      "(", "-name", "compose.yml", "-o", "-name", "compose.yaml",
+      "-o", "-name", "docker-compose.yml", "-o", "-name", "docker-compose.yaml", ")"],
+    { superuser: "try", err: "message" },
+  );
+}
+
+export function createDirectory(path: string): CockpitProcess {
+  return cockpit.spawn(["mkdir", "-p", "--", path], { superuser: "try", err: "message" });
+}
+
+export function makeTempDir(): CockpitProcess {
+  return cockpit.spawn(["mktemp", "-d"], { err: "message" });
+}
+
+// Shallow-clone repo to caller-provided tmpdir. Caller reads compose file then calls removeDirectory.
+export function fetchComposeFromGit(url: string, tmpDir: string): CockpitProcess {
+  return cockpit.spawn(["git", "clone", "--depth", "1", "--", url, tmpDir], { superuser: "try", err: "out" });
+}
+
+export function removeDirectory(path: string): CockpitProcess {
+  return cockpit.spawn(["rm", "-rf", "--", path], { superuser: "try", err: "message" });
+}
+
+export function removeFile(path: string): CockpitProcess {
+  return cockpit.spawn(["rm", "--", path], { superuser: "try", err: "message" });
+}

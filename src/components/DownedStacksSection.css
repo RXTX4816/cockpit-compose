@@ -1,0 +1,106 @@
+.dss-import-bar {
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+
+.dss-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.dss-input-group {
+  flex: 1;
+  max-width: 28rem;
+}
+
+/* Force the Scan button to fill the InputGroup height and center its text */
+.dss-scan-btn {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0 var(--pf-t--global--border--radius--medium, 4px) var(--pf-t--global--border--radius--medium, 4px) 0;
+}
+
+.dss-separator {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-top: 0.75rem;
+  margin-bottom: -1px;
+}
+
+.dss-separator::before,
+.dss-separator::after {
+  content: "";
+  flex: 1;
+  border-top: 1px dashed var(--pf-t--global--border--color--default, #d2d2d2);
+}
+
+.dss-separator-label {
+  padding: 0 0.75rem;
+  font-size: var(--pf-t--global--font--size--sm, 0.75rem);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--pf-t--global--text--color--subtle, #6a6e73);
+  white-space: nowrap;
+}
+
+/* Outer frame shared by all dss content states */
+.dss-list-wrapper {
+  border: 1px solid var(--pf-t--global--border--color--default, #d2d2d2);
+  border-radius: var(--pf-t--global--border--radius--medium, 4px);
+  overflow: hidden;
+}
+
+.dss-scanning {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  color: var(--pf-t--global--text--color--subtle, #6a6e73);
+  font-size: var(--pf-t--global--font--size--sm, 0.875rem);
+}
+
+.dss-alert {
+  border-radius: 0;
+}
+
+/* Strip PatternFly's own border/shadow so our wrapper is the only frame */
+.dss-list {
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+
+.dss-stack-name {
+  font-weight: 600;
+  margin-right: 0.5rem;
+}
+
+.dss-status-label {
+  vertical-align: middle;
+}
+
+.dss-config-path {
+  font-size: var(--pf-t--global--font--size--sm, 0.8125rem);
+  color: var(--pf-t--global--text--color--subtle, #6a6e73);
+  word-break: break-all;
+}
+
+.dss-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  justify-content: flex-end;
+}
+
+.dss-delete-btn {
+  color: var(--pf-t--global--color--status--danger--default, #c9190b);
+}
