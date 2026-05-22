@@ -58,8 +58,12 @@ function parseTopOutput(raw: string): ComposeTopEntry[] {
     if (headerIdx < 0) continue;
 
     const service = block.slice(0, headerIdx).join(" ").trim() || `Service ${entries.length + 1}`;
-    const titles = block[headerIdx].trim().split(/\s{2,}|\t+/);
-    const processes = block.slice(headerIdx + 1).map(l => l.trim().split(/\s{2,}|\t+/));
+    const headerLine = block[headerIdx];
+    const colStarts = [...headerLine.matchAll(/\S+/g)].map(m => m.index as number);
+    const splitRow = (line: string) =>
+      colStarts.map((start, i) => line.slice(start, colStarts[i + 1]).trim());
+    const titles = splitRow(headerLine);
+    const processes = block.slice(headerIdx + 1).map(l => splitRow(l));
     entries.push({ service, titles, processes });
   }
   return entries;

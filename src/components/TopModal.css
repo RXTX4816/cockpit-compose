@@ -30,11 +30,19 @@
   color: var(--pf-t--global--text--color--subtle);
   font-weight: 600;
   border-bottom: 1px solid var(--pf-t--global--border--color--default);
+  white-space: nowrap;
 }
 
 .tm-table td {
   padding: 0.25rem 0.6rem;
   border-bottom: 1px solid var(--pf-t--global--border--color--default);
+  white-space: nowrap;
+}
+
+.tm-table th:last-child,
+.tm-table td:last-child {
+  white-space: normal;
+  word-break: break-all;
 }
 
 .tm-table tr:last-child td {
