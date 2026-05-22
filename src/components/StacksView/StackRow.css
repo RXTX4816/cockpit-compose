@@ -30,3 +30,7 @@
 .sr-stack-name {
   font-weight: 600;
 }
+
+.sr-down-btn {
+  color: var(--pf-t--global--color--status--danger--default, #c9190b);
+}

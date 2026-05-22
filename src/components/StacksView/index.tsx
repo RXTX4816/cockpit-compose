@@ -16,6 +16,7 @@ import {
   ModalFooter,
 } from "@patternfly/react-core";
 import { type ComposeStack } from "../../api";
+import { type DownedStack } from "../../hooks/useDownedStacksScan";
 import { useComposeStacks } from "../../hooks/useComposeStacks";
 import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import { useDownStack } from "../../hooks/useDownStack";
@@ -31,12 +32,14 @@ import { EventsModal } from "../EventsModal";
 import { TopModal } from "../TopModal";
 import { ExecModal } from "../ExecModal";
 import { PruneModal } from "../PruneModal";
+import { DownedStacksSection } from "../DownedStacksSection";
 import { StackRow } from "./StackRow";
 import "./StacksView.css";
 
 export function StacksView() {
   const { stacks, loading, error, refresh } = useComposeStacks();
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [manuallyDownedStacks, setManuallyDownedStacks] = useState<DownedStack[]>([]);
   const [logsTarget, setLogsTarget] = useState<ComposeStack | null>(null);
   const [yamlTarget, setYamlTarget] = useState<ComposeStack | null>(null);
   const [infoTarget, setInfoTarget] = useState<ComposeStack | null>(null);
@@ -57,8 +60,21 @@ export function StacksView() {
     setActiveOps(n => Math.max(0, n + delta));
   }, []);
 
+  const handleDownComplete = useCallback((stack: ComposeStack) => {
+    const configFile = stack.ConfigFiles.split(",")[0].trim();
+    setManuallyDownedStacks(prev =>
+      prev.some(d => d.name.toLowerCase() === stack.Name.toLowerCase())
+        ? prev
+        : [...prev, { name: stack.Name, configFile }]
+    );
+  }, []);
+
+  const handleUpComplete = useCallback((name: string) => {
+    setManuallyDownedStacks(prev => prev.filter(d => d.name.toLowerCase() !== name.toLowerCase()));
+  }, []);
+
   const { target: downTarget, downing, error: downError, open: openDown, close: closeDown, execute: performDown }
-    = useDownStack(refresh, onActingChange);
+    = useDownStack(refresh, onActingChange, handleDownComplete);
 
   const { target: killTarget, killing, error: killError, open: openKill, close: closeKill, execute: performKill }
     = useKillStack(refresh, onActingChange);
@@ -133,6 +149,13 @@ export function StacksView() {
           ))}
         </DataList>
       ))}
+
+      <DownedStacksSection
+        stacks={stacks}
+        manuallyDownedStacks={manuallyDownedStacks}
+        onRefresh={refresh}
+        onUpComplete={handleUpComplete}
+      />
 
       {logsTarget && <LogsModal stack={logsTarget} onClose={() => setLogsTarget(null)} />}
       {yamlTarget && <YamlModal stack={yamlTarget} onClose={() => setYamlTarget(null)} />}

@@ -87,14 +87,34 @@ describe("UpModal", () => {
     expect(screen.getByText(/Container myapp-web-1/)).toBeInTheDocument();
   });
 
-  it("calls cancel() and onClose() when Cancel clicked", () => {
+  it("calls cancel() and onClose(false) when Cancel clicked while running", () => {
     const cancel = vi.fn();
     const onClose = vi.fn();
     mockUseUpStream.mockReturnValue({ lines: [], done: false, failed: false, errorMsg: "", cancel });
     render(<UpModal stack={stack} onClose={onClose} />);
     fireEvent.click(screen.getByRole("button", { name: /Cancel/i }));
     expect(cancel).toHaveBeenCalledOnce();
-    expect(onClose).toHaveBeenCalledOnce();
+    expect(onClose).toHaveBeenCalledWith(false);
+  });
+
+  it("calls onClose(true) when Close clicked after success", () => {
+    const cancel = vi.fn();
+    const onClose = vi.fn();
+    mockUseUpStream.mockReturnValue({ lines: [], done: true, failed: false, errorMsg: "", cancel });
+    render(<UpModal stack={stack} onClose={onClose} />);
+    const closeButtons = screen.getAllByRole("button", { name: /Close/i });
+    fireEvent.click(closeButtons[closeButtons.length - 1]);
+    expect(onClose).toHaveBeenCalledWith(true);
+  });
+
+  it("calls onClose(false) when Close clicked after failure", () => {
+    const cancel = vi.fn();
+    const onClose = vi.fn();
+    mockUseUpStream.mockReturnValue({ lines: [], done: true, failed: true, errorMsg: "boom", cancel });
+    render(<UpModal stack={stack} onClose={onClose} />);
+    const closeButtons = screen.getAllByRole("button", { name: /Close/i });
+    fireEvent.click(closeButtons[closeButtons.length - 1]);
+    expect(onClose).toHaveBeenCalledWith(false);
   });
 
   it("uses first ConfigFile from comma-separated list", () => {

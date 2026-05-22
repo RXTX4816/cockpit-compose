@@ -192,11 +192,10 @@ describe("StackRow", () => {
     expect(onPull).toHaveBeenCalledOnce();
   });
 
-  it("calls onDown when Down (remove) item clicked", () => {
+  it("calls onDown when ↓ Down button clicked", () => {
     const onDown = vi.fn();
     render(<StackRow {...defaultProps} onDown={onDown} />);
-    fireEvent.click(screen.getByRole("button", { name: /More actions for myapp/i }));
-    fireEvent.click(screen.getByRole("menuitem", { name: /Down \(remove\)/i }));
+    fireEvent.click(screen.getByRole("button", { name: /↓ Down/i }));
     expect(onDown).toHaveBeenCalledOnce();
   });
 
@@ -240,18 +239,17 @@ describe("StackRow", () => {
     expect(onPrune).toHaveBeenCalledOnce();
   });
 
-  it("shows Prune item in danger section of kebab menu", () => {
+  it("shows Prune item before Kill in kebab menu", () => {
     render(<StackRow {...defaultProps} />);
     fireEvent.click(screen.getByRole("button", { name: /More actions for myapp/i }));
     const pruneItem = screen.getByRole("menuitem", { name: /^Prune$/i });
     expect(pruneItem).toBeInTheDocument();
-    // Prune appears before Kill and Down in the menu
     const items = screen.getAllByRole("menuitem");
     const pruneIdx = items.findIndex(el => /^Prune$/i.test(el.textContent ?? ""));
     const killIdx = items.findIndex(el => /^Kill$/i.test(el.textContent ?? ""));
-    const downIdx = items.findIndex(el => /^Down/i.test(el.textContent ?? ""));
     expect(pruneIdx).toBeLessThan(killIdx);
-    expect(pruneIdx).toBeLessThan(downIdx);
+    // Down is no longer in the dropdown menu — it is a direct button
+    expect(screen.queryByRole("menuitem", { name: /Down \(remove\)/i })).not.toBeInTheDocument();
   });
 
   it("shows Pause in kebab when running", () => {
