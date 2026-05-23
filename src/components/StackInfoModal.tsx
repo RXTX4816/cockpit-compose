@@ -7,7 +7,7 @@ import {
   Alert,
   Label,
 } from "@patternfly/react-core";
-import { ExclamationTriangleIcon, InProgressIcon } from "@patternfly/react-icons";
+import { CheckCircleIcon, ExclamationTriangleIcon, InProgressIcon } from "@patternfly/react-icons";
 import {
   type ComposeStack,
   type ComposeContainer,
@@ -123,6 +123,12 @@ export function StackInfoModal({ stack, onClose }: Props) {
                     <div className="sim-card-header">
                       <Label color={isRunning ? "green" : "grey"} isCompact>{c.State || "unknown"}</Label>
                       <span className="sim-card-service">{c.Service || c.Name}</span>
+                      {health === "healthy" && (
+                        <CheckCircleIcon
+                          color="var(--pf-t--global--icon--color--status--success--default)"
+                          title="Health check passing"
+                        />
+                      )}
                       {health === "unhealthy" && (
                         <ExclamationTriangleIcon
                           color="var(--pf-t--global--icon--color--status--warning--default)"

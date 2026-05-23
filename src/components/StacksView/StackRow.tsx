@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   DataListItem,
   DataListItemRow,
@@ -17,9 +17,11 @@ import {
 } from "@patternfly/react-core";
 import {
   type ComposeStack,
+  type ComposeContainer,
   parseStackStatus,
   parseServiceCount,
 } from "../../api";
+import { CheckCircleIcon, ExclamationTriangleIcon } from "@patternfly/react-icons";
 import { useStackActions } from "../../hooks/useStackActions";
 import { useStackContainers } from "../../hooks/useStackContainers";
 import { useAutoRefresh } from "../../hooks/useAutoRefresh";
@@ -27,6 +29,13 @@ import { StatusLabel } from "./StatusLabel";
 import { StatsCell } from "./StatsCell";
 import { ContainerTable } from "./ContainerTable";
 import "./StackRow.css";
+
+function stackHealthSummary(containers: ComposeContainer[]): "healthy" | "unhealthy" | null {
+  const withHealth = containers.filter(c => c.Health);
+  if (withHealth.length === 0) return null;
+  if (withHealth.some(c => c.Health!.toLowerCase() !== "healthy")) return "unhealthy";
+  return "healthy";
+}
 
 interface StackRowProps {
   stack: ComposeStack;
@@ -56,6 +65,7 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
   const { acting, actionError, doAction } = useStackActions(stack.Name, configFile, onActingChange);
   const { containers, loading: loadingContainers, load: loadContainers, clear: clearContainers } = useStackContainers(stack.Name, configFile, status);
 
+  useEffect(() => { void loadContainers(); }, [loadContainers]);
   useAutoRefresh(loadContainers, 500, !expanded || acting);
 
   const handleToggle = () => {
@@ -84,6 +94,18 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
             <DataListCell key="name" width={2}>
               <span className="sr-name-cell">
                 <StatusLabel status={status} />
+                {stackHealthSummary(containers) === "unhealthy" && (
+                  <ExclamationTriangleIcon
+                    color="var(--pf-t--global--icon--color--status--warning--default)"
+                    title="Health check failing"
+                  />
+                )}
+                {stackHealthSummary(containers) === "healthy" && (
+                  <CheckCircleIcon
+                    color="var(--pf-t--global--icon--color--status--success--default)"
+                    title="Health check passing"
+                  />
+                )}
                 <span id={`stack-${stack.Name}`} className="sr-stack-name">
                   {stack.Name}
                 </span>

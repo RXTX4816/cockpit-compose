@@ -293,6 +293,7 @@ describe("StackRow", () => {
     mockUseStackActions.mockReturnValue({ acting: false, actionError: null, doAction });
     mockUseStackContainers.mockReturnValue({ containers: [], loading: false, load: loadContainers, clear: clearContainers });
     render(<StackRow {...defaultProps} expanded={false} />);
+    loadContainers.mockClear(); // discard the initial on-mount load
     fireEvent.click(screen.getByRole("button", { name: /Stop/i }));
     await act(async () => { await capturedCallback?.(); });
     expect(clearContainers).toHaveBeenCalled();

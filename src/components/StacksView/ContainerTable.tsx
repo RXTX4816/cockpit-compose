@@ -1,10 +1,12 @@
 import { Label } from "@patternfly/react-core";
-import { ExclamationTriangleIcon, InProgressIcon } from "@patternfly/react-icons";
+import { CheckCircleIcon, ExclamationTriangleIcon, InProgressIcon } from "@patternfly/react-icons";
 import type { ComposeContainer } from "../../api";
 import "./ContainerTable.css";
 
 function HealthIcon({ health }: { health: string }) {
-  const h = health?.toLowerCase();
+  const h = health.toLowerCase();
+  if (h === "healthy")
+    return <CheckCircleIcon color="var(--pf-t--global--icon--color--status--success--default)" title="Health check passing" />;
   if (h === "unhealthy")
     return <ExclamationTriangleIcon color="var(--pf-t--global--icon--color--status--warning--default)" title="Health check failing" />;
   if (h === "starting")
