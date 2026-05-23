@@ -3,9 +3,35 @@ import { render, screen, fireEvent, waitFor, within } from "@testing-library/rea
 import { EnvModal } from "./EnvModal";
 import type { ComposeStack } from "../api";
 
+// Mock EnvEditor as a plain textarea so tests can read/write content in raw mode
 vi.mock("./EnvEditor", () => ({
-  EnvEditor: ({ content, onChange }: { content: string; onChange?: (v: string) => void }) => (
-    <textarea value={content} data-testid="env-editor" onChange={e => onChange?.(e.target.value)} />
+  EnvEditor: ({ content, onChange }: { content: string; onChange: (v: string) => void }) => (
+    <textarea value={content} data-testid="env-editor-raw" onChange={e => onChange(e.target.value)} />
+  ),
+}));
+
+// Mock EnvTable with a simple textarea so tests can read/write content
+vi.mock("./EnvTable", () => ({
+  EnvTable: ({
+    content,
+    onChange,
+    onDuplicatesChange,
+  }: {
+    content: string;
+    onChange: (v: string) => void;
+    onDuplicatesChange: (v: boolean) => void;
+  }) => (
+    <>
+      <textarea
+        value={content}
+        data-testid="env-editor"
+        onChange={e => {
+          onChange(e.target.value);
+          // signal duplicates when the test sets a special sentinel
+          onDuplicatesChange(e.target.value.includes("__DUPLICATE__"));
+        }}
+      />
+    </>
   ),
 }));
 
@@ -13,11 +39,27 @@ const mockRead = vi.fn();
 const mockReplace = vi.fn();
 const mockCockpitFile = vi.fn();
 
+function makeSpawnProcess(output = "") {
+  const streamCbs: ((data: string) => void)[] = [];
+  const p = output
+    ? Promise.resolve().then(() => { streamCbs.forEach(cb => cb(output)); })
+    : Promise.resolve();
+  return {
+    stream(cb: (data: string) => void) { streamCbs.push(cb); return this; },
+    then(cb: () => unknown) { return p.then(cb); },
+    catch(cb: (e: unknown) => unknown) { return p.catch(cb); },
+  };
+}
+
+const mockSpawn = vi.fn();
+
 beforeEach(() => {
   mockRead.mockReset().mockResolvedValue(null);
   mockReplace.mockReset().mockResolvedValue(undefined);
   mockCockpitFile.mockReset().mockReturnValue({ read: mockRead, replace: mockReplace });
-  vi.stubGlobal("cockpit", { file: mockCockpitFile });
+  // By default, findEnvFiles returns empty → falls back to .env
+  mockSpawn.mockReset().mockImplementation(() => makeSpawnProcess(""));
+  vi.stubGlobal("cockpit", { file: mockCockpitFile, spawn: mockSpawn });
 });
 
 const stack: ComposeStack = {
@@ -60,7 +102,14 @@ describe("EnvModal", () => {
   });
 
   it("shows spinner while loading", () => {
-    mockRead.mockReturnValue(new Promise(() => {})); // never resolves
+    mockSpawn.mockImplementation(() => {
+      // spawn never resolves → stays in loading state
+      return {
+        stream() { return this; },
+        then() { return new Promise(() => {}); },
+        catch() { return this; },
+      };
+    });
     render(<EnvModal stack={stack} onClose={vi.fn()} />);
     expect(screen.getByRole("progressbar")).toBeInTheDocument();
   });
@@ -93,29 +142,22 @@ describe("EnvModal", () => {
     expect(onClose).toHaveBeenCalled();
   });
 
-  it("shows confirm modal when saving with lint errors", async () => {
-    mockRead.mockResolvedValue("INVALID LINE\n");
+  it("shows confirm modal when saving with duplicate keys", async () => {
+    mockRead.mockResolvedValue("FOO=bar\n");
     render(<EnvModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => screen.getByTestId("env-editor"));
+    fireEvent.change(screen.getByTestId("env-editor"), { target: { value: "__DUPLICATE__" } });
     fireEvent.click(screen.getByRole("button", { name: /^Save$/i }));
     await waitFor(() => expect(screen.getByText(/Save with issues\?/i)).toBeInTheDocument());
-    expect(screen.getByText(/Errors found/i)).toBeInTheDocument();
+    expect(screen.getByText(/Duplicate keys found/i)).toBeInTheDocument();
   });
 
-  it("shows confirm modal when saving with lint warnings", async () => {
-    mockRead.mockResolvedValue("KEY = value\n");
-    render(<EnvModal stack={stack} onClose={vi.fn()} />);
-    await waitFor(() => screen.getByTestId("env-editor"));
-    fireEvent.click(screen.getByRole("button", { name: /^Save$/i }));
-    await waitFor(() => expect(screen.getByText(/Save with issues\?/i)).toBeInTheDocument());
-    expect(screen.getByText(/Warnings found/i)).toBeInTheDocument();
-  });
-
-  it("Save Anyway saves despite lint issues", async () => {
-    mockRead.mockResolvedValue("INVALID LINE\n");
+  it("Save Anyway saves despite duplicate keys", async () => {
+    mockRead.mockResolvedValue("FOO=bar\n");
     const onClose = vi.fn();
     render(<EnvModal stack={stack} onClose={onClose} />);
     await waitFor(() => screen.getByTestId("env-editor"));
+    fireEvent.change(screen.getByTestId("env-editor"), { target: { value: "__DUPLICATE__" } });
     fireEvent.click(screen.getByRole("button", { name: /^Save$/i }));
     await waitFor(() => screen.getByText(/Save with issues\?/i));
     fireEvent.click(screen.getByText("Save Anyway"));
@@ -124,9 +166,10 @@ describe("EnvModal", () => {
   });
 
   it("Confirm Cancel dismisses the confirm modal without saving", async () => {
-    mockRead.mockResolvedValue("INVALID LINE\n");
+    mockRead.mockResolvedValue("FOO=bar\n");
     render(<EnvModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => screen.getByTestId("env-editor"));
+    fireEvent.change(screen.getByTestId("env-editor"), { target: { value: "__DUPLICATE__" } });
     fireEvent.click(screen.getByRole("button", { name: /^Save$/i }));
     await waitFor(() => screen.getByText(/Save with issues\?/i));
     const confirmDialog = screen.getByRole("dialog", { name: "Confirm save", hidden: true });
@@ -149,5 +192,48 @@ describe("EnvModal", () => {
     mockRead.mockRejectedValue(new Error("permission denied"));
     render(<EnvModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => expect(screen.getByText(/Could not read file/i)).toBeInTheDocument());
+  });
+
+  it("shows tabs when multiple env files are found", async () => {
+    mockSpawn.mockImplementation(() => makeSpawnProcess("/path/.env\n/path/.env.prod\n"));
+    mockRead.mockResolvedValue("FOO=bar\n");
+    render(<EnvModal stack={stack} onClose={vi.fn()} />);
+    await waitFor(() => expect(screen.getByRole("tab", { name: ".env" })).toBeInTheDocument());
+    expect(screen.getByRole("tab", { name: ".env.prod" })).toBeInTheDocument();
+  });
+
+  it("switches to raw editor when Raw button is clicked", async () => {
+    mockRead.mockResolvedValue("FOO=bar\n");
+    render(<EnvModal stack={stack} onClose={vi.fn()} />);
+    await waitFor(() => screen.getByTestId("env-editor"));
+    fireEvent.click(screen.getByRole("button", { name: /^Raw$/i }));
+    await waitFor(() => expect(screen.getByTestId("env-editor-raw")).toBeInTheDocument());
+    expect(screen.queryByTestId("env-editor")).toBeNull();
+  });
+
+  it("saves raw editor content directly without duplicate check", async () => {
+    mockRead.mockResolvedValue("FOO=bar\n");
+    const onClose = vi.fn();
+    render(<EnvModal stack={stack} onClose={onClose} />);
+    await waitFor(() => screen.getByTestId("env-editor"));
+    // Switch to raw mode first
+    fireEvent.click(screen.getByRole("button", { name: /^Raw$/i }));
+    await waitFor(() => screen.getByTestId("env-editor-raw"));
+    fireEvent.change(screen.getByTestId("env-editor-raw"), { target: { value: "FOO=a\nFOO=b\n" } });
+    fireEvent.click(screen.getByRole("button", { name: /^Save$/i }));
+    // Should save immediately without confirm dialog even though keys would be duplicate
+    await waitFor(() => expect(mockReplace).toHaveBeenCalledWith("FOO=a\nFOO=b\n"));
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  it("creates a new env file tab via the + button", async () => {
+    mockRead.mockResolvedValue(null);
+    render(<EnvModal stack={stack} onClose={vi.fn()} />);
+    await waitFor(() => screen.getByTestId("env-editor"));
+    fireEvent.click(screen.getByRole("button", { name: /Add new env file/i }));
+    const input = await waitFor(() => screen.getByPlaceholderText(".env.prod"));
+    fireEvent.change(input, { target: { value: ".env.staging" } });
+    fireEvent.click(screen.getByRole("button", { name: /^Create file$/i }));
+    await waitFor(() => expect(screen.getByRole("tab", { name: ".env.staging" })).toBeInTheDocument());
   });
 });

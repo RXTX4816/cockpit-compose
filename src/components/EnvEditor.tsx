@@ -3,7 +3,6 @@ import { EditorView, basicSetup } from "codemirror";
 import { EditorState, type Extension } from "@codemirror/state";
 import { linter } from "@codemirror/lint";
 import { oneDark } from "@codemirror/theme-one-dark";
-import type { Diagnostic } from "@codemirror/lint";
 import { lintEnvContent } from "./envLint";
 import "./YamlEditor.css";
 
@@ -11,28 +10,21 @@ interface EnvEditorProps {
   content: string;
   onChange: (content: string) => void;
   readOnly?: boolean;
-  onDiagnosticsChange?: (diagnostics: Diagnostic[]) => void;
 }
 
-export function EnvEditor({ content, onChange, readOnly = false, onDiagnosticsChange }: EnvEditorProps) {
+export function EnvEditor({ content, onChange, readOnly = false }: EnvEditorProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const editorRef = useRef<EditorView | null>(null);
   const onChangeRef = useRef(onChange);
-  const onDiagnosticsChangeRef = useRef(onDiagnosticsChange);
 
   useEffect(() => {
     onChangeRef.current = onChange;
-    onDiagnosticsChangeRef.current = onDiagnosticsChange;
-  }, [onChange, onDiagnosticsChange]);
+  }, [onChange]);
 
   useEffect(() => {
     if (!containerRef.current) return;
 
-    const envLinter = linter((view: EditorView) => {
-      const diagnostics = lintEnvContent(view.state.doc.toString());
-      onDiagnosticsChangeRef.current?.(diagnostics);
-      return diagnostics;
-    });
+    const envLinter = linter((view: EditorView) => lintEnvContent(view.state.doc.toString()));
 
     const extensions: Extension[] = [basicSetup, envLinter];
 
@@ -49,9 +41,7 @@ export function EnvEditor({ content, onChange, readOnly = false, onDiagnosticsCh
     }
 
     const isDarkMode = document.documentElement.classList.contains("pf-v6-theme-dark");
-    if (isDarkMode) {
-      extensions.push(oneDark);
-    }
+    if (isDarkMode) extensions.push(oneDark);
 
     const state = EditorState.create({ doc: content, extensions });
     const editor = new EditorView({ state, parent: containerRef.current });

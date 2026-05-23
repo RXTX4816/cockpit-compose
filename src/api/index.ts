@@ -3,7 +3,7 @@ export { detectComposeCommand, compose, composeFileSuperuser } from "./cockpit";
 export { parseStackStatus, parseServiceCount, parsePorts, parsePortsFull, parsePortsDetailed, getServicesFromCompose, getProjectNameFromCompose, getComposeProjectNameFromEnv } from "./parsing";
 export { listStacks, startStack, stopStack, restartStack, streamLogs, downStack, upStackStream, pullStack, pauseStack, unpauseStack, killStack, listImages, listVolumes, streamEvents, composeTop, composeVersion, listProjectContainerImageRefs, listImagesByRepo, listAllContainerImages, removeImages, listStoppedContainers, listDanglingVolumes, listProjectNetworks, inspectNetworkContainerCounts, pruneContainers, pruneVolumes, pruneNetworks } from "./stacks";
 export { listContainers, getContainerStats } from "./containers";
-export { readComposeFile, saveComposeFile, saveSnapshot, listSnapshots, restoreSnapshot, deleteSnapshot, readEnvFile, saveEnvFile, findComposeFiles, createDirectory, makeTempDir, fetchComposeFromGit, removeDirectory, removeFile } from "./files";
+export { readComposeFile, saveComposeFile, saveSnapshot, listSnapshots, restoreSnapshot, deleteSnapshot, readEnvFile, saveEnvFile, findEnvFiles, findComposeFiles, createDirectory, makeTempDir, fetchComposeFromGit, removeDirectory, removeFile } from "./files";
 export type { ComposeTemplate } from "./templates";
 export { COMPOSE_TEMPLATES } from "./templates";
 export { parseJsonOutput } from "../lib/parseJsonOutput";

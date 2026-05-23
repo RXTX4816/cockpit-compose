@@ -53,6 +53,14 @@ export async function saveEnvFile(path: string, content: string, superuser?: "tr
   await cockpit.file(path, { superuser }).replace(content);
 }
 
+export function findEnvFiles(dir: string, superuser?: "try"): CockpitProcess {
+  return cockpit.spawn(
+    ["find", dir, "-maxdepth", "1", "-type", "f",
+      "(", "-name", ".env", "-o", "-name", ".env.*", "-o", "-name", "*.env", ")"],
+    { superuser, err: "message" },
+  );
+}
+
 export function findComposeFiles(dir: string, superuser?: "try"): CockpitProcess {
   return cockpit.spawn(
     ["find", dir, "-maxdepth", "2", "-type", "f",
