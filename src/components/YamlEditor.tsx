@@ -77,6 +77,7 @@ export function YamlEditor({ content, onChange, readOnly = false, onDiagnosticsC
     const extensions: Extension[] = [basicSetup, yaml(), yamlLinter];
 
     if (readOnly) {
+      extensions.push(EditorState.readOnly.of(true));
       extensions.push(EditorView.editable.of(false));
     } else {
       const updateListener = EditorView.updateListener.of((update) => {
