@@ -28,4 +28,4 @@ vi.stubGlobal("cockpit", { spawn: mockSpawn });
 export { mockSpawn };
 
 // jsdom doesn't implement HTMLCanvasElement.getContext; stub it to silence the warning
-HTMLCanvasElement.prototype.getContext = () => null as unknown as CanvasRenderingContext2D;
+window.HTMLCanvasElement.prototype.getContext = () => null;
