@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { type ComposeStack, findComposeFiles } from "../api";
+import { type ComposeStack, findComposeFiles, readComposeFile, readEnvFile, getProjectNameFromCompose, getComposeProjectNameFromEnv } from "../api";
 
 export interface DownedStack {
   name: string;
@@ -30,32 +30,63 @@ export function useDownedStacksScan(dir: string, existingStacks: ComposeStack[])
     setDownedStacks([]); // clear stale results before new scan
 
     const activeNames = new Set(existingStacks.map(s => s.Name.toLowerCase()));
-    let raw = "";
-    const proc = findComposeFiles(dir.trim());
-    proc.stream((data: string) => { raw += data; });
 
-    void proc.then(() => {
-      const paths = raw.split("\n").map(l => l.trim()).filter(Boolean);
-      const found: DownedStack[] = [];
-      for (const configFile of paths) {
-        const stackDir = configFile.slice(0, configFile.lastIndexOf("/"));
-        const name = stackDir.slice(stackDir.lastIndexOf("/") + 1);
-        if (name && !activeNames.has(name.toLowerCase())) {
-          if (!found.some(d => d.name.toLowerCase() === name.toLowerCase())) {
-            found.push({ name, configFile });
+    void (async () => {
+      try {
+        let raw = "";
+        const proc = findComposeFiles(dir.trim());
+        proc.stream((data: string) => { raw += data; });
+        await proc;
+
+        const paths = raw.split("\n").map(l => l.trim()).filter(Boolean);
+        const found: DownedStack[] = [];
+
+        for (const configFile of paths) {
+          const stackDir = configFile.slice(0, configFile.lastIndexOf("/"));
+          let name: string | null = null;
+
+          // Prefer name: from the compose file itself
+          try {
+            let content = "";
+            const fileProc = readComposeFile(configFile);
+            fileProc.stream((data: string) => { content += data; });
+            await fileProc;
+            name = getProjectNameFromCompose(content);
+          } catch {
+            // ignore read errors, try next source
+          }
+
+          // Fall back to COMPOSE_PROJECT_NAME in .env alongside the compose file
+          if (!name) {
+            try {
+              const { content, exists } = await readEnvFile(`${stackDir}/.env`);
+              if (exists) name = getComposeProjectNameFromEnv(content);
+            } catch {
+              // ignore
+            }
+          }
+
+          // Last resort: directory name (original behaviour)
+          if (!name) name = stackDir.slice(stackDir.lastIndexOf("/") + 1);
+
+          if (name && !activeNames.has(name.toLowerCase())) {
+            if (!found.some(d => d.name.toLowerCase() === name!.toLowerCase())) {
+              found.push({ name, configFile });
+            }
           }
         }
+
+        setDownedStacks(found);
+        setHasScanned(true);
+        setScanning(false);
+      } catch (ex) {
+        const msg = ex instanceof Error ? ex.message : String(ex);
+        setError(msg);
+        setDownedStacks([]);
+        setHasScanned(false);
+        setScanning(false);
       }
-      setDownedStacks(found);
-      setHasScanned(true);
-      setScanning(false);
-    }).catch((ex: unknown) => {
-      const msg = ex instanceof Error ? ex.message : String(ex);
-      setError(msg);
-      setDownedStacks([]);
-      setHasScanned(false);
-      setScanning(false);
-    });
+    })();
   }, [dir, existingStacks]);
 
   const clear = useCallback(() => {

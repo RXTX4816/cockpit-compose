@@ -55,3 +55,30 @@ export function getServicesFromCompose(composeContent: string): string[] {
   }
   return [];
 }
+
+export function getProjectNameFromCompose(composeContent: string): string | null {
+  try {
+    const compose = loadYaml(composeContent);
+    if (compose && typeof compose === "object" && "name" in compose) {
+      const name = (compose as Record<string, unknown>).name;
+      if (typeof name === "string" && name.trim()) return name.trim();
+    }
+  } catch {
+    // ignore parse errors
+  }
+  return null;
+}
+
+export function getComposeProjectNameFromEnv(envContent: string): string | null {
+  for (const line of envContent.split("\n")) {
+    const trimmed = line.trim();
+    if (trimmed.startsWith("#") || !trimmed.includes("=")) continue;
+    const eqIdx = trimmed.indexOf("=");
+    const key = trimmed.slice(0, eqIdx).trim();
+    if (key === "COMPOSE_PROJECT_NAME") {
+      const val = trimmed.slice(eqIdx + 1).trim().replace(/^["']|["']$/g, "");
+      return val || null;
+    }
+  }
+  return null;
+}

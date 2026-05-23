@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { parseJsonOutput, parseStackStatus, parseServiceCount, getHealthStatus, parsePorts, getServicesFromCompose } from ".";
+import { parseJsonOutput, parseStackStatus, parseServiceCount, getHealthStatus, parsePorts, getServicesFromCompose, getProjectNameFromCompose, getComposeProjectNameFromEnv } from ".";
 
 describe("parseJsonOutput", () => {
   it("parses JSON array format", () => {
@@ -132,5 +132,50 @@ services:
 
   it("returns empty array when no services key exists", () => {
     expect(getServicesFromCompose("version: '3'\nnetworks:\n  default: {}")).toEqual([]);
+  });
+});
+
+describe("getProjectNameFromCompose", () => {
+  it("returns the name: field value", () => {
+    expect(getProjectNameFromCompose("name: my-project\nservices:\n  web:\n    image: nginx\n")).toBe("my-project");
+  });
+
+  it("returns null when no name: field", () => {
+    expect(getProjectNameFromCompose("services:\n  web:\n    image: nginx\n")).toBeNull();
+  });
+
+  it("returns null for empty input", () => {
+    expect(getProjectNameFromCompose("")).toBeNull();
+  });
+
+  it("returns null for invalid YAML", () => {
+    expect(getProjectNameFromCompose("{ bad: yaml: here")).toBeNull();
+  });
+
+  it("trims whitespace from the name", () => {
+    expect(getProjectNameFromCompose("name:  spaced  \nservices: {}")).toBe("spaced");
+  });
+});
+
+describe("getComposeProjectNameFromEnv", () => {
+  it("extracts COMPOSE_PROJECT_NAME", () => {
+    expect(getComposeProjectNameFromEnv("FOO=bar\nCOMPOSE_PROJECT_NAME=mystack\nBAZ=qux")).toBe("mystack");
+  });
+
+  it("strips surrounding quotes", () => {
+    expect(getComposeProjectNameFromEnv('COMPOSE_PROJECT_NAME="quoted"')).toBe("quoted");
+    expect(getComposeProjectNameFromEnv("COMPOSE_PROJECT_NAME='single'")).toBe("single");
+  });
+
+  it("returns null when variable is absent", () => {
+    expect(getComposeProjectNameFromEnv("FOO=bar\nBAZ=qux")).toBeNull();
+  });
+
+  it("returns null for empty content", () => {
+    expect(getComposeProjectNameFromEnv("")).toBeNull();
+  });
+
+  it("ignores commented-out lines", () => {
+    expect(getComposeProjectNameFromEnv("# COMPOSE_PROJECT_NAME=ignored\nFOO=bar")).toBeNull();
   });
 });

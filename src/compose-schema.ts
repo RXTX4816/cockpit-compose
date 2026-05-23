@@ -3,6 +3,7 @@ import Ajv from "ajv";
 const composeSchema = {
   type: "object",
   properties: {
+    name: { type: "string" },
     version: { type: ["string", "number"] },
     services: {
       type: "object",
