@@ -24,11 +24,17 @@ describe("readComposeFile", () => {
 });
 
 describe("saveComposeFile", () => {
-  it("calls cockpit.file().replace() with the content", async () => {
+  it("calls cockpit.file().replace() without superuser when not provided", async () => {
     const { saveComposeFile } = await import("./files");
     await saveComposeFile("/path/compose.yml", "services:\n  web:\n");
-    expect(mockCockpitFile).toHaveBeenCalledWith("/path/compose.yml", { superuser: "try" });
+    expect(mockCockpitFile).toHaveBeenCalledWith("/path/compose.yml", { superuser: undefined });
     expect(mockReplace).toHaveBeenCalledWith("services:\n  web:\n");
+  });
+
+  it("passes superuser: try when provided", async () => {
+    const { saveComposeFile } = await import("./files");
+    await saveComposeFile("/path/compose.yml", "services:\n  web:\n", "try");
+    expect(mockCockpitFile).toHaveBeenCalledWith("/path/compose.yml", { superuser: "try" });
   });
 });
 
@@ -91,10 +97,18 @@ describe("findComposeFiles", () => {
     expect(args).toContain("docker-compose.yml");
   });
 
-  it("uses superuser: try", async () => {
+  it("passes no superuser by default", async () => {
     const { findComposeFiles } = await import("./files");
     mockSpawn.mockReturnValue(mockProcess(""));
     findComposeFiles("/etc/docker/compose");
+    const opts = mockSpawn.mock.calls[0][1] as { superuser?: string };
+    expect(opts.superuser).toBeUndefined();
+  });
+
+  it("passes superuser: try when provided", async () => {
+    const { findComposeFiles } = await import("./files");
+    mockSpawn.mockReturnValue(mockProcess(""));
+    findComposeFiles("/etc/docker/compose", "try");
     const opts = mockSpawn.mock.calls[0][1] as { superuser?: string };
     expect(opts.superuser).toBe("try");
   });

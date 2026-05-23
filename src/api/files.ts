@@ -4,15 +4,15 @@ export function readComposeFile(path: string): CockpitProcess {
   return cockpit.spawn(["cat", path], { err: "message" });
 }
 
-export async function saveComposeFile(path: string, content: string): Promise<void> {
-  const file = cockpit.file(path, { superuser: "try" });
+export async function saveComposeFile(path: string, content: string, superuser?: "try"): Promise<void> {
+  const file = cockpit.file(path, { superuser });
   await file.replace(content);
 }
 
-export async function saveSnapshot(composeFilePath: string, content: string): Promise<Snapshot> {
+export async function saveSnapshot(composeFilePath: string, content: string, superuser?: "try"): Promise<Snapshot> {
   const timestamp = Date.now();
   const snapshotPath = `${composeFilePath}.snapshot.${timestamp}`;
-  const file = cockpit.file(snapshotPath, { superuser: "try" });
+  const file = cockpit.file(snapshotPath, { superuser });
   await file.replace(content);
   return {
     timestamp,
@@ -38,32 +38,32 @@ export async function restoreSnapshot(snapshotPath: string): Promise<string> {
   return content;
 }
 
-export async function deleteSnapshot(snapshotPath: string): Promise<void> {
-  await cockpit.spawn(["rm", snapshotPath], { superuser: "try", err: "message" });
+export async function deleteSnapshot(snapshotPath: string, superuser?: "try"): Promise<void> {
+  await cockpit.spawn(["rm", snapshotPath], { superuser, err: "message" });
 }
 
-export async function readEnvFile(path: string): Promise<{ content: string; exists: boolean }> {
-  const content = await cockpit.file(path, { superuser: "try" }).read() as string | null;
+export async function readEnvFile(path: string, superuser?: "try"): Promise<{ content: string; exists: boolean }> {
+  const content = await cockpit.file(path, { superuser }).read() as string | null;
   return content === null
     ? { content: "", exists: false }
     : { content, exists: true };
 }
 
-export async function saveEnvFile(path: string, content: string): Promise<void> {
-  await cockpit.file(path, { superuser: "try" }).replace(content);
+export async function saveEnvFile(path: string, content: string, superuser?: "try"): Promise<void> {
+  await cockpit.file(path, { superuser }).replace(content);
 }
 
-export function findComposeFiles(dir: string): CockpitProcess {
+export function findComposeFiles(dir: string, superuser?: "try"): CockpitProcess {
   return cockpit.spawn(
     ["find", dir, "-maxdepth", "2", "-type", "f",
       "(", "-name", "compose.yml", "-o", "-name", "compose.yaml",
       "-o", "-name", "docker-compose.yml", "-o", "-name", "docker-compose.yaml", ")"],
-    { superuser: "try", err: "message" },
+    { superuser, err: "message" },
   );
 }
 
-export function createDirectory(path: string): CockpitProcess {
-  return cockpit.spawn(["mkdir", "-p", "--", path], { superuser: "try", err: "message" });
+export function createDirectory(path: string, superuser?: "try"): CockpitProcess {
+  return cockpit.spawn(["mkdir", "-p", "--", path], { superuser, err: "message" });
 }
 
 export function makeTempDir(): CockpitProcess {
@@ -71,14 +71,14 @@ export function makeTempDir(): CockpitProcess {
 }
 
 // Shallow-clone repo to caller-provided tmpdir. Caller reads compose file then calls removeDirectory.
-export function fetchComposeFromGit(url: string, tmpDir: string): CockpitProcess {
-  return cockpit.spawn(["git", "clone", "--depth", "1", "--", url, tmpDir], { superuser: "try", err: "out" });
+export function fetchComposeFromGit(url: string, tmpDir: string, superuser?: "try"): CockpitProcess {
+  return cockpit.spawn(["git", "clone", "--depth", "1", "--", url, tmpDir], { superuser, err: "out" });
 }
 
-export function removeDirectory(path: string): CockpitProcess {
-  return cockpit.spawn(["rm", "-rf", "--", path], { superuser: "try", err: "message" });
+export function removeDirectory(path: string, superuser?: "try"): CockpitProcess {
+  return cockpit.spawn(["rm", "-rf", "--", path], { superuser, err: "message" });
 }
 
-export function removeFile(path: string): CockpitProcess {
-  return cockpit.spawn(["rm", "--", path], { superuser: "try", err: "message" });
+export function removeFile(path: string, superuser?: "try"): CockpitProcess {
+  return cockpit.spawn(["rm", "--", path], { superuser, err: "message" });
 }

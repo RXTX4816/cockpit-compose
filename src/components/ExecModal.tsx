@@ -17,6 +17,7 @@ import {
   readComposeFile,
   getServicesFromCompose,
   compose,
+  composeFileSuperuser,
 } from "../api";
 import "./ExecModal.css";
 
@@ -88,6 +89,8 @@ export function ExecModal({ stack, onClose }: Props) {
     setConnectError(null);
     setStep("terminal");
 
+    const su = await composeFileSuperuser(configFile);
+
     // Defer mounting until the div is in the DOM
     requestAnimationFrame(() => {
       if (!termDivRef.current) return;
@@ -118,7 +121,7 @@ export function ExecModal({ stack, onClose }: Props) {
         payload: "stream",
         spawn: spawnArgs,
         pty: true,
-        superuser: "try",
+        superuser: su,
       });
       channelRef.current = ch;
 

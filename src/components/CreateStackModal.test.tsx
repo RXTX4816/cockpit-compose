@@ -219,7 +219,7 @@ describe("CreateStackModal — step 2 manual", () => {
       fireEvent.click(screen.getByRole("button", { name: /Create/i }));
     });
     await waitFor(() => {
-      expect(mockCreateDirectory).toHaveBeenCalledWith("/etc/compose/my-stack");
+      expect(mockCreateDirectory).toHaveBeenCalledWith("/etc/compose/my-stack", "try");
       expect(mockCockpitFile).toHaveBeenCalledWith("/etc/compose/my-stack/docker-compose.yml", { superuser: "try" });
       expect(mockReplace).toHaveBeenCalled();
       expect(onCreated).toHaveBeenCalledWith({
