@@ -16,6 +16,16 @@ describe("validateComposeSpec", () => {
     expect(validateComposeSpec({ version: "3.8", ...minimalValid })).toEqual([]);
   });
 
+  it("accepts top-level name: field", () => {
+    expect(validateComposeSpec({ name: "my-project", ...minimalValid })).toEqual([]);
+  });
+
+  it("rejects non-string top-level name", () => {
+    const errors = validateComposeSpec({ name: 42, ...minimalValid });
+    expect(errors.length).toBeGreaterThan(0);
+    expect(errors.some(e => e.includes("name"))).toBe(true);
+  });
+
   it("accepts services with all common fields", () => {
     const spec = {
       services: {

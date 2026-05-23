@@ -3,14 +3,25 @@ import { renderHook, act, waitFor } from "@testing-library/react";
 import { mockProcess } from "../test/helpers";
 
 const mockFindComposeFiles = vi.fn();
+const mockReadComposeFile = vi.fn();
+const mockReadEnvFile = vi.fn();
 
 vi.mock("../api", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../api")>();
-  return { ...actual, findComposeFiles: mockFindComposeFiles };
+  return {
+    ...actual,
+    findComposeFiles: mockFindComposeFiles,
+    readComposeFile: mockReadComposeFile,
+    readEnvFile: mockReadEnvFile,
+  };
 });
 
 beforeEach(() => {
   mockFindComposeFiles.mockReset();
+  // Default: compose file has no name: field, no .env present.
+  // Use mockImplementation so a fresh mockProcess (fresh microtask) is created on each call.
+  mockReadComposeFile.mockImplementation(() => mockProcess("services:\n  web:\n    image: nginx\n"));
+  mockReadEnvFile.mockResolvedValue({ content: "", exists: false });
 });
 
 describe("useDownedStacksScan", () => {
@@ -271,5 +282,87 @@ describe("useDownedStacksScan", () => {
     await waitFor(() => expect(result.current.scanning).toBe(false));
 
     expect(result.current.downedStacks).toHaveLength(1);
+  });
+
+  it("uses name: field from compose file when present", async () => {
+    const { useDownedStacksScan } = await import("./useDownedStacksScan");
+    mockFindComposeFiles.mockReturnValue(
+      mockProcess("/etc/docker/compose/mydir/docker-compose.yml\n")
+    );
+    mockReadComposeFile.mockImplementation(() =>
+      mockProcess("name: custom-project-name\nservices:\n  web:\n    image: nginx\n")
+    );
+
+    const { result } = renderHook(() =>
+      useDownedStacksScan("/etc/docker/compose", [])
+    );
+
+    act(() => { result.current.scan(); });
+    await waitFor(() => expect(result.current.scanning).toBe(false));
+
+    expect(result.current.downedStacks).toHaveLength(1);
+    expect(result.current.downedStacks[0].name).toBe("custom-project-name");
+  });
+
+  it("uses COMPOSE_PROJECT_NAME from .env when no name: field", async () => {
+    const { useDownedStacksScan } = await import("./useDownedStacksScan");
+    mockFindComposeFiles.mockReturnValue(
+      mockProcess("/etc/docker/compose/mydir/docker-compose.yml\n")
+    );
+    mockReadEnvFile.mockResolvedValue({
+      content: "COMPOSE_PROJECT_NAME=env-project\nFOO=bar\n",
+      exists: true,
+    });
+
+    const { result } = renderHook(() =>
+      useDownedStacksScan("/etc/docker/compose", [])
+    );
+
+    act(() => { result.current.scan(); });
+    await waitFor(() => expect(result.current.scanning).toBe(false));
+
+    expect(result.current.downedStacks).toHaveLength(1);
+    expect(result.current.downedStacks[0].name).toBe("env-project");
+  });
+
+  it("name: field takes precedence over COMPOSE_PROJECT_NAME in .env", async () => {
+    const { useDownedStacksScan } = await import("./useDownedStacksScan");
+    mockFindComposeFiles.mockReturnValue(
+      mockProcess("/etc/docker/compose/mydir/docker-compose.yml\n")
+    );
+    mockReadComposeFile.mockImplementation(() =>
+      mockProcess("name: compose-name\nservices:\n  web:\n    image: nginx\n")
+    );
+    mockReadEnvFile.mockResolvedValue({
+      content: "COMPOSE_PROJECT_NAME=env-name\n",
+      exists: true,
+    });
+
+    const { result } = renderHook(() =>
+      useDownedStacksScan("/etc/docker/compose", [])
+    );
+
+    act(() => { result.current.scan(); });
+    await waitFor(() => expect(result.current.scanning).toBe(false));
+
+    expect(result.current.downedStacks[0].name).toBe("compose-name");
+  });
+
+  it("falls back to directory name when compose file is unreadable", async () => {
+    const { useDownedStacksScan } = await import("./useDownedStacksScan");
+    mockFindComposeFiles.mockReturnValue(
+      mockProcess("/etc/docker/compose/fallback-dir/docker-compose.yml\n")
+    );
+    mockReadComposeFile.mockImplementation(() => mockProcess("", "permission denied"));
+
+    const { result } = renderHook(() =>
+      useDownedStacksScan("/etc/docker/compose", [])
+    );
+
+    act(() => { result.current.scan(); });
+    await waitFor(() => expect(result.current.scanning).toBe(false));
+
+    expect(result.current.downedStacks).toHaveLength(1);
+    expect(result.current.downedStacks[0].name).toBe("fallback-dir");
   });
 });
