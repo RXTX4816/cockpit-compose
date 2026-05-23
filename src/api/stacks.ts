@@ -6,24 +6,24 @@ export function listStacks(): CockpitProcess {
   });
 }
 
-export function startStack(project: string, configFile: string): CockpitProcess {
+export function startStack(project: string, configFile: string, superuser?: "try"): CockpitProcess {
   return cockpit.spawn(
     compose("-p", project, "-f", configFile, "up", "-d"),
-    { superuser: "try", err: "message" },
+    { superuser, err: "message" },
   );
 }
 
-export function stopStack(project: string, configFile: string): CockpitProcess {
+export function stopStack(project: string, configFile: string, superuser?: "try"): CockpitProcess {
   return cockpit.spawn(
     compose("-p", project, "-f", configFile, "stop"),
-    { superuser: "try", err: "message" },
+    { superuser, err: "message" },
   );
 }
 
-export function restartStack(project: string, configFile: string): CockpitProcess {
+export function restartStack(project: string, configFile: string, superuser?: "try"): CockpitProcess {
   return cockpit.spawn(
     compose("-p", project, "-f", configFile, "restart"),
-    { superuser: "try", err: "message" },
+    { superuser, err: "message" },
   );
 }
 
@@ -34,47 +34,47 @@ export function streamLogs(project: string): CockpitProcess {
   );
 }
 
-export function downStack(project: string, configFile: string): CockpitProcess {
+export function downStack(project: string, configFile: string, superuser?: "try"): CockpitProcess {
   return cockpit.spawn(
     compose("-p", project, "-f", configFile, "down"),
-    { superuser: "try", err: "message" },
+    { superuser, err: "message" },
   );
 }
 
-export function upStackStream(project: string, configFile: string): CockpitProcess {
+export function upStackStream(project: string, configFile: string, superuser?: "try"): CockpitProcess {
   // err:"out" merges stderr into the streamable stdout so the log viewer gets all output
   return cockpit.spawn(
     compose("--progress", "plain", "-p", project, "-f", configFile, "up", "-d"),
-    { superuser: "try", err: "out" },
+    { superuser, err: "out" },
   );
 }
 
-export function pullStack(project: string, configFile: string): CockpitProcess {
+export function pullStack(project: string, configFile: string, superuser?: "try"): CockpitProcess {
   // err:"out" merges stderr (where Docker sends progress) into the streamable stdout
   return cockpit.spawn(
     compose("--progress", "plain", "-p", project, "-f", configFile, "pull"),
-    { superuser: "try", err: "out" },
+    { superuser, err: "out" },
   );
 }
 
-export function pauseStack(project: string, configFile: string): CockpitProcess {
+export function pauseStack(project: string, configFile: string, superuser?: "try"): CockpitProcess {
   return cockpit.spawn(
     compose("-p", project, "-f", configFile, "pause"),
-    { superuser: "try", err: "message" },
+    { superuser, err: "message" },
   );
 }
 
-export function unpauseStack(project: string, configFile: string): CockpitProcess {
+export function unpauseStack(project: string, configFile: string, superuser?: "try"): CockpitProcess {
   return cockpit.spawn(
     compose("-p", project, "-f", configFile, "unpause"),
-    { superuser: "try", err: "message" },
+    { superuser, err: "message" },
   );
 }
 
-export function killStack(project: string, configFile: string): CockpitProcess {
+export function killStack(project: string, configFile: string, superuser?: "try"): CockpitProcess {
   return cockpit.spawn(
     compose("-p", project, "-f", configFile, "kill"),
-    { superuser: "try", err: "message" },
+    { superuser, err: "message" },
   );
 }
 
@@ -136,10 +136,10 @@ export function listAllContainerImages(): CockpitProcess {
   );
 }
 
-export function removeImages(ids: string[]): CockpitProcess {
+export function removeImages(ids: string[], superuser?: "try"): CockpitProcess {
   return cockpit.spawn(
     ["docker", "rmi", ...ids],
-    { superuser: "try", err: "message" },
+    { superuser, err: "message" },
   );
 }
 
@@ -174,23 +174,23 @@ export function inspectNetworkContainerCounts(names: string[]): CockpitProcess {
 
 
 
-export function pruneContainers(project: string): CockpitProcess {
+export function pruneContainers(project: string, superuser?: "try"): CockpitProcess {
   return cockpit.spawn(
     ["docker", "container", "prune", "-f", "--filter", `label=com.docker.compose.project=${project}`],
-    { superuser: "try", err: "message" },
+    { superuser, err: "message" },
   );
 }
 
-export function pruneVolumes(project: string): CockpitProcess {
+export function pruneVolumes(project: string, superuser?: "try"): CockpitProcess {
   return cockpit.spawn(
     ["docker", "volume", "prune", "-f", "--filter", `label=com.docker.compose.project=${project}`],
-    { superuser: "try", err: "message" },
+    { superuser, err: "message" },
   );
 }
 
-export function pruneNetworks(project: string): CockpitProcess {
+export function pruneNetworks(project: string, superuser?: "try"): CockpitProcess {
   return cockpit.spawn(
     ["docker", "network", "prune", "-f", "--filter", `label=com.docker.compose.project=${project}`],
-    { superuser: "try", err: "message" },
+    { superuser, err: "message" },
   );
 }

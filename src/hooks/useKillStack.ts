@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { killStack, type ComposeStack } from "../api";
+import { killStack, composeFileSuperuser, type ComposeStack } from "../api";
 
 export function useKillStack(
   onSuccess: () => void,
@@ -26,7 +26,8 @@ export function useKillStack(
     onActingChange(1);
     setError(null);
     try {
-      await killStack(target.Name, configFile);
+      const su = await composeFileSuperuser(configFile);
+      await killStack(target.Name, configFile, su);
       setTarget(null);
       onSuccess();
     } catch (ex: unknown) {

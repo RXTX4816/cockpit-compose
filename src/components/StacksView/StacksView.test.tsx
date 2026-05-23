@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { StacksView } from ".";
 
 vi.mock("../../hooks/useComposeStacks", () => ({
@@ -265,6 +265,7 @@ describe("StacksView", () => {
     render(<StacksView />);
     fireEvent.click(screen.getByRole("button", { name: /↓ Down/i }));
     fireEvent.click(screen.getByRole("button", { name: /^Down \(remove\)$/i }));
-    expect(mockSpawn).toHaveBeenCalled();
+    // downStack is now called asynchronously (after composeFileSuperuser resolves).
+    await waitFor(() => expect(mockSpawn).toHaveBeenCalled());
   });
 });

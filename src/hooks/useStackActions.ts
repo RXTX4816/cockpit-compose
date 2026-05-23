@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { startStack, stopStack, restartStack, pauseStack, unpauseStack } from "../api";
+import { startStack, stopStack, restartStack, pauseStack, unpauseStack, composeFileSuperuser } from "../api";
 
 export function useStackActions(
   stackName: string,
@@ -17,11 +17,12 @@ export function useStackActions(
     onActingChange(1);
     setActionError(null);
     try {
-      if (action === "start") await startStack(stackName, configFile);
-      else if (action === "stop") await stopStack(stackName, configFile);
-      else if (action === "restart") await restartStack(stackName, configFile);
-      else if (action === "pause") await pauseStack(stackName, configFile);
-      else await unpauseStack(stackName, configFile);
+      const su = await composeFileSuperuser(configFile);
+      if (action === "start") await startStack(stackName, configFile, su);
+      else if (action === "stop") await stopStack(stackName, configFile, su);
+      else if (action === "restart") await restartStack(stackName, configFile, su);
+      else if (action === "pause") await pauseStack(stackName, configFile, su);
+      else await unpauseStack(stackName, configFile, su);
       await onSuccess?.();
     } catch (ex: unknown) {
       setActionError(ex instanceof Error ? ex.message : String(ex));

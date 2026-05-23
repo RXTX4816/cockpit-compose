@@ -18,6 +18,7 @@ import {
 import { type ComposeStack, COMPOSE_TEMPLATES, type ComposeTemplate, makeTempDir, fetchComposeFromGit, removeDirectory, createDirectory } from "../api";
 import { type DownedStack } from "../hooks/useDownedStacksScan";
 import { inferComposeRoot } from "./DownedStacksSection";
+import { composeFileSuperuser } from "../api";
 import { YamlEditor } from "./YamlEditor";
 import "./CreateStackModal.css";
 
@@ -126,7 +127,7 @@ export function CreateStackModal({ stacks, onClose, onCreated }: Props) {
       let yaml: string | null = null;
       for (const candidate of candidates) {
         try {
-          const content = await cockpit.file(`${tmpDir}/${candidate}`, { superuser: "try" }).read() as string | null;
+          const content = await cockpit.file(`${tmpDir}/${candidate}`).read() as string | null;
           if (content !== null) {
             yaml = content;
             break;
@@ -182,8 +183,9 @@ export function CreateStackModal({ stacks, onClose, onCreated }: Props) {
     const stackDir = `${composeDir.trim()}/${stackName.trim()}`;
     const configFile = `${stackDir}/docker-compose.yml`;
     try {
-      await createDirectory(stackDir);
-      await cockpit.file(configFile, { superuser: "try" }).replace(getYamlToWrite());
+      const su = await composeFileSuperuser(configFile);
+      await createDirectory(stackDir, su);
+      await cockpit.file(configFile, { superuser: su }).replace(getYamlToWrite());
       onCreated({ name: stackName.trim(), configFile });
       onClose();
     } catch (ex: unknown) {
