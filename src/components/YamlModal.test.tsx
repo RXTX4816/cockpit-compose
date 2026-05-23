@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
+import { act, render, screen, fireEvent, waitFor, within } from "@testing-library/react";
 import { YamlModal } from "./YamlModal";
 import { mockSpawn } from "../test/setup";
 import { mockProcess } from "../test/helpers";
@@ -51,16 +51,18 @@ beforeEach(() => {
 });
 
 describe("YamlModal", () => {
-  it("renders modal title with stack name", () => {
+  it("renders modal title with stack name", async () => {
     mockSpawn.mockReturnValue(mockProcess(composeContent));
     render(<YamlModal stack={stack} onClose={vi.fn()} />);
     expect(screen.getByText(/myapp — compose file/i)).toBeInTheDocument();
+    await act(async () => {});
   });
 
-  it("shows spinner while loading", () => {
+  it("shows spinner while loading", async () => {
     mockSpawn.mockReturnValue(mockProcess(composeContent));
     render(<YamlModal stack={stack} onClose={vi.fn()} />);
     expect(screen.getByRole("progressbar")).toBeInTheDocument();
+    await act(async () => {});
   });
 
   it("displays compose file content after loading", async () => {

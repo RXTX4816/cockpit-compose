@@ -17,12 +17,13 @@ describe("useEventStream", () => {
     expect(result.current.error).toBeNull();
   });
 
-  it("start() sets streaming=true and spawns process", () => {
+  it("start() sets streaming=true and spawns process", async () => {
     mockSpawn.mockReturnValue(mockProcess(""));
     const { result } = renderHook(() => useEventStream("myapp"));
     act(() => { result.current.start(); });
     expect(result.current.streaming).toBe(true);
     expect(mockSpawn).toHaveBeenCalledOnce();
+    await act(async () => {});
   });
 
   it("parses JSON event lines", async () => {
@@ -56,12 +57,13 @@ describe("useEventStream", () => {
     expect(result.current.streaming).toBe(false);
   });
 
-  it("stop() closes process and sets streaming=false", () => {
+  it("stop() closes process and sets streaming=false", async () => {
     mockSpawn.mockReturnValue(mockProcess(""));
     const { result } = renderHook(() => useEventStream("myapp"));
     act(() => { result.current.start(); });
     act(() => { result.current.stop(); });
     expect(result.current.streaming).toBe(false);
+    await act(async () => {});
   });
 
   it("clear() empties events", async () => {
@@ -83,7 +85,7 @@ describe("useEventStream", () => {
     await waitFor(() => expect(result.current.events.length).toBe(EVENTS_MAX));
   });
 
-  it("spawns docker compose events --json without --since/--until flags", () => {
+  it("spawns docker compose events --json without --since/--until flags", async () => {
     mockSpawn.mockReturnValue(mockProcess(""));
     const { result } = renderHook(() => useEventStream("myapp"));
     act(() => { result.current.start(); });
@@ -92,6 +94,7 @@ describe("useEventStream", () => {
     expect(args).toContain("--json");
     expect(args).not.toContain("--since");
     expect(args).not.toContain("--until");
+    await act(async () => {});
   });
 
   it("start() resets previous events before spawning", async () => {
@@ -102,5 +105,6 @@ describe("useEventStream", () => {
     mockSpawn.mockReturnValue(mockProcess(""));
     act(() => { result.current.start(); });
     expect(result.current.events).toHaveLength(0);
+    await act(async () => {});
   });
 });

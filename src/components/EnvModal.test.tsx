@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
+import { act, render, screen, fireEvent, waitFor, within } from "@testing-library/react";
 import { EnvModal } from "./EnvModal";
 import type { ComposeStack } from "../api";
 
@@ -99,6 +99,7 @@ describe("EnvModal", () => {
     mockRead.mockResolvedValue(null);
     render(<EnvModal stack={stack} onClose={vi.fn()} />);
     expect(screen.getByText(/myapp — env file/i)).toBeInTheDocument();
+    await act(async () => {});
   });
 
   it("shows spinner while loading", () => {

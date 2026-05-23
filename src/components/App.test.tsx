@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import { App } from "./App";
 
 vi.mock("../api", async (importOriginal) => {
@@ -26,7 +26,7 @@ describe("App", () => {
     mockDetect.mockReturnValue(new Promise<void>(r => { resolve = r; }));
     const { container } = render(<App />);
     expect(container.firstChild).toBeNull();
-    resolve();
+    await act(async () => { resolve(); });
   });
 
   it("renders StacksView after detectComposeCommand resolves", async () => {

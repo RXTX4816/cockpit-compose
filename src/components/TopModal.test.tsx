@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
+import { act, render, screen, waitFor, fireEvent } from "@testing-library/react";
 import { TopModal, parseTopOutput } from "./TopModal";
 import { mockSpawn } from "../test/setup";
 import { mockProcess } from "../test/helpers";
@@ -23,16 +23,18 @@ UID                 PID                 PPID                C                   
 `;
 
 describe("TopModal", () => {
-  it("renders modal title with stack name", () => {
+  it("renders modal title with stack name", async () => {
     mockSpawn.mockReturnValue(mockProcess(topOutput));
     render(<TopModal stack={stack} onClose={vi.fn()} />);
     expect(screen.getByText(/Top — myapp/i)).toBeInTheDocument();
+    await act(async () => {});
   });
 
-  it("shows spinner while loading", () => {
+  it("shows spinner while loading", async () => {
     mockSpawn.mockReturnValue(mockProcess(topOutput));
     render(<TopModal stack={stack} onClose={vi.fn()} />);
     expect(screen.getByRole("progressbar")).toBeInTheDocument();
+    await act(async () => {});
   });
 
   it("renders service sections after loading", async () => {
@@ -69,6 +71,7 @@ describe("TopModal", () => {
     mockSpawn.mockReturnValue(mockProcess(topOutput));
     fireEvent.click(screen.getByRole("button", { name: /Refresh/i }));
     expect(mockSpawn).toHaveBeenCalledTimes(2);
+    await act(async () => {});
   });
 });
 

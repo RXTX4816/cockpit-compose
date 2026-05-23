@@ -124,6 +124,7 @@ describe("useDownedStacksScan", () => {
     act(() => { result.current.scan(); });
     // immediately after scan() starts, stale results are gone
     expect(result.current.downedStacks).toHaveLength(0);
+    await act(async () => {});
   });
 
   it("filters out stacks already in existingStacks (case-insensitive)", async () => {

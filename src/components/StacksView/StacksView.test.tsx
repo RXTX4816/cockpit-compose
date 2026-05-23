@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { act, render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { StacksView } from ".";
 
 vi.mock("../../hooks/useComposeStacks", () => ({
@@ -227,7 +227,7 @@ describe("StacksView", () => {
     expect(screen.getByTestId("pull-modal")).toBeInTheDocument();
   });
 
-  it("Prune item opens PruneModal", () => {
+  it("Prune item opens PruneModal", async () => {
     mockUseComposeStacks.mockReturnValue({
       stacks: [{ Name: "myapp", Status: "running(1)", ConfigFiles: "/path/compose.yml" }],
       loading: false,
@@ -239,6 +239,7 @@ describe("StacksView", () => {
     fireEvent.click(screen.getByRole("menuitem", { name: /^Prune$/i }));
     expect(screen.getByTestId("prune-modal")).toBeInTheDocument();
     expect(screen.getByText(/PruneModal:myapp/i)).toBeInTheDocument();
+    await act(async () => {});
   });
 
   it("renders DownedStacksSection", () => {

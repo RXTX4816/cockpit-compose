@@ -7,11 +7,12 @@ import { mockProcess } from "../test/helpers";
 beforeEach(() => { mockSpawn.mockReset(); });
 
 describe("useLogStream", () => {
-  it("starts with streaming=true and empty lines", () => {
+  it("starts with streaming=true and empty lines", async () => {
     mockSpawn.mockReturnValue(mockProcess(""));
     const { result } = renderHook(() => useLogStream("myapp"));
     expect(result.current.streaming).toBe(true);
     expect(result.current.lines).toEqual([]);
+    await act(async () => {});
   });
 
   it("splits newline-delimited data into lines", async () => {
@@ -44,6 +45,7 @@ describe("useLogStream", () => {
     const { result } = renderHook(() => useLogStream("myapp"));
     act(() => { result.current.stop(); });
     expect(result.current.streaming).toBe(false);
+    await act(async () => {});
   });
 
   it("clear() empties lines", async () => {

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { act, render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { ExecModal } from "./ExecModal";
 import { mockSpawn } from "../test/setup";
 import { mockProcess } from "../test/helpers";
@@ -51,17 +51,19 @@ beforeEach(() => {
 });
 
 describe("ExecModal", () => {
-  it("renders modal title with stack name", () => {
+  it("renders modal title with stack name", async () => {
     mockSpawn.mockReturnValue(mockProcess(""));
     render(<ExecModal stack={stack} onClose={vi.fn()} />);
     expect(screen.getByText(/Shell — myapp/i)).toBeInTheDocument();
+    await act(async () => {});
   });
 
-  it("shows config step by default", () => {
+  it("shows config step by default", async () => {
     mockSpawn.mockReturnValue(mockProcess(""));
     render(<ExecModal stack={stack} onClose={vi.fn()} />);
     expect(screen.getByLabelText(/Command/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Open shell/i })).toBeInTheDocument();
+    await act(async () => {});
   });
 
   it("populates service selector from compose YAML", async () => {
@@ -71,11 +73,12 @@ describe("ExecModal", () => {
     expect(screen.getByRole("option", { name: "db" })).toBeInTheDocument();
   });
 
-  it("defaults shell to /bin/sh", () => {
+  it("defaults shell to /bin/sh", async () => {
     mockSpawn.mockReturnValue(mockProcess(""));
     render(<ExecModal stack={stack} onClose={vi.fn()} />);
     const shellInput = screen.getByLabelText(/Command/i) as HTMLInputElement & { value: string };
     expect(shellInput.value).toBe("/bin/sh");
+    await act(async () => {});
   });
 
   it("Open shell button is disabled when service is empty", async () => {
@@ -84,6 +87,7 @@ describe("ExecModal", () => {
     // No services loaded (file returned nothing) and no manual input
     const btn = screen.getByRole("button", { name: /Open shell/i });
     expect(btn).toBeInTheDocument();
+    await act(async () => {});
   });
 
   it("shows terminal step after clicking Open shell", async () => {
@@ -94,11 +98,12 @@ describe("ExecModal", () => {
     await waitFor(() => expect(screen.getByRole("button", { name: /Disconnect/i })).toBeInTheDocument());
   });
 
-  it("calls onClose when Cancel clicked on config step", () => {
+  it("calls onClose when Cancel clicked on config step", async () => {
     mockSpawn.mockReturnValue(mockProcess(""));
     const onClose = vi.fn();
     render(<ExecModal stack={stack} onClose={onClose} />);
     fireEvent.click(screen.getByRole("button", { name: /Cancel/i }));
     expect(onClose).toHaveBeenCalledOnce();
+    await act(async () => {});
   });
 });

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { act, render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { PullConfirmModal } from "./PullConfirmModal";
 import type { ComposeStack } from "../api";
 import { mockProcess } from "../test/helpers";
@@ -23,28 +23,32 @@ beforeEach(() => {
 });
 
 describe("PullConfirmModal", () => {
-  it("renders title with stack name", () => {
+  it("renders title with stack name", async () => {
     render(<PullConfirmModal stack={stack} onConfirm={vi.fn()} onClose={vi.fn()} />);
     expect(screen.getByText(/Pull latest images — myapp/i)).toBeInTheDocument();
+    await act(async () => {});
   });
 
-  it("shows warning alert", () => {
+  it("shows warning alert", async () => {
     render(<PullConfirmModal stack={stack} onConfirm={vi.fn()} onClose={vi.fn()} />);
     expect(screen.getByText(/breaking changes/i)).toBeInTheDocument();
+    await act(async () => {});
   });
 
-  it("calls onConfirm when Pull clicked", () => {
+  it("calls onConfirm when Pull clicked", async () => {
     const onConfirm = vi.fn();
     render(<PullConfirmModal stack={stack} onConfirm={onConfirm} onClose={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: /^Pull$/i }));
     expect(onConfirm).toHaveBeenCalledOnce();
+    await act(async () => {});
   });
 
-  it("calls onClose when Cancel clicked", () => {
+  it("calls onClose when Cancel clicked", async () => {
     const onClose = vi.fn();
     render(<PullConfirmModal stack={stack} onConfirm={vi.fn()} onClose={onClose} />);
     fireEvent.click(screen.getByRole("button", { name: /Cancel/i }));
     expect(onClose).toHaveBeenCalledOnce();
+    await act(async () => {});
   });
 
   it("shows image list parsed from compose YAML", async () => {

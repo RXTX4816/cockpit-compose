@@ -30,10 +30,11 @@ beforeEach(() => {
 });
 
 describe("useComposeStacks", () => {
-  it("starts in loading state", () => {
+  it("starts in loading state", async () => {
     mockSpawn.mockReturnValue(mockProcess("[]"));
     const { result } = renderHook(() => useComposeStacks());
     expect(result.current.loading).toBe(true);
+    await act(async () => {});
   });
 
   it("returns stacks after successful load", async () => {

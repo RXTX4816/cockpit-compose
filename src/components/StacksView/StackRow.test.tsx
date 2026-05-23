@@ -170,19 +170,21 @@ describe("StackRow", () => {
     expect(onInfo).toHaveBeenCalledOnce();
   });
 
-  it("opens dropdown when more-actions toggle clicked", () => {
+  it("opens dropdown when more-actions toggle clicked", async () => {
     render(<StackRow {...defaultProps} />);
     fireEvent.click(screen.getByRole("button", { name: /More actions for myapp/i }));
     expect(screen.getByRole("menuitem", { name: /Restart/i })).toBeInTheDocument();
+    await act(async () => {});
   });
 
-  it("calls doAction with restart when Restart item clicked", () => {
+  it("calls doAction with restart when Restart item clicked", async () => {
     const doAction = vi.fn();
     mockUseStackActions.mockReturnValue({ acting: false, actionError: null, doAction });
     render(<StackRow {...defaultProps} />);
     fireEvent.click(screen.getByRole("button", { name: /More actions for myapp/i }));
     fireEvent.click(screen.getByRole("menuitem", { name: /Restart/i }));
     expect(doAction).toHaveBeenCalledWith("restart", expect.any(Function));
+    await act(async () => {});
   });
 
   it("calls onPull when Pull button clicked", () => {
@@ -199,47 +201,52 @@ describe("StackRow", () => {
     expect(onDown).toHaveBeenCalledOnce();
   });
 
-  it("calls onKill when Kill item clicked", () => {
+  it("calls onKill when Kill item clicked", async () => {
     const onKill = vi.fn();
     render(<StackRow {...defaultProps} onKill={onKill} />);
     fireEvent.click(screen.getByRole("button", { name: /More actions for myapp/i }));
     fireEvent.click(screen.getByRole("menuitem", { name: /^Kill$/i }));
     expect(onKill).toHaveBeenCalledOnce();
+    await act(async () => {});
   });
 
-  it("calls onEvents when Events item clicked", () => {
+  it("calls onEvents when Events item clicked", async () => {
     const onEvents = vi.fn();
     render(<StackRow {...defaultProps} onEvents={onEvents} />);
     fireEvent.click(screen.getByRole("button", { name: /More actions for myapp/i }));
     fireEvent.click(screen.getByRole("menuitem", { name: /^Events$/i }));
     expect(onEvents).toHaveBeenCalledOnce();
+    await act(async () => {});
   });
 
-  it("calls onTop when Top item clicked", () => {
+  it("calls onTop when Top item clicked", async () => {
     const onTop = vi.fn();
     render(<StackRow {...defaultProps} onTop={onTop} />);
     fireEvent.click(screen.getByRole("button", { name: /More actions for myapp/i }));
     fireEvent.click(screen.getByRole("menuitem", { name: /^Top$/i }));
     expect(onTop).toHaveBeenCalledOnce();
+    await act(async () => {});
   });
 
-  it("calls onExec when Shell item clicked", () => {
+  it("calls onExec when Shell item clicked", async () => {
     const onExec = vi.fn();
     render(<StackRow {...defaultProps} onExec={onExec} />);
     fireEvent.click(screen.getByRole("button", { name: /More actions for myapp/i }));
     fireEvent.click(screen.getByRole("menuitem", { name: /^Shell$/i }));
     expect(onExec).toHaveBeenCalledOnce();
+    await act(async () => {});
   });
 
-  it("calls onPrune when Prune item clicked", () => {
+  it("calls onPrune when Prune item clicked", async () => {
     const onPrune = vi.fn();
     render(<StackRow {...defaultProps} onPrune={onPrune} />);
     fireEvent.click(screen.getByRole("button", { name: /More actions for myapp/i }));
     fireEvent.click(screen.getByRole("menuitem", { name: /^Prune$/i }));
     expect(onPrune).toHaveBeenCalledOnce();
+    await act(async () => {});
   });
 
-  it("shows Prune item before Kill in kebab menu", () => {
+  it("shows Prune item before Kill in kebab menu", async () => {
     render(<StackRow {...defaultProps} />);
     fireEvent.click(screen.getByRole("button", { name: /More actions for myapp/i }));
     const pruneItem = screen.getByRole("menuitem", { name: /^Prune$/i });
@@ -250,36 +257,41 @@ describe("StackRow", () => {
     expect(pruneIdx).toBeLessThan(killIdx);
     // Down is no longer in the dropdown menu — it is a direct button
     expect(screen.queryByRole("menuitem", { name: /Down \(remove\)/i })).not.toBeInTheDocument();
+    await act(async () => {});
   });
 
-  it("shows Pause in kebab when running", () => {
+  it("shows Pause in kebab when running", async () => {
     render(<StackRow {...defaultProps} />);
     fireEvent.click(screen.getByRole("button", { name: /More actions for myapp/i }));
     expect(screen.getByRole("menuitem", { name: /^Pause$/i })).toBeInTheDocument();
+    await act(async () => {});
   });
 
-  it("shows Unpause in kebab when paused", () => {
+  it("shows Unpause in kebab when paused", async () => {
     render(<StackRow {...defaultProps} stack={{ ...stack, Status: "paused(2)" }} />);
     fireEvent.click(screen.getByRole("button", { name: /More actions for myapp/i }));
     expect(screen.getByRole("menuitem", { name: /^Unpause$/i })).toBeInTheDocument();
+    await act(async () => {});
   });
 
-  it("calls doAction with pause when Pause clicked", () => {
+  it("calls doAction with pause when Pause clicked", async () => {
     const doAction = vi.fn();
     mockUseStackActions.mockReturnValue({ acting: false, actionError: null, doAction });
     render(<StackRow {...defaultProps} />);
     fireEvent.click(screen.getByRole("button", { name: /More actions for myapp/i }));
     fireEvent.click(screen.getByRole("menuitem", { name: /^Pause$/i }));
     expect(doAction).toHaveBeenCalledWith("pause", expect.any(Function));
+    await act(async () => {});
   });
 
-  it("calls doAction with unpause when Unpause clicked", () => {
+  it("calls doAction with unpause when Unpause clicked", async () => {
     const doAction = vi.fn();
     mockUseStackActions.mockReturnValue({ acting: false, actionError: null, doAction });
     render(<StackRow {...defaultProps} stack={{ ...stack, Status: "paused(2)" }} />);
     fireEvent.click(screen.getByRole("button", { name: /More actions for myapp/i }));
     fireEvent.click(screen.getByRole("menuitem", { name: /^Unpause$/i }));
     expect(doAction).toHaveBeenCalledWith("unpause", expect.any(Function));
+    await act(async () => {});
   });
 
   it("afterAction clears containers when not expanded", async () => {

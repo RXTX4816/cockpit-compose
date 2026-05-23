@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import { StackInfoModal } from "./StackInfoModal";
 import { mockSpawn } from "../test/setup";
 import { mockProcess } from "../test/helpers";
@@ -46,22 +46,25 @@ function mockSpawnSequence(...responses: ReturnType<typeof mockProcess>[]) {
 }
 
 describe("StackInfoModal", () => {
-  it("renders modal title with stack name", () => {
+  it("renders modal title with stack name", async () => {
     mockSpawnSequence(mockProcess(containers), mockProcess(images), mockProcess(volumes));
     render(<StackInfoModal stack={stack} onClose={vi.fn()} />);
     expect(screen.getByText(/myapp — info/i)).toBeInTheDocument();
+    await act(async () => {});
   });
 
-  it("shows spinners while loading", () => {
+  it("shows spinners while loading", async () => {
     mockSpawnSequence(mockProcess(containers), mockProcess(images), mockProcess(volumes));
     render(<StackInfoModal stack={stack} onClose={vi.fn()} />);
     expect(screen.getAllByRole("progressbar").length).toBeGreaterThan(0);
+    await act(async () => {});
   });
 
-  it("shows config file path", () => {
+  it("shows config file path", async () => {
     mockSpawnSequence(mockProcess(containers), mockProcess(images), mockProcess(volumes));
     render(<StackInfoModal stack={stack} onClose={vi.fn()} />);
     expect(screen.getByText("/path/docker-compose.yml")).toBeInTheDocument();
+    await act(async () => {});
   });
 
   it("renders container info after loading", async () => {
