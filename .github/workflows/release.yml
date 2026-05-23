@@ -80,7 +80,6 @@ jobs:
       # ── Upload ──────────────────────────────────────────────────────────
       - name: Upload release assets
         run: |
-          echo "$GH_TOKEN" | gh auth login --with-token
           RPM=$(find rpmbuild/RPMS -name "*.rpm" | head -1)
           DEB=$(find . -maxdepth 1 -name "*.deb" | head -1)
           TARBALL="cockpit-compose-${VERSION_CLEAN}.tar.gz"
@@ -92,7 +91,7 @@ jobs:
           || gh release upload "${VERSION}" \
             "${TARBALL}" "${CHECKSUM}" "${RPM}" "${DEB}" --clobber
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # ── AUR ─────────────────────────────────────────────────────────────
       - name: Get SHA256 for AUR
