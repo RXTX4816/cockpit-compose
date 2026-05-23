@@ -1,9 +1,11 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { listContainers, getContainerStats, parsePorts, parseJsonOutput, parseDockerBytes } from "../api";
-import type { ComposeContainer, ContainerStats, StackStatus } from "../api";
+import { listContainers, getContainerStats, parsePortsFull, parseJsonOutput, parseDockerBytes } from "../api";
+import type { ComposeContainer, ContainerStats, ParsedPort, StackStatus } from "../api";
+
+const BIND_PRIORITY: Record<ParsedPort["bindType"], number> = { external: 3, specific: 2, localhost: 1 };
 
 export function useContainerStats(stackName: string, status: StackStatus) {
-  const [ports, setPorts] = useState<string[]>([]);
+  const [ports, setPorts] = useState<ParsedPort[]>([]);
   const [stats, setStats] = useState<{ cpu: number; mem: number } | null>(null);
   const mountedRef = useRef(true);
 
@@ -24,13 +26,16 @@ export function useContainerStats(stackName: string, status: StackStatus) {
       await proc;
       const containers = parseJsonOutput<ComposeContainer>(raw);
 
-      const allPorts = new Set<string>();
+      const portMap = new Map<string, ParsedPort>();
       const runningIds: string[] = [];
       for (const c of containers) {
-        for (const p of parsePorts(c.Ports)) allPorts.add(p);
+        for (const p of parsePortsFull(c.Ports)) {
+          const existing = portMap.get(p.label);
+          if (!existing || BIND_PRIORITY[p.bindType] > BIND_PRIORITY[existing.bindType]) portMap.set(p.label, p);
+        }
         if (c.State?.toLowerCase() === "running" && c.ID) runningIds.push(c.ID);
       }
-      if (mountedRef.current) setPorts([...allPorts]);
+      if (mountedRef.current) setPorts([...portMap.values()]);
 
       if (runningIds.length > 0) {
         let statsRaw = "";

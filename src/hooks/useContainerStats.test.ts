@@ -42,7 +42,8 @@ describe("useContainerStats", () => {
       .mockImplementationOnce(lazy(runningContainersJson))
       .mockImplementationOnce(lazy(statsJson));
     const { result } = renderHook(() => useContainerStats("myapp", "running"));
-    await waitFor(() => expect(result.current.ports).toEqual(["8080→80"]));
+    await waitFor(() => expect(result.current.ports[0]?.label).toBe("8080→80"));
+    expect(result.current.ports[0]?.bindType).toBe("external");
   });
 
   it("fetches CPU stats when status=running", async () => {
@@ -58,7 +59,7 @@ describe("useContainerStats", () => {
       .mockImplementationOnce(lazy(runningContainersJson))
       .mockImplementationOnce(lazy(statsJson));
     const { result } = renderHook(() => useContainerStats("myapp", "partial"));
-    await waitFor(() => expect(result.current.ports).toEqual(["8080→80"]));
+    await waitFor(() => expect(result.current.ports[0]?.label).toBe("8080→80"));
   });
 
   it("sets stats=null when no containers are running", async () => {
@@ -80,7 +81,8 @@ describe("useContainerStats", () => {
       .mockImplementationOnce(lazy(twoRunning))
       .mockImplementationOnce(lazy(statsJson));
     const { result } = renderHook(() => useContainerStats("myapp", "running"));
-    await waitFor(() => expect(result.current.ports).toEqual(["8080→80"]));
+    await waitFor(() => expect(result.current.ports).toHaveLength(1));
+    expect(result.current.ports[0]?.label).toBe("8080→80");
   });
 
   it("silently ignores errors", async () => {

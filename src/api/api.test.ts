@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { parseJsonOutput, parseStackStatus, parseServiceCount, parsePorts, getServicesFromCompose, getProjectNameFromCompose, getComposeProjectNameFromEnv } from ".";
+import { parseJsonOutput, parseStackStatus, parseServiceCount, parsePorts, parsePortsFull, parsePortsDetailed, getServicesFromCompose, getProjectNameFromCompose, getComposeProjectNameFromEnv } from ".";
 
 describe("parseJsonOutput", () => {
   it("parses JSON array format", () => {
@@ -86,6 +86,64 @@ describe("parsePorts", () => {
 
   it("returns empty for non-mapped port strings", () => {
     expect(parsePorts("80/tcp")).toEqual([]);
+  });
+});
+
+describe("parsePortsFull", () => {
+  it("returns empty array for empty string", () => {
+    expect(parsePortsFull("")).toEqual([]);
+  });
+
+  it("parses IPv4 external binding", () => {
+    const [p] = parsePortsFull("0.0.0.0:8080->80/tcp");
+    expect(p.label).toBe("8080→80");
+    expect(p.fullLabel).toBe("0.0.0.0:8080 → 80/tcp");
+    expect(p.bindType).toBe("external");
+    expect(p.bindAddress).toBe("0.0.0.0");
+  });
+
+  it("parses IPv6 external binding (::)", () => {
+    const [p] = parsePortsFull(":::8080->80/tcp");
+    expect(p.bindType).toBe("external");
+    expect(p.bindAddress).toBe("::");
+    expect(p.label).toBe("8080→80");
+  });
+
+  it("parses localhost binding", () => {
+    const [p] = parsePortsFull("127.0.0.1:8080->80/tcp");
+    expect(p.bindType).toBe("localhost");
+    expect(p.fullLabel).toBe("127.0.0.1:8080 → 80/tcp");
+  });
+
+  it("parses specific IP binding", () => {
+    const [p] = parsePortsFull("192.168.1.10:8080->80/tcp");
+    expect(p.bindType).toBe("specific");
+    expect(p.bindAddress).toBe("192.168.1.10");
+  });
+
+  it("deduplicates IPv4/IPv6 pairs keeping most-exposed (external wins)", () => {
+    const ports = parsePortsFull("127.0.0.1:8080->80/tcp, 0.0.0.0:8080->80/tcp");
+    expect(ports).toHaveLength(1);
+    expect(ports[0].bindType).toBe("external");
+  });
+
+  it("deduplicates IPv4/IPv6 external pairs to one entry", () => {
+    const ports = parsePortsFull("0.0.0.0:8080->80/tcp, :::8080->80/tcp");
+    expect(ports).toHaveLength(1);
+    expect(ports[0].bindType).toBe("external");
+  });
+});
+
+describe("parsePortsDetailed", () => {
+  it("returns all individual bindings without deduplication by label", () => {
+    const ports = parsePortsDetailed("0.0.0.0:8080->80/tcp, :::8080->80/tcp");
+    expect(ports).toHaveLength(2);
+    expect(ports[0].bindAddress).toBe("0.0.0.0");
+    expect(ports[1].bindAddress).toBe("::");
+  });
+
+  it("returns empty for non-mapped port strings", () => {
+    expect(parsePortsDetailed("80/tcp")).toEqual([]);
   });
 });
 

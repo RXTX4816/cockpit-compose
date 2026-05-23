@@ -1,5 +1,5 @@
 import { load as loadYaml } from "js-yaml";
-import type { StackStatus } from "./types";
+import type { ParsedPort, StackStatus } from "./types";
 
 export function parseStackStatus(status: string): StackStatus {
   const lower = status.toLowerCase();
@@ -18,18 +18,48 @@ export function parseServiceCount(status: string): number {
   return matches.reduce((sum, m) => sum + parseInt(m.replace(/[()]/g, ""), 10), 0);
 }
 
-export function parsePorts(portsStr: string): string[] {
+function getBindType(addr: string): ParsedPort["bindType"] {
+  if (addr === "0.0.0.0" || addr === "::") return "external";
+  if (addr === "127.0.0.1" || addr === "::1") return "localhost";
+  return "specific";
+}
+
+const BIND_PRIORITY: Record<ParsedPort["bindType"], number> = { external: 3, specific: 2, localhost: 1 };
+
+export function parsePortsFull(portsStr: string): ParsedPort[] {
   if (!portsStr) return [];
-  const seen = new Set<string>();
-  const result: string[] = [];
+  const map = new Map<string, ParsedPort>();
   for (const part of portsStr.split(",")) {
-    const m = part.trim().match(/(?:[\d.]+):(\d+)->(\d+)\/\w+/);
-    if (m) {
-      const label = `${m[1]}→${m[2]}`;
-      if (!seen.has(label)) { seen.add(label); result.push(label); }
+    const m = part.trim().match(/^(.*):(\d+)->(\d+)\/(\w+)$/);
+    if (!m) continue;
+    const [, bindAddress, hostPort, containerPort, protocol] = m;
+    const label = `${hostPort}→${containerPort}`;
+    const bindType = getBindType(bindAddress);
+    const existing = map.get(label);
+    if (!existing || BIND_PRIORITY[bindType] > BIND_PRIORITY[existing.bindType]) {
+      map.set(label, { label, fullLabel: `${bindAddress}:${hostPort} → ${containerPort}/${protocol}`, bindAddress, hostPort, containerPort, protocol, bindType });
     }
   }
+  return [...map.values()];
+}
+
+export function parsePortsDetailed(portsStr: string): ParsedPort[] {
+  if (!portsStr) return [];
+  const seen = new Set<string>();
+  const result: ParsedPort[] = [];
+  for (const part of portsStr.split(",")) {
+    const raw = part.trim();
+    const m = raw.match(/^(.*):(\d+)->(\d+)\/(\w+)$/);
+    if (!m || seen.has(raw)) continue;
+    seen.add(raw);
+    const [, bindAddress, hostPort, containerPort, protocol] = m;
+    result.push({ label: `${hostPort}→${containerPort}`, fullLabel: `${bindAddress}:${hostPort} → ${containerPort}/${protocol}`, bindAddress, hostPort, containerPort, protocol, bindType: getBindType(bindAddress) });
+  }
   return result;
+}
+
+export function parsePorts(portsStr: string): string[] {
+  return parsePortsFull(portsStr).map(p => p.label);
 }
 
 export function getServicesFromCompose(composeContent: string): string[] {

@@ -68,3 +68,13 @@ export interface ComposeVersion {
   version: string;
   apiVersion?: string;
 }
+
+export interface ParsedPort {
+  label: string;
+  fullLabel: string;
+  bindAddress: string;
+  hostPort: string;
+  containerPort: string;
+  protocol: string;
+  bindType: "external" | "localhost" | "specific";
+}

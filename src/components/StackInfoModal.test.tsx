@@ -83,7 +83,7 @@ describe("StackInfoModal", () => {
   it("renders port label for mapped ports", async () => {
     mockSpawnSequence(mockProcess(containers), mockProcess(images), mockProcess(volumes));
     render(<StackInfoModal stack={stack} onClose={vi.fn()} />);
-    await waitFor(() => expect(screen.getByText("8080→80")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText("0.0.0.0:8080 → 80/tcp")).toBeInTheDocument());
   });
 
   it("shows empty state when no containers returned", async () => {

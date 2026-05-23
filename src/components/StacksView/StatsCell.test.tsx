@@ -30,7 +30,13 @@ describe("StatsCell", () => {
   });
 
   it("renders port labels when ports are present", () => {
-    mockUseContainerStats.mockReturnValue({ ports: ["8080→80", "443→443"], stats: null });
+    mockUseContainerStats.mockReturnValue({
+      ports: [
+        { label: "8080→80", fullLabel: "0.0.0.0:8080 → 80/tcp", bindAddress: "0.0.0.0", hostPort: "8080", containerPort: "80", protocol: "tcp", bindType: "external" },
+        { label: "443→443", fullLabel: "127.0.0.1:443 → 443/tcp", bindAddress: "127.0.0.1", hostPort: "443", containerPort: "443", protocol: "tcp", bindType: "localhost" },
+      ],
+      stats: null,
+    });
     render(<StatsCell stackName="myapp" status="running" />);
     expect(screen.getByText("8080→80")).toBeInTheDocument();
     expect(screen.getByText("443→443")).toBeInTheDocument();
@@ -48,7 +54,7 @@ describe("StatsCell", () => {
 
   it("renders both ports and stats when available", () => {
     mockUseContainerStats.mockReturnValue({
-      ports: ["8080→80"],
+      ports: [{ label: "8080→80", fullLabel: "0.0.0.0:8080 → 80/tcp", bindAddress: "0.0.0.0", hostPort: "8080", containerPort: "80", protocol: "tcp", bindType: "external" as const }],
       stats: { cpu: 0.2, mem: 10485760 },
     });
     render(<StatsCell stackName="myapp" status="partial" />);
