@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   Modal,
   ModalHeader,
@@ -7,55 +7,120 @@ import {
   Spinner,
   Alert,
   Button,
-  Toolbar,
-  ToolbarContent,
-  ToolbarItem,
+  Tabs,
+  Tab,
+  TabTitleText,
+  TextInput,
 } from "@patternfly/react-core";
-import type { Diagnostic } from "@codemirror/lint";
-import { type ComposeStack, readEnvFile, saveEnvFile } from "../api";
+import { PlusIcon } from "@patternfly/react-icons";
+import { type ComposeStack, readEnvFile, saveEnvFile, findEnvFiles } from "../api";
+import { EnvTable } from "./EnvTable";
 import { EnvEditor } from "./EnvEditor";
-import { lintEnvContent } from "./envLint";
 import "./YamlModal.css";
+import "./EnvModal.css";
 
 interface Props {
   stack: ComposeStack;
   onClose: () => void;
 }
 
+interface FileState {
+  content: string;
+  exists: boolean;
+}
+
 export function EnvModal({ stack, onClose }: Props) {
-  const [loading, setLoading] = useState(true);
+  const [scanning, setScanning] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [existed, setExisted] = useState(false);
-  const [editedContent, setEditedContent] = useState("");
+  const [envFiles, setEnvFiles] = useState<string[]>([]);
+  const [activeFile, setActiveFile] = useState<string>("");
+  const [fileCache, setFileCache] = useState<Record<string, FileState>>({});
+  const [loadingFile, setLoadingFile] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [diagnostics, setDiagnostics] = useState<Diagnostic[]>([]);
+  const [hasDuplicates, setHasDuplicates] = useState(false);
   const [confirmSave, setConfirmSave] = useState(false);
+  const [viewMode, setViewMode] = useState<"table" | "raw">("table");
+  const [addingFile, setAddingFile] = useState(false);
+  const [newFileName, setNewFileName] = useState("");
+  const newFileInputRef = useRef<HTMLInputElement>(null);
 
   const configFile = stack.ConfigFiles.split(",")[0].trim();
-  const envFile = configFile.substring(0, configFile.lastIndexOf("/") + 1) + ".env";
+  const dir = configFile.substring(0, configFile.lastIndexOf("/"));
+  const defaultEnv = dir + "/.env";
+
+  const loadFile = useCallback(async (path: string) => {
+    if (fileCache[path] !== undefined) return;
+    setLoadingFile(true);
+    try {
+      const result = await readEnvFile(path);
+      setFileCache(prev => ({ ...prev, [path]: result }));
+    } catch (ex: unknown) {
+      setError(ex instanceof Error ? ex.message : String(ex));
+    } finally {
+      setLoadingFile(false);
+    }
+  }, [fileCache]);
 
   useEffect(() => {
-    readEnvFile(envFile)
-      .then(({ content, exists }) => {
-        setEditedContent(content);
-        setExisted(exists);
-        setLoading(false);
-      })
-      .catch((ex: unknown) => {
-        setError(ex instanceof Error ? ex.message : String(ex));
-        setLoading(false);
-      });
-  }, [envFile]);
+    let raw = "";
+    const proc = findEnvFiles(dir);
+    proc.stream((data: string) => { raw += data; });
+    let firstFile = defaultEnv;
+    proc.then(() => {
+      const found = raw.split("\n").map(l => l.trim()).filter(Boolean).sort();
+      const files = found.length > 0 ? found : [defaultEnv];
+      firstFile = files[0];
+      setEnvFiles(files);
+      setActiveFile(files[0]);
+      return readEnvFile(files[0]);
+    }).then((result: FileState) => {
+      setFileCache({ [firstFile]: result });
+      setScanning(false);
+    }).catch((ex: unknown) => {
+      setError(ex instanceof Error ? ex.message : String(ex));
+      setScanning(false);
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Focus the new-file input when the form opens
+  useEffect(() => {
+    if (addingFile) newFileInputRef.current?.focus();
+  }, [addingFile]);
+
+  const handleTabChange = async (_e: unknown, key: string | number) => {
+    const path = String(key);
+    setActiveFile(path);
+    await loadFile(path);
+  };
+
+  const handleContentChange = (content: string) => {
+    setFileCache(prev => ({
+      ...prev,
+      [activeFile]: { content, exists: prev[activeFile]?.exists ?? false },
+    }));
+  };
+
+  const handleAddFile = () => {
+    const name = newFileName.trim();
+    if (!name) return;
+    const path = dir + "/" + name;
+    setAddingFile(false);
+    setNewFileName("");
+    if (envFiles.includes(path)) {
+      setActiveFile(path);
+      return;
+    }
+    setEnvFiles(prev => [...prev, path]);
+    setFileCache(prev => ({ ...prev, [path]: { content: "", exists: false } }));
+    setActiveFile(path);
+  };
 
   const handleSave = async () => {
-    const syncDiagnostics = lintEnvContent(editedContent);
-    setDiagnostics(syncDiagnostics);
-
-    if (syncDiagnostics.some(d => d.severity === "error" || d.severity === "warning")) {
+    if (viewMode === "table" && hasDuplicates) {
       setConfirmSave(true);
       return;
     }
-
     await performSave();
   };
 
@@ -64,7 +129,9 @@ export function EnvModal({ stack, onClose }: Props) {
     setError(null);
     setConfirmSave(false);
     try {
-      await saveEnvFile(envFile, editedContent);
+      for (const [path, state] of Object.entries(fileCache)) {
+        await saveEnvFile(path, state.content);
+      }
       onClose();
     } catch (ex: unknown) {
       setError(ex instanceof Error ? ex.message : String(ex));
@@ -72,22 +139,16 @@ export function EnvModal({ stack, onClose }: Props) {
     }
   };
 
+  const activeState = fileCache[activeFile];
+  const loading = scanning || loadingFile;
+  const basename = (path: string) => path.substring(path.lastIndexOf("/") + 1);
+
   return (
     <>
     <Modal isOpen onClose={onClose} variant="large" aria-label={`Env file — ${stack.Name}`}>
       <ModalHeader title={`${stack.Name} — env file`} />
       <ModalBody style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}>
         <div className="ym-body">
-          {!loading && (
-            <Toolbar style={{ paddingInline: 0, marginBottom: "0.75rem", flexShrink: 0 }}>
-              <ToolbarContent>
-                <ToolbarItem>
-                  <code className="ym-config-file">{envFile}</code>
-                </ToolbarItem>
-              </ToolbarContent>
-            </Toolbar>
-          )}
-
           {loading ? (
             <div className="ym-loading">
               <Spinner />
@@ -101,7 +162,78 @@ export function EnvModal({ stack, onClose }: Props) {
                   {error}
                 </Alert>
               )}
-              <EnvEditor content={editedContent} onChange={setEditedContent} onDiagnosticsChange={setDiagnostics} />
+
+              {/* Tab bar + add new file */}
+              <div className="env-tab-bar">
+                <Tabs activeKey={activeFile} onSelect={handleTabChange}>
+                  {envFiles.map(path => (
+                    <Tab key={path} eventKey={path} title={<TabTitleText>{basename(path)}</TabTitleText>} />
+                  ))}
+                </Tabs>
+                {addingFile ? (
+                  <div className="env-new-file-form">
+                    <TextInput
+                      ref={newFileInputRef}
+                      value={newFileName}
+                      onChange={(_e, v) => setNewFileName(v)}
+                      onKeyDown={e => {
+                        if (e.key === "Enter") handleAddFile();
+                        if (e.key === "Escape") { setAddingFile(false); setNewFileName(""); }
+                      }}
+                      placeholder=".env.prod"
+                      aria-label="New env file name"
+                    />
+                    <Button variant="primary" size="sm" onClick={handleAddFile} isDisabled={!newFileName.trim()} aria-label="Create file">
+                      Create
+                    </Button>
+                    <Button variant="plain" onClick={() => { setAddingFile(false); setNewFileName(""); }} aria-label="Cancel">
+                      ✕
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    variant="plain"
+                    aria-label="Add new env file"
+                    title="Create a new env file"
+                    onClick={() => setAddingFile(true)}
+                  >
+                    <PlusIcon />
+                  </Button>
+                )}
+              </div>
+
+              {/* Path + view toggle */}
+              <div className="env-toolbar">
+                <code className="ym-config-file">{activeFile}</code>
+                <div className="env-view-toggle">
+                  <Button
+                    variant={viewMode === "table" ? "primary" : "secondary"}
+                    size="sm"
+                    onClick={() => setViewMode("table")}
+                  >
+                    Table
+                  </Button>
+                  <Button
+                    variant={viewMode === "raw" ? "primary" : "secondary"}
+                    size="sm"
+                    onClick={() => setViewMode("raw")}
+                  >
+                    Raw
+                  </Button>
+                </div>
+              </div>
+
+              {/* Editor */}
+              {activeState && viewMode === "table" && (
+                <EnvTable
+                  content={activeState.content}
+                  onChange={handleContentChange}
+                  onDuplicatesChange={setHasDuplicates}
+                />
+              )}
+              {activeState && viewMode === "raw" && (
+                <EnvEditor content={activeState.content} onChange={handleContentChange} />
+              )}
             </>
           )}
         </div>
@@ -112,7 +244,7 @@ export function EnvModal({ stack, onClose }: Props) {
             Cancel
           </Button>
           <Button variant="primary" onClick={handleSave} isLoading={saving}>
-            {existed ? "Save" : "Create"}
+            {activeState?.exists ? "Save" : "Create"}
           </Button>
         </ModalFooter>
       )}
@@ -122,16 +254,9 @@ export function EnvModal({ stack, onClose }: Props) {
       <Modal isOpen variant="small" onClose={() => setConfirmSave(false)} aria-label="Confirm save">
         <ModalHeader title="Save with issues?" />
         <ModalBody>
-          {diagnostics.some(d => d.severity === "error") && (
-            <Alert variant="danger" isInline title="Errors found" style={{ marginBottom: "1rem" }}>
-              There {diagnostics.filter(d => d.severity === "error").length === 1 ? "is" : "are"} {diagnostics.filter(d => d.severity === "error").length} error(s) in your env file.
-            </Alert>
-          )}
-          {diagnostics.some(d => d.severity === "warning") && (
-            <Alert variant="warning" isInline title="Warnings found">
-              There {diagnostics.filter(d => d.severity === "warning").length === 1 ? "is" : "are"} {diagnostics.filter(d => d.severity === "warning").length} warning(s) in your env file.
-            </Alert>
-          )}
+          <Alert variant="warning" isInline title="Duplicate keys found">
+            Your env file contains duplicate keys. Only the last value for each key will be used.
+          </Alert>
           <p className="ym-confirm-note">Do you want to save anyway?</p>
         </ModalBody>
         <ModalFooter>

@@ -1,0 +1,45 @@
+.env-table-wrap {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.env-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.env-table thead th {
+  text-align: left;
+  font-size: var(--pf-t--global--font-size--sm);
+  font-weight: var(--pf-t--global--font-weight--body--bold);
+  color: var(--pf-t--global--text--color--subtle);
+  padding: 0.25rem 0.5rem 0.5rem;
+  border-bottom: 1px solid var(--pf-t--global--border--color--default);
+}
+
+.env-col-key { width: 35%; }
+.env-col-value { width: 55%; }
+.env-col-actions { width: 10%; text-align: right; white-space: nowrap; }
+
+.env-row-entry td {
+  padding: 0.25rem 0.5rem;
+  vertical-align: middle;
+}
+
+.env-row-comment td {
+  padding: 0.25rem 0.5rem;
+}
+
+.env-comment-text {
+  font-family: var(--pf-t--global--font-family--mono);
+  font-size: var(--pf-t--global--font-size--sm);
+  color: var(--pf-t--global--text--color--subtle);
+}
+
+.env-add-btn {
+  margin-top: 0.5rem;
+  align-self: flex-start;
+}
