@@ -298,6 +298,10 @@ export function CreateStackModal({ stacks, onClose, onCreated }: Props) {
               </div>
             </FormGroup>
 
+            <Alert variant="warning" isInline title="Directory ownership depends on your privilege mode" className="csm-setup-error">
+              The created directory and compose file will be owned by the user running this action — either your regular user (limited mode) or root (superuser mode). Containers started later may run with a different UID and encounter permission errors on bind-mounted paths. This is expected behavior: some images work fine, others require specific ownership. Adjust <code>user:</code>, volume permissions, or run mode as needed for your stack.
+            </Alert>
+
             {setupError && (
               <Alert variant="danger" isInline title={setupError} className="csm-setup-error" />
             )}
