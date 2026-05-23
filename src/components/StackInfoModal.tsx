@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, type ComponentType, type CSSProperties } from "react";
 import {
   Modal,
   ModalHeader,
@@ -7,20 +7,27 @@ import {
   Alert,
   Label,
 } from "@patternfly/react-core";
-import { CheckCircleIcon, ExclamationTriangleIcon, InProgressIcon } from "@patternfly/react-icons";
+import { CheckCircleIcon, ExclamationTriangleIcon, GlobeIcon, InProgressIcon, LaptopIcon, NetworkIcon } from "@patternfly/react-icons";
 import {
   type ComposeStack,
   type ComposeContainer,
   type ComposeImage,
   type ComposeVolume,
+  type ParsedPort,
   listContainers,
   listImages,
   listVolumes,
   parseJsonOutput,
-  parsePorts,
+  parsePortsDetailed,
   formatBytes,
 } from "../api";
 import "./StackInfoModal.css";
+
+const MODAL_BIND_ICONS: Record<ParsedPort["bindType"], { Icon: ComponentType<{ color?: string; style?: CSSProperties }>; color: string; label: string }> = {
+  external: { Icon: GlobeIcon,   color: "currentColor", label: "all interfaces" },
+  localhost: { Icon: LaptopIcon, color: "currentColor", label: "localhost" },
+  specific:  { Icon: NetworkIcon, color: "currentColor", label: "specific IP" },
+};
 
 interface Props {
   stack: ComposeStack;
@@ -117,7 +124,7 @@ export function StackInfoModal({ stack, onClose }: Props) {
               {containers.map(c => {
                 const isRunning = c.State?.toLowerCase() === "running";
                 const health = c.Health?.toLowerCase();
-                const ports = parsePorts(c.Ports);
+                const ports = parsePortsDetailed(c.Ports);
                 return (
                   <div key={c.ID || c.Name} className="sim-container-card">
                     <div className="sim-card-header">
@@ -171,16 +178,20 @@ export function StackInfoModal({ stack, onClose }: Props) {
 
                     {ports.length > 0 && (
                       <div className="sim-card-ports">
-                        {ports.map(p => (
-                          <Label
-                            key={p}
-                            isCompact
-                            color="blue"
-                            style={{ fontFamily: "var(--pf-t--global--font--family--mono)", fontSize: "0.72rem" }}
-                          >
-                            {p}
-                          </Label>
-                        ))}
+                        {ports.map(p => {
+                          const { Icon, color } = MODAL_BIND_ICONS[p.bindType];
+                          return (
+                            <Label
+                              key={p.fullLabel}
+                              isCompact
+                              color="blue"
+                              style={{ fontFamily: "var(--pf-t--global--font--family--mono)", fontSize: "0.72rem" }}
+                            >
+                              <Icon color={color} style={{ marginRight: "0.2rem", verticalAlign: "middle" }} />
+                              {p.fullLabel}
+                            </Label>
+                          );
+                        })}
                       </div>
                     )}
                   </div>

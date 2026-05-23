@@ -1,5 +1,7 @@
-import { Label, Spinner } from "@patternfly/react-core";
-import type { StackStatus } from "../../api";
+import type { ComponentType, CSSProperties } from "react";
+import { Label, Spinner, Tooltip } from "@patternfly/react-core";
+import { GlobeIcon, LaptopIcon, NetworkIcon } from "@patternfly/react-icons";
+import type { ParsedPort, StackStatus } from "../../api";
 import { formatBytes } from "../../api";
 import { useContainerStats } from "../../hooks/useContainerStats";
 import "./StatsCell.css";
@@ -7,6 +9,21 @@ import "./StatsCell.css";
 interface StatsCellProps {
   stackName: string;
   status: StackStatus;
+}
+
+const BIND_ICON_CONFIG: Record<ParsedPort["bindType"], { Icon: ComponentType<{ color?: string; style?: CSSProperties }>; color: string; tooltip: string }> = {
+  external: { Icon: GlobeIcon,   color: "currentColor", tooltip: "Exposed on all interfaces — open stack info for full details" },
+  localhost: { Icon: LaptopIcon, color: "currentColor", tooltip: "Bound to localhost only — open stack info for full details" },
+  specific:  { Icon: NetworkIcon, color: "currentColor", tooltip: "Bound to a specific IP — open stack info for full details" },
+};
+
+function PortBindIcon({ bindType }: { bindType: ParsedPort["bindType"] }) {
+  const { Icon, color, tooltip } = BIND_ICON_CONFIG[bindType];
+  return (
+    <Tooltip content={tooltip}>
+      <Icon color={color} style={{ marginRight: "0.2rem", verticalAlign: "middle" }} />
+    </Tooltip>
+  );
 }
 
 export function StatsCell({ stackName, status }: StatsCellProps) {
@@ -22,12 +39,13 @@ export function StatsCell({ stackName, status }: StatsCellProps) {
         <div className="sc-ports">
           {ports.map(p => (
             <Label
-              key={p}
+              key={p.label}
               isCompact
               color="blue"
               style={{ fontFamily: "var(--pf-t--global--font--family--mono)", fontSize: "0.7rem" }}
             >
-              {p}
+              <PortBindIcon bindType={p.bindType} />
+              {p.label}
             </Label>
           ))}
         </div>
