@@ -16,6 +16,9 @@
 
 .ct-name {
   font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
 }
 
 .ct-image {

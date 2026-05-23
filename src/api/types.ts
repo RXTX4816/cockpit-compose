@@ -10,6 +10,7 @@ export interface ComposeContainer {
   Image: string;
   State: string;
   Status: string;
+  Health?: string;
   Ports: string;
   Service: string;
 }

@@ -1,6 +1,6 @@
 export type { ComposeStack, ComposeContainer, StackStatus, ContainerStats, Snapshot, ComposeImage, ComposeVolume, ComposeEvent, ComposeTopEntry, ComposeVersion } from "./types";
 export { detectComposeCommand, compose, composeFileSuperuser } from "./cockpit";
-export { parseStackStatus, parseServiceCount, getHealthStatus, parsePorts, getServicesFromCompose, getProjectNameFromCompose, getComposeProjectNameFromEnv } from "./parsing";
+export { parseStackStatus, parseServiceCount, parsePorts, getServicesFromCompose, getProjectNameFromCompose, getComposeProjectNameFromEnv } from "./parsing";
 export { listStacks, startStack, stopStack, restartStack, streamLogs, downStack, upStackStream, pullStack, pauseStack, unpauseStack, killStack, listImages, listVolumes, streamEvents, composeTop, composeVersion, listProjectContainerImageRefs, listImagesByRepo, listAllContainerImages, removeImages, listStoppedContainers, listDanglingVolumes, listProjectNetworks, inspectNetworkContainerCounts, pruneContainers, pruneVolumes, pruneNetworks } from "./stacks";
 export { listContainers, getContainerStats } from "./containers";
 export { readComposeFile, saveComposeFile, saveSnapshot, listSnapshots, restoreSnapshot, deleteSnapshot, readEnvFile, saveEnvFile, findComposeFiles, createDirectory, makeTempDir, fetchComposeFromGit, removeDirectory, removeFile } from "./files";
