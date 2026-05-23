@@ -329,6 +329,36 @@ describe("CreateStackModal — step 2 git url", () => {
     expect(screen.getByRole("button", { name: /Create/i })).toBeDisabled();
   });
 
+  it("rejects non-https URL without cloning", async () => {
+    render(<CreateStackModal {...defaultProps} />);
+    await fillSetupAndAdvance("git");
+    fireEvent.change(screen.getByPlaceholderText(/github.com/i), {
+      target: { value: "file:///etc/passwd" },
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /Fetch/i }));
+    });
+    await waitFor(() => {
+      expect(screen.getByText(/only http/i)).toBeInTheDocument();
+    });
+    expect(mockFetchComposeFromGit).not.toHaveBeenCalled();
+  });
+
+  it("rejects non-URL string without cloning", async () => {
+    render(<CreateStackModal {...defaultProps} />);
+    await fillSetupAndAdvance("git");
+    fireEvent.change(screen.getByPlaceholderText(/github.com/i), {
+      target: { value: "../../../etc/passwd" },
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /Fetch/i }));
+    });
+    await waitFor(() => {
+      expect(screen.getByText(/only http/i)).toBeInTheDocument();
+    });
+    expect(mockFetchComposeFromGit).not.toHaveBeenCalled();
+  });
+
   it("successful fetch shows editor and security warning", async () => {
     const yaml = "services:\n  app:\n    image: test:latest\n";
     mockMakeTempDir.mockImplementation(() => mockProcess("/tmp/test123\n"));
