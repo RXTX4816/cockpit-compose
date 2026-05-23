@@ -47,6 +47,7 @@ export default [
         HTMLSelectElement: "readonly",
         HTMLTextAreaElement: "readonly",
         requestAnimationFrame: "readonly",
+        URL: "readonly",
       },
     },
     plugins: {

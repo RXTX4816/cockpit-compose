@@ -108,6 +108,18 @@ export function CreateStackModal({ stacks, onClose, onCreated }: Props) {
   }, [composeDir, stackName]);
 
   const handleFetchGit = useCallback(async () => {
+    const url = gitUrl.trim();
+    try {
+      const parsed = new URL(url);
+      if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+        setGitError("Only http:// and https:// URLs are supported");
+        return;
+      }
+    } catch {
+      setGitError("Invalid URL — only http:// and https:// URLs are supported");
+      return;
+    }
+
     setFetching(true);
     setGitError(null);
     setFetchedYaml(null);
@@ -119,7 +131,7 @@ export function CreateStackModal({ stacks, onClose, onCreated }: Props) {
       await mkProc;
       tmpDir = tmpOut.trim();
 
-      const cloneProc = fetchComposeFromGit(gitUrl.trim(), tmpDir);
+      const cloneProc = fetchComposeFromGit(url, tmpDir);
       await cloneProc;
 
       // Try to read compose file from repo root

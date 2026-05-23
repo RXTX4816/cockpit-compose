@@ -72,7 +72,12 @@ export function makeTempDir(): CockpitProcess {
 
 // Shallow-clone repo to caller-provided tmpdir. Caller reads compose file then calls removeDirectory.
 export function fetchComposeFromGit(url: string, tmpDir: string, superuser?: "try"): CockpitProcess {
-  return cockpit.spawn(["git", "clone", "--depth", "1", "--", url, tmpDir], { superuser, err: "out" });
+  return cockpit.spawn(
+    ["git", "clone", "--depth", "1", "--no-local",
+     "--config", "core.hooksPath=/dev/null",
+     "--filter=blob:none", "--", url, tmpDir],
+    { superuser, err: "out" },
+  );
 }
 
 export function removeDirectory(path: string, superuser?: "try"): CockpitProcess {
