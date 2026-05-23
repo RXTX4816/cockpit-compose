@@ -18,15 +18,6 @@ export function parseServiceCount(status: string): number {
   return matches.reduce((sum, m) => sum + parseInt(m.replace(/[()]/g, ""), 10), 0);
 }
 
-export function getHealthStatus(status: string): "healthy" | "partial" | "unhealthy" {
-  const lower = status.toLowerCase();
-  const hasRunning = /running\(\d+\)/.test(lower);
-  const hasExited = /exit|stopped/.test(lower);
-  if (hasRunning && !hasExited) return "healthy";
-  if (hasRunning && hasExited) return "partial";
-  return "unhealthy";
-}
-
 export function parsePorts(portsStr: string): string[] {
   if (!portsStr) return [];
   const seen = new Set<string>();

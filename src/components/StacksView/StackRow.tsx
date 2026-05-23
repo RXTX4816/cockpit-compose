@@ -6,7 +6,6 @@ import {
   DataListItemCells,
   DataListCell,
   DataListContent,
-  Label,
   Alert,
   Button,
   Dropdown,
@@ -20,7 +19,6 @@ import {
   type ComposeStack,
   parseStackStatus,
   parseServiceCount,
-  getHealthStatus,
 } from "../../api";
 import { useStackActions } from "../../hooks/useStackActions";
 import { useStackContainers } from "../../hooks/useStackContainers";
@@ -52,7 +50,6 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
   const [menuOpen, setMenuOpen] = useState(false);
 
   const status = parseStackStatus(stack.Status);
-  const health = getHealthStatus(stack.Status);
   const count = parseServiceCount(stack.Status);
   const configFile = stack.ConfigFiles.split(",")[0].trim();
 
@@ -87,12 +84,6 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
             <DataListCell key="name" width={2}>
               <span className="sr-name-cell">
                 <StatusLabel status={status} />
-                <Label
-                  color={health === "healthy" ? "green" : health === "partial" ? "orange" : "grey"}
-                  isCompact
-                >
-                  {health === "healthy" ? "✓ Healthy" : health === "partial" ? "⚠ Partial" : "Unhealthy"}
-                </Label>
                 <span id={`stack-${stack.Name}`} className="sr-stack-name">
                   {stack.Name}
                 </span>

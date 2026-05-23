@@ -7,6 +7,7 @@ import {
   Alert,
   Label,
 } from "@patternfly/react-core";
+import { ExclamationTriangleIcon, InProgressIcon } from "@patternfly/react-icons";
 import {
   type ComposeStack,
   type ComposeContainer,
@@ -115,12 +116,25 @@ export function StackInfoModal({ stack, onClose }: Props) {
             <div className="sim-container-list">
               {containers.map(c => {
                 const isRunning = c.State?.toLowerCase() === "running";
+                const health = c.Health?.toLowerCase();
                 const ports = parsePorts(c.Ports);
                 return (
                   <div key={c.ID || c.Name} className="sim-container-card">
                     <div className="sim-card-header">
                       <Label color={isRunning ? "green" : "grey"} isCompact>{c.State || "unknown"}</Label>
                       <span className="sim-card-service">{c.Service || c.Name}</span>
+                      {health === "unhealthy" && (
+                        <ExclamationTriangleIcon
+                          color="var(--pf-t--global--icon--color--status--warning--default)"
+                          title="Health check failing"
+                        />
+                      )}
+                      {health === "starting" && (
+                        <InProgressIcon
+                          color="var(--pf-t--global--icon--color--status--info--default)"
+                          title="Health check starting"
+                        />
+                      )}
                     </div>
 
                     <div className="sim-card-grid">
@@ -138,6 +152,13 @@ export function StackInfoModal({ stack, onClose }: Props) {
                         <>
                           <span>Uptime</span>
                           <span>{c.Status}</span>
+                        </>
+                      )}
+
+                      {health && (
+                        <>
+                          <span>Health</span>
+                          <span>{c.Health}</span>
                         </>
                       )}
                     </div>

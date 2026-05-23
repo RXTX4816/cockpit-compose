@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { parseJsonOutput, parseStackStatus, parseServiceCount, getHealthStatus, parsePorts, getServicesFromCompose, getProjectNameFromCompose, getComposeProjectNameFromEnv } from ".";
+import { parseJsonOutput, parseStackStatus, parseServiceCount, parsePorts, getServicesFromCompose, getProjectNameFromCompose, getComposeProjectNameFromEnv } from ".";
 
 describe("parseJsonOutput", () => {
   it("parses JSON array format", () => {
@@ -62,27 +62,6 @@ describe("parseServiceCount", () => {
 
   it("returns 0 for empty status", () => {
     expect(parseServiceCount("")).toBe(0);
-  });
-});
-
-describe("getHealthStatus", () => {
-  it("returns 'healthy' when all running", () => {
-    const status = "running(3)";
-    expect(getHealthStatus(status)).toBe("healthy");
-  });
-
-  it("returns 'partial' when some running", () => {
-    const status = "running(1), exit(2)";
-    expect(getHealthStatus(status)).toBe("partial");
-  });
-
-  it("returns 'unhealthy' when none running", () => {
-    const status = "exit(3)";
-    expect(getHealthStatus(status)).toBe("unhealthy");
-  });
-
-  it("returns 'unhealthy' for invalid status", () => {
-    expect(getHealthStatus("invalid")).toBe("unhealthy");
   });
 });
 
