@@ -55,7 +55,8 @@
   color: #6e7681;
   font-size: 0.7rem;
   align-self: center;
-  white-space: nowrap;
+  white-space: pre-line;
+  text-align: center;
   padding-right: 0.5rem;
 }
 

@@ -18,10 +18,14 @@ export function serviceColor(name: string): string {
 export function fmtTimestamp(ts: string): string {
   try {
     const d = new Date(ts);
-    if (isNaN(d.getTime())) return ts.slice(11, 19);
-    return d.toLocaleTimeString([], { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    if (isNaN(d.getTime())) return ts.slice(11, 16);
+    const day   = String(d.getDate()).padStart(2, "0");
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const year  = d.getFullYear();
+    const time  = d.toLocaleTimeString([], { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    return `${day}-${month}-${year}\n${time}`;
   } catch {
-    return ts.slice(11, 19);
+    return ts.slice(11, 16);
   }
 }
 

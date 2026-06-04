@@ -40,12 +40,32 @@ describe("useLogStream", () => {
     await waitFor(() => expect(result.current.streaming).toBe(false));
   });
 
-  it("stop() closes process and sets streaming=false", async () => {
+  it("pause() sets paused=true", async () => {
     mockSpawn.mockReturnValue(mockProcess(""));
     const { result } = renderHook(() => useLogStream("myapp"));
-    act(() => { result.current.stop(); });
-    expect(result.current.streaming).toBe(false);
+    act(() => { result.current.pause(); });
+    expect(result.current.paused).toBe(true);
     await act(async () => {});
+  });
+
+  it("resume() sets paused=false", async () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    const { result } = renderHook(() => useLogStream("myapp"));
+    act(() => { result.current.pause(); });
+    act(() => { result.current.resume(); });
+    expect(result.current.paused).toBe(false);
+    await act(async () => {});
+  });
+
+  it("restart() clears lines and starts a fresh stream", async () => {
+    mockSpawn.mockReturnValue(mockProcess("line1\n"));
+    const { result } = renderHook(() => useLogStream("myapp"));
+    await waitFor(() => expect(result.current.lines).toContain("line1"));
+
+    mockSpawn.mockReturnValue(mockProcess("line2\n"));
+    act(() => { result.current.restart(); });
+
+    await waitFor(() => expect(result.current.lines).toEqual(["line2"]));
   });
 
   it("clear() empties lines", async () => {
