@@ -21,7 +21,10 @@ beforeEach(() => {
   mockUseLogStream.mockReturnValue({
     lines: [],
     streaming: true,
-    stop: vi.fn(),
+    paused: false,
+    pause: vi.fn(),
+    resume: vi.fn(),
+    restart: vi.fn(),
     clear: vi.fn(),
   });
 });
@@ -37,30 +40,68 @@ describe("LogsModal", () => {
     expect(screen.getByText(/Waiting for logs/i)).toBeInTheDocument();
   });
 
-  it("shows Stop button while streaming", () => {
+  it("shows Pause button while streaming", () => {
     render(<LogsModal stack={stack} onClose={vi.fn()} />);
-    expect(screen.getByRole("button", { name: /Stop/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Pause/i })).toBeInTheDocument();
   });
 
-  it("calls stop() when Stop button clicked", () => {
-    const stop = vi.fn();
-    mockUseLogStream.mockReturnValue({ lines: [], streaming: true, stop, clear: vi.fn() });
+  it("calls pause() when Pause button clicked", () => {
+    const pause = vi.fn();
+    mockUseLogStream.mockReturnValue({ lines: [], streaming: true, paused: false, pause, resume: vi.fn(), restart: vi.fn(), clear: vi.fn() });
     render(<LogsModal stack={stack} onClose={vi.fn()} />);
-    fireEvent.click(screen.getByRole("button", { name: /Stop/i }));
-    expect(stop).toHaveBeenCalledOnce();
+    fireEvent.click(screen.getByRole("button", { name: /Pause/i }));
+    expect(pause).toHaveBeenCalledOnce();
   });
 
-  it("does not show Stop button when not streaming", () => {
-    mockUseLogStream.mockReturnValue({ lines: [], streaming: false, stop: vi.fn(), clear: vi.fn() });
+  it("shows Continue button when streaming and paused", () => {
+    mockUseLogStream.mockReturnValue({ lines: [], streaming: true, paused: true, pause: vi.fn(), resume: vi.fn(), restart: vi.fn(), clear: vi.fn() });
     render(<LogsModal stack={stack} onClose={vi.fn()} />);
-    expect(screen.queryByRole("button", { name: /Stop/i })).toBeNull();
+    expect(screen.getByRole("button", { name: /Continue/i })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Pause/i })).toBeNull();
+  });
+
+  it("calls resume() when Continue button clicked", () => {
+    const resume = vi.fn();
+    mockUseLogStream.mockReturnValue({ lines: [], streaming: true, paused: true, pause: vi.fn(), resume, restart: vi.fn(), clear: vi.fn() });
+    render(<LogsModal stack={stack} onClose={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: /Continue/i }));
+    expect(resume).toHaveBeenCalledOnce();
+  });
+
+  it("hides spinner when paused", () => {
+    mockUseLogStream.mockReturnValue({ lines: [], streaming: true, paused: true, pause: vi.fn(), resume: vi.fn(), restart: vi.fn(), clear: vi.fn() });
+    render(<LogsModal stack={stack} onClose={vi.fn()} />);
+    expect(document.querySelector(".pf-v6-c-spinner")).toBeNull();
+  });
+
+  it("does not show Pause or Continue button when not streaming", () => {
+    mockUseLogStream.mockReturnValue({ lines: [], streaming: false, paused: false, pause: vi.fn(), resume: vi.fn(), restart: vi.fn(), clear: vi.fn() });
+    render(<LogsModal stack={stack} onClose={vi.fn()} />);
+    expect(screen.queryByRole("button", { name: /Pause/i })).toBeNull();
+    expect(screen.queryByRole("button", { name: /Continue/i })).toBeNull();
+  });
+
+  it("always shows Refresh button", () => {
+    render(<LogsModal stack={stack} onClose={vi.fn()} />);
+    expect(screen.getByRole("button", { name: /Refresh/i })).toBeInTheDocument();
+  });
+
+  it("calls restart() when Refresh button clicked", () => {
+    const restart = vi.fn();
+    mockUseLogStream.mockReturnValue({ lines: [], streaming: true, paused: false, pause: vi.fn(), resume: vi.fn(), restart, clear: vi.fn() });
+    render(<LogsModal stack={stack} onClose={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: /Refresh/i }));
+    expect(restart).toHaveBeenCalledOnce();
   });
 
   it("shows Clear button when there are lines", () => {
     mockUseLogStream.mockReturnValue({
       lines: ["line1", "line2"],
       streaming: false,
-      stop: vi.fn(),
+      paused: false,
+      pause: vi.fn(),
+      resume: vi.fn(),
+      restart: vi.fn(),
       clear: vi.fn(),
     });
     render(<LogsModal stack={stack} onClose={vi.fn()} />);
@@ -69,7 +110,7 @@ describe("LogsModal", () => {
 
   it("calls clear() when Clear button clicked", () => {
     const clear = vi.fn();
-    mockUseLogStream.mockReturnValue({ lines: ["line1"], streaming: false, stop: vi.fn(), clear });
+    mockUseLogStream.mockReturnValue({ lines: ["line1"], streaming: false, paused: false, pause: vi.fn(), resume: vi.fn(), restart: vi.fn(), clear });
     render(<LogsModal stack={stack} onClose={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: /Clear/i }));
     expect(clear).toHaveBeenCalledOnce();
@@ -79,7 +120,10 @@ describe("LogsModal", () => {
     mockUseLogStream.mockReturnValue({
       lines: ["myapp-web-1  | 2024-01-01T00:00:00Z  hello from web"],
       streaming: false,
-      stop: vi.fn(),
+      paused: false,
+      pause: vi.fn(),
+      resume: vi.fn(),
+      restart: vi.fn(),
       clear: vi.fn(),
     });
     render(<LogsModal stack={stack} onClose={vi.fn()} />);
@@ -87,11 +131,14 @@ describe("LogsModal", () => {
   });
 
   it("shows limit notice when at LOG_MAX_LINES", () => {
-    const MAX = 500; // matches LOG_MAX_LINES constant
+    const MAX = 500;
     mockUseLogStream.mockReturnValue({
       lines: Array.from({ length: MAX }, (_, i) => `line${i}`),
       streaming: false,
-      stop: vi.fn(),
+      paused: false,
+      pause: vi.fn(),
+      resume: vi.fn(),
+      restart: vi.fn(),
       clear: vi.fn(),
     });
     render(<LogsModal stack={stack} onClose={vi.fn()} />);

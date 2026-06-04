@@ -41,19 +41,19 @@ describe("serviceColor", () => {
 });
 
 describe("fmtTimestamp", () => {
-  it("formats a valid ISO timestamp to HH:MM:SS", () => {
+  it("formats a valid ISO timestamp to DD-MM-YYYY\\nHH:MM", () => {
     const result = fmtTimestamp("2024-01-15T14:30:45.000Z");
-    expect(result).toMatch(/\d{2}:\d{2}:\d{2}/);
+    expect(result).toMatch(/\d{2}-\d{2}-\d{4}\n\d{2}:\d{2}:\d{2}/);
   });
 
-  it("falls back to slicing chars 11-19 for invalid timestamps", () => {
-    // "invalid-ts-xyz"[11:19] = "xyz"
+  it("falls back to slicing chars 11-16 for invalid timestamps", () => {
+    // "invalid-ts-xyz"[11:16] = "xyz"
     expect(fmtTimestamp("invalid-ts-xyz")).toBe("xyz");
   });
 
   it("handles timestamps without Z suffix", () => {
     const result = fmtTimestamp("2024-01-15T10:20:30");
-    expect(result).toMatch(/\d{2}:\d{2}:\d{2}/);
+    expect(result).toMatch(/\d{2}-\d{2}-\d{4}\n\d{2}:\d{2}:\d{2}/);
   });
 });
 
@@ -201,7 +201,7 @@ describe("parseLine", () => {
 
   it("extracts timestamp when present", () => {
     const result = parseLine("db-1  | 2024-01-15T10:20:30.000Z connected");
-    expect(result.timestamp).toMatch(/\d{2}:\d{2}:\d{2}/);
+    expect(result.timestamp).toMatch(/\d{2}-\d{2}-\d{4}\n\d{2}:\d{2}:\d{2}/);
     expect(result.message).toBe("connected");
   });
 

@@ -61,14 +61,24 @@ interface Props {
 }
 
 export function LogsModal({ stack, onClose }: Props) {
-  const { lines, streaming, stop, clear } = useLogStream(stack.Name);
+  const { lines, streaming, paused, pause, resume, restart, clear } = useLogStream(stack.Name);
   const logRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight;
-  }, [lines]);
+    if (!paused && logRef.current) {
+      logRef.current.scrollTop = logRef.current.scrollHeight;
+    }
+  }, [lines, paused]);
 
-  const parsedLines = useMemo(() => lines.map(parseLine), [lines]);
+  const parsedLines = useMemo(() => {
+    const parsed = lines.map(parseLine);
+    parsed.sort((a, b) => {
+      const ta = a.raw.match(/\d{4}-\d{2}-\d{2}T[\d:.]+Z?/)?.[0] ?? "";
+      const tb = b.raw.match(/\d{4}-\d{2}-\d{2}T[\d:.]+Z?/)?.[0] ?? "";
+      return ta < tb ? -1 : ta > tb ? 1 : 0;
+    });
+    return parsed;
+  }, [lines]);
 
   return (
     <Modal isOpen onClose={onClose} variant="large" width="95vw" maxWidth="95vw" aria-label={`Logs — ${stack.Name}`}>
@@ -76,14 +86,20 @@ export function LogsModal({ stack, onClose }: Props) {
       <ModalBody>
         <Toolbar style={{ paddingInline: 0, marginBottom: "0.5rem" }}>
           <ToolbarContent>
-            {streaming && (
-              <>
-                <ToolbarItem><Spinner size="sm" /></ToolbarItem>
-                <ToolbarItem>
-                  <Button variant="secondary" size="sm" onClick={stop}>Stop</Button>
-                </ToolbarItem>
-              </>
+            {streaming && !paused && (
+              <ToolbarItem><Spinner size="sm" /></ToolbarItem>
             )}
+            {streaming && (
+              <ToolbarItem>
+                {paused
+                  ? <Button variant="primary" size="sm" onClick={resume}>Continue</Button>
+                  : <Button variant="secondary" size="sm" onClick={pause}>Pause</Button>
+                }
+              </ToolbarItem>
+            )}
+            <ToolbarItem>
+              <Button variant="secondary" size="sm" onClick={restart}>Refresh</Button>
+            </ToolbarItem>
             {lines.length > 0 && (
               <ToolbarItem>
                 <Button variant="plain" size="sm" onClick={clear}>Clear</Button>
