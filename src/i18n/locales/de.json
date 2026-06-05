@@ -367,7 +367,12 @@
     "nothing_found_body": "Ist dies wirklich ein Compose-Übergeordnetes-Verzeichnis?",
     "edit_title": "Compose-Datei bearbeiten",
     "delete_title": "Compose-Datei löschen",
-    "down_stacks_aria": "Inaktive Compose-Stacks"
+    "down_stacks_aria": "Inaktive Compose-Stacks",
+    "scan_partial_warning": "Einige Verzeichnisse waren nicht zugänglich",
+    "depth_label": "Suchtiefe:",
+    "depth_aria": "Maximale Suchtiefe",
+    "depth_minus_aria": "Suchtiefe verringern",
+    "depth_plus_aria": "Suchtiefe erhöhen"
   },
 
   "stack_row": {

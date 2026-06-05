@@ -11,22 +11,25 @@ interface UseDownedStacksScanResult {
   scanning: boolean;
   hasScanned: boolean;
   error: string | null;
+  warning: string | null;
   scan: () => void;
   clear: () => void;
   removeStack: (name: string) => void;
   addStack: (stack: DownedStack) => void;
 }
 
-export function useDownedStacksScan(dir: string, existingStacks: ComposeStack[]): UseDownedStacksScanResult {
+export function useDownedStacksScan(dir: string, maxDepth: number, existingStacks: ComposeStack[]): UseDownedStacksScanResult {
   const [downedStacks, setDownedStacks] = useState<DownedStack[]>([]);
   const [scanning, setScanning] = useState(false);
   const [hasScanned, setHasScanned] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [warning, setWarning] = useState<string | null>(null);
 
   const scan = useCallback(() => {
     if (!dir.trim()) return;
     setScanning(true);
     setError(null);
+    setWarning(null);
     setDownedStacks([]); // clear stale results before new scan
 
     const activeNames = new Set(existingStacks.map(s => s.Name.toLowerCase()));
@@ -34,11 +37,25 @@ export function useDownedStacksScan(dir: string, existingStacks: ComposeStack[])
     void (async () => {
       try {
         let raw = "";
-        const proc = findComposeFiles(dir.trim());
+        const proc = findComposeFiles(dir.trim(), maxDepth);
         proc.stream((data: string) => { raw += data; });
-        await proc;
+
+        // find exits non-zero when any directory is unreadable (Permission denied).
+        // Collect whatever stdout it produced and only treat it as a hard error
+        // when stdout was empty too — meaning nothing at all was scanned.
+        let procError: string | null = null;
+        try {
+          await proc;
+        } catch (ex) {
+          procError = ex instanceof Error ? ex.message : String(ex);
+        }
 
         const paths = raw.split("\n").map(l => l.trim()).filter(Boolean);
+
+        if (procError !== null && paths.length === 0) {
+          throw new Error(procError);
+        }
+
         const found: DownedStack[] = [];
 
         for (const configFile of paths) {
@@ -76,6 +93,7 @@ export function useDownedStacksScan(dir: string, existingStacks: ComposeStack[])
           }
         }
 
+        if (procError !== null) setWarning(procError);
         setDownedStacks(found);
         setHasScanned(true);
         setScanning(false);
@@ -87,11 +105,12 @@ export function useDownedStacksScan(dir: string, existingStacks: ComposeStack[])
         setScanning(false);
       }
     })();
-  }, [dir, existingStacks]);
+  }, [dir, maxDepth, existingStacks]);
 
   const clear = useCallback(() => {
     setDownedStacks([]);
     setError(null);
+    setWarning(null);
     setHasScanned(false);
   }, []);
 
@@ -105,5 +124,5 @@ export function useDownedStacksScan(dir: string, existingStacks: ComposeStack[])
     );
   }, []);
 
-  return { downedStacks, scanning, hasScanned, error, scan, clear, removeStack, addStack };
+  return { downedStacks, scanning, hasScanned, error, warning, scan, clear, removeStack, addStack };
 }

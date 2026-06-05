@@ -61,9 +61,9 @@ export function findEnvFiles(dir: string, superuser?: "try"): CockpitProcess {
   );
 }
 
-export function findComposeFiles(dir: string, superuser?: "try"): CockpitProcess {
+export function findComposeFiles(dir: string, maxDepth: number = 2, superuser?: "try"): CockpitProcess {
   return cockpit.spawn(
-    ["find", dir, "-maxdepth", "2", "-type", "f",
+    ["find", dir, "-maxdepth", String(maxDepth), "-type", "f",
       "(", "-name", "compose.yml", "-o", "-name", "compose.yaml",
       "-o", "-name", "docker-compose.yml", "-o", "-name", "docker-compose.yaml", ")"],
     { superuser, err: "message" },

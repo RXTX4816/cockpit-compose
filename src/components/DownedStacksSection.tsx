@@ -10,8 +10,6 @@ import {
   Alert,
   Spinner,
   Label,
-  InputGroup,
-  InputGroupItem,
   TextInput,
 } from "@patternfly/react-core";
 import { type ComposeStack } from "../api";
@@ -61,13 +59,14 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
   const [importOpen, setImportOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
   const [composeDir, setComposeDir] = useState("");
+  const [maxDepth, setMaxDepth] = useState(2);
   const [upTarget, setUpTarget] = useState<DownedStack | null>(null);
   const [yamlTarget, setYamlTarget] = useState<DownedStack | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<DownedStack | null>(null);
   const autoDetectedRef = useRef(false);
 
-  const { downedStacks, scanning, hasScanned, error, scan, removeStack, addStack }
-    = useDownedStacksScan(composeDir, stacks);
+  const { downedStacks, scanning, hasScanned, error, warning, scan, removeStack, addStack }
+    = useDownedStacksScan(composeDir, maxDepth, stacks);
 
   // Merge manually downed + scanned, dedup by name
   const combinedStacks: DownedStack[] = [
@@ -90,6 +89,13 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
   const handleDirChange = useCallback((_e: unknown, val: string) => {
     setComposeDir(val);
     // do not clear scan results here — they persist until next scan runs
+  }, []);
+
+  const handleDepthMinus = useCallback(() => {
+    setMaxDepth(prev => Math.max(1, prev - 1));
+  }, []);
+  const handleDepthPlus = useCallback(() => {
+    setMaxDepth(prev => Math.min(5, prev + 1));
   }, []);
 
   const handleFindBestMatch = useCallback(() => {
@@ -131,37 +137,61 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
 
       {importOpen && (
         <div className="dss-controls">
-          <Button
-            variant="secondary"
-            size="sm"
-            isDisabled={stacks.length === 0 || scanning}
-            onClick={handleFindBestMatch}
-            title={t("actions.find_best_match_title")}
-          >
-            {t("actions.find_best_match")}
-          </Button>
-          <InputGroup className="dss-input-group">
-            <InputGroupItem isFill>
-              <TextInput
-                aria-label={t("downed_section.dir_aria")}
-                placeholder={t("downed_section.dir_placeholder")}
-                value={composeDir}
-                onChange={handleDirChange}
-                isDisabled={scanning}
-              />
-            </InputGroupItem>
-            <InputGroupItem>
-              <Button
-                variant="primary"
-                isDisabled={!composeDir.trim() || scanning}
-                isLoading={scanning}
-                onClick={scan}
-                className="dss-scan-btn"
-              >
-                {t("common.scan")}
-              </Button>
-            </InputGroupItem>
-          </InputGroup>
+          <div className="dss-search-bar">
+            <Button
+              variant="secondary"
+              isDisabled={stacks.length === 0 || scanning}
+              onClick={handleFindBestMatch}
+              title={t("actions.find_best_match_title")}
+              className="dss-find-btn"
+            >
+              {t("actions.find_best_match")}
+            </Button>
+            <TextInput
+              className="dss-search-dir"
+              aria-label={t("downed_section.dir_aria")}
+              placeholder={t("downed_section.dir_placeholder")}
+              value={composeDir}
+              onChange={handleDirChange}
+              isDisabled={scanning}
+            />
+            <div className="dss-stepper" aria-disabled={scanning}>
+              <span className="dss-stepper-label">{t("downed_section.depth_label")}</span>
+              <button
+                type="button"
+                className="dss-stepper-btn"
+                onClick={handleDepthMinus}
+                disabled={scanning || maxDepth <= 1}
+                aria-label={t("downed_section.depth_minus_aria")}
+              >−</button>
+              <span
+                className="dss-stepper-value"
+                aria-live="polite"
+                aria-label={t("downed_section.depth_aria")}
+              >{maxDepth}</span>
+              <button
+                type="button"
+                className="dss-stepper-btn"
+                onClick={handleDepthPlus}
+                disabled={scanning || maxDepth >= 5}
+                aria-label={t("downed_section.depth_plus_aria")}
+              >+</button>
+            </div>
+            <Button
+              variant="primary"
+              isDisabled={!composeDir.trim() || scanning}
+              isLoading={scanning}
+              onClick={scan}
+              className="dss-scan-btn"
+            >
+              {t("common.scan")}
+            </Button>
+          </div>
+          {hasScanned && warning && (
+            <span className="dss-scan-warning" title={warning}>
+              ⚠ {t("downed_section.scan_partial_warning")}
+            </span>
+          )}
         </div>
       )}
 

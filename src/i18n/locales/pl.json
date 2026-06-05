@@ -377,7 +377,12 @@
     "nothing_found_body": "Czy to jest katalog nadrzędny Compose?",
     "edit_title": "Edytuj plik Compose",
     "delete_title": "Usuń plik Compose",
-    "down_stacks_aria": "Nieaktywne stosy Compose"
+    "down_stacks_aria": "Nieaktywne stosy Compose",
+    "scan_partial_warning": "Niektóre katalogi były niedostępne",
+    "depth_label": "Głębokość skanowania:",
+    "depth_aria": "Maksymalna głębokość skanowania",
+    "depth_minus_aria": "Zmniejsz głębokość skanowania",
+    "depth_plus_aria": "Zwiększ głębokość skanowania"
   },
 
   "stack_row": {
