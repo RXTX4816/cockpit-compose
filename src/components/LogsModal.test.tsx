@@ -8,8 +8,18 @@ vi.mock("../hooks/useLogStream", () => ({
   LOG_MAX_LINES: 500,
 }));
 
+vi.mock("../api", () => ({
+  readComposeFile: vi.fn(() => ({
+    stream: vi.fn(),
+    then: vi.fn().mockImplementation((cb: () => void) => { cb(); return { catch: vi.fn() }; }),
+  })),
+  getServicesFromCompose: vi.fn(() => []),
+}));
+
 import { useLogStream } from "../hooks/useLogStream";
+import { getServicesFromCompose } from "../api";
 const mockUseLogStream = vi.mocked(useLogStream);
+const mockGetServicesFromCompose = vi.mocked(getServicesFromCompose);
 
 const stack: ComposeStack = {
   Name: "myapp",
@@ -27,6 +37,7 @@ beforeEach(() => {
     restart: vi.fn(),
     clear: vi.fn(),
   });
+  mockGetServicesFromCompose.mockReturnValue([]);
 });
 
 describe("LogsModal", () => {
@@ -143,5 +154,104 @@ describe("LogsModal", () => {
     });
     render(<LogsModal stack={stack} onClose={vi.fn()} />);
     expect(screen.getByText(/showing last/i)).toBeInTheDocument();
+  });
+
+  // ── Service selector ──────────────────────────────────────────────────────
+
+  it("does not show service selector when no services are available", () => {
+    mockGetServicesFromCompose.mockReturnValue([]);
+    render(<LogsModal stack={stack} onClose={vi.fn()} />);
+    expect(screen.queryByRole("combobox")).toBeNull();
+  });
+
+  it("shows service selector populated with services from compose file", () => {
+    mockGetServicesFromCompose.mockReturnValue(["web", "db"]);
+    render(<LogsModal stack={stack} onClose={vi.fn()} />);
+    expect(screen.getByRole("combobox")).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: /All services/i })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "web" })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "db" })).toBeInTheDocument();
+  });
+
+  it("passes selected service to useLogStream", () => {
+    mockGetServicesFromCompose.mockReturnValue(["web", "db"]);
+    render(<LogsModal stack={stack} onClose={vi.fn()} />);
+    fireEvent.change(screen.getByRole("combobox"), { target: { value: "db" } });
+    expect(mockUseLogStream).toHaveBeenCalledWith("myapp", "db");
+  });
+
+  it("passes undefined to useLogStream when All services is selected", () => {
+    mockGetServicesFromCompose.mockReturnValue(["web", "db"]);
+    render(<LogsModal stack={stack} onClose={vi.fn()} />);
+    const select = screen.getByRole("combobox");
+    fireEvent.change(select, { target: { value: "web" } });
+    fireEvent.change(select, { target: { value: "" } });
+    expect(mockUseLogStream).toHaveBeenLastCalledWith("myapp", undefined);
+  });
+
+  // ── Search ────────────────────────────────────────────────────────────────
+
+  it("shows search input", () => {
+    render(<LogsModal stack={stack} onClose={vi.fn()} />);
+    expect(screen.getByPlaceholderText(/Search logs/i)).toBeInTheDocument();
+  });
+
+  it("filters log lines by search term", () => {
+    mockUseLogStream.mockReturnValue({
+      lines: [
+        "web-1 | 2024-01-01T00:00:00Z hello from web",
+        "db-1 | 2024-01-01T00:00:01Z database ready",
+      ],
+      streaming: false,
+      paused: false,
+      pause: vi.fn(),
+      resume: vi.fn(),
+      restart: vi.fn(),
+      clear: vi.fn(),
+    });
+    render(<LogsModal stack={stack} onClose={vi.fn()} />);
+    fireEvent.change(screen.getByPlaceholderText(/Search logs/i), { target: { value: "database" } });
+    expect(screen.queryByText(/hello from web/i)).toBeNull();
+    // "database" is wrapped in <mark> so match on the parent message cell's textContent
+    const msgCell = screen.getByText((_c, el) =>
+      el?.classList.contains("lm-line-message") && Boolean(el.textContent?.match(/database ready/i))
+    );
+    expect(msgCell).toBeInTheDocument();
+  });
+
+  it("search is case-insensitive", () => {
+    mockUseLogStream.mockReturnValue({
+      lines: ["web-1 | 2024-01-01T00:00:00Z ERROR something failed"],
+      streaming: false,
+      paused: false,
+      pause: vi.fn(),
+      resume: vi.fn(),
+      restart: vi.fn(),
+      clear: vi.fn(),
+    });
+    render(<LogsModal stack={stack} onClose={vi.fn()} />);
+    fireEvent.change(screen.getByPlaceholderText(/Search logs/i), { target: { value: "error" } });
+    expect(screen.getByText(/something failed/i)).toBeInTheDocument();
+  });
+
+  it("shows all lines when search is cleared", () => {
+    mockUseLogStream.mockReturnValue({
+      lines: [
+        "web-1 | 2024-01-01T00:00:00Z hello from web",
+        "db-1 | 2024-01-01T00:00:01Z database ready",
+      ],
+      streaming: false,
+      paused: false,
+      pause: vi.fn(),
+      resume: vi.fn(),
+      restart: vi.fn(),
+      clear: vi.fn(),
+    });
+    render(<LogsModal stack={stack} onClose={vi.fn()} />);
+    const input = screen.getByPlaceholderText(/Search logs/i);
+    fireEvent.change(input, { target: { value: "database" } });
+    fireEvent.change(input, { target: { value: "" } });
+    expect(screen.getByText(/hello from web/i)).toBeInTheDocument();
+    expect(screen.getByText(/database ready/i)).toBeInTheDocument();
   });
 });
