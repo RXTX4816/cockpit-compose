@@ -214,7 +214,7 @@ describe("LogsModal", () => {
     expect(screen.queryByText(/hello from web/i)).toBeNull();
     // "database" is wrapped in <mark> so match on the parent message cell's textContent
     const msgCell = screen.getByText((_c, el) =>
-      el?.classList.contains("lm-line-message") && Boolean(el.textContent?.match(/database ready/i))
+      (el?.classList.contains("lm-line-message") && Boolean(el.textContent?.match(/database ready/i))) ?? false
     );
     expect(msgCell).toBeInTheDocument();
   });
