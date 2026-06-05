@@ -367,7 +367,12 @@
     "nothing_found_body": "Are you sure this is a compose parent directory?",
     "edit_title": "Edit compose file",
     "delete_title": "Delete compose file",
-    "down_stacks_aria": "Down compose stacks"
+    "down_stacks_aria": "Down compose stacks",
+    "scan_partial_warning": "Some directories were inaccessible",
+    "depth_label": "Scan depth:",
+    "depth_aria": "Max scan depth",
+    "depth_minus_aria": "Decrease scan depth",
+    "depth_plus_aria": "Increase scan depth"
   },
 
   "stack_row": {

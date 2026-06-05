@@ -13,18 +13,124 @@
   margin-top: 0.5rem;
 }
 
-.dss-input-group {
-  flex: 1;
-  max-width: 28rem;
+/* Unified search bar: dir input + depth stepper + scan button share one border */
+.dss-search-bar {
+  flex: 0 1 44rem;
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--pf-t--global--border--color--default, #8a8d90);
+  border-radius: 0 var(--pf-t--global--border--radius--medium, 6px) var(--pf-t--global--border--radius--medium, 6px) 0;
+  overflow: hidden;
+  background: var(--pf-t--global--background--color--primary--default, #fff);
+  min-width: 0;
 }
 
-/* Force the Scan button to fill the InputGroup height and center its text */
-.dss-scan-btn {
-  height: 100%;
+.dss-search-bar:focus-within:not(:has(.dss-scan-btn:focus-visible)) {
+  outline: 2px solid var(--pf-t--global--color--brand--default, #0066cc);
+  outline-offset: 2px;
+}
+
+/* Strip PF's own border / shadow / radius from the TextInput span wrapper */
+.dss-search-dir.pf-v6-c-form-control {
+  flex: 1;
+  min-width: 0;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  background: transparent;
+}
+
+.dss-search-dir.pf-v6-c-form-control > input {
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent;
+}
+
+/* PF renders the input border via ::before/::after — kill those too */
+.dss-search-dir.pf-v6-c-form-control::before,
+.dss-search-dir.pf-v6-c-form-control::after {
+  border: none !important;
+  border-radius: 0 !important;
+}
+
+/* Depth stepper: label + − value + */
+.dss-stepper {
+  display: flex;
+  align-items: stretch;
+  flex-shrink: 0;
+  border-left: 1px solid var(--pf-t--global--border--color--default, #8a8d90);
+}
+
+.dss-stepper-label {
+  display: flex;
+  align-items: center;
+  padding: 0 0.5rem;
+  font-size: var(--pf-t--global--font--size--sm, 0.8125rem);
+  color: var(--pf-t--global--text--color--subtle, #6a6e73);
+  white-space: nowrap;
+  border-right: 1px solid var(--pf-t--global--border--color--default, #8a8d90);
+  user-select: none;
+}
+
+.dss-stepper-btn {
+  width: 1.875rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 1rem;
+  color: var(--pf-t--global--text--color--regular, #151515);
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 0 var(--pf-t--global--border--radius--medium, 4px) var(--pf-t--global--border--radius--medium, 4px) 0;
+  transition: background 0.1s ease;
+}
+
+.dss-stepper-btn:hover:not(:disabled) {
+  background: var(--pf-t--global--background--color--secondary--default, #f0f0f0);
+}
+
+.dss-stepper-btn:focus-visible {
+  outline: 2px solid var(--pf-t--global--color--brand--default, #0066cc);
+  outline-offset: -2px;
+}
+
+.dss-stepper-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.dss-stepper-value {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.75rem;
+  font-size: var(--pf-t--global--font--size--body--default, 0.875rem);
+  font-weight: 600;
+  color: var(--pf-t--global--text--color--regular, #151515);
+  border-left: 1px solid var(--pf-t--global--border--color--default, #8a8d90);
+  border-right: 1px solid var(--pf-t--global--border--color--default, #8a8d90);
+  user-select: none;
+}
+
+/* Find best match: left cap of the bar */
+.dss-find-btn.pf-v6-c-button {
+  border-radius: 0 !important;
+  border: none !important;
+  border-right: 1px solid var(--pf-t--global--border--color--default, #8a8d90) !important;
+  align-self: stretch;
+  height: auto;
+  padding-inline: 0.75rem;
+  white-space: nowrap;
+}
+
+/* Scan button: flush against the right edge */
+.dss-scan-btn.pf-v6-c-button {
+  border-radius: 0 !important;
+  border: none !important;
+  border-left: 1px solid var(--pf-t--global--border--color--default, #8a8d90) !important;
+  align-self: stretch;
+  height: auto;
+  padding-inline: 1.25rem;
 }
 
 .dss-separator {
@@ -104,3 +210,14 @@
 .dss-delete-btn {
   color: var(--pf-t--global--color--status--danger--default, #c9190b);
 }
+
+.dss-scan-warning {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: var(--pf-t--global--font--size--sm, 0.8125rem);
+  color: var(--pf-t--global--color--status--warning--default, #f0ab00);
+  white-space: nowrap;
+  cursor: default;
+}
+

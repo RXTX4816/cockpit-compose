@@ -108,7 +108,7 @@ describe("findComposeFiles", () => {
   it("passes superuser: try when provided", async () => {
     const { findComposeFiles } = await import("./files");
     mockSpawn.mockReturnValue(mockProcess(""));
-    findComposeFiles("/etc/docker/compose", "try");
+    findComposeFiles("/etc/docker/compose", 2, "try");
     const opts = mockSpawn.mock.calls[0][1] as { superuser?: string };
     expect(opts.superuser).toBe("try");
   });

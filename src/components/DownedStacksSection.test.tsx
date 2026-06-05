@@ -52,6 +52,7 @@ function defaultScanResult(overrides = {}) {
     scanning: false,
     hasScanned: false,
     error: null,
+    warning: null,
     scan: noopScan,
     clear: noopClear,
     removeStack: noopRemove,

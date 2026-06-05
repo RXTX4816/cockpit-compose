@@ -28,7 +28,7 @@ describe("useDownedStacksScan", () => {
   it("starts with empty state and hasScanned=false", async () => {
     const { useDownedStacksScan } = await import("./useDownedStacksScan");
     const { result } = renderHook(() =>
-      useDownedStacksScan("", [])
+      useDownedStacksScan("", 2, [])
     );
     expect(result.current.downedStacks).toEqual([]);
     expect(result.current.scanning).toBe(false);
@@ -43,7 +43,7 @@ describe("useDownedStacksScan", () => {
     );
 
     const { result } = renderHook(() =>
-      useDownedStacksScan("/etc/docker/compose", [])
+      useDownedStacksScan("/etc/docker/compose", 2, [])
     );
 
     act(() => { result.current.scan(); });
@@ -68,7 +68,7 @@ describe("useDownedStacksScan", () => {
     mockFindComposeFiles.mockReturnValue(mockProcess(""));
 
     const { result } = renderHook(() =>
-      useDownedStacksScan("/etc/docker/compose", [])
+      useDownedStacksScan("/etc/docker/compose", 2, [])
     );
 
     act(() => { result.current.scan(); });
@@ -83,7 +83,7 @@ describe("useDownedStacksScan", () => {
     mockFindComposeFiles.mockReturnValue(mockProcess("", "permission denied"));
 
     const { result } = renderHook(() =>
-      useDownedStacksScan("/etc", [])
+      useDownedStacksScan("/etc", 2, [])
     );
 
     act(() => { result.current.scan(); });
@@ -97,7 +97,7 @@ describe("useDownedStacksScan", () => {
     mockFindComposeFiles.mockReturnValue(mockProcess(""));
 
     const { result } = renderHook(() =>
-      useDownedStacksScan("/etc/docker/compose", [])
+      useDownedStacksScan("/etc/docker/compose", 2, [])
     );
 
     act(() => { result.current.scan(); });
@@ -114,7 +114,7 @@ describe("useDownedStacksScan", () => {
     );
 
     const { result } = renderHook(() =>
-      useDownedStacksScan("/etc/docker/compose", [])
+      useDownedStacksScan("/etc/docker/compose", 2, [])
     );
 
     act(() => { result.current.scan(); });
@@ -134,7 +134,7 @@ describe("useDownedStacksScan", () => {
     );
 
     const { result } = renderHook(() =>
-      useDownedStacksScan("/etc/docker/compose", [
+      useDownedStacksScan("/etc/docker/compose", 2, [
         { Name: "myapp", Status: "running(1)", ConfigFiles: "/etc/docker/compose/myapp/docker-compose.yml" },
       ])
     );
@@ -156,7 +156,7 @@ describe("useDownedStacksScan", () => {
     );
 
     const { result } = renderHook(() =>
-      useDownedStacksScan("/etc/docker/compose", [])
+      useDownedStacksScan("/etc/docker/compose", 2, [])
     );
 
     act(() => { result.current.scan(); });
@@ -172,7 +172,7 @@ describe("useDownedStacksScan", () => {
     mockFindComposeFiles.mockReturnValue(mockProcess("", "No such file or directory"));
 
     const { result } = renderHook(() =>
-      useDownedStacksScan("/nonexistent", [])
+      useDownedStacksScan("/nonexistent", 2, [])
     );
 
     act(() => { result.current.scan(); });
@@ -190,7 +190,7 @@ describe("useDownedStacksScan", () => {
     );
 
     const { result } = renderHook(() =>
-      useDownedStacksScan("/etc/docker/compose", [])
+      useDownedStacksScan("/etc/docker/compose", 2, [])
     );
 
     act(() => { result.current.scan(); });
@@ -209,7 +209,7 @@ describe("useDownedStacksScan", () => {
     mockFindComposeFiles.mockReturnValue(mockProcess(""));
 
     const { result } = renderHook(() =>
-      useDownedStacksScan("/etc/docker/compose", [])
+      useDownedStacksScan("/etc/docker/compose", 2, [])
     );
 
     act(() => { result.current.scan(); });
@@ -225,7 +225,7 @@ describe("useDownedStacksScan", () => {
     );
 
     const { result } = renderHook(() =>
-      useDownedStacksScan("/etc/docker/compose", [])
+      useDownedStacksScan("/etc/docker/compose", 2, [])
     );
 
     act(() => { result.current.scan(); });
@@ -240,7 +240,7 @@ describe("useDownedStacksScan", () => {
   it("addStack adds an entry", async () => {
     const { useDownedStacksScan } = await import("./useDownedStacksScan");
     const { result } = renderHook(() =>
-      useDownedStacksScan("/etc/docker/compose", [])
+      useDownedStacksScan("/etc/docker/compose", 2, [])
     );
 
     act(() => {
@@ -258,7 +258,7 @@ describe("useDownedStacksScan", () => {
     );
 
     const { result } = renderHook(() =>
-      useDownedStacksScan("/etc/docker/compose", [])
+      useDownedStacksScan("/etc/docker/compose", 2, [])
     );
 
     act(() => { result.current.scan(); });
@@ -276,7 +276,7 @@ describe("useDownedStacksScan", () => {
     mockFindComposeFiles.mockReturnValue(mockProcess("\n\n/etc/docker/compose/myapp/docker-compose.yml\n\n"));
 
     const { result } = renderHook(() =>
-      useDownedStacksScan("/etc/docker/compose", [])
+      useDownedStacksScan("/etc/docker/compose", 2, [])
     );
 
     act(() => { result.current.scan(); });
@@ -295,7 +295,7 @@ describe("useDownedStacksScan", () => {
     );
 
     const { result } = renderHook(() =>
-      useDownedStacksScan("/etc/docker/compose", [])
+      useDownedStacksScan("/etc/docker/compose", 2, [])
     );
 
     act(() => { result.current.scan(); });
@@ -316,7 +316,7 @@ describe("useDownedStacksScan", () => {
     });
 
     const { result } = renderHook(() =>
-      useDownedStacksScan("/etc/docker/compose", [])
+      useDownedStacksScan("/etc/docker/compose", 2, [])
     );
 
     act(() => { result.current.scan(); });
@@ -340,7 +340,7 @@ describe("useDownedStacksScan", () => {
     });
 
     const { result } = renderHook(() =>
-      useDownedStacksScan("/etc/docker/compose", [])
+      useDownedStacksScan("/etc/docker/compose", 2, [])
     );
 
     act(() => { result.current.scan(); });
@@ -357,7 +357,7 @@ describe("useDownedStacksScan", () => {
     mockReadComposeFile.mockImplementation(() => mockProcess("", "permission denied"));
 
     const { result } = renderHook(() =>
-      useDownedStacksScan("/etc/docker/compose", [])
+      useDownedStacksScan("/etc/docker/compose", 2, [])
     );
 
     act(() => { result.current.scan(); });
