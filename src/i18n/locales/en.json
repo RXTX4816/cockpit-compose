@@ -1,0 +1,380 @@
+{
+  "common": {
+    "cancel": "Cancel",
+    "close": "Close",
+    "save": "Save",
+    "delete": "Delete",
+    "create": "Create",
+    "edit": "Edit",
+    "back": "Back",
+    "retry": "Retry",
+    "refresh": "Refresh",
+    "clear": "Clear",
+    "scan": "Scan",
+    "scanning": "Scanning…",
+    "fetch": "Fetch",
+    "nothing_found": "Nothing found.",
+    "unknown": "unknown"
+  },
+
+  "stacks": {
+    "title": "Compose Stacks",
+    "aria_label": "Compose stacks",
+    "empty_title": "No compose stacks found",
+    "empty_body": "Start a project with docker compose up -d and it will appear here.",
+    "load_failed": "Failed to load stacks",
+    "service_count_one": "{{count}} service",
+    "service_count_other": "{{count}} services",
+    "status_running": "running",
+    "status_partial": "partial",
+    "status_stopped": "stopped",
+    "status_paused": "paused",
+    "status_unknown": "unknown"
+  },
+
+  "actions": {
+    "up": "Up",
+    "down": "Down",
+    "down_title": "Down (remove containers)",
+    "stop": "Stop",
+    "start": "Start",
+    "restart": "Restart",
+    "pause": "Pause",
+    "unpause": "Unpause",
+    "kill": "Kill",
+    "pull": "Pull",
+    "pull_title": "Pull latest images",
+    "logs": "Logs",
+    "logs_title": "View logs",
+    "edit_title": "Edit compose file",
+    "info": "Info",
+    "info_title": "Stack info",
+    "events": "Events",
+    "top": "Top",
+    "shell": "Shell",
+    "prune": "Prune",
+    "more_actions_for": "More actions for {{name}}",
+    "find_best_match": "Find best match",
+    "find_best_match_title": "Infer compose root from active stacks"
+  },
+
+  "health": {
+    "passing": "Health check passing",
+    "failing": "Health check failing",
+    "starting": "Health check starting"
+  },
+
+  "ports": {
+    "external_tooltip": "Exposed on all interfaces — open stack info for full details",
+    "localhost_tooltip": "Bound to localhost only — open stack info for full details",
+    "specific_tooltip": "Bound to a specific IP — open stack info for full details"
+  },
+
+  "footer": {
+    "version": "Version: {{version}}",
+    "compose_version": "Docker Compose: {{version}}",
+    "help": "Help",
+    "feedback": "Feedback / Report bug"
+  },
+
+  "error_boundary": {
+    "load_stacks_error": "Error loading stacks"
+  },
+
+  "down_modal": {
+    "aria_label": "Confirm down",
+    "title": "Remove \"{{name}}\"?",
+    "body_prefix": "Running",
+    "body_suffix": "will stop and remove all containers for",
+    "body_suffix2": ". The stack will disappear from this list.",
+    "confirm_button": "Down (remove)"
+  },
+
+  "kill_modal": {
+    "aria_label": "Confirm kill",
+    "title": "Kill \"{{name}}\"?",
+    "body_prefix": "Running",
+    "body_sigkill": "sends SIGKILL to all containers in",
+    "body_suffix": ", forcefully terminating them immediately. Unlike Stop, processes have no chance to clean up. Use only when Stop does not respond.",
+    "confirm_button": "Kill all containers"
+  },
+
+  "delete_modal": {
+    "aria_label": "Delete compose stack — {{name}}",
+    "title": "Delete — {{name}}",
+    "cannot_undo_title": "This action cannot be undone",
+    "cannot_undo_body": "The compose file will be permanently deleted from disk.",
+    "compose_file_label": "Compose file:",
+    "delete_folder_label": "Delete entire folder",
+    "delete_folder_description": "Removes the folder {{folder}} and all its contents",
+    "confirm_aria_label": "Confirm delete",
+    "confirm_title": "Are you really sure?",
+    "confirm_warning_title": "This will permanently delete the {{target}}!",
+    "confirm_warning_body": "There is no way to recover this. Make sure you have a backup if needed.",
+    "confirm_button": "Yes, delete",
+    "target_folder": "folder {{folder}}",
+    "target_file": "file {{file}}",
+    "error_default": "Failed to delete"
+  },
+
+  "create_modal": {
+    "aria_label": "Create new compose stack",
+    "title": "Create compose stack",
+    "field_name": "Stack name",
+    "field_name_placeholder": "my-stack",
+    "field_dir": "Compose root directory",
+    "field_dir_placeholder": "/etc/docker/compose",
+    "field_dir_aria": "Compose root directory",
+    "field_method": "Creation method",
+    "method_git_label": "From Git URL",
+    "method_git_description": "Fetch docker-compose.yml from a Git repository",
+    "method_template_label": "From template",
+    "method_template_description": "Start from a structural YAML example",
+    "method_manual_label": "Manual",
+    "method_manual_description": "Write the compose file from scratch",
+    "ownership_warning_title": "Directory ownership depends on your privilege mode",
+    "ownership_warning_body": "The created directory and compose file will be owned by the user running this action — either your regular user (limited mode) or root (superuser mode). Containers started later may run with a different UID and encounter permission errors on bind-mounted paths. This is expected behavior: some images work fine, others require specific ownership. Adjust user:, volume permissions, or run mode as needed for your stack.",
+    "field_git_url": "Git repository URL",
+    "field_git_placeholder": "https://github.com/example/my-stack.git",
+    "git_review_title": "Review before creating",
+    "git_review_body": "Always review compose files from external sources. Only use repositories you trust.",
+    "next_button": "Next",
+    "create_button": "Create",
+    "create_anyway_button": "Create Anyway",
+    "confirm_create_aria_label": "Confirm create",
+    "confirm_create_title": "Create with issues?",
+    "confirm_create_question": "Do you want to create anyway?",
+    "errors_found_title": "Errors found",
+    "warnings_found_title": "Warnings found",
+    "error_count_one": "There is {{count}} error in the compose file.",
+    "error_count_other": "There are {{count}} errors in the compose file.",
+    "warning_count_one": "There is {{count}} warning in the compose file.",
+    "warning_count_other": "There are {{count}} warnings in the compose file.",
+    "validation_name_required": "Name is required",
+    "validation_name_slashes": "Name must not contain slashes",
+    "validation_name_spaces": "Name must not contain spaces",
+    "error_dir_exists": "Directory {{dir}} already exists and is not empty",
+    "error_git_protocol": "Only http:// and https:// URLs are supported",
+    "error_git_invalid_url": "Invalid URL — only http:// and https:// URLs are supported",
+    "error_git_no_compose": "No compose file found in repository root (docker-compose.yml or compose.yml)",
+    "error_git_clone_failed": "Git clone failed",
+    "error_create_failed": "Failed to create stack"
+  },
+
+  "yaml_modal": {
+    "aria_label": "Compose file — {{name}}",
+    "title": "{{name}} — compose file",
+    "env_file_button": "Env file",
+    "history_button": "History ({{count}})",
+    "edit_button": "Edit",
+    "lock_button": "Lock",
+    "snapshots_title": "Snapshots",
+    "snapshot_restore": "Restore",
+    "snapshot_delete": "Delete",
+    "load_failed_title": "Could not read file",
+    "save_failed_title": "Save failed",
+    "confirm_save_aria_label": "Confirm save",
+    "confirm_save_title": "Save with issues?",
+    "confirm_save_question": "Do you want to save anyway?",
+    "save_anyway_button": "Save Anyway",
+    "errors_found_title": "Errors found",
+    "warnings_found_title": "Warnings found",
+    "error_count_one": "There is {{count}} error in your compose file.",
+    "error_count_other": "There are {{count}} errors in your compose file.",
+    "warning_count_one": "There is {{count}} warning in your compose file.",
+    "warning_count_other": "There are {{count}} warnings in your compose file."
+  },
+
+  "env_modal": {
+    "aria_label": "Env file — {{name}}",
+    "title": "{{name}} — env file",
+    "load_failed_title": "Could not read file",
+    "save_failed_title": "Save failed",
+    "table_button": "Table",
+    "raw_button": "Raw",
+    "add_file_aria": "Add new env file",
+    "add_file_title": "Create a new env file",
+    "new_file_placeholder": ".env.prod",
+    "new_file_aria": "New env file name",
+    "create_file_aria": "Create file",
+    "cancel_aria": "Cancel",
+    "confirm_save_aria_label": "Confirm save",
+    "confirm_save_title": "Save with issues?",
+    "duplicate_keys_title": "Duplicate keys found",
+    "duplicate_keys_body": "Your env file contains duplicate keys. Only the last value for each key will be used.",
+    "confirm_save_question": "Do you want to save anyway?",
+    "save_anyway_button": "Save Anyway"
+  },
+
+  "logs_modal": {
+    "aria_label": "Logs — {{name}}",
+    "title": "Logs — {{name}}",
+    "continue_button": "Continue",
+    "pause_button": "Pause",
+    "refresh_button": "Refresh",
+    "clear_button": "Clear",
+    "limit_notice": "showing last {{count}} lines",
+    "waiting": "Waiting for logs…"
+  },
+
+  "exec_modal": {
+    "aria_label": "Shell — {{name}}",
+    "title": "Shell — {{name}}",
+    "field_service": "Service",
+    "field_service_placeholder": "service name",
+    "field_command": "Command",
+    "field_command_placeholder": "/bin/sh",
+    "field_user": "User (optional)",
+    "field_user_placeholder": "root",
+    "open_shell_button": "Open shell",
+    "disconnect_button": "Disconnect"
+  },
+
+  "events_modal": {
+    "aria_label": "Events — {{name}}",
+    "title": "Events — {{name}}",
+    "stream_button": "Stream events",
+    "stop_button": "Stop",
+    "clear_button": "Clear",
+    "stream_prompt": "Press \"Stream events\" to start watching.",
+    "error_title": "Error streaming events",
+    "col_time": "Time",
+    "col_type": "Type",
+    "col_action": "Action",
+    "col_service": "Service",
+    "col_details": "Details"
+  },
+
+  "top_modal": {
+    "aria_label": "Top — {{name}}",
+    "title": "Top — {{name}}",
+    "refresh_button": "Refresh",
+    "error_title": "Could not load processes",
+    "empty": "No running processes found."
+  },
+
+  "pull_modal": {
+    "aria_label": "Pull — {{name}}",
+    "title": "Pull — {{name}}",
+    "pulling": "Pulling images for {{name}}…",
+    "complete": "✓ Pull complete",
+    "failed": "✗ Pull failed",
+    "starting": "Starting pull…"
+  },
+
+  "pull_confirm_modal": {
+    "aria_label": "Confirm pull — {{name}}",
+    "title": "Pull latest images — {{name}}",
+    "warning_title": "Newer image versions may introduce breaking changes",
+    "warning_body_prefix": "Review changelogs before pulling, especially if services use",
+    "warning_body_suffix": "or an untagged image. Pinning to a specific version tag avoids unexpected updates.",
+    "images_title": "Images to be updated:",
+    "unpinned_label": "⚠ unpinned",
+    "unpinned_notice": "Unpinned images always pull whatever the registry considers \"latest\" and are most likely to change behaviour between pulls.",
+    "pull_button": "Pull"
+  },
+
+  "up_modal": {
+    "aria_label": "Up — {{name}}",
+    "title": "Up — {{name}}",
+    "starting": "Starting {{name}}…",
+    "initializing": "Starting…",
+    "complete": "✓ Up complete",
+    "failed": "✗ Up failed"
+  },
+
+  "up_confirm_modal": {
+    "aria_label": "Confirm up — {{name}}",
+    "title": "Up — {{name}}",
+    "warning_title": "Containers with changed configuration will be recreated",
+    "warning_body_prefix": "Running",
+    "warning_body_middle": "recreates any container whose service definition has changed. Services using",
+    "warning_body_suffix": "or an untagged image may also pull a newer version from the registry.",
+    "services_title": "Services:",
+    "unpinned_label": "⚠ unpinned",
+    "unpinned_notice": "Unpinned images may pull whatever the registry considers \"latest\" and are most likely to change behaviour unexpectedly.",
+    "up_button": "Up"
+  },
+
+  "info_modal": {
+    "aria_label": "Info — {{name}}",
+    "title": "{{name}} — info",
+    "section_compose_file": "Compose file",
+    "section_services": "Services",
+    "section_images": "Images",
+    "section_volumes": "Volumes",
+    "no_containers": "No containers found.",
+    "no_images": "No images found.",
+    "no_volumes": "No volumes found.",
+    "volumes_unavailable": "Not available on this Docker Compose version.",
+    "container_error_title": "Could not load container info",
+    "image_error_title": "Could not load images",
+    "volume_error_title": "Could not load volumes",
+    "img_col_service": "Service",
+    "img_col_repo": "Repository",
+    "img_col_tag": "Tag",
+    "img_col_size": "Size",
+    "img_col_created": "Created",
+    "vol_col_name": "Name",
+    "vol_col_driver": "Driver",
+    "vol_col_mountpoint": "Mountpoint"
+  },
+
+  "prune_modal": {
+    "aria_label_select": "Prune resources — {{name}}",
+    "title_select": "Prune resources — {{name}}",
+    "aria_label_preview": "Confirm prune — {{name}}",
+    "title_preview": "Preview — resources to be removed",
+    "not_running_title": "Stack is not running — risk of data loss",
+    "not_running_body": "Resources that appear unused may still be needed to start this stack again. Volumes removed here cannot be recovered.",
+    "not_running_preview_body": "Resources that appear unused may still be required to start the stack again. Volumes removed here cannot be recovered.",
+    "destructive_title": "Destructive action — cannot be undone",
+    "destructive_body": "Pruning permanently deletes Docker resources. Volumes especially may contain persistent data that cannot be recovered. Review carefully before proceeding.",
+    "images_label": "Images",
+    "images_description": "Older image versions for this stack's repos that are no longer used by any container.",
+    "containers_label": "Containers",
+    "containers_description": "Stopped containers belonging to this stack.",
+    "volumes_label": "Volumes",
+    "volumes_warning": "⚠ may contain persistent data",
+    "volumes_description": "Unused named volumes associated with this stack.",
+    "networks_label": "Networks",
+    "networks_description": "Unused networks created for this stack (in-use ones are skipped).",
+    "preview_button": "Preview",
+    "prune_button": "Prune selected",
+    "nothing_to_remove": "Nothing to remove."
+  },
+
+  "downed_section": {
+    "create_button": "Create",
+    "import_button": "Import",
+    "dir_placeholder": "Type compose root…",
+    "dir_aria": "Compose directory",
+    "down_status": "down",
+    "scan_failed_title": "Scan failed",
+    "nothing_found_title": "Nothing found",
+    "nothing_found_body": "Are you sure this is a compose parent directory?",
+    "edit_title": "Edit compose file",
+    "delete_title": "Delete compose file",
+    "down_stacks_aria": "Down compose stacks"
+  },
+
+  "stack_row": {
+    "no_containers": "No containers found.",
+    "containers_aria": "{{name}} containers"
+  },
+
+  "container_state": {
+    "running": "running",
+    "paused": "paused",
+    "exited": "exited",
+    "restarting": "restarting",
+    "dead": "dead",
+    "created": "created",
+    "removing": "removing"
+  },
+
+  "stats": {
+    "cpu": "CPU",
+    "mem": "Mem"
+  }
+}

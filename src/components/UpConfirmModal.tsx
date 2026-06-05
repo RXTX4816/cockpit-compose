@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Modal,
   ModalHeader,
@@ -41,6 +42,7 @@ interface Props {
 }
 
 export function UpConfirmModal({ stack, onConfirm, onClose }: Props) {
+  const { t } = useTranslation();
   const configFile = stack.ConfigFiles.split(",")[0].trim();
   const [images, setImages] = useState<ImageEntry[]>([]);
 
@@ -54,23 +56,25 @@ export function UpConfirmModal({ stack, onConfirm, onClose }: Props) {
   const hasRisky = images.some(i => i.risky);
 
   return (
-    <Modal isOpen onClose={onClose} variant="small" aria-label={`Confirm up — ${stack.Name}`}>
-      <ModalHeader title={`Up — ${stack.Name}`} />
+    <Modal isOpen onClose={onClose} variant="small" aria-label={t("up_confirm_modal.aria_label", { name: stack.Name })}>
+      <ModalHeader title={t("up_confirm_modal.title", { name: stack.Name })} />
       <ModalBody>
         <Alert
           variant="warning"
           isInline
-          title="Containers with changed configuration will be recreated"
+          title={t("up_confirm_modal.warning_title")}
           style={{ marginBottom: "1rem" }}
         >
-          Running <code>docker compose up -d</code> recreates any container whose service
-          definition has changed. Services using <code>:latest</code> or an untagged image
-          may also pull a newer version from the registry.
+          {t("up_confirm_modal.warning_body_prefix")}{" "}
+          <code>docker compose up -d</code>{" "}
+          {t("up_confirm_modal.warning_body_middle")}{" "}
+          <code>:latest</code>{" "}
+          {t("up_confirm_modal.warning_body_suffix")}
         </Alert>
 
         {images.length > 0 && (
           <div style={{ fontSize: "0.875rem" }}>
-            <strong>Services:</strong>
+            <strong>{t("up_confirm_modal.services_title")}</strong>
             <ul style={{ margin: "0.5rem 0 0 1.25rem", padding: 0 }}>
               {images.map(({ service, image, risky }) => (
                 <li key={service} style={{ marginBottom: "0.25rem" }}>
@@ -79,7 +83,7 @@ export function UpConfirmModal({ stack, onConfirm, onClose }: Props) {
                   <code>{image}</code>
                   {risky && (
                     <span style={{ marginLeft: "0.4rem", color: "var(--pf-t--global--color--status--warning--default)" }}>
-                      ⚠ unpinned
+                      {t("up_confirm_modal.unpinned_label")}
                     </span>
                   )}
                 </li>
@@ -87,16 +91,15 @@ export function UpConfirmModal({ stack, onConfirm, onClose }: Props) {
             </ul>
             {hasRisky && (
               <p style={{ marginTop: "0.75rem", color: "var(--pf-t--global--text--color--subtle)", fontSize: "0.8rem" }}>
-                Unpinned images may pull whatever the registry considers &quot;latest&quot;
-                and are most likely to change behaviour unexpectedly.
+                {t("up_confirm_modal.unpinned_notice")}
               </p>
             )}
           </div>
         )}
       </ModalBody>
       <ModalFooter>
-        <Button variant="primary" onClick={onConfirm}>Up</Button>
-        <Button variant="link" onClick={onClose}>Cancel</Button>
+        <Button variant="primary" onClick={onConfirm}>{t("up_confirm_modal.up_button")}</Button>
+        <Button variant="link" onClick={onClose}>{t("common.cancel")}</Button>
       </ModalFooter>
     </Modal>
   );

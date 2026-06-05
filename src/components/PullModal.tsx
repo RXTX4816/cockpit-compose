@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Modal,
   ModalHeader,
@@ -18,6 +19,7 @@ interface Props {
 }
 
 export function PullModal({ stack, onClose }: Props) {
+  const { t } = useTranslation();
   const configFile = stack.ConfigFiles.split(",")[0].trim();
   const { lines, done, failed, errorMsg, cancel } = usePullStream(stack.Name, configFile);
   const logRef = useRef<HTMLDivElement>(null);
@@ -32,21 +34,21 @@ export function PullModal({ stack, onClose }: Props) {
   };
 
   return (
-    <Modal isOpen onClose={handleClose} variant="medium" aria-label={`Pull — ${stack.Name}`}>
-      <ModalHeader title={`Pull — ${stack.Name}`} />
+    <Modal isOpen onClose={handleClose} variant="medium" aria-label={t("pull_modal.aria_label", { name: stack.Name })}>
+      <ModalHeader title={t("pull_modal.title", { name: stack.Name })} />
       <ModalBody>
         <div className="pm-header">
           {!done && <Spinner size="sm" />}
           {!done && (
             <span className="pm-status-running">
-              Pulling images for <strong>{stack.Name}</strong>…
+              {t("pull_modal.pulling", { name: stack.Name })}
             </span>
           )}
           {done && !failed && (
-            <span className="pm-status-ok">✓ Pull complete</span>
+            <span className="pm-status-ok">{t("pull_modal.complete")}</span>
           )}
           {done && failed && (
-            <span className="pm-status-failed">✗ Pull failed</span>
+            <span className="pm-status-failed">{t("pull_modal.failed")}</span>
           )}
         </div>
 
@@ -56,7 +58,7 @@ export function PullModal({ stack, onClose }: Props) {
 
         <div ref={logRef} className="pm-log-viewer">
           {lines.length === 0 ? (
-            <span className="pm-log-empty">Starting pull…</span>
+            <span className="pm-log-empty">{t("pull_modal.starting")}</span>
           ) : (
             lines.map((entry, i) => (
               <div key={i} style={{ color: kindColor[entry.kind] }}>
@@ -68,9 +70,9 @@ export function PullModal({ stack, onClose }: Props) {
 
         <div className="pm-footer">
           {!done ? (
-            <Button variant="secondary" onClick={handleClose}>Cancel</Button>
+            <Button variant="secondary" onClick={handleClose}>{t("common.cancel")}</Button>
           ) : (
-            <Button variant="primary" onClick={handleClose}>Close</Button>
+            <Button variant="primary" onClick={handleClose}>{t("common.close")}</Button>
           )}
         </div>
       </ModalBody>

@@ -101,6 +101,20 @@ Open `http://localhost:9090` — **Docker Compose** appears in the sidebar autom
 | `npm run test` | Run tests |
 | `npm run test:coverage` | Coverage report |
 
+## Translations
+
+The UI language follows Cockpit's language setting.
+
+<!-- i18n-coverage-start -->
+| Language | Code | Coverage |
+|---|---|---|
+| English | `en` | 100% (source) |
+| German | `de` | 100% |
+| Polish | `pl` | 100% |
+<!-- i18n-coverage-end -->
+
+To add a new language, copy `src/i18n/locales/en.json`, translate the values, and register the file in `src/i18n/index.ts`.
+
 ## Contributing
 
 Bug reports and feature requests: open an issue on [GitHub](https://github.com/RXTX4816/cockpit-compose/issues).

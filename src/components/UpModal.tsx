@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Modal,
   ModalHeader,
@@ -18,6 +19,7 @@ interface Props {
 }
 
 export function UpModal({ stack, onClose }: Props) {
+  const { t } = useTranslation();
   const configFile = stack.ConfigFiles.split(",")[0].trim();
   const { lines, done, failed, errorMsg, cancel } = useUpStream(stack.Name, configFile);
   const logRef = useRef<HTMLDivElement>(null);
@@ -32,21 +34,21 @@ export function UpModal({ stack, onClose }: Props) {
   };
 
   return (
-    <Modal isOpen onClose={handleClose} variant="medium" aria-label={`Up — ${stack.Name}`}>
-      <ModalHeader title={`Up — ${stack.Name}`} />
+    <Modal isOpen onClose={handleClose} variant="medium" aria-label={t("up_modal.aria_label", { name: stack.Name })}>
+      <ModalHeader title={t("up_modal.title", { name: stack.Name })} />
       <ModalBody>
         <div className="um-header">
           {!done && <Spinner size="sm" />}
           {!done && (
             <span className="um-status-running">
-              Starting {stack.Name}…
+              {t("up_modal.starting", { name: stack.Name })}
             </span>
           )}
           {done && !failed && (
-            <span className="um-status-ok">✓ Up complete</span>
+            <span className="um-status-ok">{t("up_modal.complete")}</span>
           )}
           {done && failed && (
-            <span className="um-status-failed">✗ Up failed</span>
+            <span className="um-status-failed">{t("up_modal.failed")}</span>
           )}
         </div>
 
@@ -56,7 +58,7 @@ export function UpModal({ stack, onClose }: Props) {
 
         <div ref={logRef} className="um-log-viewer">
           {lines.length === 0 ? (
-            <span className="um-log-empty">Starting…</span>
+            <span className="um-log-empty">{t("up_modal.initializing")}</span>
           ) : (
             lines.map((entry, i) => (
               <div key={i} style={{ color: kindColor[entry.kind] }}>
@@ -68,9 +70,9 @@ export function UpModal({ stack, onClose }: Props) {
 
         <div className="um-footer">
           {!done ? (
-            <Button variant="secondary" onClick={handleClose}>Cancel</Button>
+            <Button variant="secondary" onClick={handleClose}>{t("common.cancel")}</Button>
           ) : (
-            <Button variant="primary" onClick={handleClose}>Close</Button>
+            <Button variant="primary" onClick={handleClose}>{t("common.close")}</Button>
           )}
         </div>
       </ModalBody>

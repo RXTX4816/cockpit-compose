@@ -1,4 +1,5 @@
 import type { ComponentType, CSSProperties } from "react";
+import { useTranslation } from "react-i18next";
 import { Label, Spinner, Tooltip } from "@patternfly/react-core";
 import { GlobeIcon, LaptopIcon, NetworkIcon } from "@patternfly/react-icons";
 import type { ParsedPort, StackStatus } from "../../api";
@@ -11,22 +12,23 @@ interface StatsCellProps {
   status: StackStatus;
 }
 
-const BIND_ICON_CONFIG: Record<ParsedPort["bindType"], { Icon: ComponentType<{ color?: string; style?: CSSProperties }>; color: string; tooltip: string }> = {
-  external: { Icon: GlobeIcon,   color: "currentColor", tooltip: "Exposed on all interfaces — open stack info for full details" },
-  localhost: { Icon: LaptopIcon, color: "currentColor", tooltip: "Bound to localhost only — open stack info for full details" },
-  specific:  { Icon: NetworkIcon, color: "currentColor", tooltip: "Bound to a specific IP — open stack info for full details" },
-};
-
 function PortBindIcon({ bindType }: { bindType: ParsedPort["bindType"] }) {
-  const { Icon, color, tooltip } = BIND_ICON_CONFIG[bindType];
+  const { t } = useTranslation();
+  const cfg: Record<ParsedPort["bindType"], { Icon: ComponentType<{ color?: string; style?: CSSProperties }>; color: string; tooltipKey: string }> = {
+    external: { Icon: GlobeIcon,   color: "currentColor", tooltipKey: "ports.external_tooltip" },
+    localhost: { Icon: LaptopIcon, color: "currentColor", tooltipKey: "ports.localhost_tooltip" },
+    specific:  { Icon: NetworkIcon, color: "currentColor", tooltipKey: "ports.specific_tooltip" },
+  };
+  const { Icon, color, tooltipKey } = cfg[bindType];
   return (
-    <Tooltip content={tooltip}>
+    <Tooltip content={t(tooltipKey)}>
       <Icon color={color} style={{ marginRight: "0.2rem", verticalAlign: "middle" }} />
     </Tooltip>
   );
 }
 
 export function StatsCell({ stackName, status }: StatsCellProps) {
+  const { t } = useTranslation();
   const { ports, stats } = useContainerStats(stackName, status);
 
   if (status === "stopped" || status === "unknown") {
@@ -52,8 +54,8 @@ export function StatsCell({ stackName, status }: StatsCellProps) {
       )}
       {stats && (
         <div className="sc-metrics">
-          <span>CPU {stats.cpu.toFixed(1)}%</span>
-          <span>Mem {formatBytes(stats.mem)}</span>
+          <span>{t("stats.cpu")} {stats.cpu.toFixed(1)}%</span>
+          <span>{t("stats.mem")} {formatBytes(stats.mem)}</span>
         </div>
       )}
       {ports.length === 0 && !stats && (

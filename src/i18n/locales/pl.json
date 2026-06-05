@@ -1,0 +1,390 @@
+{
+  "common": {
+    "cancel": "Anuluj",
+    "close": "Zamknij",
+    "save": "Zapisz",
+    "delete": "Usuń",
+    "create": "Utwórz",
+    "edit": "Edytuj",
+    "back": "Wstecz",
+    "retry": "Ponów",
+    "refresh": "Odśwież",
+    "clear": "Wyczyść",
+    "scan": "Skanuj",
+    "scanning": "Skanowanie…",
+    "fetch": "Pobierz",
+    "nothing_found": "Nic nie znaleziono.",
+    "unknown": "nieznany"
+  },
+
+  "stacks": {
+    "title": "Stosy Compose",
+    "aria_label": "Stosy Compose",
+    "empty_title": "Nie znaleziono stosów Compose",
+    "empty_body": "Uruchom projekt za pomocą docker compose up -d, a pojawi się tutaj.",
+    "load_failed": "Nie udało się załadować stosów",
+    "service_count_one": "{{count}} usługa",
+    "service_count_few": "{{count}} usługi",
+    "service_count_many": "{{count}} usług",
+    "service_count_other": "{{count}} usług",
+    "status_running": "działa",
+    "status_partial": "częściowy",
+    "status_stopped": "zatrzymany",
+    "status_paused": "wstrzymany",
+    "status_unknown": "nieznany"
+  },
+
+  "actions": {
+    "up": "Uruchom",
+    "down": "Wyłącz",
+    "down_title": "Wyłącz (usuń kontenery)",
+    "stop": "Zatrzymaj",
+    "start": "Uruchom",
+    "restart": "Uruchom ponownie",
+    "pause": "Wstrzymaj",
+    "unpause": "Wznów",
+    "kill": "Zakończ",
+    "pull": "Pobierz obrazy",
+    "pull_title": "Pobierz najnowsze obrazy",
+    "logs": "Logi",
+    "logs_title": "Wyświetl logi",
+    "edit_title": "Edytuj plik Compose",
+    "info": "Info",
+    "info_title": "Informacje o stosie",
+    "events": "Zdarzenia",
+    "top": "Procesy",
+    "shell": "Terminal",
+    "prune": "Wyczyść",
+    "more_actions_for": "Więcej akcji dla {{name}}",
+    "find_best_match": "Znajdź najlepsze dopasowanie",
+    "find_best_match_title": "Wykryj katalog główny Compose z aktywnych stosów"
+  },
+
+  "health": {
+    "passing": "Kontrola zdrowia: poprawna",
+    "failing": "Kontrola zdrowia: błąd",
+    "starting": "Kontrola zdrowia: uruchamianie"
+  },
+
+  "ports": {
+    "external_tooltip": "Dostępny na wszystkich interfejsach — otwórz info stosu po szczegóły",
+    "localhost_tooltip": "Powiązany tylko z localhost — otwórz info stosu po szczegóły",
+    "specific_tooltip": "Powiązany z konkretnym IP — otwórz info stosu po szczegóły"
+  },
+
+  "footer": {
+    "version": "Wersja: {{version}}",
+    "compose_version": "Docker Compose: {{version}}",
+    "help": "Pomoc",
+    "feedback": "Opinia / Zgłoś błąd"
+  },
+
+  "error_boundary": {
+    "load_stacks_error": "Błąd podczas ładowania stosów"
+  },
+
+  "down_modal": {
+    "aria_label": "Potwierdź wyłączenie",
+    "title": "Usunąć \"{{name}}\"?",
+    "body_prefix": "Uruchomienie",
+    "body_suffix": "zatrzyma i usunie wszystkie kontenery dla",
+    "body_suffix2": ". Stos zniknie z tej listy.",
+    "confirm_button": "Wyłącz (usuń)"
+  },
+
+  "kill_modal": {
+    "aria_label": "Potwierdź zakończenie",
+    "title": "Zakończyć \"{{name}}\"?",
+    "body_prefix": "Uruchomienie",
+    "body_sigkill": "wysyła SIGKILL do wszystkich kontenerów w",
+    "body_suffix": ", natychmiast je kończąc. W przeciwieństwie do Zatrzymania, procesy nie mają szansy na posprzątanie. Używaj tylko gdy Zatrzymanie nie odpowiada.",
+    "confirm_button": "Zakończ wszystkie kontenery"
+  },
+
+  "delete_modal": {
+    "aria_label": "Usuń stos Compose — {{name}}",
+    "title": "Usuń — {{name}}",
+    "cannot_undo_title": "Tej akcji nie można cofnąć",
+    "cannot_undo_body": "Plik Compose zostanie trwale usunięty z dysku.",
+    "compose_file_label": "Plik Compose:",
+    "delete_folder_label": "Usuń cały folder",
+    "delete_folder_description": "Usuwa folder {{folder}} i całą jego zawartość",
+    "confirm_aria_label": "Potwierdź usunięcie",
+    "confirm_title": "Czy na pewno?",
+    "confirm_warning_title": "To trwale usunie {{target}}!",
+    "confirm_warning_body": "Nie ma możliwości odzyskania danych. Upewnij się, że masz kopię zapasową, jeśli potrzebujesz.",
+    "confirm_button": "Tak, usuń",
+    "target_folder": "folder {{folder}}",
+    "target_file": "plik {{file}}",
+    "error_default": "Usunięcie nie powiodło się"
+  },
+
+  "create_modal": {
+    "aria_label": "Utwórz nowy stos Compose",
+    "title": "Utwórz stos Compose",
+    "field_name": "Nazwa stosu",
+    "field_name_placeholder": "mój-stos",
+    "field_dir": "Katalog główny Compose",
+    "field_dir_placeholder": "/etc/docker/compose",
+    "field_dir_aria": "Katalog główny Compose",
+    "field_method": "Metoda tworzenia",
+    "method_git_label": "Z URL Git",
+    "method_git_description": "Pobierz docker-compose.yml z repozytorium Git",
+    "method_template_label": "Z szablonu",
+    "method_template_description": "Zacznij od przykładu struktury YAML",
+    "method_manual_label": "Ręcznie",
+    "method_manual_description": "Napisz plik Compose od podstaw",
+    "ownership_warning_title": "Właściciel katalogu zależy od trybu uprawnień",
+    "ownership_warning_body": "Utworzony katalog i plik Compose będą własnością użytkownika wykonującego tę akcję — zwykłego użytkownika (tryb ograniczony) lub roota (tryb superużytkownika). Kontenery uruchomione później mogą działać z innym UID i napotykać błędy uprawnień na ścieżkach bind-mount. Jest to oczekiwane zachowanie: część obrazów działa poprawnie, inne wymagają określonej własności. Dostosuj user:, uprawnienia woluminów lub tryb uruchomienia według potrzeb stosu.",
+    "field_git_url": "URL repozytorium Git",
+    "field_git_placeholder": "https://github.com/example/moj-stos.git",
+    "git_review_title": "Sprawdź przed utworzeniem",
+    "git_review_body": "Zawsze sprawdzaj pliki Compose z zewnętrznych źródeł. Używaj tylko zaufanych repozytoriów.",
+    "next_button": "Dalej",
+    "create_button": "Utwórz",
+    "create_anyway_button": "Utwórz mimo to",
+    "confirm_create_aria_label": "Potwierdź tworzenie",
+    "confirm_create_title": "Utworzyć mimo problemów?",
+    "confirm_create_question": "Czy chcesz kontynuować mimo to?",
+    "errors_found_title": "Znaleziono błędy",
+    "warnings_found_title": "Znaleziono ostrzeżenia",
+    "error_count_one": "Plik Compose zawiera {{count}} błąd.",
+    "error_count_few": "Plik Compose zawiera {{count}} błędy.",
+    "error_count_many": "Plik Compose zawiera {{count}} błędów.",
+    "error_count_other": "Plik Compose zawiera {{count}} błędów.",
+    "warning_count_one": "Plik Compose zawiera {{count}} ostrzeżenie.",
+    "warning_count_few": "Plik Compose zawiera {{count}} ostrzeżenia.",
+    "warning_count_many": "Plik Compose zawiera {{count}} ostrzeżeń.",
+    "warning_count_other": "Plik Compose zawiera {{count}} ostrzeżeń.",
+    "validation_name_required": "Nazwa jest wymagana",
+    "validation_name_slashes": "Nazwa nie może zawierać ukośników",
+    "validation_name_spaces": "Nazwa nie może zawierać spacji",
+    "error_dir_exists": "Katalog {{dir}} już istnieje i nie jest pusty",
+    "error_git_protocol": "Obsługiwane są tylko adresy URL http:// i https://",
+    "error_git_invalid_url": "Nieprawidłowy URL — obsługiwane są tylko adresy http:// i https://",
+    "error_git_no_compose": "Nie znaleziono pliku Compose w katalogu głównym repozytorium (docker-compose.yml lub compose.yml)",
+    "error_git_clone_failed": "Klonowanie Git nie powiodło się",
+    "error_create_failed": "Nie udało się utworzyć stosu"
+  },
+
+  "yaml_modal": {
+    "aria_label": "Plik Compose — {{name}}",
+    "title": "{{name}} — plik Compose",
+    "env_file_button": "Plik Env",
+    "history_button": "Historia ({{count}})",
+    "edit_button": "Edytuj",
+    "lock_button": "Zablokuj",
+    "snapshots_title": "Migawki",
+    "snapshot_restore": "Przywróć",
+    "snapshot_delete": "Usuń",
+    "load_failed_title": "Nie można odczytać pliku",
+    "save_failed_title": "Zapis nie powiódł się",
+    "confirm_save_aria_label": "Potwierdź zapis",
+    "confirm_save_title": "Zapisać mimo problemów?",
+    "confirm_save_question": "Czy chcesz zapisać mimo to?",
+    "save_anyway_button": "Zapisz mimo to",
+    "errors_found_title": "Znaleziono błędy",
+    "warnings_found_title": "Znaleziono ostrzeżenia",
+    "error_count_one": "Plik Compose zawiera {{count}} błąd.",
+    "error_count_few": "Plik Compose zawiera {{count}} błędy.",
+    "error_count_many": "Plik Compose zawiera {{count}} błędów.",
+    "error_count_other": "Plik Compose zawiera {{count}} błędów.",
+    "warning_count_one": "Plik Compose zawiera {{count}} ostrzeżenie.",
+    "warning_count_few": "Plik Compose zawiera {{count}} ostrzeżenia.",
+    "warning_count_many": "Plik Compose zawiera {{count}} ostrzeżeń.",
+    "warning_count_other": "Plik Compose zawiera {{count}} ostrzeżeń."
+  },
+
+  "env_modal": {
+    "aria_label": "Plik Env — {{name}}",
+    "title": "{{name}} — plik Env",
+    "load_failed_title": "Nie można odczytać pliku",
+    "save_failed_title": "Zapis nie powiódł się",
+    "table_button": "Tabela",
+    "raw_button": "Surowy",
+    "add_file_aria": "Dodaj nowy plik Env",
+    "add_file_title": "Utwórz nowy plik Env",
+    "new_file_placeholder": ".env.prod",
+    "new_file_aria": "Nazwa nowego pliku Env",
+    "create_file_aria": "Utwórz plik",
+    "cancel_aria": "Anuluj",
+    "confirm_save_aria_label": "Potwierdź zapis",
+    "confirm_save_title": "Zapisać mimo problemów?",
+    "duplicate_keys_title": "Znaleziono zduplikowane klucze",
+    "duplicate_keys_body": "Plik Env zawiera zduplikowane klucze. Dla każdego klucza zostanie użyta tylko ostatnia wartość.",
+    "confirm_save_question": "Czy chcesz zapisać mimo to?",
+    "save_anyway_button": "Zapisz mimo to"
+  },
+
+  "logs_modal": {
+    "aria_label": "Logi — {{name}}",
+    "title": "Logi — {{name}}",
+    "continue_button": "Kontynuuj",
+    "pause_button": "Wstrzymaj",
+    "refresh_button": "Odśwież",
+    "clear_button": "Wyczyść",
+    "limit_notice": "Wyświetlanie ostatnich {{count}} linii",
+    "waiting": "Oczekiwanie na logi…"
+  },
+
+  "exec_modal": {
+    "aria_label": "Terminal — {{name}}",
+    "title": "Terminal — {{name}}",
+    "field_service": "Usługa",
+    "field_service_placeholder": "nazwa usługi",
+    "field_command": "Polecenie",
+    "field_command_placeholder": "/bin/sh",
+    "field_user": "Użytkownik (opcjonalnie)",
+    "field_user_placeholder": "root",
+    "open_shell_button": "Otwórz terminal",
+    "disconnect_button": "Rozłącz"
+  },
+
+  "events_modal": {
+    "aria_label": "Zdarzenia — {{name}}",
+    "title": "Zdarzenia — {{name}}",
+    "stream_button": "Strumieniuj zdarzenia",
+    "stop_button": "Zatrzymaj",
+    "clear_button": "Wyczyść",
+    "stream_prompt": "Naciśnij \"Strumieniuj zdarzenia\", aby rozpocząć obserwowanie.",
+    "error_title": "Błąd strumieniowania zdarzeń",
+    "col_time": "Czas",
+    "col_type": "Typ",
+    "col_action": "Akcja",
+    "col_service": "Usługa",
+    "col_details": "Szczegóły"
+  },
+
+  "top_modal": {
+    "aria_label": "Procesy — {{name}}",
+    "title": "Procesy — {{name}}",
+    "refresh_button": "Odśwież",
+    "error_title": "Nie można załadować procesów",
+    "empty": "Nie znaleziono uruchomionych procesów."
+  },
+
+  "pull_modal": {
+    "aria_label": "Pobieranie obrazów — {{name}}",
+    "title": "Pobieranie obrazów — {{name}}",
+    "pulling": "Pobieranie obrazów dla {{name}}…",
+    "complete": "✓ Pobieranie zakończone",
+    "failed": "✗ Pobieranie nie powiodło się",
+    "starting": "Rozpoczynanie pobierania…"
+  },
+
+  "pull_confirm_modal": {
+    "aria_label": "Potwierdź pobieranie — {{name}}",
+    "title": "Pobierz najnowsze obrazy — {{name}}",
+    "warning_title": "Nowsze wersje obrazów mogą zawierać zmiany niekompatybilne wstecz",
+    "warning_body_prefix": "Sprawdź dzienniki zmian przed pobraniem, szczególnie gdy usługi używają",
+    "warning_body_suffix": "lub obrazu bez tagu. Przypinanie do konkretnego tagu wersji zapobiega nieoczekiwanym aktualizacjom.",
+    "images_title": "Obrazy do zaktualizowania:",
+    "unpinned_label": "⚠ nieprzypięty",
+    "unpinned_notice": "Nieprzypięte obrazy zawsze pobierają to, co rejestr uważa za \"latest\", i najczęściej zmieniają swoje zachowanie między pobraniami.",
+    "pull_button": "Pobierz"
+  },
+
+  "up_modal": {
+    "aria_label": "Uruchamianie — {{name}}",
+    "title": "Uruchamianie — {{name}}",
+    "starting": "Uruchamianie {{name}}…",
+    "initializing": "Uruchamianie…",
+    "complete": "✓ Uruchomienie zakończone",
+    "failed": "✗ Uruchomienie nie powiodło się"
+  },
+
+  "up_confirm_modal": {
+    "aria_label": "Potwierdź uruchomienie — {{name}}",
+    "title": "Uruchamianie — {{name}}",
+    "warning_title": "Kontenery ze zmienioną konfiguracją zostaną odtworzone",
+    "warning_body_prefix": "Uruchomienie",
+    "warning_body_middle": "odtworzy kontenery, których definicja usługi uległa zmianie. Usługi używające",
+    "warning_body_suffix": "lub obrazu bez tagu mogą też pobrać nowszą wersję z rejestru.",
+    "services_title": "Usługi:",
+    "unpinned_label": "⚠ nieprzypięty",
+    "unpinned_notice": "Nieprzypięte obrazy mogą pobierać to, co rejestr uważa za \"latest\", i nieoczekiwanie zmieniać swoje zachowanie.",
+    "up_button": "Uruchom"
+  },
+
+  "info_modal": {
+    "aria_label": "Info — {{name}}",
+    "title": "{{name}} — info",
+    "section_compose_file": "Plik Compose",
+    "section_services": "Usługi",
+    "section_images": "Obrazy",
+    "section_volumes": "Woluminy",
+    "no_containers": "Nie znaleziono kontenerów.",
+    "no_images": "Nie znaleziono obrazów.",
+    "no_volumes": "Nie znaleziono woluminów.",
+    "volumes_unavailable": "Niedostępne w tej wersji Docker Compose.",
+    "container_error_title": "Nie można załadować informacji o kontenerach",
+    "image_error_title": "Nie można załadować obrazów",
+    "volume_error_title": "Nie można załadować woluminów",
+    "img_col_service": "Usługa",
+    "img_col_repo": "Repozytorium",
+    "img_col_tag": "Tag",
+    "img_col_size": "Rozmiar",
+    "img_col_created": "Utworzono",
+    "vol_col_name": "Nazwa",
+    "vol_col_driver": "Sterownik",
+    "vol_col_mountpoint": "Punkt montowania"
+  },
+
+  "prune_modal": {
+    "aria_label_select": "Wyczyść zasoby — {{name}}",
+    "title_select": "Wyczyść zasoby — {{name}}",
+    "aria_label_preview": "Potwierdź czyszczenie — {{name}}",
+    "title_preview": "Podgląd — zasoby do usunięcia",
+    "not_running_title": "Stos nie działa — ryzyko utraty danych",
+    "not_running_body": "Pozornie nieużywane zasoby mogą być nadal potrzebne do ponownego uruchomienia tego stosu. Usuniętych tutaj woluminów nie można odzyskać.",
+    "not_running_preview_body": "Pozornie nieużywane zasoby mogą być nadal potrzebne do uruchomienia stosu. Usuniętych tutaj woluminów nie można odzyskać.",
+    "destructive_title": "Akcja destrukcyjna — nie można cofnąć",
+    "destructive_body": "Czyszczenie trwale usuwa zasoby Docker. Woluminy mogą zawierać trwałe dane, których nie można odzyskać. Przed kontynuowaniem dokładnie sprawdź.",
+    "images_label": "Obrazy",
+    "images_description": "Starsze wersje obrazów repozytoriów tego stosu, które nie są już używane przez żaden kontener.",
+    "containers_label": "Kontenery",
+    "containers_description": "Zatrzymane kontenery należące do tego stosu.",
+    "volumes_label": "Woluminy",
+    "volumes_warning": "⚠ mogą zawierać trwałe dane",
+    "volumes_description": "Nieużywane nazwane woluminy powiązane z tym stosem.",
+    "networks_label": "Sieci",
+    "networks_description": "Nieużywane sieci utworzone dla tego stosu (używane są pomijane).",
+    "preview_button": "Podgląd",
+    "prune_button": "Wyczyść zaznaczone",
+    "nothing_to_remove": "Nic do usunięcia."
+  },
+
+  "downed_section": {
+    "create_button": "Utwórz",
+    "import_button": "Importuj",
+    "dir_placeholder": "Wpisz katalog główny Compose…",
+    "dir_aria": "Katalog Compose",
+    "down_status": "nieaktywny",
+    "scan_failed_title": "Skanowanie nie powiodło się",
+    "nothing_found_title": "Nic nie znaleziono",
+    "nothing_found_body": "Czy to jest katalog nadrzędny Compose?",
+    "edit_title": "Edytuj plik Compose",
+    "delete_title": "Usuń plik Compose",
+    "down_stacks_aria": "Nieaktywne stosy Compose"
+  },
+
+  "stack_row": {
+    "no_containers": "Nie znaleziono kontenerów.",
+    "containers_aria": "Kontenery {{name}}"
+  },
+
+  "container_state": {
+    "running": "działa",
+    "paused": "wstrzymany",
+    "exited": "zakończony",
+    "restarting": "uruchamia się ponownie",
+    "dead": "crashed",
+    "created": "utworzony",
+    "removing": "usuwany"
+  },
+
+  "stats": {
+    "cpu": "CPU",
+    "mem": "Pam."
+  }
+}

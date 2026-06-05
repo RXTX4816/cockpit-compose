@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Page, PageSection } from "@patternfly/react-core";
 import { AppFooter } from "./AppFooter";
 import { StacksView } from "./StacksView";
@@ -6,6 +7,7 @@ import { ErrorBoundary } from "./ErrorBoundary";
 import { detectComposeCommand } from "../api";
 
 export function App() {
+  const { t } = useTranslation();
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
@@ -17,7 +19,7 @@ export function App() {
   return (
     <Page className="pf-m-no-sidebar">
       <PageSection hasBodyWrapper={false} isFilled>
-        <ErrorBoundary fallbackTitle="Error loading stacks">
+        <ErrorBoundary fallbackTitle={t("error_boundary.load_stacks_error")}>
           <StacksView />
         </ErrorBoundary>
       </PageSection>

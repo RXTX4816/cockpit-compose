@@ -1,0 +1,380 @@
+{
+  "common": {
+    "cancel": "Abbrechen",
+    "close": "Schließen",
+    "save": "Speichern",
+    "delete": "Löschen",
+    "create": "Erstellen",
+    "edit": "Bearbeiten",
+    "back": "Zurück",
+    "retry": "Wiederholen",
+    "refresh": "Aktualisieren",
+    "clear": "Leeren",
+    "scan": "Scannen",
+    "scanning": "Wird gescannt…",
+    "fetch": "Abrufen",
+    "nothing_found": "Nichts gefunden.",
+    "unknown": "unbekannt"
+  },
+
+  "stacks": {
+    "title": "Compose-Stacks",
+    "aria_label": "Compose-Stacks",
+    "empty_title": "Keine Compose-Stacks gefunden",
+    "empty_body": "Starte ein Projekt mit docker compose up -d und es erscheint hier.",
+    "load_failed": "Stacks konnten nicht geladen werden",
+    "service_count_one": "{{count}} Dienst",
+    "service_count_other": "{{count}} Dienste",
+    "status_running": "läuft",
+    "status_partial": "teilweise",
+    "status_stopped": "gestoppt",
+    "status_paused": "pausiert",
+    "status_unknown": "unbekannt"
+  },
+
+  "actions": {
+    "up": "Hochfahren",
+    "down": "Herunterfahren",
+    "down_title": "Herunterfahren (Container entfernen)",
+    "stop": "Stoppen",
+    "start": "Starten",
+    "restart": "Neu starten",
+    "pause": "Pausieren",
+    "unpause": "Fortsetzen",
+    "kill": "Beenden",
+    "pull": "Images laden",
+    "pull_title": "Neueste Images laden",
+    "logs": "Protokolle",
+    "logs_title": "Protokolle anzeigen",
+    "edit_title": "Compose-Datei bearbeiten",
+    "info": "Info",
+    "info_title": "Stack-Info",
+    "events": "Ereignisse",
+    "top": "Prozesse",
+    "shell": "Terminal",
+    "prune": "Bereinigen",
+    "more_actions_for": "Weitere Aktionen für {{name}}",
+    "find_best_match": "Besten Treffer finden",
+    "find_best_match_title": "Compose-Stammverzeichnis aus aktiven Stacks ableiten"
+  },
+
+  "health": {
+    "passing": "Gesundheitsprüfung erfolgreich",
+    "failing": "Gesundheitsprüfung fehlgeschlagen",
+    "starting": "Gesundheitsprüfung wird gestartet"
+  },
+
+  "ports": {
+    "external_tooltip": "Auf allen Netzwerkschnittstellen verfügbar — Stack-Info für Details öffnen",
+    "localhost_tooltip": "Nur an localhost gebunden — Stack-Info für Details öffnen",
+    "specific_tooltip": "An eine bestimmte IP gebunden — Stack-Info für Details öffnen"
+  },
+
+  "footer": {
+    "version": "Version: {{version}}",
+    "compose_version": "Docker Compose: {{version}}",
+    "help": "Hilfe",
+    "feedback": "Feedback / Fehler melden"
+  },
+
+  "error_boundary": {
+    "load_stacks_error": "Fehler beim Laden der Stacks"
+  },
+
+  "down_modal": {
+    "aria_label": "Herunterfahren bestätigen",
+    "title": "\"{{name}}\" entfernen?",
+    "body_prefix": "Das Ausführen von",
+    "body_suffix": "stoppt und entfernt alle Container für",
+    "body_suffix2": ". Der Stack verschwindet aus dieser Liste.",
+    "confirm_button": "Herunterfahren (entfernen)"
+  },
+
+  "kill_modal": {
+    "aria_label": "Beenden bestätigen",
+    "title": "\"{{name}}\" beenden?",
+    "body_prefix": "Das Ausführen von",
+    "body_sigkill": "sendet SIGKILL an alle Container in",
+    "body_suffix": " und beendet sie sofort. Im Gegensatz zu Stoppen haben Prozesse keine Möglichkeit zum Aufräumen. Nur verwenden, wenn Stoppen nicht reagiert.",
+    "confirm_button": "Alle Container beenden"
+  },
+
+  "delete_modal": {
+    "aria_label": "Compose-Stack löschen — {{name}}",
+    "title": "Löschen — {{name}}",
+    "cannot_undo_title": "Diese Aktion kann nicht rückgängig gemacht werden",
+    "cannot_undo_body": "Die Compose-Datei wird dauerhaft von der Festplatte gelöscht.",
+    "compose_file_label": "Compose-Datei:",
+    "delete_folder_label": "Gesamten Ordner löschen",
+    "delete_folder_description": "Entfernt den Ordner {{folder}} und seinen gesamten Inhalt",
+    "confirm_aria_label": "Löschen bestätigen",
+    "confirm_title": "Wirklich sicher?",
+    "confirm_warning_title": "Das löscht dauerhaft {{target}}!",
+    "confirm_warning_body": "Dieser Vorgang ist nicht rückgängig zu machen. Bei Bedarf vorab ein Backup anlegen.",
+    "confirm_button": "Ja, löschen",
+    "target_folder": "den Ordner {{folder}}",
+    "target_file": "die Datei {{file}}",
+    "error_default": "Löschen fehlgeschlagen"
+  },
+
+  "create_modal": {
+    "aria_label": "Neuen Compose-Stack erstellen",
+    "title": "Compose-Stack erstellen",
+    "field_name": "Stack-Name",
+    "field_name_placeholder": "mein-stack",
+    "field_dir": "Compose-Stammverzeichnis",
+    "field_dir_placeholder": "/etc/docker/compose",
+    "field_dir_aria": "Compose-Stammverzeichnis",
+    "field_method": "Erstellungsmethode",
+    "method_git_label": "Von Git-URL",
+    "method_git_description": "docker-compose.yml aus einem Git-Repository laden",
+    "method_template_label": "Aus Vorlage",
+    "method_template_description": "Mit einem YAML-Strukturbeispiel beginnen",
+    "method_manual_label": "Manuell",
+    "method_manual_description": "Die Compose-Datei von Grund auf schreiben",
+    "ownership_warning_title": "Verzeichniseigentümer hängt vom Berechtigungsmodus ab",
+    "ownership_warning_body": "Das erstellte Verzeichnis und die Compose-Datei gehören dem Benutzer, der diese Aktion ausführt — entweder dem regulären Benutzer (eingeschränkter Modus) oder root (Superuser-Modus). Später gestartete Container können mit einer anderen UID laufen und Berechtigungsfehler auf bind-gemounteten Pfaden verursachen. Dies ist erwartetes Verhalten: Manche Images funktionieren problemlos, andere benötigen bestimmte Eigentumsrechte. Passen Sie user:, Volume-Berechtigungen oder den Ausführungsmodus nach Bedarf an.",
+    "field_git_url": "Git-Repository-URL",
+    "field_git_placeholder": "https://github.com/example/mein-stack.git",
+    "git_review_title": "Vor dem Erstellen prüfen",
+    "git_review_body": "Compose-Dateien aus externen Quellen immer prüfen. Nur vertrauenswürdige Repositories verwenden.",
+    "next_button": "Weiter",
+    "create_button": "Erstellen",
+    "create_anyway_button": "Trotzdem erstellen",
+    "confirm_create_aria_label": "Erstellen bestätigen",
+    "confirm_create_title": "Mit Problemen erstellen?",
+    "confirm_create_question": "Trotzdem fortfahren?",
+    "errors_found_title": "Fehler gefunden",
+    "warnings_found_title": "Warnungen gefunden",
+    "error_count_one": "Die Compose-Datei enthält {{count}} Fehler.",
+    "error_count_other": "Die Compose-Datei enthält {{count}} Fehler.",
+    "warning_count_one": "Die Compose-Datei enthält {{count}} Warnung.",
+    "warning_count_other": "Die Compose-Datei enthält {{count}} Warnungen.",
+    "validation_name_required": "Name ist erforderlich",
+    "validation_name_slashes": "Name darf keine Schrägstriche enthalten",
+    "validation_name_spaces": "Name darf keine Leerzeichen enthalten",
+    "error_dir_exists": "Verzeichnis {{dir}} existiert bereits und ist nicht leer",
+    "error_git_protocol": "Nur http:// und https:// URLs werden unterstützt",
+    "error_git_invalid_url": "Ungültige URL — nur http:// und https:// URLs werden unterstützt",
+    "error_git_no_compose": "Keine Compose-Datei im Repository-Stammverzeichnis gefunden (docker-compose.yml oder compose.yml)",
+    "error_git_clone_failed": "Git-Clone fehlgeschlagen",
+    "error_create_failed": "Stack konnte nicht erstellt werden"
+  },
+
+  "yaml_modal": {
+    "aria_label": "Compose-Datei — {{name}}",
+    "title": "{{name}} — Compose-Datei",
+    "env_file_button": "Env-Datei",
+    "history_button": "Verlauf ({{count}})",
+    "edit_button": "Bearbeiten",
+    "lock_button": "Sperren",
+    "snapshots_title": "Snapshots",
+    "snapshot_restore": "Wiederherstellen",
+    "snapshot_delete": "Löschen",
+    "load_failed_title": "Datei konnte nicht gelesen werden",
+    "save_failed_title": "Speichern fehlgeschlagen",
+    "confirm_save_aria_label": "Speichern bestätigen",
+    "confirm_save_title": "Mit Problemen speichern?",
+    "confirm_save_question": "Trotzdem speichern?",
+    "save_anyway_button": "Trotzdem speichern",
+    "errors_found_title": "Fehler gefunden",
+    "warnings_found_title": "Warnungen gefunden",
+    "error_count_one": "Die Compose-Datei enthält {{count}} Fehler.",
+    "error_count_other": "Die Compose-Datei enthält {{count}} Fehler.",
+    "warning_count_one": "Die Compose-Datei enthält {{count}} Warnung.",
+    "warning_count_other": "Die Compose-Datei enthält {{count}} Warnungen."
+  },
+
+  "env_modal": {
+    "aria_label": "Env-Datei — {{name}}",
+    "title": "{{name}} — Env-Datei",
+    "load_failed_title": "Datei konnte nicht gelesen werden",
+    "save_failed_title": "Speichern fehlgeschlagen",
+    "table_button": "Tabelle",
+    "raw_button": "Roh",
+    "add_file_aria": "Neue Env-Datei hinzufügen",
+    "add_file_title": "Neue Env-Datei erstellen",
+    "new_file_placeholder": ".env.prod",
+    "new_file_aria": "Name der neuen Env-Datei",
+    "create_file_aria": "Datei erstellen",
+    "cancel_aria": "Abbrechen",
+    "confirm_save_aria_label": "Speichern bestätigen",
+    "confirm_save_title": "Mit Problemen speichern?",
+    "duplicate_keys_title": "Doppelte Schlüssel gefunden",
+    "duplicate_keys_body": "Die Env-Datei enthält doppelte Schlüssel. Nur der letzte Wert für jeden Schlüssel wird verwendet.",
+    "confirm_save_question": "Trotzdem speichern?",
+    "save_anyway_button": "Trotzdem speichern"
+  },
+
+  "logs_modal": {
+    "aria_label": "Protokolle — {{name}}",
+    "title": "Protokolle — {{name}}",
+    "continue_button": "Fortsetzen",
+    "pause_button": "Pausieren",
+    "refresh_button": "Aktualisieren",
+    "clear_button": "Leeren",
+    "limit_notice": "Letzte {{count}} Zeilen werden angezeigt",
+    "waiting": "Warte auf Protokolle…"
+  },
+
+  "exec_modal": {
+    "aria_label": "Terminal — {{name}}",
+    "title": "Terminal — {{name}}",
+    "field_service": "Dienst",
+    "field_service_placeholder": "Dienstname",
+    "field_command": "Befehl",
+    "field_command_placeholder": "/bin/sh",
+    "field_user": "Benutzer (optional)",
+    "field_user_placeholder": "root",
+    "open_shell_button": "Terminal öffnen",
+    "disconnect_button": "Trennen"
+  },
+
+  "events_modal": {
+    "aria_label": "Ereignisse — {{name}}",
+    "title": "Ereignisse — {{name}}",
+    "stream_button": "Ereignisse streamen",
+    "stop_button": "Stoppen",
+    "clear_button": "Leeren",
+    "stream_prompt": "\"Ereignisse streamen\" drücken, um zu beginnen.",
+    "error_title": "Fehler beim Streamen der Ereignisse",
+    "col_time": "Zeit",
+    "col_type": "Typ",
+    "col_action": "Aktion",
+    "col_service": "Dienst",
+    "col_details": "Details"
+  },
+
+  "top_modal": {
+    "aria_label": "Prozesse — {{name}}",
+    "title": "Prozesse — {{name}}",
+    "refresh_button": "Aktualisieren",
+    "error_title": "Prozesse konnten nicht geladen werden",
+    "empty": "Keine laufenden Prozesse gefunden."
+  },
+
+  "pull_modal": {
+    "aria_label": "Images laden — {{name}}",
+    "title": "Images laden — {{name}}",
+    "pulling": "Images für {{name}} werden geladen…",
+    "complete": "✓ Images geladen",
+    "failed": "✗ Images laden fehlgeschlagen",
+    "starting": "Laden wird gestartet…"
+  },
+
+  "pull_confirm_modal": {
+    "aria_label": "Images laden bestätigen — {{name}}",
+    "title": "Neueste Images laden — {{name}}",
+    "warning_title": "Neuere Image-Versionen können Breaking Changes enthalten",
+    "warning_body_prefix": "Changelogs vor dem Laden prüfen, insbesondere wenn Services",
+    "warning_body_suffix": "oder ein Image ohne Tag verwenden. Das Festlegen auf ein bestimmtes Versions-Tag vermeidet unerwartete Aktualisierungen.",
+    "images_title": "Zu aktualisierende Images:",
+    "unpinned_label": "⚠ nicht fixiert",
+    "unpinned_notice": "Nicht fixierte Images laden immer das, was die Registry als \"latest\" betrachtet, und ändern ihr Verhalten zwischen Ladevorgängen am häufigsten.",
+    "pull_button": "Laden"
+  },
+
+  "up_modal": {
+    "aria_label": "Hochfahren — {{name}}",
+    "title": "Hochfahren — {{name}}",
+    "starting": "{{name}} wird gestartet…",
+    "initializing": "Wird gestartet…",
+    "complete": "✓ Hochfahren abgeschlossen",
+    "failed": "✗ Hochfahren fehlgeschlagen"
+  },
+
+  "up_confirm_modal": {
+    "aria_label": "Hochfahren bestätigen — {{name}}",
+    "title": "Hochfahren — {{name}}",
+    "warning_title": "Container mit geänderter Konfiguration werden neu erstellt",
+    "warning_body_prefix": "Das Ausführen von",
+    "warning_body_middle": "erstellt Container neu, deren Service-Definition geändert wurde. Services, die",
+    "warning_body_suffix": "oder ein Image ohne Tag verwenden, können auch eine neuere Version aus der Registry laden.",
+    "services_title": "Dienste:",
+    "unpinned_label": "⚠ nicht fixiert",
+    "unpinned_notice": "Nicht fixierte Images können das laden, was die Registry als \"latest\" betrachtet, und ändern ihr Verhalten unerwartet.",
+    "up_button": "Hochfahren"
+  },
+
+  "info_modal": {
+    "aria_label": "Info — {{name}}",
+    "title": "{{name}} — Info",
+    "section_compose_file": "Compose-Datei",
+    "section_services": "Dienste",
+    "section_images": "Images",
+    "section_volumes": "Volumes",
+    "no_containers": "Keine Container gefunden.",
+    "no_images": "Keine Images gefunden.",
+    "no_volumes": "Keine Volumes gefunden.",
+    "volumes_unavailable": "Auf dieser Docker Compose-Version nicht verfügbar.",
+    "container_error_title": "Container-Info konnte nicht geladen werden",
+    "image_error_title": "Images konnten nicht geladen werden",
+    "volume_error_title": "Volumes konnten nicht geladen werden",
+    "img_col_service": "Dienst",
+    "img_col_repo": "Repository",
+    "img_col_tag": "Tag",
+    "img_col_size": "Größe",
+    "img_col_created": "Erstellt",
+    "vol_col_name": "Name",
+    "vol_col_driver": "Treiber",
+    "vol_col_mountpoint": "Einhängepunkt"
+  },
+
+  "prune_modal": {
+    "aria_label_select": "Ressourcen bereinigen — {{name}}",
+    "title_select": "Ressourcen bereinigen — {{name}}",
+    "aria_label_preview": "Bereinigen bestätigen — {{name}}",
+    "title_preview": "Vorschau — zu entfernende Ressourcen",
+    "not_running_title": "Stack läuft nicht — Datenverlustgefahr",
+    "not_running_body": "Scheinbar ungenutzte Ressourcen können noch zum Starten dieses Stacks benötigt werden. Hier entfernte Volumes können nicht wiederhergestellt werden.",
+    "not_running_preview_body": "Scheinbar ungenutzte Ressourcen können noch zum Starten des Stacks benötigt werden. Hier entfernte Volumes können nicht wiederhergestellt werden.",
+    "destructive_title": "Destruktive Aktion — kann nicht rückgängig gemacht werden",
+    "destructive_body": "Bereinigen löscht Docker-Ressourcen dauerhaft. Volumes können persistente Daten enthalten, die nicht wiederhergestellt werden können. Vor dem Fortfahren sorgfältig prüfen.",
+    "images_label": "Images",
+    "images_description": "Ältere Image-Versionen der Repos dieses Stacks, die von keinem Container mehr verwendet werden.",
+    "containers_label": "Container",
+    "containers_description": "Gestoppte Container, die zu diesem Stack gehören.",
+    "volumes_label": "Volumes",
+    "volumes_warning": "⚠ können persistente Daten enthalten",
+    "volumes_description": "Ungenutzte benannte Volumes, die diesem Stack zugeordnet sind.",
+    "networks_label": "Netzwerke",
+    "networks_description": "Ungenutzte Netzwerke, die für diesen Stack erstellt wurden (verwendete werden übersprungen).",
+    "preview_button": "Vorschau",
+    "prune_button": "Auswahl bereinigen",
+    "nothing_to_remove": "Nichts zu entfernen."
+  },
+
+  "downed_section": {
+    "create_button": "Erstellen",
+    "import_button": "Importieren",
+    "dir_placeholder": "Compose-Stammverzeichnis eingeben…",
+    "dir_aria": "Compose-Verzeichnis",
+    "down_status": "inaktiv",
+    "scan_failed_title": "Scan fehlgeschlagen",
+    "nothing_found_title": "Nichts gefunden",
+    "nothing_found_body": "Ist dies wirklich ein Compose-Übergeordnetes-Verzeichnis?",
+    "edit_title": "Compose-Datei bearbeiten",
+    "delete_title": "Compose-Datei löschen",
+    "down_stacks_aria": "Inaktive Compose-Stacks"
+  },
+
+  "stack_row": {
+    "no_containers": "Keine Container gefunden.",
+    "containers_aria": "{{name}} Container"
+  },
+
+  "container_state": {
+    "running": "läuft",
+    "paused": "pausiert",
+    "exited": "beendet",
+    "restarting": "neustart",
+    "dead": "abgestürzt",
+    "created": "erstellt",
+    "removing": "wird entfernt"
+  },
+
+  "stats": {
+    "cpu": "CPU",
+    "mem": "Speicher"
+  }
+}

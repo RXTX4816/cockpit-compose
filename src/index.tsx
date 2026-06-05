@@ -1,3 +1,4 @@
+import "./i18n";
 import { createRoot } from "react-dom/client";
 import "./cockpit-dark-theme";
 import "@patternfly/react-core/dist/styles/base.css";
