@@ -230,7 +230,9 @@
     "refresh_button": "Odśwież",
     "clear_button": "Wyczyść",
     "limit_notice": "Wyświetlanie ostatnich {{count}} linii",
-    "waiting": "Oczekiwanie na logi…"
+    "waiting": "Oczekiwanie na logi…",
+    "service_all": "Wszystkie usługi",
+    "search_placeholder": "Szukaj w logach…"
   },
 
   "exec_modal": {

@@ -27,9 +27,10 @@ export function restartStack(project: string, configFile: string, superuser?: "t
   );
 }
 
-export function streamLogs(project: string): CockpitProcess {
+export function streamLogs(project: string, service?: string): CockpitProcess {
   return cockpit.spawn(
-    compose("-p", project, "logs", "--follow", "--tail", "200", "--timestamps"),
+    compose("-p", project, "logs", "--follow", "--tail", "200", "--timestamps",
+      ...(service ? [service] : [])),
     { err: "message" },
   );
 }
