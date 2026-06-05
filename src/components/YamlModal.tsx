@@ -18,6 +18,7 @@ import type { Diagnostic } from "@codemirror/lint";
 import { validateComposeSpec } from "../compose-schema";
 import { type ComposeStack, readComposeFile, saveComposeFile, saveSnapshot } from "../api";
 import { YamlEditor } from "./YamlEditor";
+import { YamlDiffView } from "./YamlDiffView";
 import { EnvModal } from "./EnvModal";
 import { useSnapshots } from "../hooks/useSnapshots";
 import "./YamlModal.css";
@@ -37,6 +38,9 @@ export function YamlModal({ stack, onClose }: Props) {
   const [editedContent, setEditedContent] = useState("");
   const [diagnostics, setDiagnostics] = useState<Diagnostic[]>([]);
   const [confirmSave, setConfirmSave] = useState(false);
+  const [showDiff, setShowDiff] = useState(false);
+  const [snapshotDiff, setSnapshotDiff] = useState<{ path: string; snapshotContent: string } | null>(null);
+  const [loadingDiffPath, setLoadingDiffPath] = useState<string | null>(null);
   const [showSnapshots, setShowSnapshots] = useState(false);
   const [showEnv, setShowEnv] = useState(false);
 
@@ -65,9 +69,26 @@ export function YamlModal({ stack, onClose }: Props) {
       const snapshotContent = await restore(snapshotPath);
       setEditedContent(snapshotContent);
       setEditing(true);
+      setSnapshotDiff(null);
       setShowSnapshots(false);
     } catch (ex: unknown) {
       setError(ex instanceof Error ? ex.message : String(ex));
+    }
+  };
+
+  const handleSnapshotDiff = async (path: string) => {
+    if (snapshotDiff?.path === path) {
+      setSnapshotDiff(null);
+      return;
+    }
+    setLoadingDiffPath(path);
+    try {
+      const snapshotContent = await restore(path);
+      setSnapshotDiff({ path, snapshotContent });
+    } catch (ex: unknown) {
+      setError(ex instanceof Error ? ex.message : String(ex));
+    } finally {
+      setLoadingDiffPath(null);
     }
   };
 
@@ -132,6 +153,7 @@ export function YamlModal({ stack, onClose }: Props) {
   const handleCancel = () => {
     setEditedContent(content);
     setEditing(false);
+    setShowDiff(false);
   };
 
   const errorCount = diagnostics.filter(d => d.severity === "error").length;
@@ -158,12 +180,22 @@ export function YamlModal({ stack, onClose }: Props) {
                       {t("yaml_modal.history_button", { count: snapshots.length })}
                     </Button>
                   )}
+                  {editing && (
+                    <Button
+                      variant="plain"
+                      size="sm"
+                      isDisabled={content === editedContent}
+                      onClick={() => setShowDiff(d => !d)}
+                    >
+                      {showDiff ? t("yaml_modal.hide_diff_button") : t("yaml_modal.show_diff_button")}
+                    </Button>
+                  )}
                   {!editing ? (
-                    <Button variant="plain" size="sm" onClick={() => setEditing(true)} icon={<LockIcon />}>
+                    <Button variant="plain" size="sm" onClick={() => { setEditing(true); setSnapshotDiff(null); }} icon={<LockIcon />}>
                       {t("yaml_modal.edit_button")}
                     </Button>
                   ) : (
-                    <Button variant="plain" size="sm" onClick={() => setEditing(false)} icon={<LockOpenIcon />}>
+                    <Button variant="plain" size="sm" onClick={() => { setEditing(false); setShowDiff(false); }} icon={<LockOpenIcon />}>
                       {t("yaml_modal.lock_button")}
                     </Button>
                   )}
@@ -179,6 +211,9 @@ export function YamlModal({ stack, onClose }: Props) {
                 <div key={snap.timestamp} className="ym-snapshot-row">
                   <span className="ym-snapshot-name">{snap.name}</span>
                   <div className="ym-snapshot-actions">
+                    <Button variant="link" size="sm" isLoading={loadingDiffPath === snap.path} onClick={() => handleSnapshotDiff(snap.path)}>
+                      {snapshotDiff?.path === snap.path ? t("yaml_modal.snapshot_hide_diff") : t("yaml_modal.snapshot_show_diff")}
+                    </Button>
                     <Button variant="link" size="sm" onClick={() => handleRestoreSnapshot(snap.path)}>{t("yaml_modal.snapshot_restore")}</Button>
                     <Button variant="link" size="sm" onClick={() => handleDeleteSnapshot(snap.path)}>{t("yaml_modal.snapshot_delete")}</Button>
                   </div>
@@ -200,7 +235,12 @@ export function YamlModal({ stack, onClose }: Props) {
                   {error}
                 </Alert>
               )}
-              <YamlEditor content={editing ? editedContent : content} onChange={editing ? setEditedContent : () => {}} readOnly={!editing} onDiagnosticsChange={setDiagnostics} />
+              {editing && showDiff
+                ? <YamlDiffView original={content} modified={editedContent} />
+                : snapshotDiff
+                ? <YamlDiffView key={snapshotDiff.path} original={snapshotDiff.snapshotContent} modified={content} />
+                : <YamlEditor content={editing ? editedContent : content} onChange={editing ? setEditedContent : () => {}} readOnly={!editing} onDiagnosticsChange={setDiagnostics} />
+              }
             </>
           )}
         </div>

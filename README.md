@@ -110,7 +110,7 @@ The UI language follows Cockpit's language setting.
 |---|---|---|
 | English | `en` | 100% (source) |
 | German | `de` | 100% |
-| Polish | `pl` | 100% |
+| Polish | `pl` | 99% |
 <!-- i18n-coverage-end -->
 
 To add a new language, copy `src/i18n/locales/en.json`, translate the values, and register the file in `src/i18n/index.ts`.
