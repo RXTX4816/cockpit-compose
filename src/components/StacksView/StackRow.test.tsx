@@ -38,6 +38,7 @@ const defaultProps = {
   onEvents: vi.fn(),
   onTop: vi.fn(),
   onExec: vi.fn(),
+  onRun: vi.fn(),
   onPrune: vi.fn(),
   onActingChange: vi.fn(),
 };
@@ -234,6 +235,15 @@ describe("StackRow", () => {
     fireEvent.click(screen.getByRole("button", { name: /More actions for myapp/i }));
     fireEvent.click(screen.getByRole("menuitem", { name: /^Shell$/i }));
     expect(onExec).toHaveBeenCalledOnce();
+    await act(async () => {});
+  });
+
+  it("calls onRun when Run item clicked", async () => {
+    const onRun = vi.fn();
+    render(<StackRow {...defaultProps} onRun={onRun} />);
+    fireEvent.click(screen.getByRole("button", { name: /More actions for myapp/i }));
+    fireEvent.click(screen.getByRole("menuitem", { name: /^Run$/i }));
+    expect(onRun).toHaveBeenCalledOnce();
     await act(async () => {});
   });
 

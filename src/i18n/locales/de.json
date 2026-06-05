@@ -52,6 +52,7 @@
     "events": "Ereignisse",
     "top": "Prozesse",
     "shell": "Terminal",
+    "run": "Ausführen",
     "prune": "Bereinigen",
     "more_actions_for": "Weitere Aktionen für {{name}}",
     "find_best_match": "Besten Treffer finden",
@@ -227,6 +228,21 @@
     "waiting": "Warte auf Protokolle…",
     "service_all": "Alle Dienste",
     "search_placeholder": "Logs durchsuchen…"
+  },
+
+  "run_modal": {
+    "aria_label": "Ausführen — {{name}}",
+    "title": "Ausführen — {{name}}",
+    "field_service": "Dienst",
+    "field_service_placeholder": "Dienstname",
+    "field_command": "Befehl",
+    "field_command_placeholder": "echo hello",
+    "field_rm": "Container nach Ausführung entfernen (--rm)",
+    "run_button": "Ausführen",
+    "running": "Befehl wird in {{name}} ausgeführt…",
+    "initializing": "Wird gestartet…",
+    "complete": "✓ Befehl abgeschlossen",
+    "failed": "✗ Befehl fehlgeschlagen"
   },
 
   "exec_modal": {

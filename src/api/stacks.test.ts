@@ -5,7 +5,7 @@ import {
   listStacks, startStack, stopStack, restartStack, streamLogs, downStack, pullStack,
   listProjectContainerImageRefs, listImagesByRepo, listAllContainerImages, removeImages,
   listStoppedContainers, listDanglingVolumes, listProjectNetworks,
-  pruneContainers, pruneVolumes, pruneNetworks,
+  pruneContainers, pruneVolumes, pruneNetworks, composeRunStream,
 } from "./stacks";
 
 beforeEach(() => { mockSpawn.mockReset(); });
@@ -208,5 +208,55 @@ describe("pruneNetworks", () => {
     expect(args).toContain("prune");
     expect(args).toContain("-f");
     expect(args.join(" ")).toContain("com.docker.compose.project=myapp");
+  });
+});
+
+describe("composeRunStream", () => {
+  it("spawns compose run with service and command args", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    composeRunStream("myapp", "/path/compose.yml", "web", ["echo", "hello"], true);
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args).toContain("run");
+    expect(args).toContain("web");
+    expect(args).toContain("echo");
+    expect(args).toContain("hello");
+  });
+
+  it("includes --rm when rm is true", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    composeRunStream("myapp", "/path/compose.yml", "web", ["sh"], true);
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args).toContain("--rm");
+  });
+
+  it("omits --rm when rm is false", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    composeRunStream("myapp", "/path/compose.yml", "web", ["sh"], false);
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args).not.toContain("--rm");
+  });
+
+  it("passes project and config file", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    composeRunStream("myapp", "/path/compose.yml", "web", ["sh"], true);
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args).toContain("-p");
+    expect(args).toContain("myapp");
+    expect(args).toContain("-f");
+    expect(args).toContain("/path/compose.yml");
+  });
+
+  it("merges stderr into stdout with err: out", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    composeRunStream("myapp", "/path/compose.yml", "web", ["sh"], true);
+    const opts = mockSpawn.mock.calls[0][1] as Record<string, unknown>;
+    expect(opts.err).toBe("out");
+  });
+
+  it("passes superuser option when provided", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    composeRunStream("myapp", "/path/compose.yml", "web", ["sh"], true, "try");
+    const opts = mockSpawn.mock.calls[0][1] as Record<string, unknown>;
+    expect(opts.superuser).toBe("try");
   });
 });

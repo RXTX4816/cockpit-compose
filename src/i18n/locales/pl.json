@@ -54,6 +54,7 @@
     "events": "Zdarzenia",
     "top": "Procesy",
     "shell": "Terminal",
+    "run": "Jednorazowa akcja",
     "prune": "Wyczyść",
     "more_actions_for": "Więcej akcji dla {{name}}",
     "find_best_match": "Znajdź najlepsze dopasowanie",
@@ -237,6 +238,21 @@
     "waiting": "Oczekiwanie na logi…",
     "service_all": "Wszystkie usługi",
     "search_placeholder": "Szukaj w logach…"
+  },
+
+  "run_modal": {
+    "aria_label": "Uruchom polecenie — {{name}}",
+    "title": "Uruchom polecenie — {{name}}",
+    "field_service": "Usługa",
+    "field_service_placeholder": "nazwa usługi",
+    "field_command": "Polecenie",
+    "field_command_placeholder": "echo hello",
+    "field_rm": "Usuń kontener po zakończeniu (--rm)",
+    "run_button": "Uruchom",
+    "running": "Wykonywanie polecenia w {{name}}…",
+    "initializing": "Uruchamianie…",
+    "complete": "✓ Polecenie zakończone",
+    "failed": "✗ Polecenie nie powiodło się"
   },
 
   "exec_modal": {

@@ -204,3 +204,18 @@ export function pruneNetworks(project: string, superuser?: "try"): CockpitProces
     { superuser, err: "message" },
   );
 }
+
+export function composeRunStream(
+  project: string,
+  configFile: string,
+  service: string,
+  command: string[],
+  rm: boolean,
+  superuser?: "try",
+): CockpitProcess {
+  return cockpit.spawn(
+    compose("--progress", "plain", "-p", project, "-f", configFile,
+      "run", ...(rm ? ["--rm"] : []), service, ...command),
+    { superuser, err: "out" },
+  );
+}
