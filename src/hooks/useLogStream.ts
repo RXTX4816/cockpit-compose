@@ -3,7 +3,7 @@ import { streamLogs } from "../api";
 
 export const LOG_MAX_LINES = 500;
 
-export function useLogStream(stackName: string) {
+export function useLogStream(stackName: string, service?: string) {
   const [lines, setLines] = useState<string[]>([]);
   const [streaming, setStreaming] = useState(true);
   const [paused, setPaused] = useState(false);
@@ -21,7 +21,7 @@ export function useLogStream(stackName: string) {
     setLines([]);
     setStreaming(true);
     setPaused(false);
-    const proc = streamLogs(stackName);
+    const proc = streamLogs(stackName, service);
     proc.stream(data => {
       if (cancelled || pausedRef.current) return;
       bufRef.current += data;
@@ -38,7 +38,7 @@ export function useLogStream(stackName: string) {
     proc.then(() => { if (!cancelled) setStreaming(false); })
        .catch(() => { if (!cancelled) setStreaming(false); });
     return () => { cancelled = true; proc.close(); };
-  }, [stackName, revision]);
+  }, [stackName, service, revision]);
 
   const pause = useCallback(() => {
     pausedRef.current = true;

@@ -220,7 +220,9 @@
     "refresh_button": "Aktualisieren",
     "clear_button": "Leeren",
     "limit_notice": "Letzte {{count}} Zeilen werden angezeigt",
-    "waiting": "Warte auf Protokolle…"
+    "waiting": "Warte auf Protokolle…",
+    "service_all": "Alle Dienste",
+    "search_placeholder": "Logs durchsuchen…"
   },
 
   "exec_modal": {

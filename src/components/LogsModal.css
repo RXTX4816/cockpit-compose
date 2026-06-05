@@ -71,6 +71,38 @@
 .lm-bg-even  { background: transparent; }
 .lm-bg-odd   { background: rgba(255, 255, 255, 0.015); }
 
+/* Toolbar controls */
+.lm-toolbar {
+  padding-inline: 0;
+  margin-bottom: 0.5rem;
+}
+
+.lm-select {
+  height: var(--pf-t--global--control--size--base, 36px);
+  padding: 0 0.625rem;
+  font-size: var(--pf-t--global--font--size--md);
+  border: 1px solid var(--pf-t--global--border--color--default);
+  border-radius: var(--pf-t--global--border--radius--100);
+  background: var(--pf-t--global--background--color--primary--default);
+  color: var(--pf-t--global--text--color--regular);
+  cursor: pointer;
+}
+
+.lm-select:focus {
+  outline: 2px solid var(--pf-t--global--color--brand--default);
+  outline-offset: -2px;
+}
+
+.lm-search-input {
+  width: 220px;
+}
+
+.lm-search-match {
+  background: rgba(255, 213, 0, 0.35);
+  color: inherit;
+  border-radius: 2px;
+}
+
 /* Level-based message colours */
 .lm-msg-error { color: #f85149; }
 .lm-msg-warn  { color: #e3b341; }
