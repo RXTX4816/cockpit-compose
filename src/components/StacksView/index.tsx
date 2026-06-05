@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { useSharedNetworks } from "../../hooks/useSharedNetworks";
 import { useTranslation } from "react-i18next";
 import {
   Toolbar,
@@ -80,6 +81,9 @@ export function StacksView() {
 
   const { target: killTarget, killing, error: killError, open: openKill, close: closeKill, execute: performKill }
     = useKillStack(refresh, onActingChange);
+
+  const { sharedNetworks: downSharedNetworks, loading: downNetworksLoading } =
+    useSharedNetworks(downTarget?.Name ?? "", downTarget !== null);
 
   const toggle = useCallback((name: string) => {
     setExpanded(prev => {
@@ -207,6 +211,25 @@ export function StacksView() {
               {t("down_modal.body_prefix")} <code>docker compose down</code>{" "}
               {t("down_modal.body_suffix")} <strong>{downTarget.Name}</strong>{t("down_modal.body_suffix2")}
             </p>
+            {downNetworksLoading && (
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "1rem", color: "var(--pf-t--global--text--color--subtle)", fontSize: "0.875rem" }}>
+                <Spinner size="sm" />
+                {t("down_modal.checking_networks")}
+              </div>
+            )}
+            {!downNetworksLoading && downSharedNetworks.filter(n => n.sharedWith.length > 0).length > 0 && (
+              <Alert variant="warning" isInline title={t("down_modal.shared_networks_title")} style={{ marginTop: "1rem" }}>
+                <ul style={{ margin: "0.25rem 0 0 1.25rem", padding: 0 }}>
+                  {downSharedNetworks.filter(n => n.sharedWith.length > 0).map(n => (
+                    <li key={n.name}>
+                      <code>{n.name}</code>
+                      {" — "}{t("down_modal.shared_with")}{" "}
+                      <strong>{n.sharedWith.join(", ")}</strong>
+                    </li>
+                  ))}
+                </ul>
+              </Alert>
+            )}
             {downError && (
               <Alert variant="danger" isInline title={downError} style={{ marginTop: "1rem" }} />
             )}

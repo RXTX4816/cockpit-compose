@@ -8,9 +8,11 @@ import {
   Button,
   Alert,
   Checkbox,
+  Spinner,
 } from "@patternfly/react-core";
 import { removeFile, removeDirectory } from "../api";
 import { type DownedStack } from "../hooks/useDownedStacksScan";
+import { useSharedNetworks } from "../hooks/useSharedNetworks";
 
 interface Props {
   stack: DownedStack;
@@ -24,6 +26,9 @@ export function DeleteStackModal({ stack, onClose, onDeleted }: Props) {
   const [confirmed, setConfirmed] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const { sharedNetworks, loading: loadingNetworks } = useSharedNetworks(stack.name, true);
+  const sharedOnes = sharedNetworks.filter(n => n.sharedWith.length > 0);
 
   const folderPath = stack.configFile.slice(0, stack.configFile.lastIndexOf("/"));
   const target = deleteFolder
@@ -75,6 +80,26 @@ export function DeleteStackModal({ stack, onClose, onDeleted }: Props) {
             isChecked={deleteFolder}
             onChange={(_e, checked) => setDeleteFolder(checked)}
           />
+
+          {loadingNetworks && (
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "1rem", color: "var(--pf-t--global--text--color--subtle)", fontSize: "0.875rem" }}>
+              <Spinner size="sm" />
+              {t("delete_modal.checking_networks")}
+            </div>
+          )}
+          {!loadingNetworks && sharedOnes.length > 0 && (
+            <Alert variant="warning" isInline title={t("delete_modal.shared_networks_title")} style={{ marginTop: "1rem" }}>
+              <ul style={{ margin: "0.25rem 0 0 1.25rem", padding: 0 }}>
+                {sharedOnes.map(n => (
+                  <li key={n.name}>
+                    <code>{n.name}</code>
+                    {" — "}{t("delete_modal.shared_with")}{" "}
+                    <strong>{n.sharedWith.join(", ")}</strong>
+                  </li>
+                ))}
+              </ul>
+            </Alert>
+          )}
 
           {error && (
             <Alert variant="danger" isInline title={error} style={{ marginTop: "1rem" }} />
