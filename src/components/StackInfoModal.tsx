@@ -1,4 +1,5 @@
 import { useState, useEffect, type ComponentType, type CSSProperties } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Modal,
   ModalHeader,
@@ -23,10 +24,10 @@ import {
 } from "../api";
 import "./StackInfoModal.css";
 
-const MODAL_BIND_ICONS: Record<ParsedPort["bindType"], { Icon: ComponentType<{ color?: string; style?: CSSProperties }>; color: string; label: string }> = {
-  external: { Icon: GlobeIcon,   color: "currentColor", label: "all interfaces" },
-  localhost: { Icon: LaptopIcon, color: "currentColor", label: "localhost" },
-  specific:  { Icon: NetworkIcon, color: "currentColor", label: "specific IP" },
+const MODAL_BIND_ICONS: Record<ParsedPort["bindType"], { Icon: ComponentType<{ color?: string; style?: CSSProperties }>; color: string }> = {
+  external: { Icon: GlobeIcon,   color: "currentColor" },
+  localhost: { Icon: LaptopIcon, color: "currentColor" },
+  specific:  { Icon: NetworkIcon, color: "currentColor" },
 };
 
 interface Props {
@@ -35,6 +36,7 @@ interface Props {
 }
 
 export function StackInfoModal({ stack, onClose }: Props) {
+  const { t } = useTranslation();
   const [containers, setContainers] = useState<ComposeContainer[]>([]);
   const [loadingContainers, setLoadingContainers] = useState(true);
   const [containerError, setContainerError] = useState<string | null>(null);
@@ -102,23 +104,23 @@ export function StackInfoModal({ stack, onClose }: Props) {
   }, [stack.Name, configFile]);
 
   return (
-    <Modal isOpen onClose={onClose} variant="medium" aria-label={`Info — ${stack.Name}`}>
-      <ModalHeader title={`${stack.Name} — info`} />
+    <Modal isOpen onClose={onClose} variant="medium" aria-label={t("info_modal.aria_label", { name: stack.Name })}>
+      <ModalHeader title={t("info_modal.title", { name: stack.Name })} />
       <ModalBody>
         <section className="sim-section">
-          <div className="sim-section-label">Compose file</div>
+          <div className="sim-section-label">{t("info_modal.section_compose_file")}</div>
           <code className="sim-config-file">{configFile}</code>
         </section>
 
         <section className="sim-section">
-          <div className="sim-section-label">Services</div>
+          <div className="sim-section-label">{t("info_modal.section_services")}</div>
 
           {loadingContainers ? (
             <Spinner size="md" />
           ) : containerError ? (
-            <Alert variant="warning" isInline title="Could not load container info">{containerError}</Alert>
+            <Alert variant="warning" isInline title={t("info_modal.container_error_title")}>{containerError}</Alert>
           ) : containers.length === 0 ? (
-            <span className="sim-no-containers">No containers found.</span>
+            <span className="sim-no-containers">{t("info_modal.no_containers")}</span>
           ) : (
             <div className="sim-container-list">
               {containers.map(c => {
@@ -128,30 +130,30 @@ export function StackInfoModal({ stack, onClose }: Props) {
                 return (
                   <div key={c.ID || c.Name} className="sim-container-card">
                     <div className="sim-card-header">
-                      <Label color={isRunning ? "green" : "grey"} isCompact>{c.State || "unknown"}</Label>
+                      <Label color={isRunning ? "green" : "grey"} isCompact>{c.State || t("common.unknown")}</Label>
                       <span className="sim-card-service">{c.Service || c.Name}</span>
                       {health === "healthy" && (
                         <CheckCircleIcon
                           color="var(--pf-t--global--icon--color--status--success--default)"
-                          title="Health check passing"
+                          title={t("health.passing")}
                         />
                       )}
                       {health === "unhealthy" && (
                         <ExclamationTriangleIcon
                           color="var(--pf-t--global--icon--color--status--warning--default)"
-                          title="Health check failing"
+                          title={t("health.failing")}
                         />
                       )}
                       {health === "starting" && (
                         <InProgressIcon
                           color="var(--pf-t--global--icon--color--status--info--default)"
-                          title="Health check starting"
+                          title={t("health.starting")}
                         />
                       )}
                     </div>
 
                     <div className="sim-card-grid">
-                      <span>Image</span>
+                      <span>{t("info_modal.img_col_service")}</span>
                       <code className="sim-card-code">{c.Image || "—"}</code>
 
                       {c.ID && (
@@ -202,23 +204,23 @@ export function StackInfoModal({ stack, onClose }: Props) {
         </section>
 
         <section className="sim-section">
-          <div className="sim-section-label">Images</div>
+          <div className="sim-section-label">{t("info_modal.section_images")}</div>
 
           {loadingImages ? (
             <Spinner size="md" />
           ) : imageError ? (
-            <Alert variant="warning" isInline title="Could not load images">{imageError}</Alert>
+            <Alert variant="warning" isInline title={t("info_modal.image_error_title")}>{imageError}</Alert>
           ) : images.length === 0 ? (
-            <span className="sim-no-containers">No images found.</span>
+            <span className="sim-no-containers">{t("info_modal.no_images")}</span>
           ) : (
             <table className="sim-table">
               <thead>
                 <tr>
-                  <th>Service</th>
-                  <th>Repository</th>
-                  <th>Tag</th>
-                  <th>Size</th>
-                  <th>Created</th>
+                  <th>{t("info_modal.img_col_service")}</th>
+                  <th>{t("info_modal.img_col_repo")}</th>
+                  <th>{t("info_modal.img_col_tag")}</th>
+                  <th>{t("info_modal.img_col_size")}</th>
+                  <th>{t("info_modal.img_col_created")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -237,23 +239,23 @@ export function StackInfoModal({ stack, onClose }: Props) {
         </section>
 
         <section className="sim-section">
-          <div className="sim-section-label">Volumes</div>
+          <div className="sim-section-label">{t("info_modal.section_volumes")}</div>
 
           {loadingVolumes ? (
             <Spinner size="md" />
           ) : volumesUnavailable ? (
-            <span className="sim-no-containers">Not available on this Docker Compose version.</span>
+            <span className="sim-no-containers">{t("info_modal.volumes_unavailable")}</span>
           ) : volumeError ? (
-            <Alert variant="warning" isInline title="Could not load volumes">{volumeError}</Alert>
+            <Alert variant="warning" isInline title={t("info_modal.volume_error_title")}>{volumeError}</Alert>
           ) : volumes.length === 0 ? (
-            <span className="sim-no-containers">No volumes found.</span>
+            <span className="sim-no-containers">{t("info_modal.no_volumes")}</span>
           ) : (
             <table className="sim-table">
               <thead>
                 <tr>
-                  <th>Name</th>
-                  <th>Driver</th>
-                  <th>Mountpoint</th>
+                  <th>{t("info_modal.vol_col_name")}</th>
+                  <th>{t("info_modal.vol_col_driver")}</th>
+                  <th>{t("info_modal.vol_col_mountpoint")}</th>
                 </tr>
               </thead>
               <tbody>

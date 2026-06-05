@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import {
   DataList,
   DataListItem,
@@ -56,6 +57,7 @@ function toSyntheticStack(d: DownedStack): ComposeStack {
 }
 
 export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, onUpComplete }: Props) {
+  const { t } = useTranslation();
   const [importOpen, setImportOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
   const [composeDir, setComposeDir] = useState("");
@@ -115,7 +117,7 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
           size="sm"
           onClick={() => setCreateOpen(true)}
         >
-          Create
+          {t("downed_section.create_button")}
         </Button>
         <Button
           variant="primary"
@@ -123,7 +125,7 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
           onClick={() => setImportOpen(o => !o)}
           aria-expanded={importOpen}
         >
-          {importOpen ? "▲ Import" : "▼ Import"}
+          {importOpen ? "▲" : "▼"} {t("downed_section.import_button")}
         </Button>
       </div>
 
@@ -134,15 +136,15 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
             size="sm"
             isDisabled={stacks.length === 0 || scanning}
             onClick={handleFindBestMatch}
-            title="Infer compose root from active stacks"
+            title={t("actions.find_best_match_title")}
           >
-            Find best match
+            {t("actions.find_best_match")}
           </Button>
           <InputGroup className="dss-input-group">
             <InputGroupItem isFill>
               <TextInput
-                aria-label="Compose directory"
-                placeholder="Type compose root…"
+                aria-label={t("downed_section.dir_aria")}
+                placeholder={t("downed_section.dir_placeholder")}
                 value={composeDir}
                 onChange={handleDirChange}
                 isDisabled={scanning}
@@ -156,7 +158,7 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
                 onClick={scan}
                 className="dss-scan-btn"
               >
-                Scan
+                {t("common.scan")}
               </Button>
             </InputGroupItem>
           </InputGroup>
@@ -166,19 +168,19 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
       {hasContent && (
         <>
           <div className="dss-separator" aria-hidden="true">
-            <span className="dss-separator-label">Down</span>
+            <span className="dss-separator-label">{t("downed_section.down_status")}</span>
           </div>
 
           {scanning && (
             <div className="dss-list-wrapper dss-scanning">
               <Spinner size="sm" />
-              <span>Scanning…</span>
+              <span>{t("common.scanning")}</span>
             </div>
           )}
 
           {error && (
             <div className="dss-list-wrapper">
-              <Alert variant="danger" isInline title="Scan failed" className="dss-alert">
+              <Alert variant="danger" isInline title={t("downed_section.scan_failed_title")} className="dss-alert">
                 {error}
               </Alert>
             </div>
@@ -186,15 +188,15 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
 
           {!scanning && !error && hasScanned && combinedStacks.length === 0 && (
             <div className="dss-list-wrapper">
-              <Alert variant="warning" isInline title="Nothing found" className="dss-alert">
-                Are you sure this is a compose parent directory?
+              <Alert variant="warning" isInline title={t("downed_section.nothing_found_title")} className="dss-alert">
+                {t("downed_section.nothing_found_body")}
               </Alert>
             </div>
           )}
 
           {!scanning && combinedStacks.length > 0 && (
             <div className="dss-list-wrapper">
-              <DataList aria-label="Down compose stacks" isCompact className="dss-list">
+              <DataList aria-label={t("downed_section.down_stacks_aria")} isCompact className="dss-list">
                 {combinedStacks.map(d => (
                   <DataListItem key={d.name} aria-labelledby={`dss-name-${d.name}`}>
                     <DataListItemRow>
@@ -204,26 +206,26 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
                             <span id={`dss-name-${d.name}`} className="dss-stack-name">
                               {d.name}
                             </span>
-                            <Label color="grey" isCompact className="dss-status-label">down</Label>
+                            <Label color="grey" isCompact className="dss-status-label">{t("downed_section.down_status")}</Label>
                           </DataListCell>,
                           <DataListCell key="path" width={3}>
                             <code className="dss-config-path">{d.configFile}</code>
                           </DataListCell>,
                           <DataListCell key="actions" width={2} className="dss-actions">
                             <Button variant="primary" size="sm" onClick={() => setUpTarget(d)}>
-                              ↑ Up
+                              ↑ {t("actions.up")}
                             </Button>
-                            <Button variant="plain" size="sm" onClick={() => setYamlTarget(d)} title="Edit compose file">
-                              Edit
+                            <Button variant="plain" size="sm" onClick={() => setYamlTarget(d)} title={t("downed_section.edit_title")}>
+                              {t("common.edit")}
                             </Button>
                             <Button
                               variant="plain"
                               size="sm"
                               onClick={() => setDeleteTarget(d)}
-                              title="Delete compose file"
+                              title={t("downed_section.delete_title")}
                               className="dss-delete-btn"
                             >
-                              ✕ Delete
+                              ✕ {t("common.delete")}
                             </Button>
                           </DataListCell>,
                         ]}

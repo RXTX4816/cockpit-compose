@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Modal,
   ModalHeader,
@@ -37,6 +38,7 @@ function makeXtermTheme(dark: boolean) {
 }
 
 export function ExecModal({ stack, onClose }: Props) {
+  const { t } = useTranslation();
   const configFile = stack.ConfigFiles.split(",")[0].trim();
 
   const [services, setServices] = useState<string[]>([]);
@@ -162,13 +164,13 @@ export function ExecModal({ stack, onClose }: Props) {
       onClose={handleClose}
       variant="large"
       width="90vw"
-      aria-label={`Shell — ${stack.Name}`}
+      aria-label={t("exec_modal.aria_label", { name: stack.Name })}
     >
-      <ModalHeader title={`Shell — ${stack.Name}`} />
+      <ModalHeader title={t("exec_modal.title", { name: stack.Name })} />
       <ModalBody>
         {step === "config" && (
           <div className="em2-config-form">
-            <FormGroup label="Service" fieldId="em2-service">
+            <FormGroup label={t("exec_modal.field_service")} fieldId="em2-service">
               {services.length > 0 ? (
                 <select
                   id="em2-service"
@@ -185,26 +187,26 @@ export function ExecModal({ stack, onClose }: Props) {
                   id="em2-service"
                   value={selectedService}
                   onChange={(_e, v) => setSelectedService(v)}
-                  placeholder="service name"
+                  placeholder={t("exec_modal.field_service_placeholder")}
                 />
               )}
             </FormGroup>
 
-            <FormGroup label="Command" fieldId="em2-shell">
+            <FormGroup label={t("exec_modal.field_command")} fieldId="em2-shell">
               <TextInput
                 id="em2-shell"
                 value={shell}
                 onChange={(_e, v) => setShell(v)}
-                placeholder="/bin/sh"
+                placeholder={t("exec_modal.field_command_placeholder")}
               />
             </FormGroup>
 
-            <FormGroup label="User (optional)" fieldId="em2-user">
+            <FormGroup label={t("exec_modal.field_user")} fieldId="em2-user">
               <TextInput
                 id="em2-user"
                 value={user}
                 onChange={(_e, v) => setUser(v)}
-                placeholder="root"
+                placeholder={t("exec_modal.field_user_placeholder")}
               />
             </FormGroup>
           </div>
@@ -227,13 +229,13 @@ export function ExecModal({ stack, onClose }: Props) {
               onClick={() => void launchTerminal()}
               isDisabled={!selectedService.trim()}
             >
-              Open shell
+              {t("exec_modal.open_shell_button")}
             </Button>
-            <Button variant="secondary" onClick={handleClose}>Cancel</Button>
+            <Button variant="secondary" onClick={handleClose}>{t("common.cancel")}</Button>
           </>
         )}
         {step === "terminal" && (
-          <Button variant="secondary" onClick={handleClose}>Disconnect</Button>
+          <Button variant="secondary" onClick={handleClose}>{t("exec_modal.disconnect_button")}</Button>
         )}
       </ModalFooter>
     </Modal>

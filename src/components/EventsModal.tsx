@@ -1,4 +1,5 @@
 import { useRef, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Modal,
   ModalHeader,
@@ -30,6 +31,7 @@ function formatEventTime(t: string | number): string {
 }
 
 export function EventsModal({ stack, onClose }: Props) {
+  const { t } = useTranslation();
   const { events, streaming, error, start, stop, clear } = useEventStream(stack.Name);
   const tableBodyRef = useRef<HTMLTableSectionElement>(null);
 
@@ -51,20 +53,20 @@ export function EventsModal({ stack, onClose }: Props) {
       onClose={() => { stop(); onClose(); }}
       variant="large"
       width="90vw"
-      aria-label={`Events — ${stack.Name}`}
+      aria-label={t("events_modal.aria_label", { name: stack.Name })}
     >
-      <ModalHeader title={`Events — ${stack.Name}`} />
+      <ModalHeader title={t("events_modal.title", { name: stack.Name })} />
       <ModalBody>
         <Toolbar className="em-toolbar">
           <ToolbarContent>
             <ToolbarItem>
               {streaming ? (
                 <Button variant="secondary" size="sm" onClick={stop}>
-                  Stop
+                  {t("events_modal.stop_button")}
                 </Button>
               ) : (
                 <Button variant="primary" size="sm" onClick={handleStart}>
-                  Stream events
+                  {t("events_modal.stream_button")}
                 </Button>
               )}
             </ToolbarItem>
@@ -75,14 +77,14 @@ export function EventsModal({ stack, onClose }: Props) {
             )}
             {events.length > 0 && !streaming && (
               <ToolbarItem>
-                <Button variant="plain" size="sm" onClick={clear}>Clear</Button>
+                <Button variant="plain" size="sm" onClick={clear}>{t("events_modal.clear_button")}</Button>
               </ToolbarItem>
             )}
           </ToolbarContent>
         </Toolbar>
 
         {error && (
-          <Alert variant="danger" isInline title="Error streaming events" style={{ marginTop: "0.5rem" }}>
+          <Alert variant="danger" isInline title={t("events_modal.error_title")} style={{ marginTop: "0.5rem" }}>
             {error}
           </Alert>
         )}
@@ -90,17 +92,17 @@ export function EventsModal({ stack, onClose }: Props) {
         <div className="em-table-wrapper">
           {events.length === 0 && !streaming ? (
             <div className="em-empty">
-              {error ? null : <>Press &ldquo;Stream events&rdquo; to start watching.</>}
+              {error ? null : t("events_modal.stream_prompt")}
             </div>
           ) : (
             <table className="em-table">
               <thead>
                 <tr>
-                  <th>Time</th>
-                  <th>Type</th>
-                  <th>Action</th>
-                  <th>Service</th>
-                  <th>Details</th>
+                  <th>{t("events_modal.col_time")}</th>
+                  <th>{t("events_modal.col_type")}</th>
+                  <th>{t("events_modal.col_action")}</th>
+                  <th>{t("events_modal.col_service")}</th>
+                  <th>{t("events_modal.col_details")}</th>
                 </tr>
               </thead>
               <tbody ref={tableBodyRef}>
@@ -129,7 +131,7 @@ export function EventsModal({ stack, onClose }: Props) {
         </div>
       </ModalBody>
       <ModalFooter>
-        <Button variant="secondary" onClick={() => { stop(); onClose(); }}>Close</Button>
+        <Button variant="secondary" onClick={() => { stop(); onClose(); }}>{t("common.close")}</Button>
       </ModalFooter>
     </Modal>
   );

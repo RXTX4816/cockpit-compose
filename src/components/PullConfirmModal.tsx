@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Modal,
   ModalHeader,
@@ -41,6 +42,7 @@ interface Props {
 }
 
 export function PullConfirmModal({ stack, onConfirm, onClose }: Props) {
+  const { t } = useTranslation();
   const configFile = stack.ConfigFiles.split(",")[0].trim();
   const [images, setImages] = useState<ImageEntry[]>([]);
 
@@ -55,23 +57,23 @@ export function PullConfirmModal({ stack, onConfirm, onClose }: Props) {
   const hasRisky = riskyImages.length > 0;
 
   return (
-    <Modal isOpen onClose={onClose} variant="small" aria-label={`Confirm pull — ${stack.Name}`}>
-      <ModalHeader title={`Pull latest images — ${stack.Name}`} />
+    <Modal isOpen onClose={onClose} variant="small" aria-label={t("pull_confirm_modal.aria_label", { name: stack.Name })}>
+      <ModalHeader title={t("pull_confirm_modal.title", { name: stack.Name })} />
       <ModalBody>
         <Alert
           variant="warning"
           isInline
-          title="Newer image versions may introduce breaking changes"
+          title={t("pull_confirm_modal.warning_title")}
           style={{ marginBottom: "1rem" }}
         >
-          Review changelogs before pulling, especially if services use{" "}
-          <code>:latest</code> or an untagged image. Pinning to a specific
-          version tag avoids unexpected updates.
+          {t("pull_confirm_modal.warning_body_prefix")}{" "}
+          <code>:latest</code>{" "}
+          {t("pull_confirm_modal.warning_body_suffix")}
         </Alert>
 
         {images.length > 0 && (
           <div style={{ fontSize: "0.875rem" }}>
-            <strong>Images to be updated:</strong>
+            <strong>{t("pull_confirm_modal.images_title")}</strong>
             <ul style={{ margin: "0.5rem 0 0 1.25rem", padding: 0 }}>
               {images.map(({ service, image, risky }) => (
                 <li key={service} style={{ marginBottom: "0.25rem" }}>
@@ -80,7 +82,7 @@ export function PullConfirmModal({ stack, onConfirm, onClose }: Props) {
                   <code>{image}</code>
                   {risky && (
                     <span style={{ marginLeft: "0.4rem", color: "var(--pf-t--global--color--status--warning--default)" }}>
-                      ⚠ unpinned
+                      {t("pull_confirm_modal.unpinned_label")}
                     </span>
                   )}
                 </li>
@@ -88,16 +90,15 @@ export function PullConfirmModal({ stack, onConfirm, onClose }: Props) {
             </ul>
             {hasRisky && (
               <p style={{ marginTop: "0.75rem", color: "var(--pf-t--global--text--color--subtle)", fontSize: "0.8rem" }}>
-                Unpinned images always pull whatever the registry considers
-                &quot;latest&quot; and are most likely to change behaviour between pulls.
+                {t("pull_confirm_modal.unpinned_notice")}
               </p>
             )}
           </div>
         )}
       </ModalBody>
       <ModalFooter>
-        <Button variant="primary" onClick={onConfirm}>Pull</Button>
-        <Button variant="link" onClick={onClose}>Cancel</Button>
+        <Button variant="primary" onClick={onConfirm}>{t("pull_confirm_modal.pull_button")}</Button>
+        <Button variant="link" onClick={onClose}>{t("common.cancel")}</Button>
       </ModalFooter>
     </Modal>
   );

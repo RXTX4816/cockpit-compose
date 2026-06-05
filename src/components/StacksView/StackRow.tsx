@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import {
   DataListItem,
   DataListItemRow,
@@ -56,6 +57,7 @@ interface StackRowProps {
 }
 
 export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, onDown, onKill, onUp, onPull, onEvents, onTop, onExec, onPrune, onActingChange }: StackRowProps) {
+  const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
 
   const status = parseStackStatus(stack.Status);
@@ -97,13 +99,13 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
                 {stackHealthSummary(containers) === "unhealthy" && (
                   <ExclamationTriangleIcon
                     color="var(--pf-t--global--icon--color--status--warning--default)"
-                    title="Health check failing"
+                    title={t("health.failing")}
                   />
                 )}
                 {stackHealthSummary(containers) === "healthy" && (
                   <CheckCircleIcon
                     color="var(--pf-t--global--icon--color--status--success--default)"
-                    title="Health check passing"
+                    title={t("health.passing")}
                   />
                 )}
                 <span id={`stack-${stack.Name}`} className="sr-stack-name">
@@ -114,7 +116,7 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
 
             <DataListCell key="services" width={1}>
               <span className="sr-services-count">
-                {count} {count === 1 ? "service" : "services"}
+                {t("stacks.service_count", { count })}
               </span>
             </DataListCell>,
 
@@ -130,7 +132,7 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
                   onClick={onUp}
                   isDisabled={acting}
                 >
-                  ↑ Up
+                  ↑ {t("actions.up")}
                 </Button>
 
                 {(status === "running" || status === "partial") ? (
@@ -141,7 +143,7 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
                     isLoading={acting}
                     isDisabled={acting}
                   >
-                    ■ Stop
+                    ■ {t("actions.stop")}
                   </Button>
                 ) : status === "stopped" && (
                   <Button
@@ -151,7 +153,7 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
                     isLoading={acting}
                     isDisabled={acting}
                   >
-                    ▶ Start
+                    ▶ {t("actions.start")}
                   </Button>
                 )}
 
@@ -161,25 +163,25 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
                   onClick={onDown}
                   isDisabled={acting}
                   className="sr-down-btn"
-                  title="Down (remove containers)"
+                  title={t("actions.down_title")}
                 >
-                  ↓ Down
+                  ↓ {t("actions.down")}
                 </Button>
 
-                <Button variant="plain" size="sm" onClick={onPull} title="Pull latest images">
-                  Pull
+                <Button variant="plain" size="sm" onClick={onPull} title={t("actions.pull_title")}>
+                  {t("actions.pull")}
                 </Button>
 
-                <Button variant="plain" size="sm" onClick={onLogs} title="View logs">
-                  Logs
+                <Button variant="plain" size="sm" onClick={onLogs} title={t("actions.logs_title")}>
+                  {t("actions.logs")}
                 </Button>
 
-                <Button variant="plain" size="sm" onClick={onYaml} isDisabled={acting} title="Edit compose file">
-                  Edit
+                <Button variant="plain" size="sm" onClick={onYaml} isDisabled={acting} title={t("actions.edit_title")}>
+                  {t("common.edit")}
                 </Button>
 
-                <Button variant="plain" size="sm" onClick={onInfo} title="Stack info">
-                  Info
+                <Button variant="plain" size="sm" onClick={onInfo} title={t("actions.info_title")}>
+                  {t("actions.info")}
                 </Button>
 
                 <Dropdown
@@ -190,7 +192,7 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
                       ref={ref}
                       variant="plain"
                       onClick={() => setMenuOpen(o => !o)}
-                      aria-label={`More actions for ${stack.Name}`}
+                      aria-label={t("actions.more_actions_for", { name: stack.Name })}
                       isDisabled={acting}
                     >
                       ⋮
@@ -204,7 +206,7 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
                       isDisabled={status === "stopped" || status === "unknown"}
                       onClick={() => { setMenuOpen(false); void doAction("restart", afterAction); }}
                     >
-                      Restart
+                      {t("actions.restart")}
                     </DropdownItem>
                     <DropdownItem
                       key="pause"
@@ -214,23 +216,23 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
                         void doAction(status === "paused" ? "unpause" : "pause", afterAction);
                       }}
                     >
-                      {status === "paused" ? "Unpause" : "Pause"}
+                      {status === "paused" ? t("actions.unpause") : t("actions.pause")}
                     </DropdownItem>
                     <DropdownItem key="events" onClick={() => { setMenuOpen(false); onEvents(); }}>
-                      Events
+                      {t("actions.events")}
                     </DropdownItem>
                     <DropdownItem key="top" onClick={() => { setMenuOpen(false); onTop(); }}>
-                      Top
+                      {t("actions.top")}
                     </DropdownItem>
                     <DropdownItem key="exec" onClick={() => { setMenuOpen(false); onExec(); }}>
-                      Shell
+                      {t("actions.shell")}
                     </DropdownItem>
                     <Divider key="div1" component="li" />
                     <DropdownItem key="prune" isDanger onClick={() => { setMenuOpen(false); onPrune(); }}>
-                      Prune
+                      {t("actions.prune")}
                     </DropdownItem>
                     <DropdownItem key="kill" isDanger onClick={() => { setMenuOpen(false); onKill(); }}>
-                      Kill
+                      {t("actions.kill")}
                     </DropdownItem>
                   </DropdownList>
                 </Dropdown>
@@ -245,7 +247,7 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
       )}
 
       <DataListContent
-        aria-label={`${stack.Name} containers`}
+        aria-label={t("stack_row.containers_aria", { name: stack.Name })}
         id={`expand-${stack.Name}`}
         isHidden={!expanded}
         hasNoPadding
@@ -254,7 +256,7 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
           {loadingContainers ? (
             <Spinner size="md" />
           ) : containers.length === 0 ? (
-            <span className="sr-no-containers">No containers found.</span>
+            <span className="sr-no-containers">{t("stack_row.no_containers")}</span>
           ) : (
             <ContainerTable containers={containers} />
           )}

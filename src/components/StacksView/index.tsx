@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Toolbar,
   ToolbarContent,
@@ -37,6 +38,7 @@ import { StackRow } from "./StackRow";
 import "./StacksView.css";
 
 export function StacksView() {
+  const { t } = useTranslation();
   const { stacks, loading, error, refresh } = useComposeStacks();
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [manuallyDownedStacks, setManuallyDownedStacks] = useState<DownedStack[]>([]);
@@ -98,7 +100,7 @@ export function StacksView() {
       <Toolbar>
         <ToolbarContent>
           <ToolbarItem>
-            <Title headingLevel="h2">Compose Stacks</Title>
+            <Title headingLevel="h2">{t("stacks.title")}</Title>
           </ToolbarItem>
         </ToolbarContent>
       </Toolbar>
@@ -107,9 +109,9 @@ export function StacksView() {
         <Alert
           variant="danger"
           isInline
-          title="Failed to load stacks"
+          title={t("stacks.load_failed")}
           style={{ marginBottom: "1rem" }}
-          actionLinks={<Button variant="link" size="sm" onClick={refresh}>Retry</Button>}
+          actionLinks={<Button variant="link" size="sm" onClick={refresh}>{t("common.retry")}</Button>}
         >
           {error}
         </Alert>
@@ -120,13 +122,13 @@ export function StacksView() {
           <Spinner />
         </div>
       ) : stacks.length === 0 ? (
-        <EmptyState headingLevel="h3" titleText="No compose stacks found">
+        <EmptyState headingLevel="h3" titleText={t("stacks.empty_title")}>
           <EmptyStateBody>
-            Start a project with <code>docker compose up -d</code> and it will appear here.
+            {t("stacks.empty_body")}
           </EmptyStateBody>
         </EmptyState>
       ) : (
-        <DataList aria-label="Compose stacks" isCompact>
+        <DataList aria-label={t("stacks.aria_label")} isCompact>
           {stacks.map(stack => (
             <StackRow
               key={stack.Name}
@@ -197,13 +199,13 @@ export function StacksView() {
           isOpen
           variant="small"
           onClose={() => { if (!downing) closeDown(); }}
-          aria-label="Confirm down"
+          aria-label={t("down_modal.aria_label")}
         >
-          <ModalHeader title={`Remove "${downTarget.Name}"?`} />
+          <ModalHeader title={t("down_modal.title", { name: downTarget.Name })} />
           <ModalBody>
             <p>
-              Running <code>docker compose down</code> will stop and remove all containers for{" "}
-              <strong>{downTarget.Name}</strong>. The stack will disappear from this list.
+              {t("down_modal.body_prefix")} <code>docker compose down</code>{" "}
+              {t("down_modal.body_suffix")} <strong>{downTarget.Name}</strong>{t("down_modal.body_suffix2")}
             </p>
             {downError && (
               <Alert variant="danger" isInline title={downError} style={{ marginTop: "1rem" }} />
@@ -211,10 +213,10 @@ export function StacksView() {
           </ModalBody>
           <ModalFooter>
             <Button variant="danger" onClick={() => void performDown()} isLoading={downing}>
-              Down (remove)
+              {t("down_modal.confirm_button")}
             </Button>
             <Button variant="link" onClick={closeDown} isDisabled={downing}>
-              Cancel
+              {t("common.cancel")}
             </Button>
           </ModalFooter>
         </Modal>
@@ -225,14 +227,13 @@ export function StacksView() {
           isOpen
           variant="small"
           onClose={() => { if (!killing) closeKill(); }}
-          aria-label="Confirm kill"
+          aria-label={t("kill_modal.aria_label")}
         >
-          <ModalHeader title={`Kill "${killTarget.Name}"?`} />
+          <ModalHeader title={t("kill_modal.title", { name: killTarget.Name })} />
           <ModalBody>
             <p>
-              Running <code>docker compose kill</code> sends <strong>SIGKILL</strong> to all containers
-              in <strong>{killTarget.Name}</strong>, forcefully terminating them immediately.
-              Unlike Stop, processes have no chance to clean up. Use only when Stop does not respond.
+              {t("kill_modal.body_prefix")} <code>docker compose kill</code>{" "}
+              {t("kill_modal.body_sigkill")} <strong>{killTarget.Name}</strong>{t("kill_modal.body_suffix")}
             </p>
             {killError && (
               <Alert variant="danger" isInline title={killError} style={{ marginTop: "1rem" }} />
@@ -240,10 +241,10 @@ export function StacksView() {
           </ModalBody>
           <ModalFooter>
             <Button variant="danger" onClick={() => void performKill()} isLoading={killing}>
-              Kill all containers
+              {t("kill_modal.confirm_button")}
             </Button>
             <Button variant="link" onClick={closeKill} isDisabled={killing}>
-              Cancel
+              {t("common.cancel")}
             </Button>
           </ModalFooter>
         </Modal>

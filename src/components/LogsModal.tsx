@@ -1,4 +1,5 @@
 import { useEffect, useRef, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Modal,
   ModalHeader,
@@ -61,6 +62,7 @@ interface Props {
 }
 
 export function LogsModal({ stack, onClose }: Props) {
+  const { t } = useTranslation();
   const { lines, streaming, paused, pause, resume, restart, clear } = useLogStream(stack.Name);
   const logRef = useRef<HTMLDivElement>(null);
 
@@ -81,8 +83,8 @@ export function LogsModal({ stack, onClose }: Props) {
   }, [lines]);
 
   return (
-    <Modal isOpen onClose={onClose} variant="large" width="95vw" maxWidth="95vw" aria-label={`Logs — ${stack.Name}`}>
-      <ModalHeader title={`Logs — ${stack.Name}`} />
+    <Modal isOpen onClose={onClose} variant="large" width="95vw" maxWidth="95vw" aria-label={t("logs_modal.aria_label", { name: stack.Name })}>
+      <ModalHeader title={t("logs_modal.title", { name: stack.Name })} />
       <ModalBody>
         <Toolbar style={{ paddingInline: 0, marginBottom: "0.5rem" }}>
           <ToolbarContent>
@@ -92,22 +94,22 @@ export function LogsModal({ stack, onClose }: Props) {
             {streaming && (
               <ToolbarItem>
                 {paused
-                  ? <Button variant="primary" size="sm" onClick={resume}>Continue</Button>
-                  : <Button variant="secondary" size="sm" onClick={pause}>Pause</Button>
+                  ? <Button variant="primary" size="sm" onClick={resume}>{t("logs_modal.continue_button")}</Button>
+                  : <Button variant="secondary" size="sm" onClick={pause}>{t("logs_modal.pause_button")}</Button>
                 }
               </ToolbarItem>
             )}
             <ToolbarItem>
-              <Button variant="secondary" size="sm" onClick={restart}>Refresh</Button>
+              <Button variant="secondary" size="sm" onClick={restart}>{t("logs_modal.refresh_button")}</Button>
             </ToolbarItem>
             {lines.length > 0 && (
               <ToolbarItem>
-                <Button variant="plain" size="sm" onClick={clear}>Clear</Button>
+                <Button variant="plain" size="sm" onClick={clear}>{t("logs_modal.clear_button")}</Button>
               </ToolbarItem>
             )}
             {lines.length >= LOG_MAX_LINES && (
               <ToolbarItem>
-                <span className="lm-limit-notice">showing last {LOG_MAX_LINES} lines</span>
+                <span className="lm-limit-notice">{t("logs_modal.limit_notice", { count: LOG_MAX_LINES })}</span>
               </ToolbarItem>
             )}
           </ToolbarContent>
@@ -115,7 +117,7 @@ export function LogsModal({ stack, onClose }: Props) {
 
         <div ref={logRef} className="lm-log-viewer">
           {parsedLines.length === 0 ? (
-            <div className="lm-empty-state">Waiting for logs…</div>
+            <div className="lm-empty-state">{t("logs_modal.waiting")}</div>
           ) : (
             parsedLines.map((p, i) => <LogLine key={i} parsed={p} index={i} />)
           )}

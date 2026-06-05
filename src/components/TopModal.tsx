@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Modal,
   ModalHeader,
@@ -70,6 +71,7 @@ function parseTopOutput(raw: string): ComposeTopEntry[] {
 }
 
 export function TopModal({ stack, onClose }: Props) {
+  const { t } = useTranslation();
   const [entries, setEntries] = useState<ComposeTopEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -94,14 +96,14 @@ export function TopModal({ stack, onClose }: Props) {
   useEffect(() => { load(); }, [load]);
 
   return (
-    <Modal isOpen onClose={onClose} variant="large" aria-label={`Top — ${stack.Name}`}>
-      <ModalHeader title={`Top — ${stack.Name}`} />
+    <Modal isOpen onClose={onClose} variant="large" aria-label={t("top_modal.aria_label", { name: stack.Name })}>
+      <ModalHeader title={t("top_modal.title", { name: stack.Name })} />
       <ModalBody>
         <Toolbar className="tm-toolbar">
           <ToolbarContent>
             <ToolbarItem>
               <Button variant="secondary" size="sm" onClick={load} isDisabled={loading}>
-                Refresh
+                {t("top_modal.refresh_button")}
               </Button>
             </ToolbarItem>
             {loading && (
@@ -113,13 +115,13 @@ export function TopModal({ stack, onClose }: Props) {
         </Toolbar>
 
         {error && (
-          <Alert variant="danger" isInline title="Could not load processes" style={{ marginTop: "0.5rem" }}>
+          <Alert variant="danger" isInline title={t("top_modal.error_title")} style={{ marginTop: "0.5rem" }}>
             {error}
           </Alert>
         )}
 
         {!loading && !error && entries.length === 0 && (
-          <div className="tm-empty">No running processes found.</div>
+          <div className="tm-empty">{t("top_modal.empty")}</div>
         )}
 
         {entries.map(entry => (
@@ -147,7 +149,7 @@ export function TopModal({ stack, onClose }: Props) {
         ))}
       </ModalBody>
       <ModalFooter>
-        <Button variant="secondary" onClick={onClose}>Close</Button>
+        <Button variant="secondary" onClick={onClose}>{t("common.close")}</Button>
       </ModalFooter>
     </Modal>
   );

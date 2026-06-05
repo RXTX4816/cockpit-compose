@@ -1,4 +1,6 @@
 import { useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import { load } from "js-yaml";
 import type { Diagnostic } from "@codemirror/lint";
 import { validateComposeSpec } from "../compose-schema";
@@ -39,14 +41,15 @@ const MANUAL_STUB = `services:
     restart: unless-stopped
 `;
 
-function nameValid(name: string): string | null {
-  if (!name.trim()) return "Name is required";
-  if (/[/\\]/.test(name)) return "Name must not contain slashes";
-  if (/\s/.test(name)) return "Name must not contain spaces";
+function nameValid(name: string, t: TFunction): string | null {
+  if (!name.trim()) return t("create_modal.validation_name_required");
+  if (/[/\\]/.test(name)) return t("create_modal.validation_name_slashes");
+  if (/\s/.test(name)) return t("create_modal.validation_name_spaces");
   return null;
 }
 
 export function CreateStackModal({ stacks, onClose, onCreated }: Props) {
+  const { t } = useTranslation();
   const [step, setStep] = useState<Step>("setup");
 
   // Step 1 fields
@@ -76,7 +79,7 @@ export function CreateStackModal({ stacks, onClose, onCreated }: Props) {
   const [diagnostics, setDiagnostics] = useState<Diagnostic[]>([]);
   const [confirmCreate, setConfirmCreate] = useState(false);
 
-  const nameError = nameValid(stackName);
+  const nameError = nameValid(stackName, t);
   const canNext = !nameError && composeDir.trim() !== "" && method !== null;
 
   const handleFindBestMatch = useCallback(() => {
@@ -96,7 +99,7 @@ export function CreateStackModal({ stacks, onClose, onCreated }: Props) {
       await lsProc;
       // Command succeeded → dir exists; check if non-empty
       if (lsOutput.trim() !== "") {
-        setSetupError(`Directory ${targetDir} already exists and is not empty`);
+        setSetupError(t("create_modal.error_dir_exists", { dir: targetDir }));
         setCheckingDir(false);
         return;
       }
@@ -105,18 +108,18 @@ export function CreateStackModal({ stacks, onClose, onCreated }: Props) {
     }
     setCheckingDir(false);
     setStep("detail");
-  }, [composeDir, stackName]);
+  }, [composeDir, stackName, t]);
 
   const handleFetchGit = useCallback(async () => {
     const url = gitUrl.trim();
     try {
       const parsed = new URL(url);
       if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
-        setGitError("Only http:// and https:// URLs are supported");
+        setGitError(t("create_modal.error_git_protocol"));
         return;
       }
     } catch {
-      setGitError("Invalid URL — only http:// and https:// URLs are supported");
+      setGitError(t("create_modal.error_git_invalid_url"));
       return;
     }
 
@@ -150,21 +153,21 @@ export function CreateStackModal({ stacks, onClose, onCreated }: Props) {
       }
 
       if (yaml === null) {
-        setGitError("No compose file found in repository root (docker-compose.yml or compose.yml)");
+        setGitError(t("create_modal.error_git_no_compose"));
       } else {
         setFetchedYaml(yaml);
         setEditedGitYaml(yaml);
       }
     } catch (ex: unknown) {
       const msg = ex instanceof Error ? ex.message : String(ex);
-      setGitError(msg || "Git clone failed");
+      setGitError(msg || t("create_modal.error_git_clone_failed"));
     } finally {
       if (tmpDir) {
         try { await removeDirectory(tmpDir); } catch { /* best effort */ }
       }
       setFetching(false);
     }
-  }, [gitUrl]);
+  }, [gitUrl, t]);
 
   const getYamlToWrite = useCallback((): string => {
     if (method === "git") return editedGitYaml;
@@ -202,11 +205,11 @@ export function CreateStackModal({ stacks, onClose, onCreated }: Props) {
       onClose();
     } catch (ex: unknown) {
       const msg = ex instanceof Error ? ex.message : String(ex);
-      setCreateError(msg || "Failed to create stack");
+      setCreateError(msg || t("create_modal.error_create_failed"));
     } finally {
       setCreating(false);
     }
-  }, [composeDir, stackName, getYamlToWrite, onCreated, onClose]);
+  }, [composeDir, stackName, getYamlToWrite, onCreated, onClose, t]);
 
   const handleCreate = useCallback(() => {
     const diags = validateYaml(getYamlToWrite());
@@ -224,19 +227,22 @@ export function CreateStackModal({ stacks, onClose, onCreated }: Props) {
     manualYaml.trim() !== ""
   );
 
+  const errorCount = diagnostics.filter(d => d.severity === "error").length;
+  const warningCount = diagnostics.filter(d => d.severity === "warning").length;
+
   return (
     <>
-    <Modal isOpen onClose={onClose} variant="medium" aria-label="Create new compose stack">
-      <ModalHeader title="Create compose stack" />
+    <Modal isOpen onClose={onClose} variant="medium" aria-label={t("create_modal.aria_label")}>
+      <ModalHeader title={t("create_modal.title")} />
       <ModalBody>
         {step === "setup" && (
           <div className="csm-setup">
-            <FormGroup label="Stack name" isRequired fieldId="csm-name">
+            <FormGroup label={t("create_modal.field_name")} isRequired fieldId="csm-name">
               <TextInput
                 id="csm-name"
                 value={stackName}
                 onChange={(_e, v) => setStackName(v)}
-                placeholder="my-stack"
+                placeholder={t("create_modal.field_name_placeholder")}
                 validated={stackName && nameError ? "error" : "default"}
               />
               {stackName && nameError && (
@@ -244,16 +250,16 @@ export function CreateStackModal({ stacks, onClose, onCreated }: Props) {
               )}
             </FormGroup>
 
-            <FormGroup label="Compose root directory" isRequired fieldId="csm-dir" className="csm-form-group">
+            <FormGroup label={t("create_modal.field_dir")} isRequired fieldId="csm-dir" className="csm-form-group">
               <div className="csm-dir-row">
                 <Button
                   variant="secondary"
                   size="sm"
                   isDisabled={stacks.length === 0}
                   onClick={handleFindBestMatch}
-                  title="Infer compose root from active stacks"
+                  title={t("actions.find_best_match_title")}
                 >
-                  Find best match
+                  {t("actions.find_best_match")}
                 </Button>
                 <InputGroup className="csm-dir-input">
                   <InputGroupItem isFill>
@@ -261,45 +267,45 @@ export function CreateStackModal({ stacks, onClose, onCreated }: Props) {
                       id="csm-dir"
                       value={composeDir}
                       onChange={(_e, v) => setComposeDir(v)}
-                      placeholder="/etc/docker/compose"
-                      aria-label="Compose root directory"
+                      placeholder={t("create_modal.field_dir_placeholder")}
+                      aria-label={t("create_modal.field_dir_aria")}
                     />
                   </InputGroupItem>
                 </InputGroup>
               </div>
             </FormGroup>
 
-            <FormGroup label="Creation method" isRequired fieldId="csm-method" className="csm-form-group">
+            <FormGroup label={t("create_modal.field_method")} isRequired fieldId="csm-method" className="csm-form-group">
               <div className="csm-radio-group">
                 <Radio
                   id="csm-method-git"
                   name="csm-method"
-                  label="From Git URL"
-                  description="Fetch docker-compose.yml from a Git repository"
+                  label={t("create_modal.method_git_label")}
+                  description={t("create_modal.method_git_description")}
                   isChecked={method === "git"}
                   onChange={() => setMethod("git")}
                 />
                 <Radio
                   id="csm-method-template"
                   name="csm-method"
-                  label="From template"
-                  description="Start from a structural YAML example"
+                  label={t("create_modal.method_template_label")}
+                  description={t("create_modal.method_template_description")}
                   isChecked={method === "template"}
                   onChange={() => setMethod("template")}
                 />
                 <Radio
                   id="csm-method-manual"
                   name="csm-method"
-                  label="Manual"
-                  description="Write the compose file from scratch"
+                  label={t("create_modal.method_manual_label")}
+                  description={t("create_modal.method_manual_description")}
                   isChecked={method === "manual"}
                   onChange={() => setMethod("manual")}
                 />
               </div>
             </FormGroup>
 
-            <Alert variant="warning" isInline title="Directory ownership depends on your privilege mode" className="csm-setup-error">
-              The created directory and compose file will be owned by the user running this action — either your regular user (limited mode) or root (superuser mode). Containers started later may run with a different UID and encounter permission errors on bind-mounted paths. This is expected behavior: some images work fine, others require specific ownership. Adjust <code>user:</code>, volume permissions, or run mode as needed for your stack.
+            <Alert variant="warning" isInline title={t("create_modal.ownership_warning_title")} className="csm-setup-error">
+              {t("create_modal.ownership_warning_body")}
             </Alert>
 
             {setupError && (
@@ -310,13 +316,13 @@ export function CreateStackModal({ stacks, onClose, onCreated }: Props) {
 
         {step === "detail" && method === "git" && (
           <div className="csm-detail">
-            <FormGroup label="Git repository URL" isRequired fieldId="csm-git-url">
+            <FormGroup label={t("create_modal.field_git_url")} isRequired fieldId="csm-git-url">
               <div className="csm-git-row">
                 <TextInput
                   id="csm-git-url"
                   value={gitUrl}
                   onChange={(_e, v) => setGitUrl(v)}
-                  placeholder="https://github.com/example/my-stack.git"
+                  placeholder={t("create_modal.field_git_placeholder")}
                   isDisabled={fetching}
                 />
                 <Button
@@ -326,7 +332,7 @@ export function CreateStackModal({ stacks, onClose, onCreated }: Props) {
                   isLoading={fetching}
                   onClick={handleFetchGit}
                 >
-                  Fetch
+                  {t("common.fetch")}
                 </Button>
               </div>
             </FormGroup>
@@ -340,10 +346,10 @@ export function CreateStackModal({ stacks, onClose, onCreated }: Props) {
                 <Alert
                   variant="warning"
                   isInline
-                  title="Review before creating"
+                  title={t("create_modal.git_review_title")}
                   className="csm-alert"
                 >
-                  Always review compose files from external sources. Only use repositories you trust.
+                  {t("create_modal.git_review_body")}
                 </Alert>
                 <div className="csm-editor-wrapper">
                   <YamlEditor content={editedGitYaml} onChange={setEditedGitYaml} />
@@ -356,15 +362,15 @@ export function CreateStackModal({ stacks, onClose, onCreated }: Props) {
         {step === "detail" && method === "template" && (
           <div className="csm-detail">
             <div className="csm-template-grid">
-              {COMPOSE_TEMPLATES.map(t => (
+              {COMPOSE_TEMPLATES.map(t_item => (
                 <button
-                  key={t.id}
+                  key={t_item.id}
                   type="button"
-                  className={`csm-template-card${selectedTemplate?.id === t.id ? " csm-template-card--selected" : ""}`}
-                  onClick={() => { setSelectedTemplate(t); setTemplateYaml(t.yaml); }}
+                  className={`csm-template-card${selectedTemplate?.id === t_item.id ? " csm-template-card--selected" : ""}`}
+                  onClick={() => { setSelectedTemplate(t_item); setTemplateYaml(t_item.yaml); }}
                 >
-                  <span className="csm-template-name">{t.name}</span>
-                  <span className="csm-template-desc">{t.description}</span>
+                  <span className="csm-template-name">{t_item.name}</span>
+                  <span className="csm-template-desc">{t_item.description}</span>
                 </button>
               ))}
             </div>
@@ -398,9 +404,9 @@ export function CreateStackModal({ stacks, onClose, onCreated }: Props) {
               isLoading={checkingDir}
               onClick={() => { void handleNext(); }}
             >
-              Next →
+              {t("create_modal.next_button")} →
             </Button>
-            <Button variant="link" onClick={onClose}>Cancel</Button>
+            <Button variant="link" onClick={onClose}>{t("common.cancel")}</Button>
           </>
         ) : (
           <>
@@ -410,39 +416,37 @@ export function CreateStackModal({ stacks, onClose, onCreated }: Props) {
               isLoading={creating}
               onClick={handleCreate}
             >
-              Create
+              {t("create_modal.create_button")}
             </Button>
             <Button variant="secondary" isDisabled={creating} onClick={() => setStep("setup")}>
-              ← Back
+              ← {t("common.back")}
             </Button>
-            <Button variant="link" isDisabled={creating} onClick={onClose}>Cancel</Button>
+            <Button variant="link" isDisabled={creating} onClick={onClose}>{t("common.cancel")}</Button>
           </>
         )}
       </ModalFooter>
     </Modal>
 
     {confirmCreate && (
-      <Modal isOpen variant="small" onClose={() => setConfirmCreate(false)} aria-label="Confirm create">
-        <ModalHeader title="Create with issues?" />
+      <Modal isOpen variant="small" onClose={() => setConfirmCreate(false)} aria-label={t("create_modal.confirm_create_aria_label")}>
+        <ModalHeader title={t("create_modal.confirm_create_title")} />
         <ModalBody>
-          {diagnostics.some(d => d.severity === "error") && (
-            <Alert variant="danger" isInline title="Errors found" style={{ marginBottom: "1rem" }}>
-              There {diagnostics.filter(d => d.severity === "error").length === 1 ? "is" : "are"}{" "}
-              {diagnostics.filter(d => d.severity === "error").length} error(s) in the compose file.
+          {errorCount > 0 && (
+            <Alert variant="danger" isInline title={t("create_modal.errors_found_title")} style={{ marginBottom: "1rem" }}>
+              {t("create_modal.error_count", { count: errorCount })}
             </Alert>
           )}
-          {diagnostics.some(d => d.severity === "warning") && (
-            <Alert variant="warning" isInline title="Warnings found">
-              There {diagnostics.filter(d => d.severity === "warning").length === 1 ? "is" : "are"}{" "}
-              {diagnostics.filter(d => d.severity === "warning").length} warning(s) in the compose file.
+          {warningCount > 0 && (
+            <Alert variant="warning" isInline title={t("create_modal.warnings_found_title")}>
+              {t("create_modal.warning_count", { count: warningCount })}
             </Alert>
           )}
-          <p style={{ marginTop: "1rem", fontSize: "0.875rem" }}>Do you want to create anyway?</p>
+          <p style={{ marginTop: "1rem", fontSize: "0.875rem" }}>{t("create_modal.confirm_create_question")}</p>
         </ModalBody>
         <ModalFooter>
-          <Button variant="secondary" onClick={() => setConfirmCreate(false)}>Cancel</Button>
+          <Button variant="secondary" onClick={() => setConfirmCreate(false)}>{t("common.cancel")}</Button>
           <Button variant="primary" isLoading={creating} onClick={() => { void performCreate(); }}>
-            Create Anyway
+            {t("create_modal.create_anyway_button")}
           </Button>
         </ModalFooter>
       </Modal>

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Modal,
   ModalHeader,
@@ -30,6 +31,7 @@ interface FileState {
 }
 
 export function EnvModal({ stack, onClose }: Props) {
+  const { t } = useTranslation();
   const [scanning, setScanning] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [envFiles, setEnvFiles] = useState<string[]>([]);
@@ -145,8 +147,8 @@ export function EnvModal({ stack, onClose }: Props) {
 
   return (
     <>
-    <Modal isOpen onClose={onClose} variant="large" aria-label={`Env file — ${stack.Name}`}>
-      <ModalHeader title={`${stack.Name} — env file`} />
+    <Modal isOpen onClose={onClose} variant="large" aria-label={t("env_modal.aria_label", { name: stack.Name })}>
+      <ModalHeader title={t("env_modal.title", { name: stack.Name })} />
       <ModalBody style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}>
         <div className="ym-body">
           {loading ? (
@@ -154,11 +156,11 @@ export function EnvModal({ stack, onClose }: Props) {
               <Spinner />
             </div>
           ) : error && !saving ? (
-            <Alert variant="danger" isInline title="Could not read file">{error}</Alert>
+            <Alert variant="danger" isInline title={t("env_modal.load_failed_title")}>{error}</Alert>
           ) : (
             <>
               {error && saving && (
-                <Alert variant="danger" isInline title="Save failed" style={{ marginBottom: "1rem", flexShrink: 0 }}>
+                <Alert variant="danger" isInline title={t("env_modal.save_failed_title")} style={{ marginBottom: "1rem", flexShrink: 0 }}>
                   {error}
                 </Alert>
               )}
@@ -180,21 +182,21 @@ export function EnvModal({ stack, onClose }: Props) {
                         if (e.key === "Enter") handleAddFile();
                         if (e.key === "Escape") { setAddingFile(false); setNewFileName(""); }
                       }}
-                      placeholder=".env.prod"
-                      aria-label="New env file name"
+                      placeholder={t("env_modal.new_file_placeholder")}
+                      aria-label={t("env_modal.new_file_aria")}
                     />
-                    <Button variant="primary" size="sm" onClick={handleAddFile} isDisabled={!newFileName.trim()} aria-label="Create file">
-                      Create
+                    <Button variant="primary" size="sm" onClick={handleAddFile} isDisabled={!newFileName.trim()} aria-label={t("env_modal.create_file_aria")}>
+                      {t("common.create")}
                     </Button>
-                    <Button variant="plain" onClick={() => { setAddingFile(false); setNewFileName(""); }} aria-label="Cancel">
+                    <Button variant="plain" onClick={() => { setAddingFile(false); setNewFileName(""); }} aria-label={t("env_modal.cancel_aria")}>
                       ✕
                     </Button>
                   </div>
                 ) : (
                   <Button
                     variant="plain"
-                    aria-label="Add new env file"
-                    title="Create a new env file"
+                    aria-label={t("env_modal.add_file_aria")}
+                    title={t("env_modal.add_file_title")}
                     onClick={() => setAddingFile(true)}
                   >
                     <PlusIcon />
@@ -211,14 +213,14 @@ export function EnvModal({ stack, onClose }: Props) {
                     size="sm"
                     onClick={() => setViewMode("table")}
                   >
-                    Table
+                    {t("env_modal.table_button")}
                   </Button>
                   <Button
                     variant={viewMode === "raw" ? "primary" : "secondary"}
                     size="sm"
                     onClick={() => setViewMode("raw")}
                   >
-                    Raw
+                    {t("env_modal.raw_button")}
                   </Button>
                 </div>
               </div>
@@ -241,30 +243,30 @@ export function EnvModal({ stack, onClose }: Props) {
       {!loading && (
         <ModalFooter>
           <Button variant="secondary" onClick={onClose} isDisabled={saving}>
-            Cancel
+            {t("common.cancel")}
           </Button>
           <Button variant="primary" onClick={handleSave} isLoading={saving}>
-            {activeState?.exists ? "Save" : "Create"}
+            {activeState?.exists ? t("common.save") : t("common.create")}
           </Button>
         </ModalFooter>
       )}
     </Modal>
 
     {confirmSave && (
-      <Modal isOpen variant="small" onClose={() => setConfirmSave(false)} aria-label="Confirm save">
-        <ModalHeader title="Save with issues?" />
+      <Modal isOpen variant="small" onClose={() => setConfirmSave(false)} aria-label={t("env_modal.confirm_save_aria_label")}>
+        <ModalHeader title={t("env_modal.confirm_save_title")} />
         <ModalBody>
-          <Alert variant="warning" isInline title="Duplicate keys found">
-            Your env file contains duplicate keys. Only the last value for each key will be used.
+          <Alert variant="warning" isInline title={t("env_modal.duplicate_keys_title")}>
+            {t("env_modal.duplicate_keys_body")}
           </Alert>
-          <p className="ym-confirm-note">Do you want to save anyway?</p>
+          <p className="ym-confirm-note">{t("env_modal.confirm_save_question")}</p>
         </ModalBody>
         <ModalFooter>
           <Button variant="secondary" onClick={() => setConfirmSave(false)}>
-            Cancel
+            {t("common.cancel")}
           </Button>
           <Button variant="primary" onClick={performSave} isLoading={saving}>
-            Save Anyway
+            {t("env_modal.save_anyway_button")}
           </Button>
         </ModalFooter>
       </Modal>

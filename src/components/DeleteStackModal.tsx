@@ -1,4 +1,5 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Modal,
   ModalHeader,
@@ -18,15 +19,18 @@ interface Props {
 }
 
 export function DeleteStackModal({ stack, onClose, onDeleted }: Props) {
+  const { t } = useTranslation();
   const [deleteFolder, setDeleteFolder] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const folderPath = stack.configFile.slice(0, stack.configFile.lastIndexOf("/"));
-  const target = deleteFolder ? `folder ${folderPath}` : `file ${stack.configFile}`;
+  const target = deleteFolder
+    ? t("delete_modal.target_folder", { folder: folderPath })
+    : t("delete_modal.target_file", { file: stack.configFile });
 
-  const handleDelete = useCallback(async () => {
+  const handleDelete = async () => {
     setDeleting(true);
     setError(null);
     try {
@@ -39,12 +43,12 @@ export function DeleteStackModal({ stack, onClose, onDeleted }: Props) {
       onClose();
     } catch (ex: unknown) {
       const msg = ex instanceof Error ? ex.message : String(ex);
-      setError(msg || "Failed to delete");
+      setError(msg || t("delete_modal.error_default"));
       setConfirmed(false);
     } finally {
       setDeleting(false);
     }
-  }, [deleteFolder, folderPath, stack.configFile, onDeleted, onClose]);
+  };
 
   return (
     <>
@@ -52,22 +56,22 @@ export function DeleteStackModal({ stack, onClose, onDeleted }: Props) {
         isOpen
         onClose={onClose}
         variant="small"
-        aria-label={`Delete compose stack — ${stack.name}`}
+        aria-label={t("delete_modal.aria_label", { name: stack.name })}
       >
-        <ModalHeader title={`Delete — ${stack.name}`} />
+        <ModalHeader title={t("delete_modal.title", { name: stack.name })} />
         <ModalBody>
-          <Alert variant="danger" isInline title="This action cannot be undone" style={{ marginBottom: "1rem" }}>
-            The compose file will be permanently deleted from disk.
+          <Alert variant="danger" isInline title={t("delete_modal.cannot_undo_title")} style={{ marginBottom: "1rem" }}>
+            {t("delete_modal.cannot_undo_body")}
           </Alert>
 
           <p style={{ marginBottom: "0.75rem", fontSize: "0.875rem" }}>
-            Compose file: <code>{stack.configFile}</code>
+            {t("delete_modal.compose_file_label")} <code>{stack.configFile}</code>
           </p>
 
           <Checkbox
             id="dsm-delete-folder"
-            label="Delete entire folder"
-            description={`Removes the folder ${folderPath} and all its contents`}
+            label={t("delete_modal.delete_folder_label")}
+            description={t("delete_modal.delete_folder_description", { folder: folderPath })}
             isChecked={deleteFolder}
             onChange={(_e, checked) => setDeleteFolder(checked)}
           />
@@ -79,10 +83,10 @@ export function DeleteStackModal({ stack, onClose, onDeleted }: Props) {
 
         <ModalFooter>
           <Button variant="danger" onClick={() => setConfirmed(true)}>
-            Delete
+            {t("common.delete")}
           </Button>
           <Button variant="link" onClick={onClose}>
-            Cancel
+            {t("common.cancel")}
           </Button>
         </ModalFooter>
       </Modal>
@@ -92,12 +96,12 @@ export function DeleteStackModal({ stack, onClose, onDeleted }: Props) {
           isOpen
           onClose={() => setConfirmed(false)}
           variant="small"
-          aria-label="Confirm delete"
+          aria-label={t("delete_modal.confirm_aria_label")}
         >
-          <ModalHeader title="Are you really sure?" />
+          <ModalHeader title={t("delete_modal.confirm_title")} />
           <ModalBody>
-            <Alert variant="danger" isInline title={`This will permanently delete the ${target}!`}>
-              There is no way to recover this. Make sure you have a backup if needed.
+            <Alert variant="danger" isInline title={t("delete_modal.confirm_warning_title", { target })}>
+              {t("delete_modal.confirm_warning_body")}
             </Alert>
           </ModalBody>
           <ModalFooter>
@@ -107,10 +111,10 @@ export function DeleteStackModal({ stack, onClose, onDeleted }: Props) {
               isLoading={deleting}
               onClick={() => { void handleDelete(); }}
             >
-              Yes, delete
+              {t("delete_modal.confirm_button")}
             </Button>
             <Button variant="link" isDisabled={deleting} onClick={() => setConfirmed(false)}>
-              Cancel
+              {t("common.cancel")}
             </Button>
           </ModalFooter>
         </Modal>

@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Modal,
   ModalHeader,
@@ -116,6 +117,7 @@ async function findUnusedProjectImages(project: string): Promise<{ name: string;
 }
 
 export function PruneModal({ stack, onClose, onSuccess }: Props) {
+  const { t } = useTranslation();
   const status = parseStackStatus(stack.Status);
   const isRunning = status === "running" || status === "partial";
 
@@ -193,46 +195,44 @@ export function PruneModal({ stack, onClose, onSuccess }: Props) {
 
   if (step === "select") {
     return (
-      <Modal isOpen variant="small" onClose={onClose} aria-label={`Prune resources — ${stack.Name}`}>
-        <ModalHeader title={`Prune resources — ${stack.Name}`} />
+      <Modal isOpen variant="small" onClose={onClose} aria-label={t("prune_modal.aria_label_select", { name: stack.Name })}>
+        <ModalHeader title={t("prune_modal.title_select", { name: stack.Name })} />
         <ModalBody>
           {!isRunning && (
-            <Alert variant="danger" isInline title="Stack is not running — risk of data loss" style={{ marginBottom: "1rem" }}>
-              Resources that appear unused may still be needed to start this stack again.
-              Volumes removed here cannot be recovered.
+            <Alert variant="danger" isInline title={t("prune_modal.not_running_title")} style={{ marginBottom: "1rem" }}>
+              {t("prune_modal.not_running_body")}
             </Alert>
           )}
-          <Alert variant="warning" isInline title="Destructive action — cannot be undone" style={{ marginBottom: "1rem" }}>
-            Pruning permanently deletes Docker resources. Volumes especially may contain
-            persistent data that cannot be recovered. Review carefully before proceeding.
+          <Alert variant="warning" isInline title={t("prune_modal.destructive_title")} style={{ marginBottom: "1rem" }}>
+            {t("prune_modal.destructive_body")}
           </Alert>
 
           <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
             <Checkbox
               id="prune-images"
-              label="Images"
-              description="Older image versions for this stack's repos that are no longer used by any container."
+              label={t("prune_modal.images_label")}
+              description={t("prune_modal.images_description")}
               isChecked={selection.images}
               onChange={() => toggle("images")}
             />
             <Checkbox
               id="prune-containers"
-              label="Containers"
-              description="Stopped containers belonging to this stack."
+              label={t("prune_modal.containers_label")}
+              description={t("prune_modal.containers_description")}
               isChecked={selection.containers}
               onChange={() => toggle("containers")}
             />
             <Checkbox
               id="prune-volumes"
-              label={<span>Volumes <span style={{ color: "var(--pf-t--global--color--status--danger--default)", fontSize: "0.8rem" }}>⚠ may contain persistent data</span></span>}
-              description="Unused named volumes associated with this stack."
+              label={<span>{t("prune_modal.volumes_label")} <span style={{ color: "var(--pf-t--global--color--status--danger--default)", fontSize: "0.8rem" }}>{t("prune_modal.volumes_warning")}</span></span>}
+              description={t("prune_modal.volumes_description")}
               isChecked={selection.volumes}
               onChange={() => toggle("volumes")}
             />
             <Checkbox
               id="prune-networks"
-              label="Networks"
-              description="Unused networks created for this stack (in-use ones are skipped)."
+              label={t("prune_modal.networks_label")}
+              description={t("prune_modal.networks_description")}
               isChecked={selection.networks}
               onChange={() => toggle("networks")}
             />
@@ -249,10 +249,10 @@ export function PruneModal({ stack, onClose, onSuccess }: Props) {
             isDisabled={nothingSelected || loadingPreview}
             isLoading={loadingPreview}
           >
-            Preview →
+            {t("prune_modal.preview_button")} →
           </Button>
           <Button variant="link" onClick={onClose} isDisabled={loadingPreview}>
-            Cancel
+            {t("common.cancel")}
           </Button>
         </ModalFooter>
       </Modal>
@@ -260,18 +260,17 @@ export function PruneModal({ stack, onClose, onSuccess }: Props) {
   }
 
   return (
-    <Modal isOpen variant="medium" onClose={() => { if (!pruning) onClose(); }} aria-label={`Confirm prune — ${stack.Name}`}>
-      <ModalHeader title={`Preview — resources to be removed`} />
+    <Modal isOpen variant="medium" onClose={() => { if (!pruning) onClose(); }} aria-label={t("prune_modal.aria_label_preview", { name: stack.Name })}>
+      <ModalHeader title={t("prune_modal.title_preview")} />
       <ModalBody>
         {!isRunning && (
           <Alert
             variant="danger"
             isInline
-            title="Stack is not running"
+            title={t("prune_modal.not_running_title")}
             style={{ marginBottom: "1rem" }}
           >
-            Resources that appear unused may still be required to start the stack again.
-            Volumes removed here cannot be recovered.
+            {t("prune_modal.not_running_preview_body")}
           </Alert>
         )}
 
@@ -282,16 +281,16 @@ export function PruneModal({ stack, onClose, onSuccess }: Props) {
         ) : preview && (
           <div style={{ fontSize: "0.875rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
             {selection.images && (
-              <ResourceSection title="Images" items={preview.images} />
+              <ResourceSection title={t("prune_modal.images_label")} items={preview.images} nothingLabel={t("prune_modal.nothing_to_remove")} />
             )}
             {selection.containers && (
-              <ResourceSection title="Containers" items={preview.containers} />
+              <ResourceSection title={t("prune_modal.containers_label")} items={preview.containers} nothingLabel={t("prune_modal.nothing_to_remove")} />
             )}
             {selection.volumes && (
-              <ResourceSection title="Volumes" items={preview.volumes} />
+              <ResourceSection title={t("prune_modal.volumes_label")} items={preview.volumes} nothingLabel={t("prune_modal.nothing_to_remove")} />
             )}
             {selection.networks && (
-              <ResourceSection title="Networks" items={preview.networks} />
+              <ResourceSection title={t("prune_modal.networks_label")} items={preview.networks} nothingLabel={t("prune_modal.nothing_to_remove")} />
             )}
           </div>
         )}
@@ -307,26 +306,26 @@ export function PruneModal({ stack, onClose, onSuccess }: Props) {
           isLoading={pruning}
           isDisabled={pruning}
         >
-          Prune selected
+          {t("prune_modal.prune_button")}
         </Button>
         <Button variant="secondary" onClick={() => setStep("select")} isDisabled={pruning}>
-          ← Back
+          ← {t("common.back")}
         </Button>
         <Button variant="link" onClick={onClose} isDisabled={pruning}>
-          Cancel
+          {t("common.cancel")}
         </Button>
       </ModalFooter>
     </Modal>
   );
 }
 
-function ResourceSection({ title, items }: { title: string; items: string[] }) {
+function ResourceSection({ title, items, nothingLabel }: { title: string; items: string[]; nothingLabel: string }) {
   return (
     <div>
       <strong>{title}</strong>
       {items.length === 0 ? (
         <p style={{ margin: "0.25rem 0 0 0", color: "var(--pf-t--global--text--color--subtle)" }}>
-          Nothing to remove.
+          {nothingLabel}
         </p>
       ) : (
         <ul style={{ margin: "0.25rem 0 0 1.25rem", padding: 0 }}>
