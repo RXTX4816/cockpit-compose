@@ -47,28 +47,28 @@ function mockSpawnSequence(...responses: ReturnType<typeof mockProcess>[]) {
 
 describe("StackInfoModal", () => {
   it("renders modal title with stack name", async () => {
-    mockSpawnSequence(mockProcess(containers), mockProcess(images), mockProcess(volumes));
+    mockSpawnSequence(mockProcess(containers), mockProcess(images), mockProcess(volumes), mockProcess(""));
     render(<StackInfoModal stack={stack} onClose={vi.fn()} />);
     expect(screen.getByText(/myapp — info/i)).toBeInTheDocument();
     await act(async () => {});
   });
 
   it("shows spinners while loading", async () => {
-    mockSpawnSequence(mockProcess(containers), mockProcess(images), mockProcess(volumes));
+    mockSpawnSequence(mockProcess(containers), mockProcess(images), mockProcess(volumes), mockProcess(""));
     render(<StackInfoModal stack={stack} onClose={vi.fn()} />);
     expect(screen.getAllByRole("progressbar").length).toBeGreaterThan(0);
     await act(async () => {});
   });
 
   it("shows config file path", async () => {
-    mockSpawnSequence(mockProcess(containers), mockProcess(images), mockProcess(volumes));
+    mockSpawnSequence(mockProcess(containers), mockProcess(images), mockProcess(volumes), mockProcess(""));
     render(<StackInfoModal stack={stack} onClose={vi.fn()} />);
     expect(screen.getByText("/path/docker-compose.yml")).toBeInTheDocument();
     await act(async () => {});
   });
 
   it("renders container info after loading", async () => {
-    mockSpawnSequence(mockProcess(containers), mockProcess(images), mockProcess(volumes));
+    mockSpawnSequence(mockProcess(containers), mockProcess(images), mockProcess(volumes), mockProcess(""));
     render(<StackInfoModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => expect(screen.queryByRole("progressbar")).toBeNull());
     expect(screen.getByText("web")).toBeInTheDocument();
@@ -77,32 +77,32 @@ describe("StackInfoModal", () => {
   });
 
   it("shows truncated container ID (12 chars)", async () => {
-    mockSpawnSequence(mockProcess(containers), mockProcess(images), mockProcess(volumes));
+    mockSpawnSequence(mockProcess(containers), mockProcess(images), mockProcess(volumes), mockProcess(""));
     render(<StackInfoModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => expect(screen.queryByRole("progressbar")).toBeNull());
     expect(screen.getByText("abc123def456")).toBeInTheDocument();
   });
 
   it("renders port label for mapped ports", async () => {
-    mockSpawnSequence(mockProcess(containers), mockProcess(images), mockProcess(volumes));
+    mockSpawnSequence(mockProcess(containers), mockProcess(images), mockProcess(volumes), mockProcess(""));
     render(<StackInfoModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => expect(screen.getByText("0.0.0.0:8080 → 80/tcp")).toBeInTheDocument());
   });
 
   it("shows empty state when no containers returned", async () => {
-    mockSpawnSequence(mockProcess("[]"), mockProcess("[]"), mockProcess("[]"));
+    mockSpawnSequence(mockProcess("[]"), mockProcess("[]"), mockProcess("[]"), mockProcess(""));
     render(<StackInfoModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => expect(screen.getByText(/No containers found/i)).toBeInTheDocument());
   });
 
   it("shows error alert on container fetch failure", async () => {
-    mockSpawnSequence(mockProcess("", "permission denied"), mockProcess(images), mockProcess(volumes));
+    mockSpawnSequence(mockProcess("", "permission denied"), mockProcess(images), mockProcess(volumes), mockProcess(""));
     render(<StackInfoModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => expect(screen.getByText(/Could not load container info/i)).toBeInTheDocument());
   });
 
   it("renders images table after loading", async () => {
-    mockSpawnSequence(mockProcess(containers), mockProcess(images), mockProcess(volumes));
+    mockSpawnSequence(mockProcess(containers), mockProcess(images), mockProcess(volumes), mockProcess(""));
     render(<StackInfoModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => expect(screen.queryByRole("progressbar")).toBeNull());
     expect(screen.getByText("nginx")).toBeInTheDocument();
@@ -110,13 +110,13 @@ describe("StackInfoModal", () => {
   });
 
   it("shows images error alert on failure", async () => {
-    mockSpawnSequence(mockProcess(containers), mockProcess("", "images failed"), mockProcess(volumes));
+    mockSpawnSequence(mockProcess(containers), mockProcess("", "images failed"), mockProcess(volumes), mockProcess(""));
     render(<StackInfoModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => expect(screen.getByText(/Could not load images/i)).toBeInTheDocument());
   });
 
   it("renders volumes table after loading", async () => {
-    mockSpawnSequence(mockProcess(containers), mockProcess(images), mockProcess(volumes));
+    mockSpawnSequence(mockProcess(containers), mockProcess(images), mockProcess(volumes), mockProcess(""));
     render(<StackInfoModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => expect(screen.queryByRole("progressbar")).toBeNull());
     expect(screen.getByText("myapp_data")).toBeInTheDocument();
@@ -124,8 +124,41 @@ describe("StackInfoModal", () => {
   });
 
   it("shows unavailable notice when docker compose volumes is not supported", async () => {
-    mockSpawnSequence(mockProcess(containers), mockProcess(images), mockProcess("", "unknown command"));
+    mockSpawnSequence(mockProcess(containers), mockProcess(images), mockProcess("", "unknown command"), mockProcess(""));
     render(<StackInfoModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => expect(screen.getByText(/Not available on this Docker Compose version/i)).toBeInTheDocument());
+  });
+
+  it("renders networks section with no networks found", async () => {
+    mockSpawnSequence(mockProcess(containers), mockProcess(images), mockProcess(volumes), mockProcess(""));
+    render(<StackInfoModal stack={stack} onClose={vi.fn()} />);
+    await waitFor(() => expect(screen.queryByRole("progressbar")).toBeNull());
+    expect(screen.getByText(/No networks found/i)).toBeInTheDocument();
+  });
+
+  it("renders network name in networks table", async () => {
+    mockSpawnSequence(
+      mockProcess(containers),
+      mockProcess(images),
+      mockProcess(volumes),
+      mockProcess("myapp_default\n"),
+      mockProcess(""),
+    );
+    render(<StackInfoModal stack={stack} onClose={vi.fn()} />);
+    await waitFor(() => expect(screen.queryByRole("progressbar")).toBeNull());
+    expect(screen.getByText("myapp_default")).toBeInTheDocument();
+  });
+
+  it("shows other project name when network is shared", async () => {
+    mockSpawnSequence(
+      mockProcess(containers),
+      mockProcess(images),
+      mockProcess(volumes),
+      mockProcess("myapp_default\n"),
+      mockProcess("otherapp\n"),
+    );
+    render(<StackInfoModal stack={stack} onClose={vi.fn()} />);
+    await waitFor(() => expect(screen.queryByRole("progressbar")).toBeNull());
+    expect(screen.getByText("otherapp")).toBeInTheDocument();
   });
 });

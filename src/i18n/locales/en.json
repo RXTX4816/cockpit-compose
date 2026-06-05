@@ -87,7 +87,10 @@
     "body_prefix": "Running",
     "body_suffix": "will stop and remove all containers for",
     "body_suffix2": ". The stack will disappear from this list.",
-    "confirm_button": "Down (remove)"
+    "confirm_button": "Down (remove)",
+    "checking_networks": "Checking for shared networks…",
+    "shared_networks_title": "Shared networks detected",
+    "shared_with": "also used by"
   },
 
   "kill_modal": {
@@ -114,7 +117,10 @@
     "confirm_button": "Yes, delete",
     "target_folder": "folder {{folder}}",
     "target_file": "file {{file}}",
-    "error_default": "Failed to delete"
+    "error_default": "Failed to delete",
+    "checking_networks": "Checking for shared networks…",
+    "shared_networks_title": "Shared networks detected",
+    "shared_with": "also used by"
   },
 
   "create_modal": {
@@ -317,7 +323,13 @@
     "img_col_created": "Created",
     "vol_col_name": "Name",
     "vol_col_driver": "Driver",
-    "vol_col_mountpoint": "Mountpoint"
+    "vol_col_mountpoint": "Mountpoint",
+    "section_networks": "Networks",
+    "no_networks": "No networks found.",
+    "network_error_title": "Could not load networks",
+    "net_col_name": "Network",
+    "net_col_shared": "Shared with",
+    "net_shared_icon_title": "Shared network"
   },
 
   "prune_modal": {

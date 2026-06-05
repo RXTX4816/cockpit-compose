@@ -89,7 +89,10 @@
     "body_prefix": "Uruchomienie",
     "body_suffix": "zatrzyma i usunie wszystkie kontenery dla",
     "body_suffix2": ". Stos zniknie z tej listy.",
-    "confirm_button": "Wyłącz (usuń)"
+    "confirm_button": "Wyłącz (usuń)",
+    "checking_networks": "Sprawdzanie wspólnych sieci…",
+    "shared_networks_title": "Wykryto wspólne sieci",
+    "shared_with": "używany również przez"
   },
 
   "kill_modal": {
@@ -116,7 +119,10 @@
     "confirm_button": "Tak, usuń",
     "target_folder": "folder {{folder}}",
     "target_file": "plik {{file}}",
-    "error_default": "Usunięcie nie powiodło się"
+    "error_default": "Usunięcie nie powiodło się",
+    "checking_networks": "Sprawdzanie wspólnych sieci…",
+    "shared_networks_title": "Wykryto wspólne sieci",
+    "shared_with": "używany również przez"
   },
 
   "create_modal": {
@@ -327,7 +333,13 @@
     "img_col_created": "Utworzono",
     "vol_col_name": "Nazwa",
     "vol_col_driver": "Sterownik",
-    "vol_col_mountpoint": "Punkt montowania"
+    "vol_col_mountpoint": "Punkt montowania",
+    "section_networks": "Sieci",
+    "no_networks": "Nie znaleziono sieci.",
+    "network_error_title": "Nie można załadować sieci",
+    "net_col_name": "Sieć",
+    "net_col_shared": "Udostępniona z",
+    "net_shared_icon_title": "Sieć współdzielona"
   },
 
   "prune_modal": {

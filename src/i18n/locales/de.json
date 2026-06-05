@@ -87,7 +87,10 @@
     "body_prefix": "Das Ausführen von",
     "body_suffix": "stoppt und entfernt alle Container für",
     "body_suffix2": ". Der Stack verschwindet aus dieser Liste.",
-    "confirm_button": "Herunterfahren (entfernen)"
+    "confirm_button": "Herunterfahren (entfernen)",
+    "checking_networks": "Gemeinsame Netzwerke werden geprüft…",
+    "shared_networks_title": "Gemeinsame Netzwerke erkannt",
+    "shared_with": "wird ebenfalls verwendet von"
   },
 
   "kill_modal": {
@@ -114,7 +117,10 @@
     "confirm_button": "Ja, löschen",
     "target_folder": "den Ordner {{folder}}",
     "target_file": "die Datei {{file}}",
-    "error_default": "Löschen fehlgeschlagen"
+    "error_default": "Löschen fehlgeschlagen",
+    "checking_networks": "Gemeinsame Netzwerke werden geprüft…",
+    "shared_networks_title": "Gemeinsame Netzwerke erkannt",
+    "shared_with": "wird ebenfalls verwendet von"
   },
 
   "create_modal": {
@@ -317,7 +323,13 @@
     "img_col_created": "Erstellt",
     "vol_col_name": "Name",
     "vol_col_driver": "Treiber",
-    "vol_col_mountpoint": "Einhängepunkt"
+    "vol_col_mountpoint": "Einhängepunkt",
+    "section_networks": "Netzwerke",
+    "no_networks": "Keine Netzwerke gefunden.",
+    "network_error_title": "Netzwerke konnten nicht geladen werden",
+    "net_col_name": "Netzwerk",
+    "net_col_shared": "Geteilt mit",
+    "net_shared_icon_title": "Gemeinsames Netzwerk"
   },
 
   "prune_modal": {

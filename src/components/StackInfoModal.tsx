@@ -14,10 +14,13 @@ import {
   type ComposeContainer,
   type ComposeImage,
   type ComposeVolume,
+  type SharedNetwork,
   type ParsedPort,
   listContainers,
   listImages,
   listVolumes,
+  listProjectNetworks,
+  listNetworkConnectedProjects,
   parseJsonOutput,
   parsePortsDetailed,
   formatBytes,
@@ -49,6 +52,10 @@ export function StackInfoModal({ stack, onClose }: Props) {
   const [loadingVolumes, setLoadingVolumes] = useState(true);
   const [volumeError, setVolumeError] = useState<string | null>(null);
   const [volumesUnavailable, setVolumesUnavailable] = useState(false);
+
+  const [networks, setNetworks] = useState<SharedNetwork[]>([]);
+  const [loadingNetworks, setLoadingNetworks] = useState(true);
+  const [networkError, setNetworkError] = useState<string | null>(null);
 
   const configFile = stack.ConfigFiles.split(",")[0].trim();
 
@@ -102,6 +109,42 @@ export function StackInfoModal({ stack, onClose }: Props) {
         setLoadingVolumes(false);
       });
   }, [stack.Name, configFile]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadNetworks() {
+      try {
+        let raw = "";
+        const proc = listProjectNetworks(stack.Name);
+        proc.stream(d => { raw += d; });
+        await proc;
+        const networkNames = raw.split("\n").map(l => l.trim()).filter(l => l.length > 0);
+
+        const results: SharedNetwork[] = await Promise.all(
+          networkNames.map(async (name): Promise<SharedNetwork> => {
+            const projectRaw = await listNetworkConnectedProjects(name);
+            const sharedWith = [...new Set(
+              projectRaw.split("\n").map(l => l.trim()).filter(l => l.length > 0 && l !== stack.Name)
+            )];
+            return { name, sharedWith };
+          })
+        );
+        if (!cancelled) {
+          setNetworks(results);
+          setLoadingNetworks(false);
+        }
+      } catch (ex: unknown) {
+        if (!cancelled) {
+          setNetworkError(ex instanceof Error ? ex.message : String(ex));
+          setLoadingNetworks(false);
+        }
+      }
+    }
+
+    void loadNetworks();
+    return () => { cancelled = true; };
+  }, [stack.Name]);
 
   return (
     <Modal isOpen onClose={onClose} variant="medium" aria-label={t("info_modal.aria_label", { name: stack.Name })}>
@@ -264,6 +307,47 @@ export function StackInfoModal({ stack, onClose }: Props) {
                     <td><code>{vol.Name || "—"}</code></td>
                     <td>{vol.Driver || "—"}</td>
                     <td><code className="sim-mountpoint">{vol.Mountpoint || "—"}</code></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </section>
+
+        <section className="sim-section">
+          <div className="sim-section-label">{t("info_modal.section_networks")}</div>
+
+          {loadingNetworks ? (
+            <Spinner size="md" />
+          ) : networkError ? (
+            <Alert variant="warning" isInline title={t("info_modal.network_error_title")}>{networkError}</Alert>
+          ) : networks.length === 0 ? (
+            <span className="sim-no-containers">{t("info_modal.no_networks")}</span>
+          ) : (
+            <table className="sim-table">
+              <thead>
+                <tr>
+                  <th>{t("info_modal.net_col_name")}</th>
+                  <th>{t("info_modal.net_col_shared")}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {networks.map((net, i) => (
+                  <tr key={net.name || i}>
+                    <td><code>{net.name}</code></td>
+                    <td>
+                      {net.sharedWith.length > 0 ? (
+                        <span style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                          <ExclamationTriangleIcon
+                            color="var(--pf-t--global--icon--color--status--warning--default)"
+                            title={t("info_modal.net_shared_icon_title")}
+                          />
+                          {net.sharedWith.join(", ")}
+                        </span>
+                      ) : (
+                        <span style={{ color: "var(--pf-t--global--text--color--subtle)" }}>—</span>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>

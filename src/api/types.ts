@@ -48,6 +48,11 @@ export interface ComposeVolume {
   Mountpoint: string;
 }
 
+export interface SharedNetwork {
+  name: string;
+  sharedWith: string[];
+}
+
 export interface ComposeEvent {
   time: string | number;
   type: string;

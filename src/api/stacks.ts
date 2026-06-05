@@ -164,6 +164,15 @@ export function listProjectNetworks(project: string): CockpitProcess {
   );
 }
 
+// Returns one compose project name per line for every running container attached to the given network.
+// Non-Compose containers emit an empty string for the label; callers must filter those out.
+export function listNetworkConnectedProjects(networkName: string): CockpitProcess {
+  return cockpit.spawn(
+    ["docker", "ps", "--filter", `network=${networkName}`, "--format", `{{.Label "com.docker.compose.project"}}`],
+    { err: "message" },
+  );
+}
+
 // Returns lines of "<name>\t<container-count>" for each of the given networks.
 export function inspectNetworkContainerCounts(names: string[]): CockpitProcess {
   return cockpit.spawn(
