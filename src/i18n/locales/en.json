@@ -52,6 +52,7 @@
     "events": "Events",
     "top": "Top",
     "shell": "Shell",
+    "run": "Run",
     "prune": "Prune",
     "more_actions_for": "More actions for {{name}}",
     "find_best_match": "Find best match",
@@ -227,6 +228,21 @@
     "waiting": "Waiting for logs…",
     "service_all": "All services",
     "search_placeholder": "Search logs…"
+  },
+
+  "run_modal": {
+    "aria_label": "Run — {{name}}",
+    "title": "Run — {{name}}",
+    "field_service": "Service",
+    "field_service_placeholder": "service name",
+    "field_command": "Command",
+    "field_command_placeholder": "echo hello",
+    "field_rm": "Remove container after run (--rm)",
+    "run_button": "Run",
+    "running": "Running command in {{name}}…",
+    "initializing": "Starting…",
+    "complete": "✓ Command complete",
+    "failed": "✗ Command failed"
   },
 
   "exec_modal": {
