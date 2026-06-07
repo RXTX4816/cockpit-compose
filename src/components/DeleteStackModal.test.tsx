@@ -16,7 +16,15 @@ import { DeleteStackModal } from "./DeleteStackModal";
 
 const stack = {
   name: "myapp",
-  configFile: "/etc/docker/compose/myapp/docker-compose.yml",
+  configFiles: ["/etc/docker/compose/myapp/docker-compose.yml"],
+};
+
+const multiFileStack = {
+  name: "myapp",
+  configFiles: [
+    "/etc/docker/compose/myapp/docker-compose.yml",
+    "/etc/docker/compose/myapp/docker-compose.prod.yml",
+  ],
 };
 
 const noop = vi.fn();
@@ -35,7 +43,7 @@ describe("DeleteStackModal", () => {
 
   it("shows the compose file path", () => {
     render(<DeleteStackModal stack={stack} onClose={noop} onDeleted={noop} />);
-    expect(screen.getByText(stack.configFile)).toBeInTheDocument();
+    expect(screen.getByText(stack.configFiles[0])).toBeInTheDocument();
   });
 
   it("shows the folder path in checkbox description", () => {
@@ -83,7 +91,7 @@ describe("DeleteStackModal", () => {
       fireEvent.click(screen.getByText("Yes, delete"));
     });
     await waitFor(() => {
-      expect(mockRemoveFile).toHaveBeenCalledWith(stack.configFile);
+      expect(mockRemoveFile).toHaveBeenCalledWith(stack.configFiles[0]);
       expect(mockRemoveDirectory).not.toHaveBeenCalled();
       expect(onDeleted).toHaveBeenCalled();
       expect(onClose).toHaveBeenCalled();
@@ -117,6 +125,52 @@ describe("DeleteStackModal", () => {
     await waitFor(() => {
       expect(screen.getByText(/Permission denied/i)).toBeInTheDocument();
     });
+  });
+
+  it("multi-file: shows all file paths in the body", () => {
+    render(<DeleteStackModal stack={multiFileStack} onClose={noop} onDeleted={noop} />);
+    expect(screen.getByText("/etc/docker/compose/myapp/docker-compose.yml")).toBeInTheDocument();
+    expect(screen.getByText("/etc/docker/compose/myapp/docker-compose.prod.yml")).toBeInTheDocument();
+  });
+
+  it("multi-file: file-only delete calls removeFile for each file", async () => {
+    const onDeleted = vi.fn();
+    const onClose = vi.fn();
+    render(<DeleteStackModal stack={multiFileStack} onClose={onClose} onDeleted={onDeleted} />);
+    fireEvent.click(screen.getByRole("button", { name: /^Delete$/i }));
+    await waitFor(() => screen.getByText(/Are you really sure\?/i));
+    await act(async () => {
+      fireEvent.click(screen.getByText("Yes, delete"));
+    });
+    await waitFor(() => {
+      expect(mockRemoveFile).toHaveBeenCalledWith("/etc/docker/compose/myapp/docker-compose.yml");
+      expect(mockRemoveFile).toHaveBeenCalledWith("/etc/docker/compose/myapp/docker-compose.prod.yml");
+      expect(mockRemoveFile).toHaveBeenCalledTimes(2);
+      expect(mockRemoveDirectory).not.toHaveBeenCalled();
+      expect(onDeleted).toHaveBeenCalled();
+    });
+  });
+
+  it("multi-file: confirm target shows file count", async () => {
+    render(<DeleteStackModal stack={multiFileStack} onClose={noop} onDeleted={noop} />);
+    fireEvent.click(screen.getByRole("button", { name: /^Delete$/i }));
+    await waitFor(() => screen.getByText(/Are you really sure\?/i));
+    expect(screen.getByText(/2 compose files/i)).toBeInTheDocument();
+  });
+
+  it("multi-file: partial failure shows error and does not call onDeleted", async () => {
+    mockRemoveFile
+      .mockImplementationOnce(() => mockProcess(""))
+      .mockImplementationOnce(() => mockProcess("", "Permission denied"));
+    const onDeleted = vi.fn();
+    render(<DeleteStackModal stack={multiFileStack} onClose={noop} onDeleted={onDeleted} />);
+    fireEvent.click(screen.getByRole("button", { name: /^Delete$/i }));
+    await waitFor(() => screen.getByText(/Are you really sure\?/i));
+    await act(async () => {
+      fireEvent.click(screen.getByText("Yes, delete"));
+    });
+    await waitFor(() => expect(screen.getByText(/Permission denied/i)).toBeInTheDocument());
+    expect(onDeleted).not.toHaveBeenCalled();
   });
 
   it("does not call onDeleted when deletion fails", async () => {

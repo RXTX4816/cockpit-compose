@@ -28,10 +28,10 @@ vi.mock("./YamlModal", () => ({
   ),
 }));
 vi.mock("./CreateStackModal", () => ({
-  CreateStackModal: ({ onClose, onCreated }: { onClose: () => void; onCreated: (s: { name: string; configFile: string }) => void }) => (
+  CreateStackModal: ({ onClose, onCreated }: { onClose: () => void; onCreated: (s: { name: string; configFiles: string[] }) => void }) => (
     <div data-testid="create-modal">
       <button onClick={onClose}>CloseCreate</button>
-      <button onClick={() => { onCreated({ name: "new-stack", configFile: "/etc/compose/new-stack/docker-compose.yml" }); onClose(); }}>SimulateCreate</button>
+      <button onClick={() => { onCreated({ name: "new-stack", configFiles: ["/etc/compose/new-stack/docker-compose.yml"] }); onClose(); }}>SimulateCreate</button>
     </div>
   ),
 }));
@@ -53,6 +53,7 @@ const noopScan = vi.fn();
 const noopClear = vi.fn();
 const noopRemove = vi.fn();
 const noopAdd = vi.fn();
+const noopUpdate = vi.fn();
 
 function defaultScanResult(overrides = {}) {
   return {
@@ -65,6 +66,7 @@ function defaultScanResult(overrides = {}) {
     clear: noopClear,
     removeStack: noopRemove,
     addStack: noopAdd,
+    updateStack: noopUpdate,
     ...overrides,
   };
 }
@@ -75,6 +77,7 @@ beforeEach(() => {
   noopClear.mockReset();
   noopRemove.mockReset();
   noopAdd.mockReset();
+  noopUpdate.mockReset();
   mockUseScan.mockReturnValue(defaultScanResult());
 });
 
@@ -209,7 +212,7 @@ describe("DownedStacksSection — controls", () => {
 
   it("typing in input does not clear existing scan results", () => {
     mockUseScan.mockReturnValue(defaultScanResult({
-      downedStacks: [{ name: "myapp", configFile: "/etc/docker/compose/myapp/docker-compose.yml" }],
+      downedStacks: [{ name: "myapp", configFiles: ["/etc/docker/compose/myapp/docker-compose.yml"] }],
       hasScanned: true,
     }));
     render(<DownedStacksSection {...defaultProps} />);
@@ -258,34 +261,34 @@ describe("DownedStacksSection — Down section content", () => {
   it("renders scanned downed stack rows", () => {
     mockUseScan.mockReturnValue(defaultScanResult({
       downedStacks: [
-        { name: "myapp", configFile: "/etc/docker/compose/myapp/docker-compose.yml" },
+        { name: "myapp", configFiles: ["/etc/docker/compose/myapp/docker-compose.yml"] },
       ],
       hasScanned: true,
     }));
     render(<DownedStacksSection {...defaultProps} />);
     expect(screen.getByText("myapp")).toBeInTheDocument();
-    expect(screen.getByText("/etc/docker/compose/myapp/docker-compose.yml")).toBeInTheDocument();
+    expect(screen.getByText("/etc/docker/compose/myapp")).toBeInTheDocument();
   });
 
   it("renders manually downed stacks even without a scan", () => {
-    const manuallyDownedStacks = [{ name: "manual-app", configFile: "/tmp/manual-app/compose.yml" }];
+    const manuallyDownedStacks = [{ name: "manual-app", configFiles: ["/tmp/manual-app/compose.yml"] }];
     render(<DownedStacksSection {...defaultProps} manuallyDownedStacks={manuallyDownedStacks} />);
     expect(screen.getByText("manual-app")).toBeInTheDocument();
   });
 
   it("deduplicates manually downed and scanned stacks", () => {
     mockUseScan.mockReturnValue(defaultScanResult({
-      downedStacks: [{ name: "myapp", configFile: "/etc/docker/compose/myapp/docker-compose.yml" }],
+      downedStacks: [{ name: "myapp", configFiles: ["/etc/docker/compose/myapp/docker-compose.yml"] }],
       hasScanned: true,
     }));
-    const manuallyDownedStacks = [{ name: "myapp", configFile: "/etc/docker/compose/myapp/docker-compose.yml" }];
+    const manuallyDownedStacks = [{ name: "myapp", configFiles: ["/etc/docker/compose/myapp/docker-compose.yml"] }];
     render(<DownedStacksSection {...defaultProps} manuallyDownedStacks={manuallyDownedStacks} />);
     expect(screen.getAllByText("myapp")).toHaveLength(1);
   });
 
   it("↑ Up button opens UpConfirmModal then UpModal after confirm", () => {
     mockUseScan.mockReturnValue(defaultScanResult({
-      downedStacks: [{ name: "myapp", configFile: "/etc/docker/compose/myapp/docker-compose.yml" }],
+      downedStacks: [{ name: "myapp", configFiles: ["/etc/docker/compose/myapp/docker-compose.yml"] }],
       hasScanned: true,
     }));
     render(<DownedStacksSection {...defaultProps} />);
@@ -298,7 +301,7 @@ describe("DownedStacksSection — Down section content", () => {
 
   it("UpModal close (success) calls onUpComplete, onRefresh, removeStack", () => {
     mockUseScan.mockReturnValue(defaultScanResult({
-      downedStacks: [{ name: "myapp", configFile: "/etc/docker/compose/myapp/docker-compose.yml" }],
+      downedStacks: [{ name: "myapp", configFiles: ["/etc/docker/compose/myapp/docker-compose.yml"] }],
       hasScanned: true,
       removeStack: noopRemove,
     }));
@@ -315,7 +318,7 @@ describe("DownedStacksSection — Down section content", () => {
 
   it("UpModal close (failure) keeps stack in table and does not call onUpComplete", () => {
     mockUseScan.mockReturnValue(defaultScanResult({
-      downedStacks: [{ name: "myapp", configFile: "/etc/docker/compose/myapp/docker-compose.yml" }],
+      downedStacks: [{ name: "myapp", configFiles: ["/etc/docker/compose/myapp/docker-compose.yml"] }],
       hasScanned: true,
       removeStack: noopRemove,
     }));
@@ -333,7 +336,7 @@ describe("DownedStacksSection — Down section content", () => {
 
   it("Delete button opens DeleteStackModal", () => {
     mockUseScan.mockReturnValue(defaultScanResult({
-      downedStacks: [{ name: "myapp", configFile: "/etc/docker/compose/myapp/docker-compose.yml" }],
+      downedStacks: [{ name: "myapp", configFiles: ["/etc/docker/compose/myapp/docker-compose.yml"] }],
       hasScanned: true,
     }));
     render(<DownedStacksSection {...defaultProps} />);
@@ -344,7 +347,7 @@ describe("DownedStacksSection — Down section content", () => {
 
   it("Delete confirm calls removeStack and onUpComplete", () => {
     mockUseScan.mockReturnValue(defaultScanResult({
-      downedStacks: [{ name: "myapp", configFile: "/etc/docker/compose/myapp/docker-compose.yml" }],
+      downedStacks: [{ name: "myapp", configFiles: ["/etc/docker/compose/myapp/docker-compose.yml"] }],
       hasScanned: true,
       removeStack: noopRemove,
     }));
@@ -359,7 +362,7 @@ describe("DownedStacksSection — Down section content", () => {
 
   it("Edit button opens YamlModal", () => {
     mockUseScan.mockReturnValue(defaultScanResult({
-      downedStacks: [{ name: "myapp", configFile: "/etc/docker/compose/myapp/docker-compose.yml" }],
+      downedStacks: [{ name: "myapp", configFiles: ["/etc/docker/compose/myapp/docker-compose.yml"] }],
       hasScanned: true,
     }));
     render(<DownedStacksSection {...defaultProps} />);
@@ -369,7 +372,7 @@ describe("DownedStacksSection — Down section content", () => {
 
   it("does not render Info or Prune buttons", () => {
     mockUseScan.mockReturnValue(defaultScanResult({
-      downedStacks: [{ name: "myapp", configFile: "/etc/docker/compose/myapp/docker-compose.yml" }],
+      downedStacks: [{ name: "myapp", configFiles: ["/etc/docker/compose/myapp/docker-compose.yml"] }],
       hasScanned: true,
     }));
     render(<DownedStacksSection {...defaultProps} />);

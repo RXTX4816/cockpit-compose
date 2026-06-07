@@ -123,6 +123,15 @@ export function getProjectNameFromCompose(composeContent: string): string | null
   return null;
 }
 
+export function hasServicesKey(content: string): boolean {
+  try {
+    const parsed = loadYaml(content);
+    return typeof parsed === "object" && parsed !== null && "services" in (parsed as Record<string, unknown>);
+  } catch {
+    return false;
+  }
+}
+
 export function getComposeProjectNameFromEnv(envContent: string): string | null {
   for (const line of envContent.split("\n")) {
     const trimmed = line.trim();

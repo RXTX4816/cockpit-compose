@@ -25,7 +25,7 @@ describe("listStacks", () => {
 describe("startStack", () => {
   it("spawns compose up -d with project and config file", () => {
     mockSpawn.mockReturnValue(mockProcess(""));
-    startStack("myapp", "/path/compose.yml");
+    startStack("myapp", ["/path/compose.yml"]);
     const args = mockSpawn.mock.calls[0][0] as string[];
     expect(args).toContain("-p");
     expect(args).toContain("myapp");
@@ -34,22 +34,39 @@ describe("startStack", () => {
     expect(args).toContain("up");
     expect(args).toContain("-d");
   });
+
+  it("emits two -f flags for multi-file input", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    startStack("myapp", ["/path/base.yml", "/path/override.yml"]);
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    const fFlags = args.filter(a => a === "-f");
+    expect(fFlags).toHaveLength(2);
+    expect(args).toContain("/path/base.yml");
+    expect(args).toContain("/path/override.yml");
+  });
 });
 
 describe("stopStack", () => {
   it("spawns compose stop with project and config file", () => {
     mockSpawn.mockReturnValue(mockProcess(""));
-    stopStack("myapp", "/path/compose.yml");
+    stopStack("myapp", ["/path/compose.yml"]);
     const args = mockSpawn.mock.calls[0][0] as string[];
     expect(args).toContain("stop");
     expect(args).toContain("myapp");
+  });
+
+  it("emits two -f flags for multi-file input", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    stopStack("myapp", ["/path/base.yml", "/path/override.yml"]);
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args.filter(a => a === "-f")).toHaveLength(2);
   });
 });
 
 describe("restartStack", () => {
   it("spawns compose restart with project and config file", () => {
     mockSpawn.mockReturnValue(mockProcess(""));
-    restartStack("myapp", "/path/compose.yml");
+    restartStack("myapp", ["/path/compose.yml"]);
     const args = mockSpawn.mock.calls[0][0] as string[];
     expect(args).toContain("restart");
   });
@@ -69,17 +86,24 @@ describe("streamLogs", () => {
 describe("downStack", () => {
   it("spawns compose down with project and config file", () => {
     mockSpawn.mockReturnValue(mockProcess(""));
-    downStack("myapp", "/path/compose.yml");
+    downStack("myapp", ["/path/compose.yml"]);
     const args = mockSpawn.mock.calls[0][0] as string[];
     expect(args).toContain("down");
     expect(args).toContain("myapp");
+  });
+
+  it("emits two -f flags for multi-file input", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    downStack("myapp", ["/path/base.yml", "/path/override.yml"]);
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args.filter(a => a === "-f")).toHaveLength(2);
   });
 });
 
 describe("upStackStream", () => {
   it("spawns compose up -d with plain progress", () => {
     mockSpawn.mockReturnValue(mockProcess(""));
-    upStackStream("myapp", "/path/compose.yml", []);
+    upStackStream("myapp", ["/path/compose.yml"], []);
     const args = mockSpawn.mock.calls[0][0] as string[];
     expect(args).toContain("up");
     expect(args).toContain("-d");
@@ -89,21 +113,21 @@ describe("upStackStream", () => {
 
   it("merges stderr into stdout (err: out)", () => {
     mockSpawn.mockReturnValue(mockProcess(""));
-    upStackStream("myapp", "/path/compose.yml", []);
+    upStackStream("myapp", ["/path/compose.yml"], []);
     const opts = mockSpawn.mock.calls[0][1] as { err: string };
     expect(opts.err).toBe("out");
   });
 
   it("includes no --profile flags when profiles is empty", () => {
     mockSpawn.mockReturnValue(mockProcess(""));
-    upStackStream("myapp", "/path/compose.yml", []);
+    upStackStream("myapp", ["/path/compose.yml"], []);
     const args = mockSpawn.mock.calls[0][0] as string[];
     expect(args).not.toContain("--profile");
   });
 
   it("adds --profile flags before --progress for each selected profile", () => {
     mockSpawn.mockReturnValue(mockProcess(""));
-    upStackStream("myapp", "/path/compose.yml", ["dev", "debug"]);
+    upStackStream("myapp", ["/path/compose.yml"], ["dev", "debug"]);
     const args = mockSpawn.mock.calls[0][0] as string[];
     const progressIdx = args.indexOf("--progress");
     const firstProfileIdx = args.indexOf("--profile");
@@ -115,7 +139,7 @@ describe("upStackStream", () => {
 
   it("emits each profile as a separate --profile flag pair", () => {
     mockSpawn.mockReturnValue(mockProcess(""));
-    upStackStream("myapp", "/path/compose.yml", ["dev", "monitoring"]);
+    upStackStream("myapp", ["/path/compose.yml"], ["dev", "monitoring"]);
     const args = mockSpawn.mock.calls[0][0] as string[];
     const profilePairs: string[] = [];
     for (let i = 0; i < args.length - 1; i++) {
@@ -124,12 +148,21 @@ describe("upStackStream", () => {
     expect(profilePairs).toContain("dev");
     expect(profilePairs).toContain("monitoring");
   });
+
+  it("emits two -f flags for multi-file input", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    upStackStream("myapp", ["/path/base.yml", "/path/override.yml"], []);
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args.filter(a => a === "-f")).toHaveLength(2);
+    expect(args).toContain("/path/base.yml");
+    expect(args).toContain("/path/override.yml");
+  });
 });
 
 describe("pullStack", () => {
   it("spawns compose pull with plain progress", () => {
     mockSpawn.mockReturnValue(mockProcess(""));
-    pullStack("myapp", "/path/compose.yml");
+    pullStack("myapp", ["/path/compose.yml"]);
     const args = mockSpawn.mock.calls[0][0] as string[];
     expect(args).toContain("pull");
     expect(args).toContain("--progress");
@@ -138,9 +171,16 @@ describe("pullStack", () => {
 
   it("merges stderr into stdout (err: out)", () => {
     mockSpawn.mockReturnValue(mockProcess(""));
-    pullStack("myapp", "/path/compose.yml");
+    pullStack("myapp", ["/path/compose.yml"]);
     const opts = mockSpawn.mock.calls[0][1] as { err: string };
     expect(opts.err).toBe("out");
+  });
+
+  it("emits two -f flags for multi-file input", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    pullStack("myapp", ["/path/base.yml", "/path/override.yml"]);
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args.filter(a => a === "-f")).toHaveLength(2);
   });
 });
 
@@ -264,7 +304,7 @@ describe("pruneNetworks", () => {
 describe("composeRunStream", () => {
   it("spawns compose run with service and command args", () => {
     mockSpawn.mockReturnValue(mockProcess(""));
-    composeRunStream("myapp", "/path/compose.yml", "web", ["echo", "hello"], true);
+    composeRunStream("myapp", ["/path/compose.yml"], "web", ["echo", "hello"], true);
     const args = mockSpawn.mock.calls[0][0] as string[];
     expect(args).toContain("run");
     expect(args).toContain("web");
@@ -274,21 +314,21 @@ describe("composeRunStream", () => {
 
   it("includes --rm when rm is true", () => {
     mockSpawn.mockReturnValue(mockProcess(""));
-    composeRunStream("myapp", "/path/compose.yml", "web", ["sh"], true);
+    composeRunStream("myapp", ["/path/compose.yml"], "web", ["sh"], true);
     const args = mockSpawn.mock.calls[0][0] as string[];
     expect(args).toContain("--rm");
   });
 
   it("omits --rm when rm is false", () => {
     mockSpawn.mockReturnValue(mockProcess(""));
-    composeRunStream("myapp", "/path/compose.yml", "web", ["sh"], false);
+    composeRunStream("myapp", ["/path/compose.yml"], "web", ["sh"], false);
     const args = mockSpawn.mock.calls[0][0] as string[];
     expect(args).not.toContain("--rm");
   });
 
   it("passes project and config file", () => {
     mockSpawn.mockReturnValue(mockProcess(""));
-    composeRunStream("myapp", "/path/compose.yml", "web", ["sh"], true);
+    composeRunStream("myapp", ["/path/compose.yml"], "web", ["sh"], true);
     const args = mockSpawn.mock.calls[0][0] as string[];
     expect(args).toContain("-p");
     expect(args).toContain("myapp");
@@ -298,15 +338,24 @@ describe("composeRunStream", () => {
 
   it("merges stderr into stdout with err: out", () => {
     mockSpawn.mockReturnValue(mockProcess(""));
-    composeRunStream("myapp", "/path/compose.yml", "web", ["sh"], true);
+    composeRunStream("myapp", ["/path/compose.yml"], "web", ["sh"], true);
     const opts = mockSpawn.mock.calls[0][1] as Record<string, unknown>;
     expect(opts.err).toBe("out");
   });
 
   it("passes superuser option when provided", () => {
     mockSpawn.mockReturnValue(mockProcess(""));
-    composeRunStream("myapp", "/path/compose.yml", "web", ["sh"], true, "try");
+    composeRunStream("myapp", ["/path/compose.yml"], "web", ["sh"], true, "try");
     const opts = mockSpawn.mock.calls[0][1] as Record<string, unknown>;
     expect(opts.superuser).toBe("try");
+  });
+
+  it("emits two -f flags for multi-file input", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    composeRunStream("myapp", ["/path/base.yml", "/path/override.yml"], "web", ["sh"], true);
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args.filter(a => a === "-f")).toHaveLength(2);
+    expect(args).toContain("/path/base.yml");
+    expect(args).toContain("/path/override.yml");
   });
 });

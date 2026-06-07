@@ -63,10 +63,10 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
 
   const status = parseStackStatus(stack.Status);
   const count = parseServiceCount(stack.Status);
-  const configFile = stack.ConfigFiles.split(",")[0].trim();
+  const configFiles = stack.ConfigFiles.split(",").map(f => f.trim());
 
-  const { acting, actionError, doAction } = useStackActions(stack.Name, configFile, onActingChange);
-  const { containers, loading: loadingContainers, load: loadContainers, clear: clearContainers } = useStackContainers(stack.Name, configFile, status);
+  const { acting, actionError, doAction } = useStackActions(stack.Name, configFiles, onActingChange);
+  const { containers, loading: loadingContainers, load: loadContainers, clear: clearContainers } = useStackContainers(stack.Name, configFiles, status);
 
   useEffect(() => { void loadContainers(); }, [loadContainers]);
   useAutoRefresh(loadContainers, 500, !expanded || acting);

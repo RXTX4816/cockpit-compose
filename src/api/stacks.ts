@@ -1,31 +1,35 @@
 import { compose } from "./cockpit";
 
+function fileFlags(configFiles: string[]): string[] {
+  return configFiles.flatMap(f => ["-f", f]);
+}
+
 export function listStacks(): CockpitProcess {
   return cockpit.spawn(compose("ls", "--all", "--format", "json"), {
     err: "message",
   });
 }
 
-export function startStack(project: string, configFile: string, profiles: string[] = [], superuser?: "try"): CockpitProcess {
+export function startStack(project: string, configFiles: string[], profiles: string[] = [], superuser?: "try"): CockpitProcess {
   const profileFlags = profiles.flatMap(p => ["--profile", p]);
   return cockpit.spawn(
-    compose(...profileFlags, "-p", project, "-f", configFile, "up", "-d"),
+    compose(...profileFlags, "-p", project, ...fileFlags(configFiles), "up", "-d"),
     { superuser, err: "message" },
   );
 }
 
-export function stopStack(project: string, configFile: string, profiles: string[] = [], superuser?: "try"): CockpitProcess {
+export function stopStack(project: string, configFiles: string[], profiles: string[] = [], superuser?: "try"): CockpitProcess {
   const profileFlags = profiles.flatMap(p => ["--profile", p]);
   return cockpit.spawn(
-    compose(...profileFlags, "-p", project, "-f", configFile, "stop"),
+    compose(...profileFlags, "-p", project, ...fileFlags(configFiles), "stop"),
     { superuser, err: "message" },
   );
 }
 
-export function restartStack(project: string, configFile: string, profiles: string[] = [], services: string[] = [], superuser?: "try"): CockpitProcess {
+export function restartStack(project: string, configFiles: string[], profiles: string[] = [], services: string[] = [], superuser?: "try"): CockpitProcess {
   const profileFlags = profiles.flatMap(p => ["--profile", p]);
   return cockpit.spawn(
-    compose(...profileFlags, "-p", project, "-f", configFile, "restart", ...services),
+    compose(...profileFlags, "-p", project, ...fileFlags(configFiles), "restart", ...services),
     { superuser, err: "message" },
   );
 }
@@ -53,66 +57,66 @@ export function streamLogs(project: string, service?: string): CockpitProcess {
   );
 }
 
-export function downStack(project: string, configFile: string, profiles: string[] = [], superuser?: "try"): CockpitProcess {
+export function downStack(project: string, configFiles: string[], profiles: string[] = [], superuser?: "try"): CockpitProcess {
   const profileFlags = profiles.flatMap(p => ["--profile", p]);
   return cockpit.spawn(
-    compose(...profileFlags, "-p", project, "-f", configFile, "down"),
+    compose(...profileFlags, "-p", project, ...fileFlags(configFiles), "down"),
     { superuser, err: "message" },
   );
 }
 
-export function upStackStream(project: string, configFile: string, profiles: string[], superuser?: "try"): CockpitProcess {
+export function upStackStream(project: string, configFiles: string[], profiles: string[], superuser?: "try"): CockpitProcess {
   // err:"out" merges stderr into the streamable stdout so the log viewer gets all output
   const profileFlags = profiles.flatMap(p => ["--profile", p]);
   return cockpit.spawn(
-    compose(...profileFlags, "--progress", "plain", "-p", project, "-f", configFile, "up", "-d"),
+    compose(...profileFlags, "--progress", "plain", "-p", project, ...fileFlags(configFiles), "up", "-d"),
     { superuser, err: "out" },
   );
 }
 
-export function pullStack(project: string, configFile: string, profiles: string[] = [], superuser?: "try"): CockpitProcess {
+export function pullStack(project: string, configFiles: string[], profiles: string[] = [], superuser?: "try"): CockpitProcess {
   // err:"out" merges stderr (where Docker sends progress) into the streamable stdout
   const profileFlags = profiles.flatMap(p => ["--profile", p]);
   return cockpit.spawn(
-    compose(...profileFlags, "--progress", "plain", "-p", project, "-f", configFile, "pull"),
+    compose(...profileFlags, "--progress", "plain", "-p", project, ...fileFlags(configFiles), "pull"),
     { superuser, err: "out" },
   );
 }
 
-export function pauseStack(project: string, configFile: string, profiles: string[] = [], superuser?: "try"): CockpitProcess {
+export function pauseStack(project: string, configFiles: string[], profiles: string[] = [], superuser?: "try"): CockpitProcess {
   const profileFlags = profiles.flatMap(p => ["--profile", p]);
   return cockpit.spawn(
-    compose(...profileFlags, "-p", project, "-f", configFile, "pause"),
+    compose(...profileFlags, "-p", project, ...fileFlags(configFiles), "pause"),
     { superuser, err: "message" },
   );
 }
 
-export function unpauseStack(project: string, configFile: string, profiles: string[] = [], superuser?: "try"): CockpitProcess {
+export function unpauseStack(project: string, configFiles: string[], profiles: string[] = [], superuser?: "try"): CockpitProcess {
   const profileFlags = profiles.flatMap(p => ["--profile", p]);
   return cockpit.spawn(
-    compose(...profileFlags, "-p", project, "-f", configFile, "unpause"),
+    compose(...profileFlags, "-p", project, ...fileFlags(configFiles), "unpause"),
     { superuser, err: "message" },
   );
 }
 
-export function killStack(project: string, configFile: string, profiles: string[] = [], superuser?: "try"): CockpitProcess {
+export function killStack(project: string, configFiles: string[], profiles: string[] = [], superuser?: "try"): CockpitProcess {
   const profileFlags = profiles.flatMap(p => ["--profile", p]);
   return cockpit.spawn(
-    compose(...profileFlags, "-p", project, "-f", configFile, "kill"),
+    compose(...profileFlags, "-p", project, ...fileFlags(configFiles), "kill"),
     { superuser, err: "message" },
   );
 }
 
-export function listImages(project: string, configFile: string): CockpitProcess {
+export function listImages(project: string, configFiles: string[]): CockpitProcess {
   return cockpit.spawn(
-    compose("-p", project, "-f", configFile, "images", "--format", "json"),
+    compose("-p", project, ...fileFlags(configFiles), "images", "--format", "json"),
     { err: "message" },
   );
 }
 
-export function listVolumes(project: string, configFile: string): CockpitProcess {
+export function listVolumes(project: string, configFiles: string[]): CockpitProcess {
   return cockpit.spawn(
-    compose("-p", project, "-f", configFile, "volumes", "--format", "json"),
+    compose("-p", project, ...fileFlags(configFiles), "volumes", "--format", "json"),
     { err: "message" },
   );
 }
@@ -231,14 +235,14 @@ export function pruneNetworks(project: string, superuser?: "try"): CockpitProces
 
 export function composeRunStream(
   project: string,
-  configFile: string,
+  configFiles: string[],
   service: string,
   command: string[],
   rm: boolean,
   superuser?: "try",
 ): CockpitProcess {
   return cockpit.spawn(
-    compose("--progress", "plain", "-p", project, "-f", configFile,
+    compose("--progress", "plain", "-p", project, ...fileFlags(configFiles),
       "run", ...(rm ? ["--rm"] : []), service, ...command),
     { superuser, err: "out" },
   );

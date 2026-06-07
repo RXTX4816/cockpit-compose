@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { upStackStream, composeFileSuperuser } from "../api";
 import { stripAnsi, classifyLine, type LineEntry } from "../lib/pullParser";
 
-export function useUpStream(stackName: string, configFile: string, profiles: string[] = []) {
+export function useUpStream(stackName: string, configFiles: string[], profiles: string[] = []) {
   const [lines, setLines] = useState<LineEntry[]>([]);
   const [done, setDone] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -10,11 +10,12 @@ export function useUpStream(stackName: string, configFile: string, profiles: str
   const bufRef = useRef("");
   const procRef = useRef<CockpitProcess | null>(null);
 
+  const configFilesKey = configFiles.join(",");
   useEffect(() => {
     let cancelled = false;
-    composeFileSuperuser(configFile).then(su => {
+    composeFileSuperuser(configFiles).then(su => {
       if (cancelled) return;
-      const proc = upStackStream(stackName, configFile, profiles, su);
+      const proc = upStackStream(stackName, configFiles, profiles, su);
       procRef.current = proc;
 
       proc.stream(data => {
@@ -43,7 +44,7 @@ export function useUpStream(stackName: string, configFile: string, profiles: str
 
     return () => { cancelled = true; procRef.current?.close(); };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stackName, configFile]);
+  }, [stackName, configFilesKey]);
 
   const cancel = useCallback(() => {
     procRef.current?.close();

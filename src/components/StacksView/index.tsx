@@ -67,11 +67,10 @@ export function StacksView() {
   }, []);
 
   const handleDownComplete = useCallback((stack: ComposeStack) => {
-    const configFile = stack.ConfigFiles.split(",")[0].trim();
     setManuallyDownedStacks(prev =>
       prev.some(d => d.name.toLowerCase() === stack.Name.toLowerCase())
         ? prev
-        : [...prev, { name: stack.Name, configFile }]
+        : [...prev, { name: stack.Name, configFiles: stack.ConfigFiles.split(",").map(f => f.trim()) }]
     );
   }, []);
 
@@ -168,7 +167,21 @@ export function StacksView() {
       />
 
       {logsTarget && <LogsModal stack={logsTarget} onClose={() => setLogsTarget(null)} />}
-      {yamlTarget && <YamlModal stack={yamlTarget} onClose={() => setYamlTarget(null)} />}
+      {yamlTarget && (
+        <YamlModal
+          stack={yamlTarget}
+          onClose={() => setYamlTarget(null)}
+          onFileAdded={(newPath) => {
+            setYamlTarget(prev => prev ? { ...prev, ConfigFiles: [prev.ConfigFiles, newPath].join(",") } : null);
+          }}
+          onFileRemoved={(removedPath) => {
+            setYamlTarget(prev => prev
+              ? { ...prev, ConfigFiles: prev.ConfigFiles.split(",").map(f => f.trim()).filter(f => f !== removedPath).join(",") }
+              : null
+            );
+          }}
+        />
+      )}
       {infoTarget && <StackInfoModal stack={infoTarget} onClose={() => setInfoTarget(null)} />}
       {upConfirmTarget && (
         <UpConfirmModal

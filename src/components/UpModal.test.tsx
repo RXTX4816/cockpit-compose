@@ -117,16 +117,16 @@ describe("UpModal", () => {
     expect(onClose).toHaveBeenCalledWith(false);
   });
 
-  it("uses first ConfigFile from comma-separated list", () => {
+  it("passes all ConfigFiles from comma-separated list to useUpStream", () => {
     const multiStack: ComposeStack = { ...stack, ConfigFiles: "/a.yml, /b.yml" };
     mockUseUpStream.mockReturnValue({ lines: [], done: false, failed: false, errorMsg: "", cancel: vi.fn() });
     render(<UpModal stack={multiStack} onClose={vi.fn()} />);
-    expect(mockUseUpStream).toHaveBeenCalledWith("myapp", "/a.yml", []);
+    expect(mockUseUpStream).toHaveBeenCalledWith("myapp", ["/a.yml", "/b.yml"], []);
   });
 
   it("forwards profiles to useUpStream", () => {
     mockUseUpStream.mockReturnValue({ lines: [], done: false, failed: false, errorMsg: "", cancel: vi.fn() });
     render(<UpModal stack={stack} profiles={["dev", "debug"]} onClose={vi.fn()} />);
-    expect(mockUseUpStream).toHaveBeenCalledWith("myapp", "/path/compose.yml", ["dev", "debug"]);
+    expect(mockUseUpStream).toHaveBeenCalledWith("myapp", ["/path/compose.yml"], ["dev", "debug"]);
   });
 });

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { getProfilesFromCompose } from "./parsing";
+import { getProfilesFromCompose, hasServicesKey } from "./parsing";
 
 describe("getProfilesFromCompose", () => {
   it("returns empty array when no services have profiles", () => {
@@ -68,5 +68,31 @@ services:
     profiles: [debug]
 `;
     expect(getProfilesFromCompose(yaml)).toEqual(["debug"]);
+  });
+});
+
+describe("hasServicesKey", () => {
+  it("returns true when services: key is present with services", () => {
+    expect(hasServicesKey("services:\n  web:\n    image: nginx\n")).toBe(true);
+  });
+
+  it("returns true when services: key is present but empty", () => {
+    expect(hasServicesKey("services:\n")).toBe(true);
+  });
+
+  it("returns false for an empty string", () => {
+    expect(hasServicesKey("")).toBe(false);
+  });
+
+  it("returns false when services: key is absent", () => {
+    expect(hasServicesKey("version: '3'\nnetworks:\n  mynet:\n")).toBe(false);
+  });
+
+  it("returns false for invalid YAML", () => {
+    expect(hasServicesKey("services:\n  [unclosed")).toBe(false);
+  });
+
+  it("returns false for a plain scalar", () => {
+    expect(hasServicesKey("just a string")).toBe(false);
   });
 });

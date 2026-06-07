@@ -32,7 +32,7 @@ function withStatMocks(makeActual: () => CockpitProcess) {
 describe("usePullStream", () => {
   it("starts with empty lines and done=false, failed=false", () => {
     withStatMocks(() => mockProcess(""));
-    const { result } = renderHook(() => usePullStream("myapp", "/path/compose.yml"));
+    const { result } = renderHook(() => usePullStream("myapp", ["/path/compose.yml"]));
     expect(result.current.lines).toEqual([]);
     expect(result.current.done).toBe(false);
     expect(result.current.failed).toBe(false);
@@ -40,14 +40,14 @@ describe("usePullStream", () => {
 
   it("sets done=true on process completion", async () => {
     withStatMocks(() => mockProcess(""));
-    const { result } = renderHook(() => usePullStream("myapp", "/path/compose.yml"));
+    const { result } = renderHook(() => usePullStream("myapp", ["/path/compose.yml"]));
     await waitFor(() => expect(result.current.done).toBe(true));
     expect(result.current.failed).toBe(false);
   });
 
   it("sets done=true and failed=true on process error", async () => {
     withStatMocks(() => mockProcess("", "pull failed"));
-    const { result } = renderHook(() => usePullStream("myapp", "/path/compose.yml"));
+    const { result } = renderHook(() => usePullStream("myapp", ["/path/compose.yml"]));
     await waitFor(() => expect(result.current.done).toBe(true));
     expect(result.current.failed).toBe(true);
     expect(result.current.errorMsg).toBe("pull failed");
@@ -55,7 +55,7 @@ describe("usePullStream", () => {
 
   it("parses newline-delimited output into LineEntry items", async () => {
     withStatMocks(() => mockProcess("Pulling nginx\nPulled latest\n"));
-    const { result } = renderHook(() => usePullStream("myapp", "/path/compose.yml"));
+    const { result } = renderHook(() => usePullStream("myapp", ["/path/compose.yml"]));
     await waitFor(() => expect(result.current.lines.length).toBeGreaterThan(0));
     expect(result.current.lines[0]).toHaveProperty("text");
     expect(result.current.lines[0]).toHaveProperty("kind");
@@ -63,21 +63,21 @@ describe("usePullStream", () => {
 
   it("strips ANSI escape codes from output", async () => {
     withStatMocks(() => mockProcess("\x1b[32mGreen text\x1b[0m\n"));
-    const { result } = renderHook(() => usePullStream("myapp", "/path/compose.yml"));
+    const { result } = renderHook(() => usePullStream("myapp", ["/path/compose.yml"]));
     await waitFor(() => expect(result.current.lines.length).toBeGreaterThan(0));
     expect(result.current.lines[0].text).toBe("Green text");
   });
 
   it("handles \\r carriage return — takes the last segment", async () => {
     withStatMocks(() => mockProcess("first\rsecond\n"));
-    const { result } = renderHook(() => usePullStream("myapp", "/path/compose.yml"));
+    const { result } = renderHook(() => usePullStream("myapp", ["/path/compose.yml"]));
     await waitFor(() => expect(result.current.lines.length).toBeGreaterThan(0));
     expect(result.current.lines[0].text).toBe("second");
   });
 
   it("filters out whitespace-only lines", async () => {
     withStatMocks(() => mockProcess("real line\n   \n\n"));
-    const { result } = renderHook(() => usePullStream("myapp", "/path/compose.yml"));
+    const { result } = renderHook(() => usePullStream("myapp", ["/path/compose.yml"]));
     await waitFor(() => expect(result.current.done).toBe(true));
     expect(result.current.lines.every(l => l.text.trim() !== "")).toBe(true);
   });
@@ -89,7 +89,7 @@ describe("usePullStream", () => {
       input: vi.fn(),
     }) as CockpitProcess;
     withStatMocks(() => proc);
-    const { result } = renderHook(() => usePullStream("myapp", "/path/compose.yml"));
+    const { result } = renderHook(() => usePullStream("myapp", ["/path/compose.yml"]));
     await waitFor(() => expect(mockSpawn).toHaveBeenCalledTimes(3));
     result.current.cancel();
     expect((proc as unknown as { close: ReturnType<typeof vi.fn> }).close).toHaveBeenCalled();
@@ -102,7 +102,7 @@ describe("usePullStream", () => {
       input: vi.fn(),
     }) as CockpitProcess;
     withStatMocks(() => proc);
-    const { unmount } = renderHook(() => usePullStream("myapp", "/path/compose.yml"));
+    const { unmount } = renderHook(() => usePullStream("myapp", ["/path/compose.yml"]));
     await waitFor(() => expect(mockSpawn).toHaveBeenCalledTimes(3));
     unmount();
     expect((proc as unknown as { close: ReturnType<typeof vi.fn> }).close).toHaveBeenCalled();

@@ -91,7 +91,7 @@ export function ExecModal({ stack, onClose }: Props) {
     setConnectError(null);
     setStep("terminal");
 
-    const su = await composeFileSuperuser(configFile);
+    const su = await composeFileSuperuser(stack.ConfigFiles.split(",").map(f => f.trim()));
 
     // Defer mounting until the div is in the DOM
     requestAnimationFrame(() => {
@@ -144,7 +144,7 @@ export function ExecModal({ stack, onClose }: Props) {
         channelRef.current?.send(data);
       });
     });
-  }, [selectedService, shell, user, stack.Name, configFile]);
+  }, [selectedService, shell, user, stack.Name, stack.ConfigFiles, configFile]);
 
   const disconnect = useCallback(() => {
     channelRef.current?.close();

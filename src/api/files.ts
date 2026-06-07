@@ -74,6 +74,14 @@ export function findEnvFiles(dir: string, superuser?: "try"): CockpitProcess {
   );
 }
 
+export function listYamlFilesInDir(dir: string, superuser?: "try"): CockpitProcess {
+  return cockpit.spawn(
+    ["find", dir, "-maxdepth", "1", "-type", "f",
+      "(", "-name", "*.yml", "-o", "-name", "*.yaml", ")"],
+    { superuser, err: "message" },
+  );
+}
+
 export function findComposeFiles(dir: string, maxDepth: number = 2, superuser?: "try"): CockpitProcess {
   return cockpit.spawn(
     ["find", dir, "-maxdepth", String(maxDepth), "-type", "f",

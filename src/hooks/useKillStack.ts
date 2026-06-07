@@ -21,13 +21,13 @@ export function useKillStack(
 
   const execute = useCallback(async () => {
     if (!target) return;
-    const configFile = target.ConfigFiles.split(",")[0].trim();
+    const configFiles = target.ConfigFiles.split(",").map(f => f.trim());
     setKilling(true);
     onActingChange(1);
     setError(null);
     try {
-      const [su, profiles] = await Promise.all([composeFileSuperuser(configFile), readAllProfiles(configFile)]);
-      await killStack(target.Name, configFile, profiles, su);
+      const [su, profiles] = await Promise.all([composeFileSuperuser(configFiles), readAllProfiles(configFiles[0])]);
+      await killStack(target.Name, configFiles, profiles, su);
       setTarget(null);
       onSuccess();
     } catch (ex: unknown) {

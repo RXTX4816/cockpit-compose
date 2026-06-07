@@ -22,13 +22,13 @@ export function useDownStack(
 
   const execute = useCallback(async () => {
     if (!target) return;
-    const configFile = target.ConfigFiles.split(",")[0].trim();
+    const configFiles = target.ConfigFiles.split(",").map(f => f.trim());
     setDowning(true);
     onActingChange(1);
     setError(null);
     try {
-      const [su, profiles] = await Promise.all([composeFileSuperuser(configFile), readAllProfiles(configFile)]);
-      await downStack(target.Name, configFile, profiles, su);
+      const [su, profiles] = await Promise.all([composeFileSuperuser(configFiles), readAllProfiles(configFiles[0])]);
+      await downStack(target.Name, configFiles, profiles, su);
       onDownComplete?.(target);
       setTarget(null);
       onSuccess();

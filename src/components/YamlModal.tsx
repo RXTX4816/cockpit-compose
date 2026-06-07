@@ -11,24 +11,33 @@ import {
   Toolbar,
   ToolbarContent,
   ToolbarItem,
+  FormGroup,
+  TextInput,
+  FormSelect,
+  FormSelectOption,
 } from "@patternfly/react-core";
 import { LockIcon, LockOpenIcon } from "@patternfly/react-icons";
 import { load } from "js-yaml";
 import type { Diagnostic } from "@codemirror/lint";
 import { validateComposeSpec } from "../compose-schema";
-import { type ComposeStack, readComposeFile, saveComposeFile, saveSnapshot } from "../api";
+import { type ComposeStack, readComposeFile, saveComposeFile, saveSnapshot, composeFileSuperuser, removeFile, listYamlFilesInDir } from "../api";
 import { YamlEditor } from "./YamlEditor";
 import { YamlDiffView } from "./YamlDiffView";
 import { EnvModal } from "./EnvModal";
 import { useSnapshots } from "../hooks/useSnapshots";
 import "./YamlModal.css";
 
+const ADDITIONAL_STUB = `services:\n  my-service:\n    image: my-image:latest\n`;
+const PRIMARY_FILENAMES = new Set(["docker-compose.yml", "docker-compose.yaml", "compose.yml", "compose.yaml"]);
+
 interface Props {
   stack: ComposeStack;
   onClose: () => void;
+  onFileAdded?: (newPath: string) => void;
+  onFileRemoved?: (removedPath: string) => void;
 }
 
-export function YamlModal({ stack, onClose }: Props) {
+export function YamlModal({ stack, onClose, onFileAdded, onFileRemoved }: Props) {
   const { t } = useTranslation();
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(true);
@@ -44,7 +53,25 @@ export function YamlModal({ stack, onClose }: Props) {
   const [showSnapshots, setShowSnapshots] = useState(false);
   const [showEnv, setShowEnv] = useState(false);
 
-  const configFile = stack.ConfigFiles.split(",")[0].trim();
+  const [configFiles, setConfigFiles] = useState(
+    () => stack.ConfigFiles.split(",").map(f => f.trim()),
+  );
+  const [activeIdx, setActiveIdx] = useState(0);
+  const configFile = configFiles[activeIdx];
+  const stackDir = configFiles[0].slice(0, configFiles[0].lastIndexOf("/"));
+  const [addFileOpen, setAddFileOpen] = useState(false);
+  const [newFilename, setNewFilename] = useState("");
+  const [newFileContent, setNewFileContent] = useState(ADDITIONAL_STUB);
+  const [addFileError, setAddFileError] = useState<string | null>(null);
+  const [addFileSaving, setAddFileSaving] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deleteFileSaving, setDeleteFileSaving] = useState(false);
+  const [deleteFileError, setDeleteFileError] = useState<string | null>(null);
+  const [importFileOpen, setImportFileOpen] = useState(false);
+  const [importFileScanning, setImportFileScanning] = useState(false);
+  const [availableYamls, setAvailableYamls] = useState<string[]>([]);
+  const [importFileSelected, setImportFileSelected] = useState("");
+  const [importFileError, setImportFileError] = useState<string | null>(null);
   const { snapshots, load: loadSnapshots, restore, remove } = useSnapshots(configFile);
 
   useEffect(() => {
@@ -63,6 +90,19 @@ export function YamlModal({ stack, onClose }: Props) {
         setLoading(false);
       });
   }, [configFile, loadSnapshots]);
+
+  const handleTabSwitch = (idx: number) => {
+    if (idx === activeIdx) return;
+    setActiveIdx(idx);
+    setEditing(false);
+    setShowDiff(false);
+    setSnapshotDiff(null);
+    setShowSnapshots(false);
+    setLoading(true);
+    setContent("");
+    setEditedContent("");
+    setError(null);
+  };
 
   const handleRestoreSnapshot = async (snapshotPath: string) => {
     try {
@@ -98,6 +138,110 @@ export function YamlModal({ stack, onClose }: Props) {
     } catch (ex: unknown) {
       setError(ex instanceof Error ? ex.message : String(ex));
     }
+  };
+
+  const handleAddFile = async () => {
+    const filename = newFilename.trim();
+    if (!filename) { setAddFileError(t("yaml_modal.add_file_name_required")); return; }
+    if (/[/\\]/.test(filename)) { setAddFileError(t("yaml_modal.add_file_name_slashes")); return; }
+    if (!/\.(yml|yaml)$/.test(filename)) { setAddFileError(t("yaml_modal.add_file_name_extension")); return; }
+    const newPath = `${stackDir}/${filename}`;
+    if (PRIMARY_FILENAMES.has(filename) || configFiles.includes(newPath)) {
+      setAddFileError(t("yaml_modal.add_file_name_duplicate"));
+      return;
+    }
+    setAddFileSaving(true);
+    setAddFileError(null);
+    try {
+      const su = await composeFileSuperuser(configFiles);
+      await saveComposeFile(newPath, newFileContent, su);
+      const newFiles = [...configFiles, newPath];
+      setConfigFiles(newFiles);
+      setActiveIdx(newFiles.length - 1);
+      setLoading(true);
+      setContent("");
+      setEditedContent("");
+      setError(null);
+      setEditing(false);
+      setShowDiff(false);
+      setSnapshotDiff(null);
+      setShowSnapshots(false);
+      setAddFileOpen(false);
+      setNewFilename("");
+      setNewFileContent(ADDITIONAL_STUB);
+      onFileAdded?.(newPath);
+    } catch (ex: unknown) {
+      setAddFileError(ex instanceof Error ? ex.message : String(ex));
+    } finally {
+      setAddFileSaving(false);
+    }
+  };
+
+  const handleDeleteFile = async () => {
+    setDeleteFileSaving(true);
+    setDeleteFileError(null);
+    const targetPath = configFile;
+    try {
+      await removeFile(targetPath);
+      const newFiles = configFiles.filter(f => f !== targetPath);
+      const newIdx = Math.min(activeIdx - 1, newFiles.length - 1);
+      setConfigFiles(newFiles);
+      setActiveIdx(newIdx);
+      setLoading(true);
+      setContent("");
+      setEditedContent("");
+      setError(null);
+      setEditing(false);
+      setShowDiff(false);
+      setSnapshotDiff(null);
+      setShowSnapshots(false);
+      setDeleteConfirmOpen(false);
+      onFileRemoved?.(targetPath);
+    } catch (ex: unknown) {
+      setDeleteFileError(ex instanceof Error ? ex.message : String(ex));
+    } finally {
+      setDeleteFileSaving(false);
+    }
+  };
+
+  const handleOpenImport = async () => {
+    setImportFileOpen(true);
+    setImportFileScanning(true);
+    setImportFileError(null);
+    setImportFileSelected("");
+    setAvailableYamls([]);
+    try {
+      let raw = "";
+      const proc = listYamlFilesInDir(stackDir);
+      proc.stream((d: string) => { raw += d; });
+      await proc;
+      const files = raw.split("\n").map(l => l.trim()).filter(Boolean)
+        .filter(f => !configFiles.includes(f))
+        .sort();
+      setAvailableYamls(files);
+      if (files.length > 0) setImportFileSelected(files[0]);
+    } catch (ex: unknown) {
+      setImportFileError(ex instanceof Error ? ex.message : String(ex));
+    } finally {
+      setImportFileScanning(false);
+    }
+  };
+
+  const handleImportFile = () => {
+    if (!importFileSelected) return;
+    const newFiles = [...configFiles, importFileSelected];
+    setConfigFiles(newFiles);
+    setActiveIdx(newFiles.length - 1);
+    setLoading(true);
+    setContent("");
+    setEditedContent("");
+    setError(null);
+    setEditing(false);
+    setShowDiff(false);
+    setSnapshotDiff(null);
+    setShowSnapshots(false);
+    setImportFileOpen(false);
+    onFileAdded?.(importFileSelected);
   };
 
   const handleSave = async () => {
@@ -165,6 +309,32 @@ export function YamlModal({ stack, onClose }: Props) {
       <ModalHeader title={t("yaml_modal.title", { name: stack.Name })} />
       <ModalBody style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}>
         <div className="ym-body">
+          <div className="ym-tab-bar" role="tablist">
+            {configFiles.map((f, i) => {
+              const label = f.slice(f.lastIndexOf("/") + 1);
+              return (
+                <button
+                  key={f}
+                  role="tab"
+                  aria-selected={i === activeIdx}
+                  className={`ym-tab${i === activeIdx ? " ym-tab--active" : ""}`}
+                  aria-label={t("yaml_modal.file_tab_aria", { name: label })}
+                  onClick={() => handleTabSwitch(i)}
+                >
+                  {label}
+                </button>
+              );
+            })}
+            <div className="ym-tab-actions">
+              <Button variant="plain" size="sm" onClick={() => { setAddFileOpen(true); setNewFilename(""); setNewFileContent(ADDITIONAL_STUB); setAddFileError(null); }}>
+                {t("yaml_modal.add_file_button")}
+              </Button>
+              <Button variant="plain" size="sm" onClick={() => void handleOpenImport()}>
+                {t("yaml_modal.import_file_button")}
+              </Button>
+            </div>
+          </div>
+
           {!loading && (
             <Toolbar style={{ paddingInline: 0, marginBottom: "0.75rem", flexShrink: 0 }}>
               <ToolbarContent>
@@ -175,6 +345,11 @@ export function YamlModal({ stack, onClose }: Props) {
                   <Button variant="plain" size="sm" onClick={() => setShowEnv(true)}>
                     {t("yaml_modal.env_file_button")}
                   </Button>
+                  {activeIdx > 0 && (
+                    <Button variant="plain" size="sm" className="ym-delete-file-btn" onClick={() => { setDeleteConfirmOpen(true); setDeleteFileError(null); }}>
+                      {t("yaml_modal.delete_file_button")}
+                    </Button>
+                  )}
                   {snapshots.length > 0 && (
                     <Button variant="plain" size="sm" onClick={() => setShowSnapshots(!showSnapshots)}>
                       {t("yaml_modal.history_button", { count: snapshots.length })}
@@ -258,6 +433,95 @@ export function YamlModal({ stack, onClose }: Props) {
     </Modal>
 
     {showEnv && <EnvModal stack={stack} onClose={() => setShowEnv(false)} />}
+
+    {importFileOpen && (
+      <Modal isOpen variant="small" onClose={() => setImportFileOpen(false)} aria-label={t("yaml_modal.import_file_title")}>
+        <ModalHeader title={t("yaml_modal.import_file_title")} />
+        <ModalBody>
+          {importFileScanning ? (
+            <div style={{ display: "flex", justifyContent: "center", padding: "1rem" }}>
+              <Spinner />
+            </div>
+          ) : availableYamls.length === 0 && !importFileError ? (
+            <p>{t("yaml_modal.import_file_none")}</p>
+          ) : (
+            <FormGroup label={t("yaml_modal.import_file_select_label")} fieldId="ym-import-file">
+              <FormSelect id="ym-import-file" value={importFileSelected} onChange={(_, v) => setImportFileSelected(v)}>
+                {availableYamls.map(f => (
+                  <FormSelectOption key={f} value={f} label={f.slice(f.lastIndexOf("/") + 1)} />
+                ))}
+              </FormSelect>
+            </FormGroup>
+          )}
+          {importFileError && (
+            <Alert variant="danger" isInline title={importFileError} style={{ marginTop: "0.75rem" }} />
+          )}
+        </ModalBody>
+        <ModalFooter>
+          <Button variant="secondary" onClick={() => setImportFileOpen(false)}>
+            {t("common.cancel")}
+          </Button>
+          <Button variant="primary" isDisabled={!importFileSelected || importFileScanning} onClick={handleImportFile}>
+            {t("yaml_modal.import_file_confirm_button")}
+          </Button>
+        </ModalFooter>
+      </Modal>
+    )}
+
+    {deleteConfirmOpen && (
+      <Modal isOpen variant="small" onClose={() => setDeleteConfirmOpen(false)} aria-label={t("yaml_modal.delete_file_confirm_aria")}>
+        <ModalHeader title={t("yaml_modal.delete_file_confirm_title", { filename: configFile.slice(configFile.lastIndexOf("/") + 1) })} />
+        <ModalBody>
+          <p>{t("yaml_modal.delete_file_confirm_body", { file: configFile })}</p>
+          {deleteFileError && (
+            <Alert variant="danger" isInline title={deleteFileError} style={{ marginTop: "0.75rem" }} />
+          )}
+        </ModalBody>
+        <ModalFooter>
+          <Button variant="link" onClick={() => setDeleteConfirmOpen(false)} isDisabled={deleteFileSaving}>
+            {t("common.cancel")}
+          </Button>
+          <Button variant="danger" onClick={() => void handleDeleteFile()} isLoading={deleteFileSaving}>
+            {t("yaml_modal.delete_file_confirm_button")}
+          </Button>
+        </ModalFooter>
+      </Modal>
+    )}
+
+    {addFileOpen && (
+      <Modal isOpen variant="medium" onClose={() => setAddFileOpen(false)} aria-label={t("yaml_modal.add_file_title")}>
+        <ModalHeader title={t("yaml_modal.add_file_title")} />
+        <ModalBody>
+          <FormGroup label={t("yaml_modal.add_file_filename_label")} fieldId="ym-new-filename">
+            <TextInput
+              id="ym-new-filename"
+              value={newFilename}
+              onChange={(_, v) => { setNewFilename(v); setAddFileError(null); }}
+              placeholder={t("yaml_modal.add_file_filename_placeholder")}
+            />
+          </FormGroup>
+          {addFileError && (
+            <Alert variant="danger" isInline title={addFileError} style={{ marginTop: "0.5rem" }} />
+          )}
+          <div style={{ marginTop: "1rem", minHeight: "200px" }}>
+            <YamlEditor
+              content={newFileContent}
+              onChange={setNewFileContent}
+              readOnly={false}
+              onDiagnosticsChange={() => {}}
+            />
+          </div>
+        </ModalBody>
+        <ModalFooter>
+          <Button variant="secondary" onClick={() => setAddFileOpen(false)} isDisabled={addFileSaving}>
+            {t("common.cancel")}
+          </Button>
+          <Button variant="primary" onClick={() => void handleAddFile()} isLoading={addFileSaving}>
+            {t("yaml_modal.add_file_create_button")}
+          </Button>
+        </ModalFooter>
+      </Modal>
+    )}
 
     {confirmSave && (
       <Modal isOpen variant="small" onClose={() => setConfirmSave(false)} aria-label={t("yaml_modal.confirm_save_aria_label")}>

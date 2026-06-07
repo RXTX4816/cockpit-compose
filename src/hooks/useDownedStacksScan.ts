@@ -1,9 +1,9 @@
 import { useState, useCallback } from "react";
-import { type ComposeStack, findComposeFiles, readComposeFile, readEnvFile, getProjectNameFromCompose, getComposeProjectNameFromEnv } from "../api";
+import { type ComposeStack, findComposeFiles, listYamlFilesInDir, readComposeFile, readEnvFile, getProjectNameFromCompose, getComposeProjectNameFromEnv, hasServicesKey } from "../api";
 
 export interface DownedStack {
   name: string;
-  configFile: string;
+  configFiles: string[];
 }
 
 interface UseDownedStacksScanResult {
@@ -16,6 +16,7 @@ interface UseDownedStacksScanResult {
   clear: () => void;
   removeStack: (name: string) => void;
   addStack: (stack: DownedStack) => void;
+  updateStack: (name: string, updater: (prev: DownedStack) => DownedStack) => void;
 }
 
 export function useDownedStacksScan(dir: string, maxDepth: number, existingStacks: ComposeStack[]): UseDownedStacksScanResult {
@@ -88,7 +89,32 @@ export function useDownedStacksScan(dir: string, maxDepth: number, existingStack
 
           if (name && !activeNames.has(name.toLowerCase())) {
             if (!found.some(d => d.name.toLowerCase() === name!.toLowerCase())) {
-              found.push({ name, configFile });
+              // Find all YAML files in the stack directory and filter to those
+              // with a top-level services: key (excludes non-compose YAMLs and empty files)
+              const additionalFiles: string[] = [];
+              try {
+                let lsRaw = "";
+                const lsProc = listYamlFilesInDir(stackDir);
+                lsProc.stream((d: string) => { lsRaw += d; });
+                await lsProc;
+                const candidates = lsRaw.split("\n").map(l => l.trim()).filter(Boolean)
+                  .filter(p => p !== configFile)
+                  .sort();
+                for (const candidatePath of candidates) {
+                  try {
+                    let content = "";
+                    const fp = readComposeFile(candidatePath);
+                    fp.stream((d: string) => { content += d; });
+                    await fp;
+                    if (hasServicesKey(content)) additionalFiles.push(candidatePath);
+                  } catch {
+                    // skip unreadable files
+                  }
+                }
+              } catch {
+                // if listing fails, fall back to primary-only
+              }
+              found.push({ name, configFiles: [configFile, ...additionalFiles] });
             }
           }
         }
@@ -124,5 +150,9 @@ export function useDownedStacksScan(dir: string, maxDepth: number, existingStack
     );
   }, []);
 
-  return { downedStacks, scanning, hasScanned, error, warning, scan, clear, removeStack, addStack };
+  const updateStack = useCallback((name: string, updater: (prev: DownedStack) => DownedStack) => {
+    setDownedStacks(prev => prev.map(d => d.name.toLowerCase() === name.toLowerCase() ? updater(d) : d));
+  }, []);
+
+  return { downedStacks, scanning, hasScanned, error, warning, scan, clear, removeStack, addStack, updateStack };
 }

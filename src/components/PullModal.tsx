@@ -20,8 +20,8 @@ interface Props {
 
 export function PullModal({ stack, onClose }: Props) {
   const { t } = useTranslation();
-  const configFile = stack.ConfigFiles.split(",")[0].trim();
-  const { lines, done, failed, errorMsg, cancel } = usePullStream(stack.Name, configFile);
+  const configFiles = stack.ConfigFiles.split(",").map(f => f.trim());
+  const { lines, done, failed, errorMsg, cancel } = usePullStream(stack.Name, configFiles);
   const logRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

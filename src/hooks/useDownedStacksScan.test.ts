@@ -5,6 +5,7 @@ import { mockProcess } from "../test/helpers";
 const mockFindComposeFiles = vi.fn();
 const mockReadComposeFile = vi.fn();
 const mockReadEnvFile = vi.fn();
+const mockListYamlFilesInDir = vi.fn();
 
 vi.mock("../api", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../api")>();
@@ -13,6 +14,7 @@ vi.mock("../api", async (importOriginal) => {
     findComposeFiles: mockFindComposeFiles,
     readComposeFile: mockReadComposeFile,
     readEnvFile: mockReadEnvFile,
+    listYamlFilesInDir: mockListYamlFilesInDir,
   };
 });
 
@@ -22,6 +24,8 @@ beforeEach(() => {
   // Use mockImplementation so a fresh mockProcess (fresh microtask) is created on each call.
   mockReadComposeFile.mockImplementation(() => mockProcess("services:\n  web:\n    image: nginx\n"));
   mockReadEnvFile.mockResolvedValue({ content: "", exists: false });
+  // Default: no additional YAML files in the directory
+  mockListYamlFilesInDir.mockImplementation(() => mockProcess(""));
 });
 
 describe("useDownedStacksScan", () => {
@@ -53,11 +57,11 @@ describe("useDownedStacksScan", () => {
     expect(result.current.downedStacks).toHaveLength(2);
     expect(result.current.downedStacks[0]).toEqual({
       name: "myapp",
-      configFile: "/etc/docker/compose/myapp/docker-compose.yml",
+      configFiles: ["/etc/docker/compose/myapp/docker-compose.yml"],
     });
     expect(result.current.downedStacks[1]).toEqual({
       name: "blog",
-      configFile: "/etc/docker/compose/blog/compose.yml",
+      configFiles: ["/etc/docker/compose/blog/compose.yml"],
     });
     expect(result.current.error).toBeNull();
     expect(result.current.hasScanned).toBe(true);
@@ -244,7 +248,7 @@ describe("useDownedStacksScan", () => {
     );
 
     act(() => {
-      result.current.addStack({ name: "manual", configFile: "/etc/docker/compose/manual/docker-compose.yml" });
+      result.current.addStack({ name: "manual", configFiles: ["/etc/docker/compose/manual/docker-compose.yml"] });
     });
 
     expect(result.current.downedStacks).toHaveLength(1);
@@ -265,7 +269,7 @@ describe("useDownedStacksScan", () => {
     await waitFor(() => expect(result.current.scanning).toBe(false));
 
     act(() => {
-      result.current.addStack({ name: "MYAPP", configFile: "/etc/docker/compose/myapp/docker-compose.yml" });
+      result.current.addStack({ name: "MYAPP", configFiles: ["/etc/docker/compose/myapp/docker-compose.yml"] });
     });
 
     expect(result.current.downedStacks).toHaveLength(1);
@@ -283,6 +287,128 @@ describe("useDownedStacksScan", () => {
     await waitFor(() => expect(result.current.scanning).toBe(false));
 
     expect(result.current.downedStacks).toHaveLength(1);
+  });
+
+  it("includes additional YAML files that have a services: key", async () => {
+    const { useDownedStacksScan } = await import("./useDownedStacksScan");
+    mockFindComposeFiles.mockReturnValue(
+      mockProcess("/etc/docker/compose/myapp/docker-compose.yml\n")
+    );
+    mockListYamlFilesInDir.mockImplementation(() =>
+      mockProcess("/etc/docker/compose/myapp/docker-compose.yml\n/etc/docker/compose/myapp/docker-compose.prod.yml\n")
+    );
+    // primary file: returns services yaml; additional file: also has services:
+    mockReadComposeFile.mockImplementation((path: string) => {
+      if (path.includes("prod")) return mockProcess("services:\n  prod-svc:\n    image: prod:latest\n");
+      return mockProcess("services:\n  web:\n    image: nginx\n");
+    });
+
+    const { result } = renderHook(() =>
+      useDownedStacksScan("/etc/docker/compose", 2, [])
+    );
+
+    act(() => { result.current.scan(); });
+    await waitFor(() => expect(result.current.scanning).toBe(false));
+
+    expect(result.current.downedStacks[0].configFiles).toEqual([
+      "/etc/docker/compose/myapp/docker-compose.yml",
+      "/etc/docker/compose/myapp/docker-compose.prod.yml",
+    ]);
+  });
+
+  it("excludes additional YAML files that lack a services: key", async () => {
+    const { useDownedStacksScan } = await import("./useDownedStacksScan");
+    mockFindComposeFiles.mockReturnValue(
+      mockProcess("/etc/docker/compose/myapp/docker-compose.yml\n")
+    );
+    mockListYamlFilesInDir.mockImplementation(() =>
+      mockProcess("/etc/docker/compose/myapp/docker-compose.yml\n/etc/docker/compose/myapp/config.yml\n")
+    );
+    mockReadComposeFile.mockImplementation((path: string) => {
+      if (path.includes("config")) return mockProcess("other: data\n");
+      return mockProcess("services:\n  web:\n    image: nginx\n");
+    });
+
+    const { result } = renderHook(() =>
+      useDownedStacksScan("/etc/docker/compose", 2, [])
+    );
+
+    act(() => { result.current.scan(); });
+    await waitFor(() => expect(result.current.scanning).toBe(false));
+
+    expect(result.current.downedStacks[0].configFiles).toEqual([
+      "/etc/docker/compose/myapp/docker-compose.yml",
+    ]);
+  });
+
+  it("excludes empty additional YAML files", async () => {
+    const { useDownedStacksScan } = await import("./useDownedStacksScan");
+    mockFindComposeFiles.mockReturnValue(
+      mockProcess("/etc/docker/compose/myapp/docker-compose.yml\n")
+    );
+    mockListYamlFilesInDir.mockImplementation(() =>
+      mockProcess("/etc/docker/compose/myapp/docker-compose.yml\n/etc/docker/compose/myapp/wip.yml\n")
+    );
+    mockReadComposeFile.mockImplementation((path: string) => {
+      if (path.includes("wip")) return mockProcess("");
+      return mockProcess("services:\n  web:\n    image: nginx\n");
+    });
+
+    const { result } = renderHook(() =>
+      useDownedStacksScan("/etc/docker/compose", 2, [])
+    );
+
+    act(() => { result.current.scan(); });
+    await waitFor(() => expect(result.current.scanning).toBe(false));
+
+    expect(result.current.downedStacks[0].configFiles).toHaveLength(1);
+  });
+
+  it("sorts additional files alphabetically", async () => {
+    const { useDownedStacksScan } = await import("./useDownedStacksScan");
+    mockFindComposeFiles.mockReturnValue(
+      mockProcess("/etc/docker/compose/myapp/docker-compose.yml\n")
+    );
+    mockListYamlFilesInDir.mockImplementation(() =>
+      mockProcess(
+        "/etc/docker/compose/myapp/docker-compose.yml\n" +
+        "/etc/docker/compose/myapp/z-last.yml\n" +
+        "/etc/docker/compose/myapp/a-first.yml\n"
+      )
+    );
+    mockReadComposeFile.mockImplementation(() => mockProcess("services:\n  svc:\n    image: img\n"));
+
+    const { result } = renderHook(() =>
+      useDownedStacksScan("/etc/docker/compose", 2, [])
+    );
+
+    act(() => { result.current.scan(); });
+    await waitFor(() => expect(result.current.scanning).toBe(false));
+
+    expect(result.current.downedStacks[0].configFiles).toEqual([
+      "/etc/docker/compose/myapp/docker-compose.yml",
+      "/etc/docker/compose/myapp/a-first.yml",
+      "/etc/docker/compose/myapp/z-last.yml",
+    ]);
+  });
+
+  it("falls back to primary-only when listYamlFilesInDir fails", async () => {
+    const { useDownedStacksScan } = await import("./useDownedStacksScan");
+    mockFindComposeFiles.mockReturnValue(
+      mockProcess("/etc/docker/compose/myapp/docker-compose.yml\n")
+    );
+    mockListYamlFilesInDir.mockImplementation(() => mockProcess("", "permission denied"));
+
+    const { result } = renderHook(() =>
+      useDownedStacksScan("/etc/docker/compose", 2, [])
+    );
+
+    act(() => { result.current.scan(); });
+    await waitFor(() => expect(result.current.scanning).toBe(false));
+
+    expect(result.current.downedStacks[0].configFiles).toEqual([
+      "/etc/docker/compose/myapp/docker-compose.yml",
+    ]);
   });
 
   it("uses name: field from compose file when present", async () => {

@@ -49,3 +49,40 @@
   font-size: var(--pf-t--global--font--size--sm);
   color: var(--pf-t--global--text--color--subtle);
 }
+
+.ym-tab-bar {
+  display: flex;
+  gap: 0.25rem;
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid var(--pf-t--global--border--color--default);
+  flex-shrink: 0;
+  align-items: center;
+}
+
+.ym-tab-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  padding-bottom: 2px;
+}
+
+.ym-tab {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 0.25rem 0.75rem;
+  font-size: var(--pf-t--global--font--size--sm);
+  color: var(--pf-t--global--text--color--subtle);
+  cursor: pointer;
+  margin-bottom: -1px;
+}
+
+.ym-tab--active {
+  border-bottom-color: var(--pf-t--global--color--brand--default);
+  color: var(--pf-t--global--text--color--regular);
+  font-weight: 600;
+}
+
+.ym-delete-file-btn {
+  color: var(--pf-t--global--icon--color--status--danger--default) !important;
+}

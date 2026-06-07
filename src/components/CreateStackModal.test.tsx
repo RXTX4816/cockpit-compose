@@ -224,7 +224,7 @@ describe("CreateStackModal — step 2 manual", () => {
       expect(mockReplace).toHaveBeenCalled();
       expect(onCreated).toHaveBeenCalledWith({
         name: "my-stack",
-        configFile: "/etc/compose/my-stack/docker-compose.yml",
+        configFiles: ["/etc/compose/my-stack/docker-compose.yml"],
       });
     });
   });
@@ -436,7 +436,94 @@ describe("CreateStackModal — step 2 git url", () => {
     await waitFor(() => {
       expect(onCreated).toHaveBeenCalledWith({
         name: "my-stack",
-        configFile: "/etc/compose/my-stack/docker-compose.yml",
+        configFiles: ["/etc/compose/my-stack/docker-compose.yml"],
+      });
+    });
+  });
+});
+
+describe("CreateStackModal — additional files", () => {
+  it("Add file button is present in step 2", async () => {
+    render(<CreateStackModal {...defaultProps} />);
+    await fillSetupAndAdvance("manual");
+    expect(screen.getByRole("button", { name: /\+ Add file/i })).toBeInTheDocument();
+  });
+
+  it("clicking Add file shows a filename input and yaml editor", async () => {
+    render(<CreateStackModal {...defaultProps} />);
+    await fillSetupAndAdvance("manual");
+    fireEvent.click(screen.getByRole("button", { name: /\+ Add file/i }));
+    expect(screen.getByPlaceholderText("docker-compose.prod.yml")).toBeInTheDocument();
+    expect(screen.getAllByTestId("yaml-editor")).toHaveLength(2);
+  });
+
+  it("info alert shown when at least one additional file is added", async () => {
+    render(<CreateStackModal {...defaultProps} />);
+    await fillSetupAndAdvance("manual");
+    fireEvent.click(screen.getByRole("button", { name: /\+ Add file/i }));
+    expect(screen.getByText(/must contain a services: key/i)).toBeInTheDocument();
+  });
+
+  it("Remove button removes the additional file entry", async () => {
+    render(<CreateStackModal {...defaultProps} />);
+    await fillSetupAndAdvance("manual");
+    fireEvent.click(screen.getByRole("button", { name: /\+ Add file/i }));
+    expect(screen.getAllByTestId("yaml-editor")).toHaveLength(2);
+    fireEvent.click(screen.getByRole("button", { name: /Remove/i }));
+    expect(screen.getAllByTestId("yaml-editor")).toHaveLength(1);
+  });
+
+  it("Create is disabled when additional filename is empty", async () => {
+    render(<CreateStackModal {...defaultProps} />);
+    await fillSetupAndAdvance("manual");
+    fireEvent.click(screen.getByRole("button", { name: /\+ Add file/i }));
+    // filename input is empty — canCreate should be false
+    expect(screen.getByRole("button", { name: /^Create$/i })).toBeDisabled();
+  });
+
+  it("Create is disabled when additional filename has no yml/yaml extension", async () => {
+    render(<CreateStackModal {...defaultProps} />);
+    await fillSetupAndAdvance("manual");
+    fireEvent.click(screen.getByRole("button", { name: /\+ Add file/i }));
+    fireEvent.change(screen.getByPlaceholderText("docker-compose.prod.yml"), {
+      target: { value: "not-a-yaml" },
+    });
+    expect(screen.getByRole("button", { name: /^Create$/i })).toBeDisabled();
+  });
+
+  it("Create is disabled when additional filename duplicates primary", async () => {
+    render(<CreateStackModal {...defaultProps} />);
+    await fillSetupAndAdvance("manual");
+    fireEvent.click(screen.getByRole("button", { name: /\+ Add file/i }));
+    fireEvent.change(screen.getByPlaceholderText("docker-compose.prod.yml"), {
+      target: { value: "docker-compose.yml" },
+    });
+    expect(screen.getByRole("button", { name: /^Create$/i })).toBeDisabled();
+  });
+
+  it("Create with valid additional file writes both files and calls onCreated with both paths", async () => {
+    const onCreated = vi.fn();
+    render(<CreateStackModal {...defaultProps} onCreated={onCreated} />);
+    await fillSetupAndAdvance("manual");
+    fireEvent.click(screen.getByRole("button", { name: /\+ Add file/i }));
+    fireEvent.change(screen.getByPlaceholderText("docker-compose.prod.yml"), {
+      target: { value: "docker-compose.prod.yml" },
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /^Create$/i }));
+    });
+    await waitFor(() => {
+      expect(mockReplace).toHaveBeenCalledTimes(2);
+      expect(mockCockpitFile).toHaveBeenCalledWith(
+        "/etc/compose/my-stack/docker-compose.prod.yml",
+        expect.objectContaining({ superuser: expect.anything() })
+      );
+      expect(onCreated).toHaveBeenCalledWith({
+        name: "my-stack",
+        configFiles: [
+          "/etc/compose/my-stack/docker-compose.yml",
+          "/etc/compose/my-stack/docker-compose.prod.yml",
+        ],
       });
     });
   });

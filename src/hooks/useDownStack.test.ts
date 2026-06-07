@@ -98,7 +98,7 @@ describe("useDownStack", () => {
     expect(onDownComplete).not.toHaveBeenCalled();
   });
 
-  it("uses first ConfigFile when multiple are listed", async () => {
+  it("passes all ConfigFiles when multiple are listed", async () => {
     mockSpawn.mockReturnValue(mockProcess(""));
     const multiStack: ComposeStack = {
       ...stack,
@@ -109,6 +109,7 @@ describe("useDownStack", () => {
     await act(() => result.current.execute());
     const spawnArgs = mockSpawn.mock.calls[0][0] as string[];
     expect(spawnArgs).toContain("/path/a.yml");
-    expect(spawnArgs).not.toContain("/path/b.yml");
+    expect(spawnArgs).toContain("/path/b.yml");
+    expect(spawnArgs.filter(a => a === "-f")).toHaveLength(2);
   });
 });
