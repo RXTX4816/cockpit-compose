@@ -1,9 +1,9 @@
 export type { ComposeStack, ComposeContainer, StackStatus, ContainerStats, Snapshot, ComposeImage, ComposeVolume, SharedNetwork, ComposeEvent, ComposeTopEntry, ComposeVersion, ParsedPort } from "./types";
 export { detectComposeCommand, compose, composeFileSuperuser } from "./cockpit";
-export { parseStackStatus, parseServiceCount, parsePorts, parsePortsFull, parsePortsDetailed, getServicesFromCompose, getProjectNameFromCompose, getComposeProjectNameFromEnv } from "./parsing";
-export { listStacks, startStack, stopStack, restartStack, streamLogs, downStack, upStackStream, pullStack, pauseStack, unpauseStack, killStack, listImages, listVolumes, streamEvents, composeTop, composeVersion, listProjectContainerImageRefs, listImagesByRepo, listAllContainerImages, removeImages, listStoppedContainers, listDanglingVolumes, listProjectNetworks, listNetworkConnectedProjects, inspectNetworkContainerCounts, pruneContainers, pruneVolumes, pruneNetworks, composeRunStream } from "./stacks";
+export { parseStackStatus, parseServiceCount, parsePorts, parsePortsFull, parsePortsDetailed, getServicesFromCompose, getProfilesFromCompose, getServiceProfileMapFromCompose, getProjectNameFromCompose, getComposeProjectNameFromEnv } from "./parsing";
+export { listStacks, startStack, stopStack, restartStack, readRunningServiceNames, streamLogs, downStack, upStackStream, pullStack, pauseStack, unpauseStack, killStack, listImages, listVolumes, streamEvents, composeTop, composeVersion, listProjectContainerImageRefs, listImagesByRepo, listAllContainerImages, removeImages, listStoppedContainers, listDanglingVolumes, listProjectNetworks, listNetworkConnectedProjects, inspectNetworkContainerCounts, pruneContainers, pruneVolumes, pruneNetworks, composeRunStream } from "./stacks";
 export { listContainers, getContainerStats } from "./containers";
-export { readComposeFile, saveComposeFile, saveSnapshot, listSnapshots, restoreSnapshot, deleteSnapshot, readEnvFile, saveEnvFile, findEnvFiles, findComposeFiles, createDirectory, makeTempDir, fetchComposeFromGit, removeDirectory, removeFile } from "./files";
+export { readComposeFile, readAllProfiles, saveComposeFile, saveSnapshot, listSnapshots, restoreSnapshot, deleteSnapshot, readEnvFile, saveEnvFile, findEnvFiles, findComposeFiles, createDirectory, makeTempDir, fetchComposeFromGit, removeDirectory, removeFile } from "./files";
 export type { ComposeTemplate } from "./templates";
 export { COMPOSE_TEMPLATES } from "./templates";
 export { parseJsonOutput } from "../lib/parseJsonOutput";

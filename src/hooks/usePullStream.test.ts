@@ -4,6 +4,11 @@ import { usePullStream } from "./usePullStream";
 import { mockSpawn } from "../test/setup";
 import { mockProcess } from "../test/helpers";
 
+vi.mock("../api", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../api")>();
+  return { ...actual, readAllProfiles: vi.fn().mockResolvedValue([]) };
+});
+
 const mockUser = vi.fn().mockResolvedValue({ id: 1000, name: "user", home: "/home/user" });
 
 beforeEach(() => {

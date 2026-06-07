@@ -49,6 +49,7 @@ export function StacksView() {
   const [infoTarget, setInfoTarget] = useState<ComposeStack | null>(null);
   const [upConfirmTarget, setUpConfirmTarget] = useState<ComposeStack | null>(null);
   const [upTarget, setUpTarget] = useState<ComposeStack | null>(null);
+  const [upTargetProfiles, setUpTargetProfiles] = useState<string[]>([]);
   const [pullConfirmTarget, setPullConfirmTarget] = useState<ComposeStack | null>(null);
   const [pullTarget, setPullTarget] = useState<ComposeStack | null>(null);
   const [eventsTarget, setEventsTarget] = useState<ComposeStack | null>(null);
@@ -172,13 +173,14 @@ export function StacksView() {
       {upConfirmTarget && (
         <UpConfirmModal
           stack={upConfirmTarget}
-          onConfirm={() => { setUpTarget(upConfirmTarget); setUpConfirmTarget(null); }}
+          onConfirm={(profiles) => { setUpTargetProfiles(profiles); setUpTarget(upConfirmTarget); setUpConfirmTarget(null); }}
           onClose={() => setUpConfirmTarget(null)}
         />
       )}
       {upTarget && (
         <UpModal
           stack={upTarget}
+          profiles={upTargetProfiles}
           onClose={() => { setUpTarget(null); void refresh(); }}
         />
       )}

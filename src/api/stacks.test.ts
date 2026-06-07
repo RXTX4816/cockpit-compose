@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { mockSpawn } from "../test/setup";
 import { mockProcess } from "../test/helpers";
 import {
-  listStacks, startStack, stopStack, restartStack, streamLogs, downStack, pullStack,
+  listStacks, startStack, stopStack, restartStack, streamLogs, downStack, upStackStream, pullStack,
   listProjectContainerImageRefs, listImagesByRepo, listAllContainerImages, removeImages,
   listStoppedContainers, listDanglingVolumes, listProjectNetworks,
   pruneContainers, pruneVolumes, pruneNetworks, composeRunStream,
@@ -73,6 +73,56 @@ describe("downStack", () => {
     const args = mockSpawn.mock.calls[0][0] as string[];
     expect(args).toContain("down");
     expect(args).toContain("myapp");
+  });
+});
+
+describe("upStackStream", () => {
+  it("spawns compose up -d with plain progress", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    upStackStream("myapp", "/path/compose.yml", []);
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args).toContain("up");
+    expect(args).toContain("-d");
+    expect(args).toContain("--progress");
+    expect(args).toContain("plain");
+  });
+
+  it("merges stderr into stdout (err: out)", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    upStackStream("myapp", "/path/compose.yml", []);
+    const opts = mockSpawn.mock.calls[0][1] as { err: string };
+    expect(opts.err).toBe("out");
+  });
+
+  it("includes no --profile flags when profiles is empty", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    upStackStream("myapp", "/path/compose.yml", []);
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args).not.toContain("--profile");
+  });
+
+  it("adds --profile flags before --progress for each selected profile", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    upStackStream("myapp", "/path/compose.yml", ["dev", "debug"]);
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    const progressIdx = args.indexOf("--progress");
+    const firstProfileIdx = args.indexOf("--profile");
+    expect(firstProfileIdx).toBeGreaterThanOrEqual(0);
+    expect(firstProfileIdx).toBeLessThan(progressIdx);
+    expect(args).toContain("dev");
+    expect(args).toContain("debug");
+  });
+
+  it("emits each profile as a separate --profile flag pair", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    upStackStream("myapp", "/path/compose.yml", ["dev", "monitoring"]);
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    const profilePairs: string[] = [];
+    for (let i = 0; i < args.length - 1; i++) {
+      if (args[i] === "--profile") profilePairs.push(args[i + 1]);
+    }
+    expect(profilePairs).toContain("dev");
+    expect(profilePairs).toContain("monitoring");
   });
 });
 

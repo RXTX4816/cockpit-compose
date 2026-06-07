@@ -7,9 +7,10 @@ import {
   ModalFooter,
   Button,
   Alert,
+  Checkbox,
 } from "@patternfly/react-core";
 import { load as loadYaml } from "js-yaml";
-import { type ComposeStack, readComposeFile } from "../api";
+import { type ComposeStack, readComposeFile, getProfilesFromCompose } from "../api";
 
 interface ImageEntry {
   service: string;
@@ -37,7 +38,7 @@ function parseImages(yaml: string): ImageEntry[] {
 
 interface Props {
   stack: ComposeStack;
-  onConfirm: () => void;
+  onConfirm: (profiles: string[]) => void;
   onClose: () => void;
 }
 
@@ -45,13 +46,27 @@ export function UpConfirmModal({ stack, onConfirm, onClose }: Props) {
   const { t } = useTranslation();
   const configFile = stack.ConfigFiles.split(",")[0].trim();
   const [images, setImages] = useState<ImageEntry[]>([]);
+  const [profiles, setProfiles] = useState<string[]>([]);
+  const [selectedProfiles, setSelectedProfiles] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     let content = "";
     const proc = readComposeFile(configFile);
     proc.stream((data: string) => { content += data; });
-    void proc.then(() => setImages(parseImages(content)));
+    void proc.then(() => {
+      setImages(parseImages(content));
+      setProfiles(getProfilesFromCompose(content));
+    });
   }, [configFile]);
+
+  const toggleProfile = (name: string, checked: boolean) => {
+    setSelectedProfiles(prev => {
+      const next = new Set(prev);
+      if (checked) next.add(name);
+      else next.delete(name);
+      return next;
+    });
+  };
 
   const hasRisky = images.some(i => i.risky);
 
@@ -96,9 +111,29 @@ export function UpConfirmModal({ stack, onConfirm, onClose }: Props) {
             )}
           </div>
         )}
+
+        {profiles.length > 0 && (
+          <div style={{ fontSize: "0.875rem", marginTop: "1rem" }}>
+            <strong>{t("up_confirm_modal.profiles_title")}</strong>
+            <div style={{ marginTop: "0.5rem" }}>
+              {profiles.map(name => (
+                <Checkbox
+                  key={name}
+                  id={`profile-${name}`}
+                  label={name}
+                  isChecked={selectedProfiles.has(name)}
+                  onChange={(_e, checked) => toggleProfile(name, checked)}
+                />
+              ))}
+            </div>
+            <p style={{ marginTop: "0.5rem", color: "var(--pf-t--global--text--color--subtle)", fontSize: "0.8rem" }}>
+              {t("up_confirm_modal.profiles_hint")}
+            </p>
+          </div>
+        )}
       </ModalBody>
       <ModalFooter>
-        <Button variant="primary" onClick={onConfirm}>{t("up_confirm_modal.up_button")}</Button>
+        <Button variant="primary" onClick={() => onConfirm([...selectedProfiles])}>{t("up_confirm_modal.up_button")}</Button>
         <Button variant="link" onClick={onClose}>{t("common.cancel")}</Button>
       </ModalFooter>
     </Modal>

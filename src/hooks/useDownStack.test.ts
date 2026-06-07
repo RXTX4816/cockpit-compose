@@ -5,6 +5,11 @@ import { mockSpawn } from "../test/setup";
 import { mockProcess } from "../test/helpers";
 import type { ComposeStack } from "../api";
 
+vi.mock("../api", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../api")>();
+  return { ...actual, readAllProfiles: vi.fn().mockResolvedValue([]) };
+});
+
 const stack: ComposeStack = {
   Name: "myapp",
   Status: "running(1)",

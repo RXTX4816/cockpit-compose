@@ -35,11 +35,11 @@ describe("UpConfirmModal", () => {
     await act(async () => {});
   });
 
-  it("calls onConfirm when Up clicked", async () => {
+  it("calls onConfirm with empty profiles when Up clicked and none selected", async () => {
     const onConfirm = vi.fn();
     render(<UpConfirmModal stack={stack} onConfirm={onConfirm} onClose={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: /^Up$/i }));
-    expect(onConfirm).toHaveBeenCalledOnce();
+    expect(onConfirm).toHaveBeenCalledWith([]);
     await act(async () => {});
   });
 
@@ -96,5 +96,43 @@ describe("UpConfirmModal", () => {
     render(<UpConfirmModal stack={multiStack} onConfirm={vi.fn()} onClose={vi.fn()} />);
     expect(mockReadComposeFile).toHaveBeenCalledWith("/a.yml");
     await act(async () => {});
+  });
+
+  it("shows profiles checklist when compose file has profiled services", async () => {
+    const yaml = "services:\n  always:\n    image: nginx\n  debug:\n    image: busybox\n    profiles: [dev]\n";
+    mockReadComposeFile.mockImplementation(() => mockProcess(yaml));
+    render(<UpConfirmModal stack={stack} onConfirm={vi.fn()} onClose={vi.fn()} />);
+    await waitFor(() => expect(screen.getByText("dev")).toBeInTheDocument());
+    expect(screen.getByText(/Optional profiles/i)).toBeInTheDocument();
+  });
+
+  it("does not show profiles section when no profiled services", async () => {
+    const yaml = "services:\n  web:\n    image: nginx\n";
+    mockReadComposeFile.mockImplementation(() => mockProcess(yaml));
+    render(<UpConfirmModal stack={stack} onConfirm={vi.fn()} onClose={vi.fn()} />);
+    await waitFor(() => expect(screen.getByText(/nginx/)).toBeInTheDocument());
+    expect(screen.queryByText(/Optional profiles/i)).not.toBeInTheDocument();
+  });
+
+  it("calls onConfirm with selected profiles", async () => {
+    const yaml = "services:\n  debug:\n    image: busybox\n    profiles: [dev]\n";
+    mockReadComposeFile.mockImplementation(() => mockProcess(yaml));
+    const onConfirm = vi.fn();
+    render(<UpConfirmModal stack={stack} onConfirm={onConfirm} onClose={vi.fn()} />);
+    await waitFor(() => expect(screen.getByRole("checkbox", { name: /dev/i })).toBeInTheDocument());
+    fireEvent.click(screen.getByRole("checkbox", { name: /dev/i }));
+    fireEvent.click(screen.getByRole("button", { name: /^Up$/i }));
+    expect(onConfirm).toHaveBeenCalledWith(["dev"]);
+  });
+
+  it("omits deselected profiles from onConfirm call", async () => {
+    const yaml = "services:\n  debug:\n    image: busybox\n    profiles: [dev]\n";
+    mockReadComposeFile.mockImplementation(() => mockProcess(yaml));
+    const onConfirm = vi.fn();
+    render(<UpConfirmModal stack={stack} onConfirm={onConfirm} onClose={vi.fn()} />);
+    await waitFor(() => expect(screen.getByRole("checkbox", { name: /dev/i })).toBeInTheDocument());
+    // checkbox starts unchecked — do not click it
+    fireEvent.click(screen.getByRole("button", { name: /^Up$/i }));
+    expect(onConfirm).toHaveBeenCalledWith([]);
   });
 });

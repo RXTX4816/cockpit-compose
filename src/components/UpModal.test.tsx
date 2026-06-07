@@ -121,6 +121,12 @@ describe("UpModal", () => {
     const multiStack: ComposeStack = { ...stack, ConfigFiles: "/a.yml, /b.yml" };
     mockUseUpStream.mockReturnValue({ lines: [], done: false, failed: false, errorMsg: "", cancel: vi.fn() });
     render(<UpModal stack={multiStack} onClose={vi.fn()} />);
-    expect(mockUseUpStream).toHaveBeenCalledWith("myapp", "/a.yml");
+    expect(mockUseUpStream).toHaveBeenCalledWith("myapp", "/a.yml", []);
+  });
+
+  it("forwards profiles to useUpStream", () => {
+    mockUseUpStream.mockReturnValue({ lines: [], done: false, failed: false, errorMsg: "", cancel: vi.fn() });
+    render(<UpModal stack={stack} profiles={["dev", "debug"]} onClose={vi.fn()} />);
+    expect(mockUseUpStream).toHaveBeenCalledWith("myapp", "/path/compose.yml", ["dev", "debug"]);
   });
 });

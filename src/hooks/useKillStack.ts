@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { killStack, composeFileSuperuser, type ComposeStack } from "../api";
+import { killStack, composeFileSuperuser, readAllProfiles, type ComposeStack } from "../api";
 
 export function useKillStack(
   onSuccess: () => void,
@@ -26,8 +26,8 @@ export function useKillStack(
     onActingChange(1);
     setError(null);
     try {
-      const su = await composeFileSuperuser(configFile);
-      await killStack(target.Name, configFile, su);
+      const [su, profiles] = await Promise.all([composeFileSuperuser(configFile), readAllProfiles(configFile)]);
+      await killStack(target.Name, configFile, profiles, su);
       setTarget(null);
       onSuccess();
     } catch (ex: unknown) {

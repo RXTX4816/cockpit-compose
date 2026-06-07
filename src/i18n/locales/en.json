@@ -321,6 +321,8 @@
     "services_title": "Services:",
     "unpinned_label": "⚠ unpinned",
     "unpinned_notice": "Unpinned images may pull whatever the registry considers \"latest\" and are most likely to change behaviour unexpectedly.",
+    "profiles_title": "Optional profiles",
+    "profiles_hint": "Only services tagged with a selected profile will start.",
     "up_button": "Up"
   },
 
@@ -351,7 +353,8 @@
     "network_error_title": "Could not load networks",
     "net_col_name": "Network",
     "net_col_shared": "Shared with",
-    "net_shared_icon_title": "Shared network"
+    "net_shared_icon_title": "Shared network",
+    "profiles_label": "Profiles"
   },
 
   "prune_modal": {

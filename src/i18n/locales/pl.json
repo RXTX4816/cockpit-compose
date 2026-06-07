@@ -331,6 +331,8 @@
     "services_title": "Usługi:",
     "unpinned_label": "⚠ nieprzypięty",
     "unpinned_notice": "Nieprzypięte obrazy mogą pobierać to, co rejestr uważa za \"latest\", i nieoczekiwanie zmieniać swoje zachowanie.",
+    "profiles_title": "Opcjonalne profile",
+    "profiles_hint": "Uruchomione zostaną tylko usługi oznaczone wybranym profilem.",
     "up_button": "Uruchom"
   },
 
@@ -361,7 +363,8 @@
     "network_error_title": "Nie można załadować sieci",
     "net_col_name": "Sieć",
     "net_col_shared": "Udostępniona z",
-    "net_shared_icon_title": "Sieć współdzielona"
+    "net_shared_icon_title": "Sieć współdzielona",
+    "profiles_label": "Profile"
   },
 
   "prune_modal": {
