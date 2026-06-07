@@ -31,11 +31,14 @@ export function AppFooter() {
       variant="default"
       className="cc-footer"
       style={{
+        position: "sticky",
+        bottom: 0,
+        zIndex: 1,
         borderTop: "1px solid",
         padding: "0.5rem 1.5rem",
         fontSize: 13,
-        marginTop: "2.5rem",
-        textAlign: "center"
+        textAlign: "center",
+        backgroundColor: "var(--pf-t--global--background--color--primary--default)"
       }}
     >
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
