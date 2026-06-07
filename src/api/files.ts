@@ -1,7 +1,20 @@
 import type { Snapshot } from "./types";
+import { getProfilesFromCompose } from "./parsing";
 
 export function readComposeFile(path: string): CockpitProcess {
   return cockpit.spawn(["cat", path], { err: "message" });
+}
+
+export async function readAllProfiles(configFile: string): Promise<string[]> {
+  try {
+    let content = "";
+    const proc = readComposeFile(configFile);
+    proc.stream((d: string) => { content += d; });
+    await proc;
+    return getProfilesFromCompose(content);
+  } catch {
+    return [];
+  }
 }
 
 export async function saveComposeFile(path: string, content: string, superuser?: "try"): Promise<void> {

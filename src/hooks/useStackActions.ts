@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { startStack, stopStack, restartStack, pauseStack, unpauseStack, composeFileSuperuser } from "../api";
+import { startStack, stopStack, restartStack, readRunningServiceNames, pauseStack, unpauseStack, composeFileSuperuser, readAllProfiles } from "../api";
 
 export function useStackActions(
   stackName: string,
@@ -17,12 +17,14 @@ export function useStackActions(
     onActingChange(1);
     setActionError(null);
     try {
-      const su = await composeFileSuperuser(configFile);
-      if (action === "start") await startStack(stackName, configFile, su);
-      else if (action === "stop") await stopStack(stackName, configFile, su);
-      else if (action === "restart") await restartStack(stackName, configFile, su);
-      else if (action === "pause") await pauseStack(stackName, configFile, su);
-      else await unpauseStack(stackName, configFile, su);
+      const [su, profiles] = await Promise.all([composeFileSuperuser(configFile), readAllProfiles(configFile)]);
+      if (action === "start") await startStack(stackName, configFile, profiles, su);
+      else if (action === "stop") await stopStack(stackName, configFile, profiles, su);
+      else if (action === "restart") {
+        const runningServices = await readRunningServiceNames(stackName);
+        if (runningServices.length > 0) await restartStack(stackName, configFile, profiles, runningServices, su);
+      } else if (action === "pause") await pauseStack(stackName, configFile, profiles, su);
+      else await unpauseStack(stackName, configFile, profiles, su);
       await onSuccess?.();
     } catch (ex: unknown) {
       setActionError(ex instanceof Error ? ex.message : String(ex));

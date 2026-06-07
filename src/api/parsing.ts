@@ -77,6 +77,39 @@ export function getServicesFromCompose(composeContent: string): string[] {
   return [];
 }
 
+export function getServiceProfileMapFromCompose(composeContent: string): Record<string, string[]> {
+  try {
+    const compose = loadYaml(composeContent);
+    if (!compose || typeof compose !== "object" || !("services" in compose)) return {};
+    const services = (compose as Record<string, unknown>).services;
+    if (typeof services !== "object" || services === null) return {};
+    const result: Record<string, string[]> = {};
+    for (const [name, svc] of Object.entries(services)) {
+      const p = (svc as Record<string, unknown>)?.profiles;
+      if (Array.isArray(p)) {
+        const profiles = p.filter((x): x is string => typeof x === "string");
+        if (profiles.length > 0) result[name] = profiles;
+      }
+    }
+    return result;
+  } catch { return {}; }
+}
+
+export function getProfilesFromCompose(composeContent: string): string[] {
+  try {
+    const compose = loadYaml(composeContent);
+    if (!compose || typeof compose !== "object" || !("services" in compose)) return [];
+    const services = (compose as Record<string, unknown>).services;
+    if (typeof services !== "object" || services === null) return [];
+    const profiles = new Set<string>();
+    for (const svc of Object.values(services)) {
+      const p = (svc as Record<string, unknown>)?.profiles;
+      if (Array.isArray(p)) p.forEach(name => { if (typeof name === "string") profiles.add(name); });
+    }
+    return [...profiles].sort();
+  } catch { return []; }
+}
+
 export function getProjectNameFromCompose(composeContent: string): string | null {
   try {
     const compose = loadYaml(composeContent);

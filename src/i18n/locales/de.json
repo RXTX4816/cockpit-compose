@@ -321,6 +321,8 @@
     "services_title": "Dienste:",
     "unpinned_label": "⚠ nicht fixiert",
     "unpinned_notice": "Nicht fixierte Images können das laden, was die Registry als \"latest\" betrachtet, und ändern ihr Verhalten unerwartet.",
+    "profiles_title": "Optionale Profile",
+    "profiles_hint": "Nur Dienste, die einem ausgewählten Profil zugeordnet sind, werden gestartet.",
     "up_button": "Hochfahren"
   },
 
@@ -351,7 +353,8 @@
     "network_error_title": "Netzwerke konnten nicht geladen werden",
     "net_col_name": "Netzwerk",
     "net_col_shared": "Geteilt mit",
-    "net_shared_icon_title": "Gemeinsames Netzwerk"
+    "net_shared_icon_title": "Gemeinsames Netzwerk",
+    "profiles_label": "Profile"
   },
 
   "prune_modal": {

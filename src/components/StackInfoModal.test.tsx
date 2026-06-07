@@ -5,7 +5,18 @@ import { mockSpawn } from "../test/setup";
 import { mockProcess } from "../test/helpers";
 import type { ComposeStack } from "../api";
 
-beforeEach(() => { mockSpawn.mockReset(); });
+vi.mock("../api", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../api")>();
+  return { ...actual, readComposeFile: vi.fn() };
+});
+
+import { readComposeFile } from "../api";
+const mockReadComposeFile = vi.mocked(readComposeFile);
+
+beforeEach(() => {
+  mockSpawn.mockReset();
+  mockReadComposeFile.mockImplementation(() => mockProcess(""));
+});
 
 const stack: ComposeStack = {
   Name: "myapp",

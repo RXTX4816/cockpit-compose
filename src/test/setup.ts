@@ -1,4 +1,3 @@
-import "../i18n";
 import "@testing-library/jest-dom/vitest";
 import { vi } from "vitest";
 
@@ -22,6 +21,10 @@ const localStorageMock = (() => {
 })();
 vi.stubGlobal("localStorage", localStorageMock);
 Object.defineProperty(window, "localStorage", { value: localStorageMock });
+
+// Dynamic import ensures localStorage mock is in place before i18n's cockpitDetector
+// runs localStorage.getItem(), preventing the Node.js v26 ExperimentalWarning.
+await import("../i18n");
 
 const mockSpawn = vi.fn();
 vi.stubGlobal("cockpit", { spawn: mockSpawn });

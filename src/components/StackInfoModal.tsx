@@ -21,6 +21,8 @@ import {
   listVolumes,
   listProjectNetworks,
   listNetworkConnectedProjects,
+  readComposeFile,
+  getServiceProfileMapFromCompose,
   parseJsonOutput,
   parsePortsDetailed,
   formatBytes,
@@ -57,7 +59,16 @@ export function StackInfoModal({ stack, onClose }: Props) {
   const [loadingNetworks, setLoadingNetworks] = useState(true);
   const [networkError, setNetworkError] = useState<string | null>(null);
 
+  const [serviceProfileMap, setServiceProfileMap] = useState<Record<string, string[]>>({});
+
   const configFile = stack.ConfigFiles.split(",")[0].trim();
+
+  useEffect(() => {
+    let content = "";
+    const proc = readComposeFile(configFile);
+    proc.stream((d: string) => { content += d; });
+    void proc.then(() => setServiceProfileMap(getServiceProfileMapFromCompose(content)));
+  }, [configFile]);
 
   useEffect(() => {
     let raw = "";
@@ -217,6 +228,17 @@ export function StackInfoModal({ stack, onClose }: Props) {
                         <>
                           <span>Health</span>
                           <span>{c.Health}</span>
+                        </>
+                      )}
+
+                      {(serviceProfileMap[c.Service ?? ""] ?? []).length > 0 && (
+                        <>
+                          <span>{t("info_modal.profiles_label")}</span>
+                          <span style={{ display: "flex", gap: "0.25rem", flexWrap: "wrap" }}>
+                            {(serviceProfileMap[c.Service ?? ""] ?? []).map(p => (
+                              <Label key={p} isCompact color="purple">{p}</Label>
+                            ))}
+                          </span>
                         </>
                       )}
                     </div>

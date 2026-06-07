@@ -15,13 +15,14 @@ import "./UpModal.css";
 
 interface Props {
   stack: ComposeStack;
+  profiles?: string[];
   onClose: (succeeded: boolean) => void;
 }
 
-export function UpModal({ stack, onClose }: Props) {
+export function UpModal({ stack, profiles = [], onClose }: Props) {
   const { t } = useTranslation();
   const configFile = stack.ConfigFiles.split(",")[0].trim();
-  const { lines, done, failed, errorMsg, cancel } = useUpStream(stack.Name, configFile);
+  const { lines, done, failed, errorMsg, cancel } = useUpStream(stack.Name, configFile, profiles);
   const logRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

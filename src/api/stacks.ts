@@ -6,25 +6,43 @@ export function listStacks(): CockpitProcess {
   });
 }
 
-export function startStack(project: string, configFile: string, superuser?: "try"): CockpitProcess {
+export function startStack(project: string, configFile: string, profiles: string[] = [], superuser?: "try"): CockpitProcess {
+  const profileFlags = profiles.flatMap(p => ["--profile", p]);
   return cockpit.spawn(
-    compose("-p", project, "-f", configFile, "up", "-d"),
+    compose(...profileFlags, "-p", project, "-f", configFile, "up", "-d"),
     { superuser, err: "message" },
   );
 }
 
-export function stopStack(project: string, configFile: string, superuser?: "try"): CockpitProcess {
+export function stopStack(project: string, configFile: string, profiles: string[] = [], superuser?: "try"): CockpitProcess {
+  const profileFlags = profiles.flatMap(p => ["--profile", p]);
   return cockpit.spawn(
-    compose("-p", project, "-f", configFile, "stop"),
+    compose(...profileFlags, "-p", project, "-f", configFile, "stop"),
     { superuser, err: "message" },
   );
 }
 
-export function restartStack(project: string, configFile: string, superuser?: "try"): CockpitProcess {
+export function restartStack(project: string, configFile: string, profiles: string[] = [], services: string[] = [], superuser?: "try"): CockpitProcess {
+  const profileFlags = profiles.flatMap(p => ["--profile", p]);
   return cockpit.spawn(
-    compose("-p", project, "-f", configFile, "restart"),
+    compose(...profileFlags, "-p", project, "-f", configFile, "restart", ...services),
     { superuser, err: "message" },
   );
+}
+
+// Returns deduplicated service names for containers currently in "running" state.
+export async function readRunningServiceNames(project: string): Promise<string[]> {
+  try {
+    let raw = "";
+    const proc = cockpit.spawn(
+      ["docker", "ps", "--filter", `label=com.docker.compose.project=${project}`, "--filter", "status=running",
+        "--format", `{{index .Labels "com.docker.compose.service"}}`],
+      { err: "message" },
+    );
+    proc.stream((d: string) => { raw += d; });
+    await proc;
+    return [...new Set(raw.split("\n").map(l => l.trim()).filter(l => l.length > 0))];
+  } catch { return []; }
 }
 
 export function streamLogs(project: string, service?: string): CockpitProcess {
@@ -35,46 +53,52 @@ export function streamLogs(project: string, service?: string): CockpitProcess {
   );
 }
 
-export function downStack(project: string, configFile: string, superuser?: "try"): CockpitProcess {
+export function downStack(project: string, configFile: string, profiles: string[] = [], superuser?: "try"): CockpitProcess {
+  const profileFlags = profiles.flatMap(p => ["--profile", p]);
   return cockpit.spawn(
-    compose("-p", project, "-f", configFile, "down"),
+    compose(...profileFlags, "-p", project, "-f", configFile, "down"),
     { superuser, err: "message" },
   );
 }
 
-export function upStackStream(project: string, configFile: string, superuser?: "try"): CockpitProcess {
+export function upStackStream(project: string, configFile: string, profiles: string[], superuser?: "try"): CockpitProcess {
   // err:"out" merges stderr into the streamable stdout so the log viewer gets all output
+  const profileFlags = profiles.flatMap(p => ["--profile", p]);
   return cockpit.spawn(
-    compose("--progress", "plain", "-p", project, "-f", configFile, "up", "-d"),
+    compose(...profileFlags, "--progress", "plain", "-p", project, "-f", configFile, "up", "-d"),
     { superuser, err: "out" },
   );
 }
 
-export function pullStack(project: string, configFile: string, superuser?: "try"): CockpitProcess {
+export function pullStack(project: string, configFile: string, profiles: string[] = [], superuser?: "try"): CockpitProcess {
   // err:"out" merges stderr (where Docker sends progress) into the streamable stdout
+  const profileFlags = profiles.flatMap(p => ["--profile", p]);
   return cockpit.spawn(
-    compose("--progress", "plain", "-p", project, "-f", configFile, "pull"),
+    compose(...profileFlags, "--progress", "plain", "-p", project, "-f", configFile, "pull"),
     { superuser, err: "out" },
   );
 }
 
-export function pauseStack(project: string, configFile: string, superuser?: "try"): CockpitProcess {
+export function pauseStack(project: string, configFile: string, profiles: string[] = [], superuser?: "try"): CockpitProcess {
+  const profileFlags = profiles.flatMap(p => ["--profile", p]);
   return cockpit.spawn(
-    compose("-p", project, "-f", configFile, "pause"),
+    compose(...profileFlags, "-p", project, "-f", configFile, "pause"),
     { superuser, err: "message" },
   );
 }
 
-export function unpauseStack(project: string, configFile: string, superuser?: "try"): CockpitProcess {
+export function unpauseStack(project: string, configFile: string, profiles: string[] = [], superuser?: "try"): CockpitProcess {
+  const profileFlags = profiles.flatMap(p => ["--profile", p]);
   return cockpit.spawn(
-    compose("-p", project, "-f", configFile, "unpause"),
+    compose(...profileFlags, "-p", project, "-f", configFile, "unpause"),
     { superuser, err: "message" },
   );
 }
 
-export function killStack(project: string, configFile: string, superuser?: "try"): CockpitProcess {
+export function killStack(project: string, configFile: string, profiles: string[] = [], superuser?: "try"): CockpitProcess {
+  const profileFlags = profiles.flatMap(p => ["--profile", p]);
   return cockpit.spawn(
-    compose("-p", project, "-f", configFile, "kill"),
+    compose(...profileFlags, "-p", project, "-f", configFile, "kill"),
     { superuser, err: "message" },
   );
 }

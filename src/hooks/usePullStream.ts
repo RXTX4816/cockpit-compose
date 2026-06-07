@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { pullStack, composeFileSuperuser } from "../api";
+import { pullStack, composeFileSuperuser, readAllProfiles } from "../api";
 import { stripAnsi, classifyLine, type LineEntry } from "../lib/pullParser";
 
 export function usePullStream(stackName: string, configFile: string) {
@@ -12,9 +12,9 @@ export function usePullStream(stackName: string, configFile: string) {
 
   useEffect(() => {
     let cancelled = false;
-    composeFileSuperuser(configFile).then(su => {
+    Promise.all([composeFileSuperuser(configFile), readAllProfiles(configFile)]).then(([su, profiles]) => {
       if (cancelled) return;
-      const proc = pullStack(stackName, configFile, su);
+      const proc = pullStack(stackName, configFile, profiles, su);
       procRef.current = proc;
 
       proc.stream(data => {

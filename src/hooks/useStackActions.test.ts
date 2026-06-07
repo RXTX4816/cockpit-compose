@@ -4,6 +4,15 @@ import { useStackActions } from "./useStackActions";
 import { mockSpawn } from "../test/setup";
 import { mockProcess } from "../test/helpers";
 
+vi.mock("../api", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../api")>();
+  return {
+    ...actual,
+    readAllProfiles: vi.fn().mockResolvedValue([]),
+    readRunningServiceNames: vi.fn().mockResolvedValue(["web"]),
+  };
+});
+
 beforeEach(() => { mockSpawn.mockReset(); });
 
 describe("useStackActions", () => {
@@ -35,7 +44,7 @@ describe("useStackActions", () => {
     expect(args).toContain("stop");
   });
 
-  it("doAction('restart') calls cockpit.spawn with restart args", async () => {
+  it("doAction('restart') calls cockpit.spawn with restart args and running service name", async () => {
     mockSpawn.mockReturnValue(mockProcess(""));
     const { result } = renderHook(() =>
       useStackActions("myapp", "/path/compose.yml", vi.fn()),
@@ -43,6 +52,18 @@ describe("useStackActions", () => {
     await act(() => result.current.doAction("restart"));
     const args = mockSpawn.mock.calls[0][0] as string[];
     expect(args).toContain("restart");
+    expect(args).toContain("web");
+  });
+
+  it("doAction('restart') does not spawn when no services are running", async () => {
+    const { readRunningServiceNames } = await import("../api");
+    vi.mocked(readRunningServiceNames).mockResolvedValueOnce([]);
+    mockSpawn.mockReturnValue(mockProcess(""));
+    const { result } = renderHook(() =>
+      useStackActions("myapp", "/path/compose.yml", vi.fn()),
+    );
+    await act(() => result.current.doAction("restart"));
+    expect(mockSpawn).not.toHaveBeenCalled();
   });
 
   it("sets acting=true during action and false after", async () => {

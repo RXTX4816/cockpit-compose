@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { downStack, composeFileSuperuser, type ComposeStack } from "../api";
+import { downStack, composeFileSuperuser, readAllProfiles, type ComposeStack } from "../api";
 
 export function useDownStack(
   onSuccess: () => void,
@@ -27,8 +27,8 @@ export function useDownStack(
     onActingChange(1);
     setError(null);
     try {
-      const su = await composeFileSuperuser(configFile);
-      await downStack(target.Name, configFile, su);
+      const [su, profiles] = await Promise.all([composeFileSuperuser(configFile), readAllProfiles(configFile)]);
+      await downStack(target.Name, configFile, profiles, su);
       onDownComplete?.(target);
       setTarget(null);
       onSuccess();

@@ -15,6 +15,7 @@ import {
 import { type ComposeStack } from "../api";
 import { type DownedStack, useDownedStacksScan } from "../hooks/useDownedStacksScan";
 import { UpModal } from "./UpModal";
+import { UpConfirmModal } from "./UpConfirmModal";
 import { YamlModal } from "./YamlModal";
 import { CreateStackModal } from "./CreateStackModal";
 import { DeleteStackModal } from "./DeleteStackModal";
@@ -60,7 +61,9 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
   const [createOpen, setCreateOpen] = useState(false);
   const [composeDir, setComposeDir] = useState("");
   const [maxDepth, setMaxDepth] = useState(2);
+  const [upConfirmTarget, setUpConfirmTarget] = useState<DownedStack | null>(null);
   const [upTarget, setUpTarget] = useState<DownedStack | null>(null);
+  const [upTargetProfiles, setUpTargetProfiles] = useState<string[]>([]);
   const [yamlTarget, setYamlTarget] = useState<DownedStack | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<DownedStack | null>(null);
   const autoDetectedRef = useRef(false);
@@ -242,7 +245,7 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
                             <code className="dss-config-path">{d.configFile}</code>
                           </DataListCell>,
                           <DataListCell key="actions" width={2} className="dss-actions">
-                            <Button variant="primary" size="sm" onClick={() => setUpTarget(d)}>
+                            <Button variant="primary" size="sm" onClick={() => setUpConfirmTarget(d)}>
                               ↑ {t("actions.up")}
                             </Button>
                             <Button variant="plain" size="sm" onClick={() => setYamlTarget(d)} title={t("downed_section.edit_title")}>
@@ -269,9 +272,17 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
         </>
       )}
 
+      {upConfirmTarget && (
+        <UpConfirmModal
+          stack={toSyntheticStack(upConfirmTarget)}
+          onConfirm={(profiles) => { setUpTargetProfiles(profiles); setUpTarget(upConfirmTarget); setUpConfirmTarget(null); }}
+          onClose={() => setUpConfirmTarget(null)}
+        />
+      )}
       {upTarget && (
         <UpModal
           stack={toSyntheticStack(upTarget)}
+          profiles={upTargetProfiles}
           onClose={(succeeded) => handleUpClose(upTarget.name, succeeded)}
         />
       )}

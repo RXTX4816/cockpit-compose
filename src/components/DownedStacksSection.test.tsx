@@ -5,6 +5,14 @@ import { DownedStacksSection, inferComposeRoot } from "./DownedStacksSection";
 vi.mock("../hooks/useDownedStacksScan", () => ({
   useDownedStacksScan: vi.fn(),
 }));
+vi.mock("./UpConfirmModal", () => ({
+  UpConfirmModal: ({ onConfirm, onClose }: { onConfirm: (profiles: string[]) => void; onClose: () => void }) => (
+    <div data-testid="up-confirm-modal">
+      <button onClick={() => onConfirm([])}>ConfirmUp</button>
+      <button onClick={onClose}>CancelConfirm</button>
+    </div>
+  ),
+}));
 vi.mock("./UpModal", () => ({
   UpModal: ({ stack, onClose }: { stack: { Name: string }; onClose: (succeeded: boolean) => void }) => (
     <div data-testid="up-modal">
@@ -275,13 +283,15 @@ describe("DownedStacksSection — Down section content", () => {
     expect(screen.getAllByText("myapp")).toHaveLength(1);
   });
 
-  it("↑ Up button opens UpModal", () => {
+  it("↑ Up button opens UpConfirmModal then UpModal after confirm", () => {
     mockUseScan.mockReturnValue(defaultScanResult({
       downedStacks: [{ name: "myapp", configFile: "/etc/docker/compose/myapp/docker-compose.yml" }],
       hasScanned: true,
     }));
     render(<DownedStacksSection {...defaultProps} />);
     fireEvent.click(screen.getByRole("button", { name: /↑ Up/i }));
+    expect(screen.getByTestId("up-confirm-modal")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /ConfirmUp/i }));
     expect(screen.getByTestId("up-modal")).toBeInTheDocument();
     expect(screen.getByText("UpModal:myapp")).toBeInTheDocument();
   });
@@ -296,6 +306,7 @@ describe("DownedStacksSection — Down section content", () => {
     const onUpComplete = vi.fn();
     render(<DownedStacksSection {...defaultProps} onRefresh={onRefresh} onUpComplete={onUpComplete} />);
     fireEvent.click(screen.getByRole("button", { name: /↑ Up/i }));
+    fireEvent.click(screen.getByRole("button", { name: /ConfirmUp/i }));
     fireEvent.click(screen.getByRole("button", { name: /^Close$/ }));
     expect(onUpComplete).toHaveBeenCalledWith("myapp");
     expect(onRefresh).toHaveBeenCalledOnce();
@@ -312,11 +323,11 @@ describe("DownedStacksSection — Down section content", () => {
     const onUpComplete = vi.fn();
     render(<DownedStacksSection {...defaultProps} onRefresh={onRefresh} onUpComplete={onUpComplete} />);
     fireEvent.click(screen.getByRole("button", { name: /↑ Up/i }));
+    fireEvent.click(screen.getByRole("button", { name: /ConfirmUp/i }));
     fireEvent.click(screen.getByRole("button", { name: /CloseFailed/i }));
     expect(onUpComplete).not.toHaveBeenCalled();
     expect(onRefresh).not.toHaveBeenCalled();
     expect(noopRemove).not.toHaveBeenCalled();
-    // modal is gone but stack row is still visible (mock removeStack was not called)
     expect(screen.queryByTestId("up-modal")).not.toBeInTheDocument();
   });
 
