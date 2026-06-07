@@ -6,8 +6,10 @@ Cockpit Compose is a web-based UI for managing [Docker Compose](https://docs.doc
 
 - See all your Compose stacks at a glance with live CPU and memory usage
 - Start, stop, restart, pause, or forcefully kill stacks with one click
-- Edit your `docker-compose.yml` and `.env` files in a built-in editor with schema validation
-- Stream real-time logs, Docker events, and process lists
+- Edit compose files in a built-in editor with schema validation, diff view, and snapshots
+- Manage multiple compose files per stack (base + overrides)
+- Stream real-time logs with per-service filtering and text search
+- Run one-off commands inside a service container
 - Open an interactive shell inside any running service container
 - Pull the latest images and preview what will change before applying
 - Clean up unused images, containers, volumes, and networks
@@ -20,13 +22,14 @@ Cockpit Compose is a web-based UI for managing [Docker Compose](https://docs.doc
 |---|---|
 | [Stacks Dashboard](Stacks-Dashboard) | The main screen — stack list, status indicators, stats, and action buttons |
 | [Managing Stacks](Managing-Stacks) | Up, Start, Stop, Down, Restart, Pause / Unpause, Kill |
-| [Viewing Logs](Viewing-Logs) | Streaming logs modal |
-| [Editing Configuration](Editing-Configuration) | YAML editor, env file editor, snapshots |
-| [Stack Info](Stack-Info) | Containers, images, and volumes details |
+| [Viewing Logs](Viewing-Logs) | Streaming logs with service filter and search |
+| [Editing Configuration](Editing-Configuration) | YAML editor, multi-file tabs, diff view, snapshots, env file editor |
+| [Stack Info](Stack-Info) | Containers, images, volumes, and networks |
 | [Pulling Images](Pulling-Images) | Pull latest images with a warning about breaking changes |
 | [Events](Events) | Live Docker event stream |
 | [Process Viewer](Process-Viewer) | Running processes inside containers (docker compose top) |
 | [Shell Access](Shell-Access) | Interactive terminal inside a service container |
+| [Running Commands](Running-Commands) | Run one-off commands with docker compose run |
 | [Prune Resources](Prune-Resources) | Remove unused images, containers, volumes, and networks |
 | [Creating Stacks](Creating-Stacks) | Create a new stack from Git, a template, or manually |
 | [Importing Stacks](Importing-Stacks) | Scan a directory to find and manage offline stacks |

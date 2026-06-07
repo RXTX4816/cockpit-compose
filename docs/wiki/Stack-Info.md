@@ -1,6 +1,6 @@
 # Stack Info
 
-The Stack Info modal shows a detailed snapshot of everything associated with a stack: its running containers, the images they use, and any named volumes.
+The Stack Info modal shows a detailed snapshot of everything associated with a stack: its running containers, the images they use, any named volumes, and the networks it participates in.
 
 ## Opening the modal
 
@@ -10,7 +10,7 @@ Click the **Info** button on any stack row.
 
 ### Compose file
 
-Shows the full path to the `docker-compose.yml` file on disk, for quick reference.
+Shows the full path to the compose file on disk, for quick reference.
 
 ---
 
@@ -58,6 +58,19 @@ A table of named volumes associated with the stack.
 | **Mountpoint** | The path on the host where the volume data is stored |
 
 > **Note:** If your Docker Compose installation does not support the `volumes` subcommand, this section displays: "Not available on this Docker Compose version."
+
+---
+
+### Networks
+
+A table of networks created by this stack.
+
+| Column | Description |
+|---|---|
+| **Name** | The network name |
+| **Shared with** | Other stacks that are also connected to this network, if any |
+
+Networks shared with other stacks are flagged with an icon. This is useful for understanding cross-stack dependencies before running **Down** — removing a shared network will affect those other stacks.
 
 ---
 

@@ -37,28 +37,44 @@ Cockpit Compose does not automatically scan your entire filesystem. You tell it 
 1. Click the **▼ Import** button to expand the import controls.
 
    ```
-   ┌───────────────────────────────────────────────────────┐
-   │  [Best match]  [/etc/docker/compose          ] [Scan] │
-   └───────────────────────────────────────────────────────┘
+   ┌─────────────────────────────────────────────────────────────────┐
+   │  [Best match]  [/etc/docker/compose      ]  Depth: [−] 2 [+]  [Scan] │
+   └─────────────────────────────────────────────────────────────────┘
    ```
 
 2. Optionally click **Best match** to auto-fill the directory path with the best guess based on where your active stacks are stored (disabled if no active stacks are running).
 
 3. Enter a directory path in the text field, for example `/etc/docker/compose` or `/home/user/projects`.
 
-4. Click **Scan**. A spinner appears with "Scanning…" while the directory is being searched.
+4. Adjust the **Scan depth** if needed (see below).
+
+5. Click **Scan**. A spinner appears with "Scanning…" while the directory is being searched.
+
+### Scan depth
+
+The **Depth** stepper controls how many directory levels deep the scan will look for compose files. The default is **2**, which finds stacks in a typical layout like `/compose-root/stack-name/docker-compose.yml`.
+
+| Depth | Example paths found |
+|---|---|
+| 1 | `/compose-root/docker-compose.yml` |
+| 2 | `/compose-root/stack-name/docker-compose.yml` *(default)* |
+| 3 | `/compose-root/group/stack-name/docker-compose.yml` |
+
+Use the **−** and **+** buttons to decrease or increase the depth (range: 1–5). A deeper scan covers more levels but takes longer and may surface compose files you don't intend to manage.
 
 ### Scan results
 
-Cockpit Compose searches the directory for any files named `docker-compose.yml`, `docker-compose.yaml`, `compose.yml`, or `compose.yaml`. For each one found, it checks if the stack is already running. Stacks that are not currently running appear in the list below.
+Cockpit Compose searches the directory for any files named `docker-compose.yml`, `docker-compose.yaml`, `compose.yml`, or `compose.yaml` up to the configured depth. Stacks that are not currently running appear in the list below.
 
 **If no compose files are found:**
 
 > ⚠ Are you sure this is a compose parent directory?
 
-This warning means either the directory is empty, there are no compose files in it, or all found stacks are already running.
+This warning means either the directory is empty, there are no compose files within the scan depth, or all found stacks are already running.
 
-**If the scan fails (permission error, directory not found, etc.):** A red error alert is shown with the error message.
+**If some directories were inaccessible:** A warning notice is shown, but results from accessible directories are still displayed.
+
+**If the scan fails entirely (permission error, directory not found, etc.):** A red error alert is shown with the error message.
 
 ## Deleting a stack
 
@@ -81,6 +97,8 @@ Click **✕ Delete** on any stopped stack row to permanently delete its compose 
 │                         [Delete]  [Cancel]           │
 └──────────────────────────────────────────────────────┘
 ```
+
+If the stack uses shared networks (also used by other running stacks), a warning is shown before you proceed.
 
 Choose whether to delete only the compose file or the entire folder (including env files and any other files inside).
 

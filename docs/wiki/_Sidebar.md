@@ -13,6 +13,7 @@
 - [Events](Events)
 - [Process Viewer](Process-Viewer)
 - [Shell Access](Shell-Access)
+- [Running Commands](Running-Commands)
 - [Prune Resources](Prune-Resources)
 
 **Stack Management**

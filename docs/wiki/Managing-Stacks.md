@@ -10,12 +10,13 @@ This page covers all the lifecycle actions you can perform on a stack: bringing 
 
 ### Confirmation step
 
-Before the operation starts, a confirmation modal appears if the stack has services that use unpinned images (`:latest` or no tag):
+Before the operation starts, a confirmation modal always appears. It shows:
 
-> Containers with changed configuration will be recreated.  
-> Images tagged `:latest` may pull a newer version.
+- A warning that containers with changed configuration will be recreated.
+- A list of every service and its image. Services using unpinned images (`:latest` or no tag) are marked with a **⚠** warning.
+- An **Optional profiles** section — if your compose file defines [profiles](https://docs.docker.com/compose/profiles/), checkboxes appear here so you can select which ones to activate. Only services tagged with a selected profile will start. Services without any profile tag always start regardless.
 
-Each service is listed. Services with unpinned images are marked with a **⚠** warning. Click **Up** to proceed or **Cancel** to abort.
+Click **Up** to proceed or **Cancel** to abort.
 
 ### Progress modal
 
@@ -60,6 +61,8 @@ A confirmation modal appears:
 
 > Running `docker compose down` will stop and remove all containers for **[stack name]**.  
 > The stack will disappear from this list.
+
+If any of the stack's networks are also used by other running stacks, a warning is shown listing which stacks share those networks. Proceeding will remove the network, which may affect the other stacks.
 
 Click **Down (remove)** to proceed or **Cancel** to abort.
 

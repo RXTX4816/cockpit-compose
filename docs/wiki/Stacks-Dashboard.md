@@ -55,11 +55,11 @@ Stats (CPU and memory) only display for stacks with at least one running contain
 | **Logs** | Open the logs viewer — see [Viewing Logs](Viewing-Logs) |
 | **Edit** | Open the YAML editor — see [Editing Configuration](Editing-Configuration) |
 | **Info** | Open the stack info panel — see [Stack Info](Stack-Info) |
-| **⋮ (more)** | Restart, Pause/Unpause, Events, Top, Shell, Prune, Kill |
+| **⋮ (more)** | Restart, Pause/Unpause, Events, Top, Shell, Run, Prune, Kill |
 
 The **Up** button is highlighted (primary) when the stack is stopped. **Stop** and **Start** are secondary. **Down**, **Pull**, **Logs**, **Edit**, **Info**, and the more menu are plain style.
 
-Buttons are disabled when they are not applicable. For example, Restart, Pause, Events, Top, and Shell are disabled for a stopped stack.
+Buttons are disabled when they are not applicable. For example, Restart, Pause, Events, Top, Shell, and Run are disabled for a stopped stack.
 
 ### Expanded row (container list)
 
