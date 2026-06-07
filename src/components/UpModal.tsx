@@ -21,8 +21,8 @@ interface Props {
 
 export function UpModal({ stack, profiles = [], onClose }: Props) {
   const { t } = useTranslation();
-  const configFile = stack.ConfigFiles.split(",")[0].trim();
-  const { lines, done, failed, errorMsg, cancel } = useUpStream(stack.Name, configFile, profiles);
+  const configFiles = stack.ConfigFiles.split(",").map(f => f.trim());
+  const { lines, done, failed, errorMsg, cancel } = useUpStream(stack.Name, configFiles, profiles);
   const logRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

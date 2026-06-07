@@ -35,21 +35,27 @@ async function statOwnerUid(path: string): Promise<number> {
 //
 // When the compose file doesn't exist yet (e.g., creating a new stack), only
 // the parent directory ownership is checked, which is sufficient.
-export async function composeFileSuperuser(configFile: string): Promise<"try" | undefined> {
+async function checkOneFile(configFile: string, user: { id: number }): Promise<"try" | undefined> {
+  const parentDir = configFile.lastIndexOf("/") > 0
+    ? configFile.substring(0, configFile.lastIndexOf("/"))
+    : "/";
+  const dirUid = await statOwnerUid(parentDir);
+  if (dirUid !== user.id) return "try";
   try {
-    const parentDir = configFile.lastIndexOf("/") > 0
-      ? configFile.substring(0, configFile.lastIndexOf("/"))
-      : "/";
+    const fileUid = await statOwnerUid(configFile);
+    return fileUid === user.id ? undefined : "try";
+  } catch {
+    return undefined;
+  }
+}
+
+export async function composeFileSuperuser(configFiles: string[]): Promise<"try" | undefined> {
+  try {
     const user = await cockpit.user();
-    const dirUid = await statOwnerUid(parentDir);
-    if (dirUid !== user.id) return "try";
-    try {
-      const fileUid = await statOwnerUid(configFile);
-      return fileUid === user.id ? undefined : "try";
-    } catch {
-      // File doesn't exist yet — parent directory check is sufficient.
-      return undefined;
+    for (const f of configFiles) {
+      if (await checkOneFile(f, user) === "try") return "try";
     }
+    return undefined;
   } catch {
     return "try";
   }

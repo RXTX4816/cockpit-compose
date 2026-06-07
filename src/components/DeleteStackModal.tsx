@@ -30,10 +30,12 @@ export function DeleteStackModal({ stack, onClose, onDeleted }: Props) {
   const { sharedNetworks, loading: loadingNetworks } = useSharedNetworks(stack.name, true);
   const sharedOnes = sharedNetworks.filter(n => n.sharedWith.length > 0);
 
-  const folderPath = stack.configFile.slice(0, stack.configFile.lastIndexOf("/"));
+  const folderPath = stack.configFiles[0].slice(0, stack.configFiles[0].lastIndexOf("/"));
   const target = deleteFolder
     ? t("delete_modal.target_folder", { folder: folderPath })
-    : t("delete_modal.target_file", { file: stack.configFile });
+    : stack.configFiles.length === 1
+      ? t("delete_modal.target_file", { file: stack.configFiles[0] })
+      : t("delete_modal.target_files", { count: stack.configFiles.length });
 
   const handleDelete = async () => {
     setDeleting(true);
@@ -42,7 +44,9 @@ export function DeleteStackModal({ stack, onClose, onDeleted }: Props) {
       if (deleteFolder) {
         await removeDirectory(folderPath);
       } else {
-        await removeFile(stack.configFile);
+        for (const f of stack.configFiles) {
+          await removeFile(f);
+        }
       }
       onDeleted();
       onClose();
@@ -69,9 +73,14 @@ export function DeleteStackModal({ stack, onClose, onDeleted }: Props) {
             {t("delete_modal.cannot_undo_body")}
           </Alert>
 
-          <p style={{ marginBottom: "0.75rem", fontSize: "0.875rem" }}>
-            {t("delete_modal.compose_file_label")} <code>{stack.configFile}</code>
-          </p>
+          <div style={{ marginBottom: "0.75rem", fontSize: "0.875rem" }}>
+            <p style={{ margin: "0 0 0.25rem" }}>{t("delete_modal.compose_files_label")}</p>
+            <ul style={{ margin: 0, paddingLeft: "1.25rem" }}>
+              {stack.configFiles.map(f => (
+                <li key={f}><code>{f}</code></li>
+              ))}
+            </ul>
+          </div>
 
           <Checkbox
             id="dsm-delete-folder"

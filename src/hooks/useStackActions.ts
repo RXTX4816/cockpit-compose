@@ -3,12 +3,13 @@ import { startStack, stopStack, restartStack, readRunningServiceNames, pauseStac
 
 export function useStackActions(
   stackName: string,
-  configFile: string,
+  configFiles: string[],
   onActingChange: (delta: 1 | -1) => void,
 ) {
   const [acting, setActing] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
 
+  const configFilesKey = configFiles.join(",");
   const doAction = useCallback(async (
     action: "start" | "stop" | "restart" | "pause" | "unpause",
     onSuccess?: () => Promise<void>,
@@ -17,14 +18,14 @@ export function useStackActions(
     onActingChange(1);
     setActionError(null);
     try {
-      const [su, profiles] = await Promise.all([composeFileSuperuser(configFile), readAllProfiles(configFile)]);
-      if (action === "start") await startStack(stackName, configFile, profiles, su);
-      else if (action === "stop") await stopStack(stackName, configFile, profiles, su);
+      const [su, profiles] = await Promise.all([composeFileSuperuser(configFiles), readAllProfiles(configFiles[0])]);
+      if (action === "start") await startStack(stackName, configFiles, profiles, su);
+      else if (action === "stop") await stopStack(stackName, configFiles, profiles, su);
       else if (action === "restart") {
         const runningServices = await readRunningServiceNames(stackName);
-        if (runningServices.length > 0) await restartStack(stackName, configFile, profiles, runningServices, su);
-      } else if (action === "pause") await pauseStack(stackName, configFile, profiles, su);
-      else await unpauseStack(stackName, configFile, profiles, su);
+        if (runningServices.length > 0) await restartStack(stackName, configFiles, profiles, runningServices, su);
+      } else if (action === "pause") await pauseStack(stackName, configFiles, profiles, su);
+      else await unpauseStack(stackName, configFiles, profiles, su);
       await onSuccess?.();
     } catch (ex: unknown) {
       setActionError(ex instanceof Error ? ex.message : String(ex));
@@ -32,7 +33,8 @@ export function useStackActions(
       setActing(false);
       onActingChange(-1);
     }
-  }, [stackName, configFile, onActingChange]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stackName, configFilesKey, onActingChange]);
 
   return { acting, actionError, doAction };
 }

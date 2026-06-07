@@ -61,7 +61,8 @@ export function StackInfoModal({ stack, onClose }: Props) {
 
   const [serviceProfileMap, setServiceProfileMap] = useState<Record<string, string[]>>({});
 
-  const configFile = stack.ConfigFiles.split(",")[0].trim();
+  const configFiles = stack.ConfigFiles.split(",").map(f => f.trim());
+  const configFile = configFiles[0];
 
   useEffect(() => {
     let content = "";
@@ -87,7 +88,7 @@ export function StackInfoModal({ stack, onClose }: Props) {
 
   useEffect(() => {
     let raw = "";
-    const proc = listImages(stack.Name, configFile);
+    const proc = listImages(stack.Name, stack.ConfigFiles.split(",").map(f => f.trim()));
     proc.stream(d => { raw += d; });
     proc
       .then(() => {
@@ -98,11 +99,11 @@ export function StackInfoModal({ stack, onClose }: Props) {
         setImageError(ex instanceof Error ? ex.message : String(ex));
         setLoadingImages(false);
       });
-  }, [stack.Name, configFile]);
+  }, [stack.Name, stack.ConfigFiles]);
 
   useEffect(() => {
     let raw = "";
-    const proc = listVolumes(stack.Name, configFile);
+    const proc = listVolumes(stack.Name, stack.ConfigFiles.split(",").map(f => f.trim()));
     proc.stream(d => { raw += d; });
     proc
       .then(() => {
@@ -119,7 +120,7 @@ export function StackInfoModal({ stack, onClose }: Props) {
         }
         setLoadingVolumes(false);
       });
-  }, [stack.Name, configFile]);
+  }, [stack.Name, stack.ConfigFiles]);
 
   useEffect(() => {
     let cancelled = false;

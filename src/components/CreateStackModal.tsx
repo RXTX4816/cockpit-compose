@@ -27,6 +27,15 @@ import "./CreateStackModal.css";
 type Method = "git" | "template" | "manual";
 type Step = "setup" | "detail";
 
+let _nextEntryId = 0;
+function genEntryId() { return String(++_nextEntryId); }
+
+interface AdditionalFileEntry {
+  id: string;
+  filename: string;
+  content: string;
+}
+
 interface Props {
   stacks: ComposeStack[];
   onClose: () => void;
@@ -41,10 +50,26 @@ const MANUAL_STUB = `services:
     restart: unless-stopped
 `;
 
+const ADDITIONAL_STUB = `services:
+  my-service:
+    image: my-image:latest
+`;
+
 function nameValid(name: string, t: TFunction): string | null {
   if (!name.trim()) return t("create_modal.validation_name_required");
   if (/[/\\]/.test(name)) return t("create_modal.validation_name_slashes");
   if (/\s/.test(name)) return t("create_modal.validation_name_spaces");
+  return null;
+}
+
+const PRIMARY_FILENAMES = new Set(["docker-compose.yml", "docker-compose.yaml", "compose.yml", "compose.yaml"]);
+
+function additionalFilenameError(filename: string, idx: number, allEntries: AdditionalFileEntry[], t: TFunction): string | null {
+  if (!filename.trim()) return t("create_modal.validation_extra_name_required");
+  if (/[/\\]/.test(filename)) return t("create_modal.validation_extra_name_slashes");
+  if (!/\.(yml|yaml)$/.test(filename)) return t("create_modal.validation_extra_name_extension");
+  if (PRIMARY_FILENAMES.has(filename)) return t("create_modal.validation_extra_name_duplicate_primary");
+  if (allEntries.some((e, i) => i !== idx && e.filename === filename)) return t("create_modal.validation_extra_name_duplicate");
   return null;
 }
 
@@ -73,6 +98,9 @@ export function CreateStackModal({ stacks, onClose, onCreated }: Props) {
   // Step 2 — Manual
   const [manualYaml, setManualYaml] = useState(MANUAL_STUB);
 
+  // Step 2 — Additional files
+  const [additionalFiles, setAdditionalFiles] = useState<AdditionalFileEntry[]>([]);
+
   // Common creation state
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
@@ -91,13 +119,10 @@ export function CreateStackModal({ stacks, onClose, onCreated }: Props) {
     setCheckingDir(true);
     const targetDir = `${composeDir.trim()}/${stackName.trim()}`;
     try {
-      // Check if target dir exists and is non-empty
-      // cockpit.file on a dir path will fail; use spawn to test
       let lsOutput = "";
       const lsProc = cockpit.spawn(["ls", "-A", "--", targetDir], { err: "message" });
       lsProc.stream((d: string) => { lsOutput += d; });
       await lsProc;
-      // Command succeeded → dir exists; check if non-empty
       if (lsOutput.trim() !== "") {
         setSetupError(t("create_modal.error_dir_exists", { dir: targetDir }));
         setCheckingDir(false);
@@ -137,7 +162,6 @@ export function CreateStackModal({ stacks, onClose, onCreated }: Props) {
       const cloneProc = fetchComposeFromGit(url, tmpDir);
       await cloneProc;
 
-      // Try to read compose file from repo root
       const candidates = ["docker-compose.yml", "compose.yml", "docker-compose.yaml", "compose.yaml"];
       let yaml: string | null = null;
       for (const candidate of candidates) {
@@ -197,11 +221,15 @@ export function CreateStackModal({ stacks, onClose, onCreated }: Props) {
     setConfirmCreate(false);
     const stackDir = `${composeDir.trim()}/${stackName.trim()}`;
     const configFile = `${stackDir}/docker-compose.yml`;
+    const extraPaths = additionalFiles.map(e => `${stackDir}/${e.filename.trim()}`);
     try {
-      const su = await composeFileSuperuser(configFile);
+      const su = await composeFileSuperuser([configFile, ...extraPaths]);
       await createDirectory(stackDir, su);
       await cockpit.file(configFile, { superuser: su }).replace(getYamlToWrite());
-      onCreated({ name: stackName.trim(), configFile });
+      for (const entry of additionalFiles) {
+        await cockpit.file(`${stackDir}/${entry.filename.trim()}`, { superuser: su }).replace(entry.content);
+      }
+      onCreated({ name: stackName.trim(), configFiles: [configFile, ...extraPaths] });
       onClose();
     } catch (ex: unknown) {
       const msg = ex instanceof Error ? ex.message : String(ex);
@@ -209,19 +237,41 @@ export function CreateStackModal({ stacks, onClose, onCreated }: Props) {
     } finally {
       setCreating(false);
     }
-  }, [composeDir, stackName, getYamlToWrite, onCreated, onClose, t]);
+  }, [composeDir, stackName, additionalFiles, getYamlToWrite, onCreated, onClose, t]);
 
   const handleCreate = useCallback(() => {
-    const diags = validateYaml(getYamlToWrite());
-    setDiagnostics(diags);
-    if (diags.some(d => d.severity === "error" || d.severity === "warning")) {
+    const primaryDiags = validateYaml(getYamlToWrite());
+    const extraDiags = additionalFiles.flatMap(e => validateYaml(e.content));
+    const allDiags = [...primaryDiags, ...extraDiags];
+    setDiagnostics(allDiags);
+    if (allDiags.some(d => d.severity === "error" || d.severity === "warning")) {
       setConfirmCreate(true);
       return;
     }
     void performCreate();
-  }, [validateYaml, getYamlToWrite, performCreate]);
+  }, [validateYaml, getYamlToWrite, additionalFiles, performCreate]);
 
-  const canCreate = !creating && (
+  const handleAddFile = useCallback(() => {
+    setAdditionalFiles(prev => [...prev, { id: genEntryId(), filename: "", content: ADDITIONAL_STUB }]);
+  }, []);
+
+  const handleRemoveFile = useCallback((id: string) => {
+    setAdditionalFiles(prev => prev.filter(e => e.id !== id));
+  }, []);
+
+  const handleAdditionalFilenameChange = useCallback((id: string, filename: string) => {
+    setAdditionalFiles(prev => prev.map(e => e.id === id ? { ...e, filename } : e));
+  }, []);
+
+  const handleAdditionalContentChange = useCallback((id: string, content: string) => {
+    setAdditionalFiles(prev => prev.map(e => e.id === id ? { ...e, content } : e));
+  }, []);
+
+  const allAdditionalValid = additionalFiles.every(
+    (e, idx) => additionalFilenameError(e.filename, idx, additionalFiles, t) === null
+  );
+
+  const canCreate = !creating && allAdditionalValid && (
     method === "git" ? fetchedYaml !== null :
     method === "template" ? selectedTemplate !== null :
     manualYaml.trim() !== ""
@@ -229,6 +279,47 @@ export function CreateStackModal({ stacks, onClose, onCreated }: Props) {
 
   const errorCount = diagnostics.filter(d => d.severity === "error").length;
   const warningCount = diagnostics.filter(d => d.severity === "warning").length;
+
+  const additionalFilesSection = step === "detail" && (
+    <div className="csm-additional-section">
+      <div className="csm-additional-header">
+        <span className="csm-additional-label">{t("create_modal.additional_files_label")}</span>
+        <Button variant="link" size="sm" onClick={handleAddFile}>
+          + {t("create_modal.add_file_button")}
+        </Button>
+      </div>
+      {additionalFiles.length > 0 && (
+        <Alert variant="info" isInline title={t("create_modal.additional_files_info_title")} className="csm-alert">
+          {t("create_modal.additional_files_info_body")}
+        </Alert>
+      )}
+      {additionalFiles.map((entry, idx) => {
+        const filenameErr = additionalFilenameError(entry.filename, idx, additionalFiles, t);
+        return (
+          <div key={entry.id} className="csm-additional-entry">
+            <div className="csm-additional-entry-header">
+              <TextInput
+                value={entry.filename}
+                onChange={(_e, v) => handleAdditionalFilenameChange(entry.id, v)}
+                placeholder={t("create_modal.field_extra_filename_placeholder")}
+                aria-label={t("create_modal.field_extra_filename")}
+                validated={entry.filename && filenameErr ? "error" : "default"}
+              />
+              <Button variant="link" isDanger size="sm" onClick={() => handleRemoveFile(entry.id)}>
+                {t("create_modal.remove_file_button")}
+              </Button>
+            </div>
+            {entry.filename && filenameErr && (
+              <div className="csm-field-error">{filenameErr}</div>
+            )}
+            <div className="csm-editor-wrapper">
+              <YamlEditor content={entry.content} onChange={v => handleAdditionalContentChange(entry.id, v)} />
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
 
   return (
     <>
@@ -389,6 +480,8 @@ export function CreateStackModal({ stacks, onClose, onCreated }: Props) {
             </div>
           </div>
         )}
+
+        {additionalFilesSection}
 
         {createError && (
           <Alert variant="danger" isInline title={createError} className="csm-alert" />

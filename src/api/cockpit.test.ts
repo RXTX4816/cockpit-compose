@@ -29,14 +29,14 @@ describe("composeFileSuperuser()", () => {
     mockUser.mockResolvedValue({ id: 1000, name: "user", home: "/home/user" });
     mockSpawn.mockImplementation(() => mockProcess("1000\n")); // dir and file both uid 1000
     const { composeFileSuperuser } = await import("./cockpit");
-    expect(await composeFileSuperuser("/home/user/myapp/compose.yml")).toBeUndefined();
+    expect(await composeFileSuperuser(["/home/user/myapp/compose.yml"])).toBeUndefined();
   });
 
   it("returns 'try' when parent directory is owned by a different user", async () => {
     mockUser.mockResolvedValue({ id: 1000, name: "user", home: "/home/user" });
     mockSpawn.mockImplementation(() => mockProcess("0\n")); // dir owned by root
     const { composeFileSuperuser } = await import("./cockpit");
-    expect(await composeFileSuperuser("/home/user/myapp/compose.yml")).toBe("try");
+    expect(await composeFileSuperuser(["/home/user/myapp/compose.yml"])).toBe("try");
   });
 
   it("returns 'try' when file is owned by a different user", async () => {
@@ -47,7 +47,7 @@ describe("composeFileSuperuser()", () => {
       return mockProcess(spawnCount === 1 ? "1000\n" : "0\n"); // dir ok, file owned by root
     });
     const { composeFileSuperuser } = await import("./cockpit");
-    expect(await composeFileSuperuser("/home/user/myapp/compose.yml")).toBe("try");
+    expect(await composeFileSuperuser(["/home/user/myapp/compose.yml"])).toBe("try");
   });
 
   it("returns undefined when file does not exist but parent dir is user-owned", async () => {
@@ -60,20 +60,20 @@ describe("composeFileSuperuser()", () => {
       return spawnCount === 1 ? mockProcess("1000\n") : mockProcess("", "No such file or directory");
     });
     const { composeFileSuperuser } = await import("./cockpit");
-    expect(await composeFileSuperuser("/home/user/newapp/compose.yml")).toBeUndefined();
+    expect(await composeFileSuperuser(["/home/user/newapp/compose.yml"])).toBeUndefined();
   });
 
   it("returns 'try' when stat of parent dir fails", async () => {
     mockUser.mockResolvedValue({ id: 1000, name: "user", home: "/home/user" });
     mockSpawn.mockImplementation(() => mockProcess("", "Permission denied"));
     const { composeFileSuperuser } = await import("./cockpit");
-    expect(await composeFileSuperuser("/home/user/myapp/compose.yml")).toBe("try");
+    expect(await composeFileSuperuser(["/home/user/myapp/compose.yml"])).toBe("try");
   });
 
   it("returns 'try' when cockpit.user() rejects", async () => {
     mockUser.mockRejectedValue(new Error("no user"));
     const { composeFileSuperuser } = await import("./cockpit");
-    expect(await composeFileSuperuser("/home/user/myapp/compose.yml")).toBe("try");
+    expect(await composeFileSuperuser(["/home/user/myapp/compose.yml"])).toBe("try");
   });
 });
 

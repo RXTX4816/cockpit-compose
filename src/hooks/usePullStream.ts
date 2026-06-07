@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { pullStack, composeFileSuperuser, readAllProfiles } from "../api";
 import { stripAnsi, classifyLine, type LineEntry } from "../lib/pullParser";
 
-export function usePullStream(stackName: string, configFile: string) {
+export function usePullStream(stackName: string, configFiles: string[]) {
   const [lines, setLines] = useState<LineEntry[]>([]);
   const [done, setDone] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -10,11 +10,12 @@ export function usePullStream(stackName: string, configFile: string) {
   const bufRef = useRef("");
   const procRef = useRef<CockpitProcess | null>(null);
 
+  const configFilesKey = configFiles.join(",");
   useEffect(() => {
     let cancelled = false;
-    Promise.all([composeFileSuperuser(configFile), readAllProfiles(configFile)]).then(([su, profiles]) => {
+    Promise.all([composeFileSuperuser(configFiles), readAllProfiles(configFiles[0])]).then(([su, profiles]) => {
       if (cancelled) return;
-      const proc = pullStack(stackName, configFile, profiles, su);
+      const proc = pullStack(stackName, configFiles, profiles, su);
       procRef.current = proc;
 
       proc.stream(data => {
@@ -44,7 +45,8 @@ export function usePullStream(stackName: string, configFile: string) {
     });
 
     return () => { cancelled = true; procRef.current?.close(); };
-  }, [stackName, configFile]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stackName, configFilesKey]);
 
   const cancel = useCallback(() => {
     procRef.current?.close();

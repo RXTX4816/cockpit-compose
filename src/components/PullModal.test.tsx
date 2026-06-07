@@ -98,10 +98,10 @@ describe("PullModal", () => {
     expect(onClose).toHaveBeenCalledOnce();
   });
 
-  it("uses first ConfigFile from comma-separated list", () => {
+  it("passes all ConfigFiles from comma-separated list to usePullStream", () => {
     const multiStack: ComposeStack = { ...stack, ConfigFiles: "/a.yml, /b.yml" };
     mockUsePullStream.mockReturnValue({ lines: [], done: false, failed: false, errorMsg: "", cancel: vi.fn() });
     render(<PullModal stack={multiStack} onClose={vi.fn()} />);
-    expect(mockUsePullStream).toHaveBeenCalledWith("myapp", "/a.yml");
+    expect(mockUsePullStream).toHaveBeenCalledWith("myapp", ["/a.yml", "/b.yml"]);
   });
 });

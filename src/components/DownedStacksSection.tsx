@@ -52,7 +52,7 @@ function isUnambiguousRoot(stacks: ComposeStack[], root: string): boolean {
 }
 
 function toSyntheticStack(d: DownedStack): ComposeStack {
-  return { Name: d.name, Status: "", ConfigFiles: d.configFile };
+  return { Name: d.name, Status: "", ConfigFiles: d.configFiles.join(",") };
 }
 
 export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, onUpComplete }: Props) {
@@ -66,18 +66,22 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
   const [upTargetProfiles, setUpTargetProfiles] = useState<string[]>([]);
   const [yamlTarget, setYamlTarget] = useState<DownedStack | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<DownedStack | null>(null);
+  const [configFileOverrides, setConfigFileOverrides] = useState<Record<string, string[]>>({});
   const autoDetectedRef = useRef(false);
 
-  const { downedStacks, scanning, hasScanned, error, warning, scan, removeStack, addStack }
+  const { downedStacks, scanning, hasScanned, error, warning, scan, removeStack, addStack, updateStack }
     = useDownedStacksScan(composeDir, maxDepth, stacks);
 
-  // Merge manually downed + scanned, dedup by name
+  // Merge manually downed + scanned, dedup by name, apply local config file overrides
   const combinedStacks: DownedStack[] = [
     ...manuallyDownedStacks,
     ...downedStacks.filter(d =>
       !manuallyDownedStacks.some(m => m.name.toLowerCase() === d.name.toLowerCase())
     ),
-  ];
+  ].map(d => {
+    const override = configFileOverrides[d.name.toLowerCase()];
+    return override ? { ...d, configFiles: override } : d;
+  });
 
   // Auto-detect the compose root on first stacks load if unambiguous
   useEffect(() => {
@@ -242,7 +246,10 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
                             <Label color="grey" isCompact className="dss-status-label">{t("downed_section.down_status")}</Label>
                           </DataListCell>,
                           <DataListCell key="path" width={3}>
-                            <code className="dss-config-path">{d.configFile}</code>
+                            <code className="dss-config-path">{d.configFiles[0]?.replace(/\/[^/]+$/, "") ?? ""}</code>
+                            {d.configFiles.length > 1 && (
+                              <><br /><code className="dss-config-path">{d.configFiles.map(f => f.replace(/.*\//, "")).join(" + ")}</code></>
+                            )}
                           </DataListCell>,
                           <DataListCell key="actions" width={2} className="dss-actions">
                             <Button variant="primary" size="sm" onClick={() => setUpConfirmTarget(d)}>
@@ -290,6 +297,18 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
         <YamlModal
           stack={toSyntheticStack(yamlTarget)}
           onClose={() => setYamlTarget(null)}
+          onFileAdded={(newPath) => {
+            const updated: DownedStack = { ...yamlTarget, configFiles: [...yamlTarget.configFiles, newPath] };
+            setYamlTarget(updated);
+            updateStack(yamlTarget.name, () => updated);
+            setConfigFileOverrides(prev => ({ ...prev, [yamlTarget.name.toLowerCase()]: updated.configFiles }));
+          }}
+          onFileRemoved={(removedPath) => {
+            const updated: DownedStack = { ...yamlTarget, configFiles: yamlTarget.configFiles.filter(f => f !== removedPath) };
+            setYamlTarget(updated);
+            updateStack(yamlTarget.name, () => updated);
+            setConfigFileOverrides(prev => ({ ...prev, [yamlTarget.name.toLowerCase()]: updated.configFiles }));
+          }}
         />
       )}
       {createOpen && (

@@ -113,3 +113,26 @@ describe("findComposeFiles", () => {
     expect(opts.superuser).toBe("try");
   });
 });
+
+describe("listYamlFilesInDir", () => {
+  it("spawns find with -maxdepth 1 for *.yml and *.yaml", async () => {
+    const { listYamlFilesInDir } = await import("./files");
+    mockSpawn.mockReturnValue(mockProcess(""));
+    listYamlFilesInDir("/etc/docker/compose/myapp");
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args).toContain("find");
+    expect(args).toContain("/etc/docker/compose/myapp");
+    expect(args).toContain("-maxdepth");
+    expect(args).toContain("1");
+    expect(args).toContain("*.yml");
+    expect(args).toContain("*.yaml");
+  });
+
+  it("passes superuser: try when provided", async () => {
+    const { listYamlFilesInDir } = await import("./files");
+    mockSpawn.mockReturnValue(mockProcess(""));
+    listYamlFilesInDir("/dir", "try");
+    const opts = mockSpawn.mock.calls[0][1] as { superuser?: string };
+    expect(opts.superuser).toBe("try");
+  });
+});

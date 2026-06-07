@@ -24,6 +24,12 @@ const stack: ComposeStack = {
   ConfigFiles: "/path/compose.yml",
 };
 
+const multiFileStack: ComposeStack = {
+  Name: "myapp",
+  Status: "running(2)",
+  ConfigFiles: "/path/base.yml,/path/override.yml",
+};
+
 const defaultProps = {
   stack,
   expanded: false,
@@ -292,6 +298,24 @@ describe("StackRow", () => {
     fireEvent.click(screen.getByRole("menuitem", { name: /^Pause$/i }));
     expect(doAction).toHaveBeenCalledWith("pause", expect.any(Function));
     await act(async () => {});
+  });
+
+  it("passes full configFiles array to useStackActions for multi-file stack", () => {
+    render(<StackRow {...defaultProps} stack={multiFileStack} />);
+    expect(mockUseStackActions).toHaveBeenCalledWith(
+      "myapp",
+      ["/path/base.yml", "/path/override.yml"],
+      expect.any(Function),
+    );
+  });
+
+  it("passes full configFiles array to useStackContainers for multi-file stack", () => {
+    render(<StackRow {...defaultProps} stack={multiFileStack} />);
+    expect(mockUseStackContainers).toHaveBeenCalledWith(
+      "myapp",
+      ["/path/base.yml", "/path/override.yml"],
+      expect.any(String),
+    );
   });
 
   it("calls doAction with unpause when Unpause clicked", async () => {

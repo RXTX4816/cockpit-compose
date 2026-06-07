@@ -26,7 +26,7 @@ const runningContainersJson = JSON.stringify([
 describe("useStackContainers", () => {
   it("starts with empty containers and loading=false", () => {
     const { result } = renderHook(() =>
-      useStackContainers("myapp", "/path/compose.yml", "running"),
+      useStackContainers("myapp", ["/path/compose.yml"], "running"),
     );
     expect(result.current.containers).toEqual([]);
     expect(result.current.loading).toBe(false);
@@ -38,7 +38,7 @@ describe("useStackContainers", () => {
       .mockImplementationOnce(lazy(composeYaml));
 
     const { result } = renderHook(() =>
-      useStackContainers("myapp", "/path/compose.yml", "running"),
+      useStackContainers("myapp", ["/path/compose.yml"], "running"),
     );
     void act(() => { void result.current.load(); });
     await waitFor(() => expect(result.current.containers).toHaveLength(2));
@@ -55,7 +55,7 @@ describe("useStackContainers", () => {
       .mockImplementationOnce(lazy(composeYaml));
 
     const { result } = renderHook(() =>
-      useStackContainers("myapp", "/path/compose.yml", "stopped"),
+      useStackContainers("myapp", ["/path/compose.yml"], "stopped"),
     );
     void act(() => { void result.current.load(); });
     await waitFor(() => expect(result.current.containers).toHaveLength(2));
@@ -68,7 +68,7 @@ describe("useStackContainers", () => {
       .mockImplementationOnce(lazy(composeYaml));
 
     const { result } = renderHook(() =>
-      useStackContainers("myapp", "/path/compose.yml", "running"),
+      useStackContainers("myapp", ["/path/compose.yml"], "running"),
     );
     void act(() => { void result.current.load(); });
     await waitFor(() => expect(result.current.containers).toHaveLength(2));
@@ -87,7 +87,7 @@ describe("useStackContainers", () => {
       .mockImplementationOnce(lazy(composeYaml));
 
     const { result } = renderHook(() =>
-      useStackContainers("myapp", "/path/compose.yml", "running"),
+      useStackContainers("myapp", ["/path/compose.yml"], "running"),
     );
     void act(() => { void result.current.load(); });
     await waitFor(() => expect(result.current.containers).toHaveLength(2));
@@ -103,7 +103,7 @@ describe("useStackContainers", () => {
 
     let status: "running" | "stopped" = "running";
     const { result, rerender } = renderHook(() =>
-      useStackContainers("myapp", "/path/compose.yml", status),
+      useStackContainers("myapp", ["/path/compose.yml"], status),
     );
     void act(() => { void result.current.load(); });
     await waitFor(() => expect(result.current.containers).toHaveLength(2));

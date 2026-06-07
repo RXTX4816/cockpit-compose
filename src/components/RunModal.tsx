@@ -29,7 +29,8 @@ interface Props {
 
 export function RunModal({ stack, onClose }: Props) {
   const { t } = useTranslation();
-  const configFile = stack.ConfigFiles.split(",")[0].trim();
+  const configFiles = stack.ConfigFiles.split(",").map(f => f.trim());
+  const configFile = configFiles[0];
 
   const [services, setServices] = useState<string[]>([]);
   const [selectedService, setSelectedService] = useState("");
@@ -68,10 +69,11 @@ export function RunModal({ stack, onClose }: Props) {
     if (!service || !cmd) return;
 
     setStep("running");
-    const su = await composeFileSuperuser(configFile);
+    const files = stack.ConfigFiles.split(",").map(f => f.trim());
+    const su = await composeFileSuperuser(files);
 
     const proc = composeRunStream(
-      stack.Name, configFile, service,
+      stack.Name, files, service,
       cmd.split(/\s+/).filter(Boolean),
       removeContainer, su,
     );
@@ -97,7 +99,7 @@ export function RunModal({ stack, onClose }: Props) {
         setErrorMsg(ex instanceof Error ? ex.message : String(ex));
         procRef.current = null;
       });
-  }, [selectedService, command, removeContainer, stack.Name, configFile]);
+  }, [selectedService, command, removeContainer, stack.Name, stack.ConfigFiles]);
 
   const handleClose = useCallback(() => {
     procRef.current?.close();

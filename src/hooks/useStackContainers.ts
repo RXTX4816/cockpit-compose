@@ -8,7 +8,23 @@ import {
   parseJsonOutput,
 } from "../api";
 
-export function useStackContainers(stackName: string, configFile: string, status: StackStatus) {
+
+async function readServiceNames(configFiles: string[]): Promise<string[]> {
+  const seen = new Set<string>();
+  const result: string[] = [];
+  for (const f of configFiles) {
+    let content = "";
+    const cp = readComposeFile(f);
+    cp.stream(d => { content += d; });
+    await cp;
+    for (const name of getServicesFromCompose(content)) {
+      if (!seen.has(name)) { seen.add(name); result.push(name); }
+    }
+  }
+  return result;
+}
+
+export function useStackContainers(stackName: string, configFiles: string[], status: StackStatus) {
   const [containers, setContainers] = useState<ComposeContainer[]>([]);
   const [loading, setLoading] = useState(false);
   const cachedServiceNamesRef = useRef<string[]>([]);
@@ -24,6 +40,7 @@ export function useStackContainers(stackName: string, configFile: string, status
     }
   }, [status]);
 
+  const configFilesKey = configFiles.join(",");
   const load = useCallback(async () => {
     if (!hasDataRef.current) setLoading(true);
     try {
@@ -33,11 +50,7 @@ export function useStackContainers(stackName: string, configFile: string, status
       await proc;
       const running = parseJsonOutput<ComposeContainer>(raw);
 
-      let composeContent = "";
-      const cp = readComposeFile(configFile);
-      cp.stream(d => { composeContent += d; });
-      await cp;
-      const serviceNames = getServicesFromCompose(composeContent);
+      const serviceNames = await readServiceNames(configFiles);
       cachedServiceNamesRef.current = serviceNames;
 
       hasDataRef.current = true;
@@ -47,11 +60,7 @@ export function useStackContainers(stackName: string, configFile: string, status
       }));
     } catch {
       try {
-        let composeContent = "";
-        const cp2 = readComposeFile(configFile);
-        cp2.stream(d => { composeContent += d; });
-        await cp2;
-        const serviceNames = getServicesFromCompose(composeContent);
+        const serviceNames = await readServiceNames(configFiles);
         cachedServiceNamesRef.current = serviceNames;
         setContainers(serviceNames.map(name => ({
           ID: "", Name: name, Image: "", State: "down", Status: "down", Ports: "", Service: name,
@@ -65,7 +74,8 @@ export function useStackContainers(stackName: string, configFile: string, status
     } finally {
       setLoading(false);
     }
-  }, [stackName, configFile]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stackName, configFilesKey]);
 
   const clear = useCallback(() => { hasDataRef.current = false; setContainers([]); }, []);
 
