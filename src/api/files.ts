@@ -116,3 +116,54 @@ export function removeDirectory(path: string, superuser?: "try"): CockpitProcess
 export function removeFile(path: string, superuser?: "try"): CockpitProcess {
   return cockpit.spawn(["rm", "--", path], { superuser, err: "message" });
 }
+
+export function findBackupArchives(dir: string, superuser?: "try"): CockpitProcess {
+  return cockpit.spawn(
+    ["find", dir, "-maxdepth", "1", "-type", "f", "-name", "*.bak.tar.gz"],
+    { superuser, err: "message" },
+  );
+}
+
+export function listArchiveContents(archivePath: string, superuser?: "try"): CockpitProcess {
+  return cockpit.spawn(["tar", "-tzf", archivePath], { superuser, err: "message" });
+}
+
+export function extractArchive(archivePath: string, targetParentDir: string, superuser?: "try"): CockpitProcess {
+  return cockpit.spawn(["tar", "-xzf", archivePath, "-C", targetParentDir], { superuser, err: "message" });
+}
+
+export function readFileFromArchive(archivePath: string, memberPath: string, superuser?: "try"): CockpitProcess {
+  return cockpit.spawn(["tar", "-xzOf", archivePath, memberPath], { superuser, err: "message" });
+}
+
+export async function createBackupArchive(
+  parentDir: string,
+  dirName: string,
+  destPath: string,
+  options: { includeSnapshots: boolean; includeSubdirs: boolean },
+  superuser?: "try",
+): Promise<void> {
+  const args: string[] = ["tar", "-czf", destPath, "-C", parentDir];
+  if (!options.includeSnapshots) {
+    args.push("--wildcards");
+    args.push("--exclude=*.snapshot.*");
+  }
+  if (!options.includeSubdirs) {
+    // Discover immediate subdirectories via find and exclude each by exact name.
+    // Wildcard patterns with trailing slash (gitea/*/) are unreliable across GNU tar versions
+    // because tar checks paths during traversal without trailing slashes.
+    let findOut = "";
+    const findProc = cockpit.spawn(
+      ["find", `${parentDir}/${dirName}`, "-mindepth", "1", "-maxdepth", "1", "-type", "d"],
+      { superuser, err: "message" },
+    );
+    findProc.stream((d: string) => { findOut += d; });
+    await findProc;
+    for (const line of findOut.trim().split("\n").filter(l => l.trim())) {
+      const name = line.substring(line.lastIndexOf("/") + 1);
+      args.push(`--exclude=${dirName}/${name}`);
+    }
+  }
+  args.push(dirName);
+  await cockpit.spawn(args, { superuser, err: "message" });
+}

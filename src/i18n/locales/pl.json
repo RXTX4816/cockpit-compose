@@ -58,7 +58,8 @@
     "prune": "Wyczyść",
     "more_actions_for": "Więcej akcji dla {{name}}",
     "find_best_match": "Znajdź najlepsze dopasowanie",
-    "find_best_match_title": "Wykryj katalog główny Compose z aktywnych stosów"
+    "find_best_match_title": "Wykryj katalog główny Compose z aktywnych stosów",
+    "backup": "Kopia zapasowa"
   },
 
   "health": {
@@ -440,7 +441,8 @@
     "depth_label": "Głębokość skanowania:",
     "depth_aria": "Maksymalna głębokość skanowania",
     "depth_minus_aria": "Zmniejsz głębokość skanowania",
-    "depth_plus_aria": "Zwiększ głębokość skanowania"
+    "depth_plus_aria": "Zwiększ głębokość skanowania",
+    "restore_button": "Przywróć"
   },
 
   "stack_row": {
@@ -461,5 +463,40 @@
   "stats": {
     "cpu": "CPU",
     "mem": "Pam."
+  },
+
+  "backup_modal": {
+    "title": "Kopia zapasowa {{name}}",
+    "base_name_label": "Nazwa archiwum",
+    "archive_preview_label": "Zostanie zapisane jako",
+    "dest_dir_label": "Katalog docelowy",
+    "include_snapshots_label": "Uwzględnij migawki",
+    "include_subdirs_label": "Uwzględnij podkatalogi",
+    "include_subdirs_note": "Może zawierać dane zamontowanych woluminów",
+    "create_button": "Utwórz kopię zapasową",
+    "success_title": "Kopia zapasowa utworzona",
+    "success_body": "Zapisano w {{path}}",
+    "warning_partial": "Niektóre pliki zostały pominięte z powodu braku uprawnień"
+  },
+
+  "restore_modal": {
+    "title": "Przywróć stos z kopii zapasowej",
+    "scan_dir_label": "Katalog wyszukiwania",
+    "rescan_button": "Skanuj ponownie",
+    "no_backups_found": "Nie znaleziono kopii zapasowych w tym katalogu",
+    "manual_path_toggle": "Wprowadź ścieżkę archiwum ręcznie",
+    "manual_path_label": "Ścieżka archiwum",
+    "archive_contents_toggle": "Pokaż zawartość archiwum",
+    "detected_name_label": "Wykryta nazwa stosu",
+    "name_conflict_warning": "Stos \"{{name}}\" jest już uruchomiony",
+    "new_name_label": "Przywróć jako",
+    "target_dir_label": "Katalog docelowy",
+    "target_exists_warning": "Katalog {{path}} już istnieje i zostanie nadpisany",
+    "target_exists_confirm": "Rozumiem, że dane w {{path}} zostaną nadpisane",
+    "restore_button": "Przywróć",
+    "success_title": "Stos przywrócony",
+    "error_src_missing": "Nie znaleziono wypakowanego katalogu w {{path}}",
+    "error_dest_exists": "Ścieżka docelowa {{path}} już istnieje – przerwano, aby uniknąć nadpisania",
+    "error_unknown": "Przywracanie nie powiodło się (sprawdź konsolę przeglądarki)"
   }
 }

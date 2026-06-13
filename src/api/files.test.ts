@@ -136,3 +136,176 @@ describe("listYamlFilesInDir", () => {
     expect(opts.superuser).toBe("try");
   });
 });
+
+describe("findBackupArchives", () => {
+  it("spawns find with -maxdepth 1 and *.bak.tar.gz", async () => {
+    const { findBackupArchives } = await import("./files");
+    mockSpawn.mockReturnValue(mockProcess(""));
+    findBackupArchives("/home/user/stacks");
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args).toContain("find");
+    expect(args).toContain("/home/user/stacks");
+    expect(args).toContain("-maxdepth");
+    expect(args).toContain("1");
+    expect(args).toContain("*.bak.tar.gz");
+  });
+
+  it("passes superuser: try when provided", async () => {
+    const { findBackupArchives } = await import("./files");
+    mockSpawn.mockReturnValue(mockProcess(""));
+    findBackupArchives("/dir", "try");
+    const opts = mockSpawn.mock.calls[0][1] as { superuser?: string };
+    expect(opts.superuser).toBe("try");
+  });
+});
+
+describe("listArchiveContents", () => {
+  it("spawns tar -tzf on the archive path", async () => {
+    const { listArchiveContents } = await import("./files");
+    mockSpawn.mockReturnValue(mockProcess("myapp/\nmyapp/docker-compose.yml\n"));
+    listArchiveContents("/backups/myapp-2026.bak.tar.gz");
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args).toEqual(["tar", "-tzf", "/backups/myapp-2026.bak.tar.gz"]);
+  });
+});
+
+describe("extractArchive", () => {
+  it("spawns tar -xzf with -C for the target parent dir", async () => {
+    const { extractArchive } = await import("./files");
+    mockSpawn.mockReturnValue(mockProcess(""));
+    extractArchive("/backups/myapp-2026.bak.tar.gz", "/home/user/stacks");
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args).toEqual(["tar", "-xzf", "/backups/myapp-2026.bak.tar.gz", "-C", "/home/user/stacks"]);
+  });
+});
+
+describe("readFileFromArchive", () => {
+  it("spawns tar -xzOf with archive and member path", async () => {
+    const { readFileFromArchive } = await import("./files");
+    mockSpawn.mockReturnValue(mockProcess("name: myapp\nservices:\n"));
+    readFileFromArchive("/backups/myapp-2026.bak.tar.gz", "myapp/docker-compose.yml");
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args).toEqual(["tar", "-xzOf", "/backups/myapp-2026.bak.tar.gz", "myapp/docker-compose.yml"]);
+  });
+});
+
+describe("createBackupArchive", () => {
+  it("includes basic tar -czf args with -C and dir name", async () => {
+    const { createBackupArchive } = await import("./files");
+    mockSpawn.mockReturnValue(mockProcess(""));
+    await createBackupArchive("/home/user/stacks", "myapp", "/backups/myapp-2026.bak.tar.gz", {
+      includeSnapshots: true,
+      includeSubdirs: true,
+    });
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args).toContain("tar");
+    expect(args).toContain("-czf");
+    expect(args).toContain("/backups/myapp-2026.bak.tar.gz");
+    expect(args).toContain("-C");
+    expect(args).toContain("/home/user/stacks");
+    expect(args[args.length - 1]).toBe("myapp");
+  });
+
+  it("excludes snapshots when includeSnapshots is false", async () => {
+    const { createBackupArchive } = await import("./files");
+    mockSpawn.mockReturnValue(mockProcess(""));
+    await createBackupArchive("/home/user/stacks", "myapp", "/dest.bak.tar.gz", {
+      includeSnapshots: false,
+      includeSubdirs: true,
+    });
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args).toContain("--exclude=*.snapshot.*");
+  });
+
+  it("includes --wildcards before --exclude=*.snapshot.* when includeSnapshots is false", async () => {
+    const { createBackupArchive } = await import("./files");
+    mockSpawn.mockReturnValue(mockProcess(""));
+    await createBackupArchive("/home/user/stacks", "myapp", "/dest.bak.tar.gz", {
+      includeSnapshots: false,
+      includeSubdirs: true,
+    });
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args).toContain("--wildcards");
+    expect(args.indexOf("--wildcards")).toBeLessThan(args.indexOf("--exclude=*.snapshot.*"));
+  });
+
+  it("does not exclude snapshots when includeSnapshots is true", async () => {
+    const { createBackupArchive } = await import("./files");
+    mockSpawn.mockReturnValue(mockProcess(""));
+    await createBackupArchive("/home/user/stacks", "myapp", "/dest.bak.tar.gz", {
+      includeSnapshots: true,
+      includeSubdirs: true,
+    });
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args).not.toContain("--exclude=*.snapshot.*");
+  });
+
+  it("runs find to discover subdirs and excludes each by exact name when includeSubdirs is false", async () => {
+    const { createBackupArchive } = await import("./files");
+    // First call = find (returns two subdirs); second call = tar.
+    mockSpawn
+      .mockReturnValueOnce(mockProcess("/home/user/stacks/myapp/data\n/home/user/stacks/myapp/logs\n"))
+      .mockReturnValueOnce(mockProcess(""));
+    await createBackupArchive("/home/user/stacks", "myapp", "/dest.bak.tar.gz", {
+      includeSnapshots: true,
+      includeSubdirs: false,
+    });
+    const findArgs = mockSpawn.mock.calls[0][0] as string[];
+    expect(findArgs[0]).toBe("find");
+    expect(findArgs).toContain("/home/user/stacks/myapp");
+    expect(findArgs).toContain("-type");
+    expect(findArgs).toContain("d");
+
+    const tarArgs = mockSpawn.mock.calls[1][0] as string[];
+    expect(tarArgs).toContain("--exclude=myapp/data");
+    expect(tarArgs).toContain("--exclude=myapp/logs");
+    expect(tarArgs).not.toContain("--wildcards");
+    expect(tarArgs[tarArgs.length - 1]).toBe("myapp");
+  });
+
+  it("does not add --exclude args for subdirs when find returns nothing", async () => {
+    const { createBackupArchive } = await import("./files");
+    mockSpawn
+      .mockReturnValueOnce(mockProcess(""))   // find: no subdirs
+      .mockReturnValueOnce(mockProcess(""));  // tar
+    await createBackupArchive("/home/user/stacks", "myapp", "/dest.bak.tar.gz", {
+      includeSnapshots: true,
+      includeSubdirs: false,
+    });
+    const tarArgs = mockSpawn.mock.calls[1][0] as string[];
+    expect(tarArgs.every(a => !a.startsWith("--exclude=myapp"))).toBe(true);
+  });
+
+  it("does not run find and does not add subdir excludes when includeSubdirs is true", async () => {
+    const { createBackupArchive } = await import("./files");
+    mockSpawn.mockReturnValue(mockProcess(""));
+    await createBackupArchive("/home/user/stacks", "myapp", "/dest.bak.tar.gz", {
+      includeSnapshots: true,
+      includeSubdirs: true,
+    });
+    // Only one spawn call (tar), no find.
+    expect(mockSpawn).toHaveBeenCalledOnce();
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args[0]).toBe("tar");
+    expect(args.every(a => !a.startsWith("--exclude=myapp"))).toBe(true);
+  });
+
+  it("does not include --wildcards when both options are true", async () => {
+    const { createBackupArchive } = await import("./files");
+    mockSpawn.mockReturnValue(mockProcess(""));
+    await createBackupArchive("/home/user/stacks", "myapp", "/dest.bak.tar.gz", {
+      includeSnapshots: true,
+      includeSubdirs: true,
+    });
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args).not.toContain("--wildcards");
+  });
+
+  it("passes superuser: try when provided", async () => {
+    const { createBackupArchive } = await import("./files");
+    mockSpawn.mockReturnValue(mockProcess(""));
+    await createBackupArchive("/p", "d", "/dest.bak.tar.gz", { includeSnapshots: true, includeSubdirs: true }, "try");
+    const opts = mockSpawn.mock.calls[0][1] as { superuser?: string };
+    expect(opts.superuser).toBe("try");
+  });
+});

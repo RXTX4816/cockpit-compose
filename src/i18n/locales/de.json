@@ -56,7 +56,8 @@
     "prune": "Bereinigen",
     "more_actions_for": "Weitere Aktionen für {{name}}",
     "find_best_match": "Besten Treffer finden",
-    "find_best_match_title": "Compose-Stammverzeichnis aus aktiven Stacks ableiten"
+    "find_best_match_title": "Compose-Stammverzeichnis aus aktiven Stacks ableiten",
+    "backup": "Sicherung"
   },
 
   "health": {
@@ -430,7 +431,8 @@
     "depth_label": "Suchtiefe:",
     "depth_aria": "Maximale Suchtiefe",
     "depth_minus_aria": "Suchtiefe verringern",
-    "depth_plus_aria": "Suchtiefe erhöhen"
+    "depth_plus_aria": "Suchtiefe erhöhen",
+    "restore_button": "Wiederherstellen"
   },
 
   "stack_row": {
@@ -451,5 +453,40 @@
   "stats": {
     "cpu": "CPU",
     "mem": "Speicher"
+  },
+
+  "backup_modal": {
+    "title": "Sicherung von {{name}}",
+    "base_name_label": "Archivname",
+    "archive_preview_label": "Wird gespeichert als",
+    "dest_dir_label": "Zielverzeichnis",
+    "include_snapshots_label": "Snapshots einschließen",
+    "include_subdirs_label": "Unterverzeichnisse einschließen",
+    "include_subdirs_note": "Kann eingehängte Daten enthalten",
+    "create_button": "Sicherung erstellen",
+    "success_title": "Sicherung erstellt",
+    "success_body": "Gespeichert unter {{path}}",
+    "warning_partial": "Einige Dateien wurden aufgrund von Berechtigungsfehlern übersprungen"
+  },
+
+  "restore_modal": {
+    "title": "Stack aus Sicherung wiederherstellen",
+    "scan_dir_label": "Suchverzeichnis",
+    "rescan_button": "Erneut scannen",
+    "no_backups_found": "Keine Sicherungen in diesem Verzeichnis gefunden",
+    "manual_path_toggle": "Archivpfad manuell eingeben",
+    "manual_path_label": "Archivpfad",
+    "archive_contents_toggle": "Archivinhalt anzeigen",
+    "detected_name_label": "Erkannter Stack-Name",
+    "name_conflict_warning": "Stack \"{{name}}\" läuft bereits",
+    "new_name_label": "Wiederherstellen als Name",
+    "target_dir_label": "Zielverzeichnis",
+    "target_exists_warning": "Verzeichnis {{path}} existiert bereits und wird überschrieben",
+    "target_exists_confirm": "Ich verstehe, dass {{path}} überschrieben wird",
+    "restore_button": "Wiederherstellen",
+    "success_title": "Stack wiederhergestellt",
+    "error_src_missing": "Entpacktes Verzeichnis nicht gefunden unter {{path}}",
+    "error_dest_exists": "Zielpfad {{path}} existiert bereits – Abbruch zum Schutz vor Überschreiben",
+    "error_unknown": "Wiederherstellung fehlgeschlagen (Browserkonzole für Details prüfen)"
   }
 }
