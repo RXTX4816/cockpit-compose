@@ -15,6 +15,7 @@ Cockpit Compose is a web-based UI for managing [Docker Compose](https://docs.doc
 - Clean up unused images, containers, volumes, and networks
 - Create new stacks from a Git URL, a template, or from scratch
 - Import and manage stacks that are stopped or stored on disk
+- Back up a stack to a `.bak.tar.gz` archive and restore it later
 
 ## Pages
 
@@ -33,6 +34,7 @@ Cockpit Compose is a web-based UI for managing [Docker Compose](https://docs.doc
 | [Prune Resources](Prune-Resources) | Remove unused images, containers, volumes, and networks |
 | [Creating Stacks](Creating-Stacks) | Create a new stack from Git, a template, or manually |
 | [Importing Stacks](Importing-Stacks) | Scan a directory to find and manage offline stacks |
+| [Backup and Restore](Backup-and-Restore) | Archive a stack to a `.bak.tar.gz` file and restore it |
 
 ## Interface conventions
 

@@ -19,6 +19,8 @@ import { UpConfirmModal } from "./UpConfirmModal";
 import { YamlModal } from "./YamlModal";
 import { CreateStackModal } from "./CreateStackModal";
 import { DeleteStackModal } from "./DeleteStackModal";
+import { RestoreModal } from "./RestoreModal";
+import { BackupModal } from "./BackupModal";
 import "./DownedStacksSection.css";
 
 interface Props {
@@ -67,6 +69,8 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
   const [yamlTarget, setYamlTarget] = useState<DownedStack | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<DownedStack | null>(null);
   const [configFileOverrides, setConfigFileOverrides] = useState<Record<string, string[]>>({});
+  const [restoreOpen, setRestoreOpen] = useState(false);
+  const [backupTarget, setBackupTarget] = useState<DownedStack | null>(null);
   const autoDetectedRef = useRef(false);
 
   const { downedStacks, scanning, hasScanned, error, warning, scan, removeStack, addStack, updateStack }
@@ -139,6 +143,13 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
           aria-expanded={importOpen}
         >
           {importOpen ? "▲" : "▼"} {t("downed_section.import_button")}
+        </Button>
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() => setRestoreOpen(true)}
+        >
+          {t("downed_section.restore_button")}
         </Button>
       </div>
 
@@ -258,6 +269,9 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
                             <Button variant="plain" size="sm" onClick={() => setYamlTarget(d)} title={t("downed_section.edit_title")}>
                               {t("common.edit")}
                             </Button>
+                            <Button variant="plain" size="sm" onClick={() => setBackupTarget(d)} title={t("actions.backup")}>
+                              {t("actions.backup")}
+                            </Button>
                             <Button
                               variant="plain"
                               size="sm"
@@ -327,6 +341,20 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
             onUpComplete(deleteTarget.name);
             setDeleteTarget(null);
           }}
+        />
+      )}
+      {backupTarget && (
+        <BackupModal
+          stack={toSyntheticStack(backupTarget)}
+          onClose={() => setBackupTarget(null)}
+        />
+      )}
+      {restoreOpen && (
+        <RestoreModal
+          existingStacks={stacks}
+          defaultScanDir={inferComposeRoot(stacks)}
+          onClose={() => setRestoreOpen(false)}
+          onRestored={d => { addStack(d); setRestoreOpen(false); }}
         />
       )}
     </>

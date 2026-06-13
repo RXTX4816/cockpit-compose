@@ -46,6 +46,7 @@ const defaultProps = {
   onExec: vi.fn(),
   onRun: vi.fn(),
   onPrune: vi.fn(),
+  onBackup: vi.fn(),
   onActingChange: vi.fn(),
 };
 

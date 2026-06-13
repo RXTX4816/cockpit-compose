@@ -56,7 +56,8 @@
     "prune": "Prune",
     "more_actions_for": "More actions for {{name}}",
     "find_best_match": "Find best match",
-    "find_best_match_title": "Infer compose root from active stacks"
+    "find_best_match_title": "Infer compose root from active stacks",
+    "backup": "Backup"
   },
 
   "health": {
@@ -430,7 +431,8 @@
     "depth_label": "Scan depth:",
     "depth_aria": "Max scan depth",
     "depth_minus_aria": "Decrease scan depth",
-    "depth_plus_aria": "Increase scan depth"
+    "depth_plus_aria": "Increase scan depth",
+    "restore_button": "Restore"
   },
 
   "stack_row": {
@@ -451,5 +453,40 @@
   "stats": {
     "cpu": "CPU",
     "mem": "Mem"
+  },
+
+  "backup_modal": {
+    "title": "Backup {{name}}",
+    "base_name_label": "Archive name",
+    "archive_preview_label": "Will be saved as",
+    "dest_dir_label": "Destination directory",
+    "include_snapshots_label": "Include snapshots",
+    "include_subdirs_label": "Include subdirectories",
+    "include_subdirs_note": "May include bind-mounted data",
+    "create_button": "Create backup",
+    "success_title": "Backup created",
+    "success_body": "Saved to {{path}}",
+    "warning_partial": "Some files were skipped due to permission errors"
+  },
+
+  "restore_modal": {
+    "title": "Restore stack from backup",
+    "scan_dir_label": "Search directory",
+    "rescan_button": "Rescan",
+    "no_backups_found": "No backups found in this directory",
+    "manual_path_toggle": "Enter archive path manually",
+    "manual_path_label": "Archive path",
+    "archive_contents_toggle": "Show archive contents",
+    "detected_name_label": "Detected stack name",
+    "name_conflict_warning": "Stack \"{{name}}\" is already running",
+    "new_name_label": "Restore as name",
+    "target_dir_label": "Target directory",
+    "target_exists_warning": "Directory {{path}} already exists and will be overwritten",
+    "target_exists_confirm": "I understand this will write to {{path}}",
+    "restore_button": "Restore",
+    "success_title": "Stack restored",
+    "error_src_missing": "Extracted directory not found at {{path}}",
+    "error_dest_exists": "Target path {{path}} already exists — aborting to prevent overwrite",
+    "error_unknown": "Restore failed (check browser console for details)"
   }
 }
