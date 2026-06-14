@@ -31,6 +31,13 @@ import { StatsCell } from "./StatsCell";
 import { ContainerTable } from "./ContainerTable";
 import "./StackRow.css";
 
+function effectiveStatus(base: ReturnType<typeof parseStackStatus>, containers: ComposeContainer[]): ReturnType<typeof parseStackStatus> {
+  if (base !== "partial" || containers.length === 0) return base;
+  const exited = containers.filter(c => c.State === "exited");
+  if (exited.length === 0) return base;
+  return exited.every(c => /exited \(0\)/i.test(c.Status)) ? "running" : base;
+}
+
 function stackHealthSummary(containers: ComposeContainer[]): "healthy" | "unhealthy" | null {
   const withHealth = containers.filter(c => c.Health);
   if (withHealth.length === 0) return null;
@@ -62,12 +69,14 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
   const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const status = parseStackStatus(stack.Status);
+  const baseStatus = parseStackStatus(stack.Status);
   const count = parseServiceCount(stack.Status);
   const configFiles = stack.ConfigFiles.split(",").map(f => f.trim());
 
   const { acting, actionError, doAction } = useStackActions(stack.Name, configFiles, onActingChange);
-  const { containers, loading: loadingContainers, load: loadContainers, clear: clearContainers } = useStackContainers(stack.Name, configFiles, status);
+  const { containers, loading: loadingContainers, load: loadContainers, clear: clearContainers } = useStackContainers(stack.Name, configFiles, baseStatus);
+
+  const status = effectiveStatus(baseStatus, containers);
 
   useEffect(() => { void loadContainers(); }, [loadContainers]);
   useAutoRefresh(loadContainers, 500, !expanded || acting);
