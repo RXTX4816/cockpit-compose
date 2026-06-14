@@ -62,10 +62,11 @@ interface StackRowProps {
   onRun: () => void;
   onPrune: () => void;
   onBackup: () => void;
+  onScale: () => void;
   onActingChange: (delta: 1 | -1) => void;
 }
 
-export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, onDown, onKill, onUp, onPull, onEvents, onTop, onExec, onRun, onPrune, onBackup, onActingChange }: StackRowProps) {
+export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, onDown, onKill, onUp, onPull, onEvents, onTop, onExec, onRun, onPrune, onBackup, onScale, onActingChange }: StackRowProps) {
   const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -212,6 +213,13 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
                   popperProps={{ position: "right" }}
                 >
                   <DropdownList>
+                    <DropdownItem
+                      key="scale"
+                      onClick={() => { setMenuOpen(false); onScale(); }}
+                    >
+                      {t("actions.scale")}
+                    </DropdownItem>
+                    <Divider key="div-scale" component="li" />
                     <DropdownItem
                       key="restart"
                       isDisabled={status === "stopped" || status === "unknown"}

@@ -60,7 +60,8 @@
     "more_actions_for": "Więcej akcji dla {{name}}",
     "find_best_match": "Znajdź najlepsze dopasowanie",
     "find_best_match_title": "Wykryj katalog główny Compose z aktywnych stosów",
-    "backup": "Kopia zapasowa"
+    "backup": "Kopia zapasowa",
+    "scale": "Skaluj"
   },
 
   "health": {
@@ -507,5 +508,27 @@
     "aria_label": "Ostrzeżenie: zewnętrzny link",
     "title": "Otwieranie zewnętrznego linku",
     "warning_title": "Przed kontynuowaniem zawsze sprawdź, czy strona docelowa jest godna zaufania."
+  },
+
+  "container_table": {
+    "replica_count": "×{{count}}"
+  },
+
+  "scale_modal": {
+    "title": "Skaluj usługi — {{name}}",
+    "confirm_title": "Potwierdź skalowanie — {{name}}",
+    "aria_label": "Modal skalowania usług",
+    "sideeffects_title": "Skalowanie zmienia działające instancje",
+    "sideeffects_body": "Każda replika usługi to osobny kontener korzystający z tego samego obrazu i konfiguracji. Skalowanie w górę natychmiast uruchamia nowe kontenery. Skalowanie w dół zatrzymuje i usuwa nadmiarowe kontenery. Statyczne przypisania portów hosta, montowania woluminów lub aliasy sieciowe mogą powodować konflikty.",
+    "what_is_scale_title": "Jak działa skalowanie docker compose",
+    "what_is_scale_body": "To polecenie uruchamia \"docker compose up -d --scale <usługa>=<n>\". Docker Compose uruchomi lub zatrzyma kontenery, aby osiągnąć żądaną liczbę. Istniejące kontenery nie zostaną odtworzone, chyba że zmienił się obraz lub konfiguracja.",
+    "apply_button": "Zastosuj",
+    "service_label": "Liczba replik dla {{service}}",
+    "minus_aria": "Zmniejsz liczbę replik dla {{service}}",
+    "plus_aria": "Zwiększ liczbę replik dla {{service}}",
+    "port_conflict_inline": "Ta usługa ma statyczne przypisania portów hosta — skalowanie powyżej 1 repliki nie powiedzie się, ponieważ port hosta może być zajęty tylko przez jeden kontener na raz.",
+    "port_conflict_title": "Prawdopodobny konflikt portów",
+    "port_conflict_body": "Poniższe usługi mają statyczne przypisania portów hosta. Docker nie będzie mógł uruchomić więcej niż jednej repliki, ponieważ port hosta może być zajęty tylko przez jeden kontener:",
+    "port_conflict_icon_title": "Ma statyczne przypisania portów hosta"
   }
 }

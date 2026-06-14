@@ -54,9 +54,9 @@ export function useStackContainers(stackName: string, configFiles: string[], sta
       cachedServiceNamesRef.current = serviceNames;
 
       hasDataRef.current = true;
-      setContainers(serviceNames.map(name => {
-        const c = running.find(r => r.Service === name);
-        return c ?? { ID: "", Name: name, Image: "", State: "down", Status: "down", Ports: "", Service: name };
+      setContainers(serviceNames.flatMap(name => {
+        const cs = running.filter(r => r.Service === name);
+        return cs.length > 0 ? cs : [{ ID: "", Name: name, Image: "", State: "down", Status: "down", Ports: "", Service: name }];
       }));
     } catch {
       try {
@@ -69,7 +69,8 @@ export function useStackContainers(stackName: string, configFiles: string[], sta
         const cached = cachedServiceNamesRef.current;
         setContainers(cached.length > 0
           ? cached.map(name => ({ ID: "", Name: name, Image: "", State: "down", Status: "down", Ports: "", Service: name }))
-          : []);
+          : []
+        );
       }
     } finally {
       setLoading(false);

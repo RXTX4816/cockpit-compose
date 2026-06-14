@@ -58,7 +58,8 @@
     "more_actions_for": "More actions for {{name}}",
     "find_best_match": "Find best match",
     "find_best_match_title": "Infer compose root from active stacks",
-    "backup": "Backup"
+    "backup": "Backup",
+    "scale": "Scale"
   },
 
   "health": {
@@ -497,5 +498,27 @@
     "aria_label": "External link warning",
     "title": "Opening external link",
     "warning_title": "Always verify that the destination site is trustworthy before continuing."
+  },
+
+  "container_table": {
+    "replica_count": "×{{count}}"
+  },
+
+  "scale_modal": {
+    "title": "Scale services — {{name}}",
+    "confirm_title": "Confirm scaling — {{name}}",
+    "aria_label": "Scale services modal",
+    "sideeffects_title": "Scaling changes running instances",
+    "sideeffects_body": "Each service replica is a separate container sharing the same image and config. Scaling up starts new containers immediately. Scaling down stops and removes the excess ones. Changes to host port bindings, volume mounts, or network aliases may cause conflicts.",
+    "what_is_scale_title": "How docker compose scaling works",
+    "what_is_scale_body": "This runs \"docker compose up -d --scale <service>=<n>\". Docker Compose will start or stop containers to reach the requested count. Existing containers are not recreated unless the image or config changed.",
+    "apply_button": "Apply",
+    "service_label": "{{service}} replica count",
+    "minus_aria": "Decrease replicas for {{service}}",
+    "plus_aria": "Increase replicas for {{service}}",
+    "port_conflict_inline": "This service has static host port bindings — scaling beyond 1 replica will fail because only one container can bind a host port at a time.",
+    "port_conflict_title": "Port conflict likely",
+    "port_conflict_body": "The following services have static host port bindings. Docker will not be able to start more than one replica because a host port can only be bound by a single container:",
+    "port_conflict_icon_title": "Has static host port bindings"
   }
 }

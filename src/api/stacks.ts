@@ -240,6 +240,21 @@ export function pruneNetworks(project: string, superuser?: "try"): CockpitProces
   );
 }
 
+export function scaleStack(
+  project: string,
+  configFiles: string[],
+  scales: Record<string, number>,
+  profiles: string[] = [],
+  superuser?: "try",
+): CockpitProcess {
+  const profileFlags = profiles.flatMap(p => ["--profile", p]);
+  const scaleFlags = Object.entries(scales).flatMap(([svc, n]) => ["--scale", `${svc}=${n}`]);
+  return cockpit.spawn(
+    compose(...profileFlags, "-p", project, ...fileFlags(configFiles), "up", "-d", ...scaleFlags),
+    { superuser, err: "message", ...dockerSpawnEnviron() },
+  );
+}
+
 export function composeRunStream(
   project: string,
   configFiles: string[],
