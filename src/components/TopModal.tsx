@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { SyncAltIcon } from "@patternfly/react-icons";
 import { useTranslation } from "react-i18next";
 import {
   Modal,
@@ -102,7 +103,7 @@ export function TopModal({ stack, onClose }: Props) {
         <Toolbar className="tm-toolbar">
           <ToolbarContent>
             <ToolbarItem>
-              <Button variant="secondary" size="sm" onClick={load} isDisabled={loading}>
+              <Button variant="secondary" size="sm" icon={<SyncAltIcon />} onClick={load} isDisabled={loading}>
                 {t("top_modal.refresh_button")}
               </Button>
             </ToolbarItem>

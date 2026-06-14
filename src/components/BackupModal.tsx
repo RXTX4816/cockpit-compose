@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ArchiveIcon } from "@patternfly/react-icons";
 import { useTranslation } from "react-i18next";
 import {
   Modal,
@@ -147,6 +148,7 @@ export function BackupModal({ stack, onClose }: Props) {
           <>
             <Button
               variant="primary"
+              icon={<ArchiveIcon />}
               onClick={() => void handleCreate()}
               isLoading={running}
               isDisabled={running || !baseName.trim() || !destDir.trim()}

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { ArrowCircleUpIcon } from "@patternfly/react-icons";
 import { useTranslation } from "react-i18next";
 import {
   Modal,
@@ -133,7 +134,7 @@ export function UpConfirmModal({ stack, onConfirm, onClose }: Props) {
         )}
       </ModalBody>
       <ModalFooter>
-        <Button variant="primary" onClick={() => onConfirm([...selectedProfiles])}>{t("up_confirm_modal.up_button")}</Button>
+        <Button variant="primary" icon={<ArrowCircleUpIcon />} onClick={() => onConfirm([...selectedProfiles])}>{t("up_confirm_modal.up_button")}</Button>
         <Button variant="link" onClick={onClose}>{t("common.cancel")}</Button>
       </ModalFooter>
     </Modal>

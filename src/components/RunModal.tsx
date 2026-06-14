@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { PlayIcon } from "@patternfly/react-icons";
 import { useTranslation } from "react-i18next";
 import {
   Modal,
@@ -198,6 +199,7 @@ export function RunModal({ stack, onClose }: Props) {
           <>
             <Button
               variant="primary"
+              icon={<PlayIcon />}
               onClick={() => void handleRun()}
               isDisabled={!selectedService.trim() || !command.trim()}
             >

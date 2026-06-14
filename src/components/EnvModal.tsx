@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { SaveIcon } from "@patternfly/react-icons";
 import { useTranslation } from "react-i18next";
 import {
   Modal,
@@ -245,7 +246,7 @@ export function EnvModal({ stack, onClose }: Props) {
           <Button variant="secondary" onClick={onClose} isDisabled={saving}>
             {t("common.cancel")}
           </Button>
-          <Button variant="primary" onClick={handleSave} isLoading={saving}>
+          <Button variant="primary" icon={<SaveIcon />} onClick={handleSave} isLoading={saving}>
             {activeState?.exists ? t("common.save") : t("common.create")}
           </Button>
         </ModalFooter>
@@ -265,7 +266,7 @@ export function EnvModal({ stack, onClose }: Props) {
           <Button variant="secondary" onClick={() => setConfirmSave(false)}>
             {t("common.cancel")}
           </Button>
-          <Button variant="primary" onClick={performSave} isLoading={saving}>
+          <Button variant="primary" icon={<SaveIcon />} onClick={performSave} isLoading={saving}>
             {t("env_modal.save_anyway_button")}
           </Button>
         </ModalFooter>

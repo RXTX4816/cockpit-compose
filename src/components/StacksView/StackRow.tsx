@@ -32,6 +32,16 @@ import {
   PencilAltIcon,
   InfoCircleIcon,
   EllipsisVIcon,
+  ArrowsAltVIcon,
+  RedoAltIcon,
+  PauseCircleIcon,
+  PlayCircleIcon,
+  BellIcon,
+  ListAltIcon,
+  PlayIcon,
+  ArchiveIcon,
+  BroomIcon,
+  BanIcon,
 } from "@patternfly/react-icons";
 import { useStackActions } from "../../hooks/useStackActions";
 import { useStackContainers } from "../../hooks/useStackContainers";
@@ -239,6 +249,7 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
                   <DropdownList>
                     <DropdownItem
                       key="scale"
+                      icon={<ArrowsAltVIcon />}
                       onClick={() => { setMenuOpen(false); onScale(); }}
                     >
                       {t("actions.scale")}
@@ -246,6 +257,7 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
                     <Divider key="div-scale" component="li" />
                     <DropdownItem
                       key="restart"
+                      icon={<RedoAltIcon />}
                       isDisabled={status === "stopped" || status === "unknown"}
                       onClick={() => { setMenuOpen(false); void doAction("restart", afterAction); }}
                     >
@@ -253,6 +265,7 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
                     </DropdownItem>
                     <DropdownItem
                       key="pause"
+                      icon={status === "paused" ? <PlayCircleIcon /> : <PauseCircleIcon />}
                       isDisabled={status === "stopped" || status === "unknown"}
                       onClick={() => {
                         setMenuOpen(false);
@@ -261,26 +274,26 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
                     >
                       {status === "paused" ? t("actions.unpause") : t("actions.pause")}
                     </DropdownItem>
-                    <DropdownItem key="events" onClick={() => { setMenuOpen(false); onEvents(); }}>
+                    <DropdownItem key="events" icon={<BellIcon />} onClick={() => { setMenuOpen(false); onEvents(); }}>
                       {t("actions.events")}
                     </DropdownItem>
-                    <DropdownItem key="top" onClick={() => { setMenuOpen(false); onTop(); }}>
+                    <DropdownItem key="top" icon={<ListAltIcon />} onClick={() => { setMenuOpen(false); onTop(); }}>
                       {t("actions.top")}
                     </DropdownItem>
-                    <DropdownItem key="exec" onClick={() => { setMenuOpen(false); onExec(); }}>
+                    <DropdownItem key="exec" icon={<TerminalIcon />} onClick={() => { setMenuOpen(false); onExec(); }}>
                       {t("actions.shell")}
                     </DropdownItem>
-                    <DropdownItem key="run" onClick={() => { setMenuOpen(false); onRun(); }}>
+                    <DropdownItem key="run" icon={<PlayIcon />} onClick={() => { setMenuOpen(false); onRun(); }}>
                       {t("actions.run")}
                     </DropdownItem>
-                    <DropdownItem key="backup" onClick={() => { setMenuOpen(false); onBackup(); }}>
+                    <DropdownItem key="backup" icon={<ArchiveIcon />} onClick={() => { setMenuOpen(false); onBackup(); }}>
                       {t("actions.backup")}
                     </DropdownItem>
                     <Divider key="div1" component="li" />
-                    <DropdownItem key="prune" isDanger onClick={() => { setMenuOpen(false); onPrune(); }}>
+                    <DropdownItem key="prune" icon={<BroomIcon />} isDanger onClick={() => { setMenuOpen(false); onPrune(); }}>
                       {t("actions.prune")}
                     </DropdownItem>
-                    <DropdownItem key="kill" isDanger onClick={() => { setMenuOpen(false); onKill(); }}>
+                    <DropdownItem key="kill" icon={<BanIcon />} isDanger onClick={() => { setMenuOpen(false); onKill(); }}>
                       {t("actions.kill")}
                     </DropdownItem>
                   </DropdownList>
