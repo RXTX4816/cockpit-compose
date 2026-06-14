@@ -121,4 +121,22 @@ describe("useLogStream", () => {
     unmount();
     expect((proc as unknown as { close: ReturnType<typeof vi.fn> }).close).toHaveBeenCalled();
   });
+
+  it("ignores stream data when paused", async () => {
+    let streamCb: ((data: string) => void) | null = null;
+    const proc = Object.assign(
+      new Promise<string>(() => {}),
+      {
+        stream: (cb: (data: string) => void) => { streamCb = cb; return proc as CockpitProcess; },
+        close: vi.fn(),
+        input: vi.fn(),
+      },
+    ) as CockpitProcess;
+    mockSpawn.mockReturnValue(proc);
+    const { result } = renderHook(() => useLogStream("myapp"));
+    await waitFor(() => expect(streamCb).not.toBeNull());
+    act(() => { result.current.pause(); });
+    act(() => { streamCb?.("ignored line\n"); });
+    expect(result.current.lines).toHaveLength(0);
+  });
 });

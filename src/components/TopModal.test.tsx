@@ -91,4 +91,28 @@ describe("parseTopOutput", () => {
     expect(parseTopOutput("")).toEqual([]);
     expect(parseTopOutput("\n\n\n")).toEqual([]);
   });
+
+  it("skips blocks with only one line (no header + data)", () => {
+    // A single line block can't have both a header and at least one data row
+    const singleLineBlock = "just one line\n";
+    expect(parseTopOutput(singleLineBlock)).toEqual([]);
+  });
+
+  it("skips blocks where no header line is found", () => {
+    // Two lines but neither looks like a PS header
+    const noHeader = "some random text\nanother random line\n";
+    expect(parseTopOutput(noHeader)).toEqual([]);
+  });
+
+  it("uses fallback service name when header is the first line of the block", () => {
+    // If the first line IS the header, block.slice(0, headerIdx=0).join("").trim() is ""
+    // which triggers the `|| \`Service 1\`` fallback
+    const headerFirstBlock = `UID                 PID                 PPID                CMD
+root                1234                1                   nginx
+`;
+    const result = parseTopOutput(headerFirstBlock);
+    expect(result).toHaveLength(1);
+    expect(result[0].service).toBe("Service 1");
+    expect(result[0].processes).toHaveLength(1);
+  });
 });

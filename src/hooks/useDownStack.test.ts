@@ -112,4 +112,17 @@ describe("useDownStack", () => {
     expect(spawnArgs).toContain("/path/b.yml");
     expect(spawnArgs.filter(a => a === "-f")).toHaveLength(2);
   });
+
+  it("execute() uses String(ex) when rejection is not an Error instance", async () => {
+    mockSpawn.mockReturnValue(
+      Object.assign(
+        new Promise<string>((_, reject) => queueMicrotask(() => reject("plain string error"))),
+        { stream: vi.fn().mockReturnThis(), close: vi.fn(), input: vi.fn() },
+      ) as CockpitProcess,
+    );
+    const { result } = renderHook(() => useDownStack(vi.fn(), vi.fn()));
+    act(() => { result.current.open(stack); });
+    await act(() => result.current.execute());
+    await waitFor(() => expect(result.current.error).toBe("plain string error"));
+  });
 });

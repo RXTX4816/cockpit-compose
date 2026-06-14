@@ -103,4 +103,18 @@ describe("useComposeStacks", () => {
     expect(result.current.stacks).toEqual([]);
     expect(result.current.error).toBeNull();
   });
+
+  it("shows Docker-not-found message when error includes 'not found'", async () => {
+    mockSpawn.mockReturnValue(mockProcess("", "docker: command not found"));
+    const { result } = renderHook(() => useComposeStacks());
+
+    // Trigger FAIL_THRESHOLD (4) consecutive failures
+    for (let i = 0; i < 4; i++) {
+      await waitFor(() => expect(result.current.loading).toBe(false));
+      act(() => result.current.refresh());
+    }
+
+    await waitFor(() => expect(result.current.error).not.toBeNull());
+    expect(result.current.error).toMatch(/Docker not found/i);
+  });
 });

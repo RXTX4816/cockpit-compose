@@ -107,4 +107,19 @@ describe("useEventStream", () => {
     expect(result.current.events).toHaveLength(0);
     await act(async () => {});
   });
+
+  it("skips empty lines between events", async () => {
+    mockSpawn.mockReturnValue(mockProcess(`\n${event1}\n\n${event2}\n`));
+    const { result } = renderHook(() => useEventStream("myapp"));
+    act(() => { result.current.start(); });
+    await waitFor(() => expect(result.current.events).toHaveLength(2));
+  });
+
+  it("produces no events when stream contains only empty lines", async () => {
+    mockSpawn.mockReturnValue(mockProcess("\n\n\n"));
+    const { result } = renderHook(() => useEventStream("myapp"));
+    act(() => { result.current.start(); });
+    await waitFor(() => expect(result.current.streaming).toBe(false));
+    expect(result.current.events).toHaveLength(0);
+  });
 });

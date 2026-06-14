@@ -493,3 +493,32 @@ describe("useDownedStacksScan", () => {
     expect(result.current.downedStacks[0].name).toBe("fallback-dir");
   });
 });
+
+describe("useDownedStacksScan — updateStack and addStack", () => {
+  it("updateStack applies updater to matching stack and leaves others unchanged", async () => {
+    const { useDownedStacksScan } = await import("./useDownedStacksScan");
+    const stackA = { name: "alpha", dir: "/a", configFiles: ["/a/compose.yml"] };
+    const stackB = { name: "beta", dir: "/b", configFiles: ["/b/compose.yml"] };
+    const { result } = renderHook(() => useDownedStacksScan("", 2, []));
+
+    act(() => { result.current.addStack({ ...stackA }); });
+    act(() => { result.current.addStack({ ...stackB }); });
+    expect(result.current.downedStacks).toHaveLength(2);
+
+    act(() => {
+      result.current.updateStack("alpha", prev => ({ ...prev, name: "alpha-updated" }));
+    });
+    expect(result.current.downedStacks.find(d => d.name === "alpha-updated")).toBeDefined();
+    expect(result.current.downedStacks.find(d => d.name === "beta")).toBeDefined();
+  });
+
+  it("addStack ignores duplicate (same name case-insensitive)", async () => {
+    const { useDownedStacksScan } = await import("./useDownedStacksScan");
+    const stack = { name: "MyApp", dir: "/a", configFiles: ["/a/compose.yml"] };
+    const { result } = renderHook(() => useDownedStacksScan("", 2, []));
+
+    act(() => { result.current.addStack({ ...stack }); });
+    act(() => { result.current.addStack({ ...stack, name: "myapp" }); });
+    expect(result.current.downedStacks).toHaveLength(1);
+  });
+});

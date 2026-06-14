@@ -94,4 +94,11 @@ describe("validateComposeSpec", () => {
     const errors = validateComposeSpec(spec);
     expect(errors.length).toBeGreaterThan(0);
   });
+
+  it("reports unknown top-level properties via additionalProperties error", () => {
+    const spec = { ...minimalValid, totally_unknown_prop: "value" };
+    const errors = validateComposeSpec(spec);
+    expect(errors.length).toBeGreaterThan(0);
+    expect(errors.some(e => e.includes("unknown property"))).toBe(true);
+  });
 });

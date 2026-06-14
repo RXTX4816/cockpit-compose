@@ -112,4 +112,53 @@ describe("useStackContainers", () => {
     rerender();
     expect(result.current.containers).toEqual([]);
   });
+
+  it("does not clear containers when status re-renders with same value", async () => {
+    mockSpawn
+      .mockImplementationOnce(lazy(runningContainersJson))
+      .mockImplementationOnce(lazy(composeYaml));
+
+    const { result, rerender } = renderHook(() =>
+      useStackContainers("myapp", ["/path/compose.yml"], "running"),
+    );
+    void act(() => { void result.current.load(); });
+    await waitFor(() => expect(result.current.containers).toHaveLength(2));
+
+    rerender();
+    expect(result.current.containers).toHaveLength(2);
+  });
+
+  it("returns empty containers when both fetches fail on first load", async () => {
+    mockSpawn
+      .mockImplementationOnce(lazy("", "error"))
+      .mockImplementationOnce(lazy("", "error"));
+
+    const { result } = renderHook(() =>
+      useStackContainers("myapp", ["/path/compose.yml"], "running"),
+    );
+    void act(() => { void result.current.load(); });
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.containers).toEqual([]);
+  });
+
+  it("deduplicates service names across multiple config files", async () => {
+    const overlappingYaml = `
+services:
+  web:
+    image: nginx
+  db:
+    image: postgres
+`;
+    mockSpawn
+      .mockImplementationOnce(lazy("[]"))
+      .mockImplementationOnce(lazy(overlappingYaml))
+      .mockImplementationOnce(lazy(overlappingYaml));
+
+    const { result } = renderHook(() =>
+      useStackContainers("myapp", ["/path/compose.yml", "/path/override.yml"], "running"),
+    );
+    void act(() => { void result.current.load(); });
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.containers).toHaveLength(2);
+  });
 });

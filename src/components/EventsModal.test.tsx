@@ -109,4 +109,59 @@ describe("EventsModal", () => {
     expect(stop).toHaveBeenCalledOnce();
     expect(onClose).toHaveBeenCalledOnce();
   });
+
+  it("calls stop() and onClose when modal header X button is clicked", () => {
+    const stop = vi.fn();
+    const onClose = vi.fn();
+    mockUseEventStream.mockReturnValue({ events: [], streaming: false, error: null, start: vi.fn(), stop, clear: vi.fn() });
+    render(<EventsModal stack={stack} onClose={onClose} />);
+    const closeButtons = screen.getAllByRole("button", { name: /close/i });
+    fireEvent.click(closeButtons[0]);
+    expect(stop).toHaveBeenCalled();
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  it("renders non-compose attributes as details column", () => {
+    const eventWithDetails = {
+      ...mockEvent,
+      actor: {
+        ID: "abc123",
+        Attributes: {
+          "com.docker.compose.service": "web",
+          "exitCode": "0",
+          "signal": "15",
+        },
+      },
+    };
+    mockUseEventStream.mockReturnValue({
+      events: [eventWithDetails],
+      streaming: false,
+      error: null,
+      start: vi.fn(),
+      stop: vi.fn(),
+      clear: vi.fn(),
+    });
+    render(<EventsModal stack={stack} onClose={vi.fn()} />);
+    expect(screen.getByText(/exitCode=0/)).toBeInTheDocument();
+  });
+
+  it("falls back to String(t) when toLocaleTimeString throws", () => {
+    // Force the Date method to throw so the catch branch executes
+    const spy = vi.spyOn(Date.prototype, "toLocaleTimeString").mockImplementationOnce(() => {
+      throw new RangeError("Invalid time value");
+    });
+    mockUseEventStream.mockReturnValue({
+      events: [mockEvent],
+      streaming: false,
+      error: null,
+      start: vi.fn(),
+      stop: vi.fn(),
+      clear: vi.fn(),
+    });
+    render(<EventsModal stack={stack} onClose={vi.fn()} />);
+    // Fallback to String(t) — the numeric time value as a string
+    expect(screen.getByText(String(mockEvent.time))).toBeInTheDocument();
+    spy.mockRestore();
+  });
+
 });

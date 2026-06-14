@@ -172,4 +172,60 @@ describe("StackInfoModal", () => {
     await waitFor(() => expect(screen.queryByRole("progressbar")).toBeNull());
     expect(screen.getByText("otherapp")).toBeInTheDocument();
   });
+
+  it("shows volume error alert for non-unknown-command failures", async () => {
+    mockSpawnSequence(mockProcess(containers), mockProcess(images), mockProcess("", "permission denied"), mockProcess(""));
+    render(<StackInfoModal stack={stack} onClose={vi.fn()} />);
+    await waitFor(() => expect(screen.getByText(/Could not load volumes/i)).toBeInTheDocument());
+  });
+
+  it("shows network error alert when network fetch fails", async () => {
+    mockSpawnSequence(mockProcess(containers), mockProcess(images), mockProcess(volumes), mockProcess("", "network error"));
+    render(<StackInfoModal stack={stack} onClose={vi.fn()} />);
+    await waitFor(() => expect(screen.getByText(/Could not load networks/i)).toBeInTheDocument());
+  });
+
+  it("shows profiles label for containers with active profiles", async () => {
+    const containerWithService = JSON.stringify([
+      {
+        ID: "abc123def456",
+        Name: "myapp_debug_1",
+        Image: "busybox:latest",
+        State: "running",
+        Status: "Up 1 hour",
+        Ports: "",
+        Service: "debug",
+      },
+    ]);
+    const composeWithProfiles = `
+services:
+  debug:
+    image: busybox
+    profiles: [debug]
+`;
+    mockReadComposeFile.mockImplementation(() => mockProcess(composeWithProfiles));
+    mockSpawnSequence(mockProcess(containerWithService), mockProcess("[]"), mockProcess("[]"), mockProcess(""));
+    render(<StackInfoModal stack={stack} onClose={vi.fn()} />);
+    await waitFor(() => expect(screen.getByText("Profiles")).toBeInTheDocument());
+    expect(screen.getAllByText("debug").length).toBeGreaterThan(0);
+  });
+
+  it("shows image error via String(ex) when image fetch fails with non-Error", async () => {
+    const nonErrorProcess = Object.assign(
+      new Promise<string>((_, reject) => queueMicrotask(() => reject("img string error"))),
+      { stream: vi.fn().mockReturnThis(), close: vi.fn(), input: vi.fn() },
+    ) as CockpitProcess;
+    mockSpawnSequence(mockProcess(containers), nonErrorProcess, mockProcess(volumes), mockProcess(""));
+    render(<StackInfoModal stack={stack} onClose={vi.fn()} />);
+    await waitFor(() => expect(screen.getByText(/Could not load images/i)).toBeInTheDocument());
+    expect(screen.getByText("img string error")).toBeInTheDocument();
+  });
+
+  it("renders volume rows with fallback dashes for missing fields", async () => {
+    const emptyVolume = JSON.stringify([{ Name: "", Driver: "", Mountpoint: "" }]);
+    mockSpawnSequence(mockProcess(containers), mockProcess(images), mockProcess(emptyVolume), mockProcess(""));
+    render(<StackInfoModal stack={stack} onClose={vi.fn()} />);
+    await waitFor(() => expect(screen.queryByRole("progressbar")).toBeNull());
+    expect(screen.getAllByText("—").length).toBeGreaterThan(0);
+  });
 });

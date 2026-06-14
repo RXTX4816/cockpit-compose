@@ -23,8 +23,12 @@ vi.mock("./UpModal", () => ({
   ),
 }));
 vi.mock("./YamlModal", () => ({
-  YamlModal: ({ stack }: { stack: { Name: string } }) => (
-    <div data-testid="yaml-modal">YamlModal:{stack.Name}</div>
+  YamlModal: ({ stack, onFileAdded, onFileRemoved }: { stack: { Name: string }; onFileAdded?: (p: string) => void; onFileRemoved?: (p: string) => void }) => (
+    <div data-testid="yaml-modal">
+      YamlModal:{stack.Name}
+      <button onClick={() => onFileAdded?.("/extra.yml")}>AddFile</button>
+      <button onClick={() => onFileRemoved?.("/path/compose.yml")}>RemoveFile</button>
+    </div>
   ),
 }));
 vi.mock("./CreateStackModal", () => ({
@@ -41,6 +45,21 @@ vi.mock("./DeleteStackModal", () => ({
       DeleteModal:{stack.name}
       <button onClick={onDeleted}>ConfirmDelete</button>
       <button onClick={onClose}>CloseDelete</button>
+    </div>
+  ),
+}));
+vi.mock("./BackupModal", () => ({
+  BackupModal: ({ onClose }: { onClose: () => void }) => (
+    <div data-testid="backup-modal">
+      <button onClick={onClose}>CloseBackup</button>
+    </div>
+  ),
+}));
+vi.mock("./RestoreModal", () => ({
+  RestoreModal: ({ onClose, onRestored }: { onClose: () => void; onRestored: (d: { name: string; configFiles: string[] }) => void }) => (
+    <div data-testid="restore-modal">
+      <button onClick={onClose}>CloseRestore</button>
+      <button onClick={() => onRestored({ name: "restored-stack", configFiles: ["/etc/compose/restored-stack/docker-compose.yml"] })}>SimulateRestore</button>
     </div>
   ),
 }));
@@ -378,5 +397,121 @@ describe("DownedStacksSection — Down section content", () => {
     render(<DownedStacksSection {...defaultProps} />);
     expect(screen.queryByRole("button", { name: /Info/i })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /Prune/i })).not.toBeInTheDocument();
+  });
+
+  it("shows abbreviated file names when there are multiple configFiles", () => {
+    mockUseScan.mockReturnValue(defaultScanResult({
+      downedStacks: [{
+        name: "myapp",
+        configFiles: [
+          "/etc/docker/compose/myapp/docker-compose.yml",
+          "/etc/docker/compose/myapp/docker-compose.override.yml",
+        ],
+      }],
+      hasScanned: true,
+    }));
+    render(<DownedStacksSection {...defaultProps} />);
+    // Second line shows combined filenames
+    expect(screen.getByText(/docker-compose\.yml \+ docker-compose\.override\.yml/)).toBeInTheDocument();
+  });
+
+  it("CancelConfirm on UpConfirmModal closes it without opening UpModal", () => {
+    mockUseScan.mockReturnValue(defaultScanResult({
+      downedStacks: [{ name: "myapp", configFiles: ["/etc/docker/compose/myapp/docker-compose.yml"] }],
+      hasScanned: true,
+    }));
+    render(<DownedStacksSection {...defaultProps} />);
+    fireEvent.click(screen.getByRole("button", { name: /↑ Up/i }));
+    expect(screen.getByTestId("up-confirm-modal")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "CancelConfirm" }));
+    expect(screen.queryByTestId("up-confirm-modal")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("up-modal")).not.toBeInTheDocument();
+  });
+
+  it("YamlModal onFileAdded adds path to configFiles", () => {
+    const updateStack = vi.fn();
+    mockUseScan.mockReturnValue(defaultScanResult({
+      downedStacks: [{ name: "myapp", configFiles: ["/etc/compose/myapp/docker-compose.yml"] }],
+      hasScanned: true,
+      updateStack,
+    }));
+    render(<DownedStacksSection {...defaultProps} />);
+    fireEvent.click(screen.getByRole("button", { name: /Edit/i }));
+    expect(screen.getByTestId("yaml-modal")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "AddFile" }));
+    expect(updateStack).toHaveBeenCalled();
+  });
+
+  it("YamlModal onFileRemoved removes path from configFiles", () => {
+    const updateStack = vi.fn();
+    mockUseScan.mockReturnValue(defaultScanResult({
+      downedStacks: [{ name: "myapp", configFiles: ["/etc/compose/myapp/docker-compose.yml", "/etc/compose/myapp/override.yml"] }],
+      hasScanned: true,
+      updateStack,
+    }));
+    render(<DownedStacksSection {...defaultProps} />);
+    fireEvent.click(screen.getByRole("button", { name: /Edit/i }));
+    fireEvent.click(screen.getByRole("button", { name: "RemoveFile" }));
+    expect(updateStack).toHaveBeenCalled();
+  });
+
+  it("CloseDelete closes the delete modal without removing stack", () => {
+    mockUseScan.mockReturnValue(defaultScanResult({
+      downedStacks: [{ name: "myapp", configFiles: ["/etc/docker/compose/myapp/docker-compose.yml"] }],
+      hasScanned: true,
+    }));
+    render(<DownedStacksSection {...defaultProps} />);
+    fireEvent.click(screen.getByRole("button", { name: /✕ Delete/i }));
+    expect(screen.getByTestId("delete-modal")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "CloseDelete" }));
+    expect(screen.queryByTestId("delete-modal")).not.toBeInTheDocument();
+  });
+
+  it("Backup button opens BackupModal for that stack", () => {
+    mockUseScan.mockReturnValue(defaultScanResult({
+      downedStacks: [{ name: "myapp", configFiles: ["/etc/docker/compose/myapp/docker-compose.yml"] }],
+      hasScanned: true,
+    }));
+    render(<DownedStacksSection {...defaultProps} />);
+    fireEvent.click(screen.getByRole("button", { name: /backup/i }));
+    expect(screen.getByTestId("backup-modal")).toBeInTheDocument();
+  });
+
+  it("CloseBackup closes the BackupModal", () => {
+    mockUseScan.mockReturnValue(defaultScanResult({
+      downedStacks: [{ name: "myapp", configFiles: ["/etc/docker/compose/myapp/docker-compose.yml"] }],
+      hasScanned: true,
+    }));
+    render(<DownedStacksSection {...defaultProps} />);
+    fireEvent.click(screen.getByRole("button", { name: /backup/i }));
+    fireEvent.click(screen.getByRole("button", { name: "CloseBackup" }));
+    expect(screen.queryByTestId("backup-modal")).not.toBeInTheDocument();
+  });
+});
+
+describe("DownedStacksSection — RestoreModal", () => {
+  it("Restore button opens RestoreModal", () => {
+    mockUseScan.mockReturnValue(defaultScanResult({ hasScanned: true }));
+    render(<DownedStacksSection {...defaultProps} />);
+    fireEvent.click(screen.getByRole("button", { name: /restore/i }));
+    expect(screen.getByTestId("restore-modal")).toBeInTheDocument();
+  });
+
+  it("CloseRestore closes the RestoreModal", () => {
+    mockUseScan.mockReturnValue(defaultScanResult({ hasScanned: true }));
+    render(<DownedStacksSection {...defaultProps} />);
+    fireEvent.click(screen.getByRole("button", { name: /restore/i }));
+    fireEvent.click(screen.getByRole("button", { name: "CloseRestore" }));
+    expect(screen.queryByTestId("restore-modal")).not.toBeInTheDocument();
+  });
+
+  it("SimulateRestore calls addStack and closes modal", () => {
+    const addStack = vi.fn();
+    mockUseScan.mockReturnValue(defaultScanResult({ hasScanned: true, addStack }));
+    render(<DownedStacksSection {...defaultProps} />);
+    fireEvent.click(screen.getByRole("button", { name: /restore/i }));
+    fireEvent.click(screen.getByRole("button", { name: "SimulateRestore" }));
+    expect(addStack).toHaveBeenCalledWith(expect.objectContaining({ name: "restored-stack" }));
+    expect(screen.queryByTestId("restore-modal")).not.toBeInTheDocument();
   });
 });
