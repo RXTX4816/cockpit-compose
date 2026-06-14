@@ -26,6 +26,7 @@ import {
   parseJsonOutput,
   parsePortsDetailed,
   formatBytes,
+  getPortUrl,
 } from "../api";
 import "./StackInfoModal.css";
 
@@ -248,12 +249,14 @@ export function StackInfoModal({ stack, onClose }: Props) {
                       <div className="sim-card-ports">
                         {ports.map(p => {
                           const { Icon, color } = MODAL_BIND_ICONS[p.bindType];
+                          const url = getPortUrl(p);
                           return (
                             <Label
                               key={p.fullLabel}
                               isCompact
                               color="blue"
-                              style={{ fontFamily: "var(--pf-t--global--font--family--mono)", fontSize: "0.72rem" }}
+                              style={{ fontFamily: "var(--pf-t--global--font--family--mono)", fontSize: "0.72rem", ...(url ? { cursor: "pointer" } : {}) }}
+                              onClick={url ? () => window.open(url, "_blank", "noopener,noreferrer") : undefined}
                             >
                               <Icon color={color} style={{ marginRight: "0.2rem", verticalAlign: "middle" }} />
                               {p.fullLabel}

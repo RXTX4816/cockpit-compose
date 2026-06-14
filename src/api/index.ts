@@ -6,5 +6,6 @@ export { listContainers, getContainerStats } from "./containers";
 export { readComposeFile, readAllProfiles, saveComposeFile, saveSnapshot, listSnapshots, restoreSnapshot, deleteSnapshot, readEnvFile, saveEnvFile, findEnvFiles, findComposeFiles, listYamlFilesInDir, createDirectory, makeTempDir, fetchComposeFromGit, removeDirectory, removeFile, findBackupArchives, listArchiveContents, extractArchive, readFileFromArchive, createBackupArchive } from "./files";
 export type { ComposeTemplate } from "./templates";
 export { COMPOSE_TEMPLATES } from "./templates";
+export { getPortUrl } from "../lib/portUrl";
 export { parseJsonOutput } from "../lib/parseJsonOutput";
 export { parseDockerBytes, formatBytes } from "../lib/bytes";
