@@ -11,8 +11,8 @@
     "url": "https://github.com/RXTX4816/cockpit-compose.git"
   },
   "scripts": {
-    "build": "node scripts/i18n-coverage.mjs && esbuild src/index.tsx --bundle --outfile=src/main.js --minify --target=es2020 --jsx=automatic --loader:.tsx=tsx --loader:.ts=ts --loader:.svg=dataurl --external:*.woff --external:*.woff2 --external:*.ttf --external:*.eot --external:*.png --external:*.jpg --external:*.gif",
-    "watch": "esbuild src/index.tsx --bundle --outfile=src/main.js --target=es2020 --jsx=automatic --loader:.tsx=tsx --loader:.ts=ts --loader:.svg=dataurl --external:*.woff --external:*.woff2 --external:*.ttf --external:*.eot --external:*.png --external:*.jpg --external:*.gif --watch",
+    "build": "mkdir -p src/assets && cp -r node_modules/@patternfly/react-core/dist/styles/assets/fonts node_modules/@patternfly/react-core/dist/styles/assets/pficon src/assets/ && node scripts/i18n-coverage.mjs && esbuild src/index.tsx --bundle --outfile=src/main.js --minify --target=es2020 --jsx=automatic --loader:.tsx=tsx --loader:.ts=ts --loader:.svg=dataurl --external:*.woff --external:*.woff2 --external:*.ttf --external:*.eot --external:*.png --external:*.jpg --external:*.gif",
+    "watch": "mkdir -p src/assets && cp -r node_modules/@patternfly/react-core/dist/styles/assets/fonts node_modules/@patternfly/react-core/dist/styles/assets/pficon src/assets/ && esbuild src/index.tsx --bundle --outfile=src/main.js --target=es2020 --jsx=automatic --loader:.tsx=tsx --loader:.ts=ts --loader:.svg=dataurl --external:*.woff --external:*.woff2 --external:*.ttf --external:*.eot --external:*.png --external:*.jpg --external:*.gif --watch",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src/",
     "test": "vitest run",
