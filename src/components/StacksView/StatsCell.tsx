@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Label, Spinner, Tooltip } from "@patternfly/react-core";
 import { GlobeIcon, LaptopIcon, NetworkIcon } from "@patternfly/react-icons";
 import type { ParsedPort, StackStatus } from "../../api";
-import { formatBytes } from "../../api";
+import { formatBytes, getPortUrl } from "../../api";
 import { useContainerStats } from "../../hooks/useContainerStats";
 import "./StatsCell.css";
 
@@ -39,17 +39,21 @@ export function StatsCell({ stackName, status }: StatsCellProps) {
     <div className="sc-cell">
       {ports.length > 0 && (
         <div className="sc-ports">
-          {ports.map(p => (
-            <Label
-              key={p.label}
-              isCompact
-              color="blue"
-              style={{ fontFamily: "var(--pf-t--global--font--family--mono)", fontSize: "0.7rem" }}
-            >
-              <PortBindIcon bindType={p.bindType} />
-              {p.label}
-            </Label>
-          ))}
+          {ports.map(p => {
+            const url = getPortUrl(p);
+            return (
+              <Label
+                key={p.label}
+                isCompact
+                color="blue"
+                style={{ fontFamily: "var(--pf-t--global--font--family--mono)", fontSize: "0.7rem", ...(url ? { cursor: "pointer" } : {}) }}
+                onClick={url ? () => window.open(url, "_blank", "noopener,noreferrer") : undefined}
+              >
+                <PortBindIcon bindType={p.bindType} />
+                {p.label}
+              </Label>
+            );
+          })}
         </div>
       )}
       {stats && (
