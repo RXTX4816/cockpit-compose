@@ -12,6 +12,7 @@ import {
   Label,
   TextInput,
 } from "@patternfly/react-core";
+import { PlusCircleIcon, FolderOpenIcon, AngleUpIcon, HistoryIcon } from "@patternfly/react-icons";
 import { type ComposeStack } from "../api";
 import { type DownedStack, useDownedStacksScan } from "../hooks/useDownedStacksScan";
 import { UpModal } from "./UpModal";
@@ -132,6 +133,7 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
         <Button
           variant="primary"
           size="sm"
+          icon={<PlusCircleIcon />}
           onClick={() => setCreateOpen(true)}
         >
           {t("downed_section.create_button")}
@@ -139,14 +141,16 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
         <Button
           variant="primary"
           size="sm"
+          icon={importOpen ? <AngleUpIcon /> : <FolderOpenIcon />}
           onClick={() => setImportOpen(o => !o)}
           aria-expanded={importOpen}
         >
-          {importOpen ? "▲" : "▼"} {t("downed_section.import_button")}
+          {t("downed_section.import_button")}
         </Button>
         <Button
           variant="secondary"
           size="sm"
+          icon={<HistoryIcon />}
           onClick={() => setRestoreOpen(true)}
         >
           {t("downed_section.restore_button")}

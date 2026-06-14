@@ -15,6 +15,7 @@ import {
   MenuToggle,
   Divider,
   Spinner,
+  Tooltip,
 } from "@patternfly/react-core";
 import {
   type ComposeStack,
@@ -22,7 +23,16 @@ import {
   parseStackStatus,
   parseServiceCount,
 } from "../../api";
-import { CheckCircleIcon, ExclamationTriangleIcon } from "@patternfly/react-icons";
+import {
+  CheckCircleIcon,
+  ExclamationTriangleIcon,
+  TimesCircleIcon,
+  DownloadIcon,
+  TerminalIcon,
+  PencilAltIcon,
+  InfoCircleIcon,
+  EllipsisVIcon,
+} from "@patternfly/react-icons";
 import { useStackActions } from "../../hooks/useStackActions";
 import { useStackContainers } from "../../hooks/useStackContainers";
 import { useAutoRefresh } from "../../hooks/useAutoRefresh";
@@ -144,7 +154,7 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
                   onClick={onUp}
                   isDisabled={acting}
                 >
-                  ↑ {t("actions.up")}
+                  {t("actions.up")}
                 </Button>
 
                 {(status === "running" || status === "partial") ? (
@@ -155,7 +165,7 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
                     isLoading={acting}
                     isDisabled={acting}
                   >
-                    ■ {t("actions.stop")}
+                    {t("actions.stop")}
                   </Button>
                 ) : status === "stopped" && (
                   <Button
@@ -165,36 +175,48 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
                     isLoading={acting}
                     isDisabled={acting}
                   >
-                    ▶ {t("actions.start")}
+                    {t("actions.start")}
                   </Button>
                 )}
 
-                <Button
-                  variant="plain"
-                  size="sm"
-                  onClick={onDown}
-                  isDisabled={acting}
-                  className="sr-down-btn"
-                  title={t("actions.down_title")}
-                >
-                  ↓ {t("actions.down")}
-                </Button>
+                <span className="sr-icon-group">
+                  <Tooltip content={t("actions.down_title")}>
+                    <Button
+                      variant="plain"
+                      size="sm"
+                      onClick={onDown}
+                      isDisabled={acting}
+                      className="sr-down-btn"
+                      aria-label={t("actions.down_title")}
+                    >
+                      <TimesCircleIcon />
+                    </Button>
+                  </Tooltip>
 
-                <Button variant="plain" size="sm" onClick={onPull} title={t("actions.pull_title")}>
-                  {t("actions.pull")}
-                </Button>
+                  <Tooltip content={t("actions.pull_title")}>
+                    <Button variant="plain" size="sm" onClick={onPull} aria-label={t("actions.pull_title")}>
+                      <DownloadIcon />
+                    </Button>
+                  </Tooltip>
 
-                <Button variant="plain" size="sm" onClick={onLogs} title={t("actions.logs_title")}>
-                  {t("actions.logs")}
-                </Button>
+                  <Tooltip content={t("actions.logs_title")}>
+                    <Button variant="plain" size="sm" onClick={onLogs} aria-label={t("actions.logs_title")}>
+                      <TerminalIcon />
+                    </Button>
+                  </Tooltip>
 
-                <Button variant="plain" size="sm" onClick={onYaml} isDisabled={acting} title={t("actions.edit_title")}>
-                  {t("common.edit")}
-                </Button>
+                  <Tooltip content={t("actions.edit_title")}>
+                    <Button variant="plain" size="sm" onClick={onYaml} isDisabled={acting} aria-label={t("actions.edit_title")}>
+                      <PencilAltIcon />
+                    </Button>
+                  </Tooltip>
 
-                <Button variant="plain" size="sm" onClick={onInfo} title={t("actions.info_title")}>
-                  {t("actions.info")}
-                </Button>
+                  <Tooltip content={t("actions.info_title")}>
+                    <Button variant="plain" size="sm" onClick={onInfo} aria-label={t("actions.info_title")}>
+                      <InfoCircleIcon />
+                    </Button>
+                  </Tooltip>
+                </span>
 
                 <Dropdown
                   isOpen={menuOpen}
@@ -207,7 +229,7 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
                       aria-label={t("actions.more_actions_for", { name: stack.Name })}
                       isDisabled={acting}
                     >
-                      ⋮
+                      <EllipsisVIcon />
                     </MenuToggle>
                   )}
                   popperProps={{ position: "right" }}

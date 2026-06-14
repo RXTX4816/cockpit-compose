@@ -511,7 +511,11 @@
   },
 
   "container_table": {
-    "replica_count": "×{{count}}"
+    "replica_count": "×{{count}}",
+    "col_status": "Status",
+    "col_service": "Usługa",
+    "col_image": "Obraz",
+    "col_uptime": "Czas pracy"
   },
 
   "scale_modal": {

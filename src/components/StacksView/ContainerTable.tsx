@@ -33,6 +33,12 @@ export function ContainerTable({ containers }: { containers: ComposeContainer[] 
     <>
       {pendingUrl && <ExternalLinkModal url={pendingUrl} onClose={() => setPendingUrl(null)} />}
       <div className="ct-list">
+        <div className="ct-header">
+          <span>{t("container_table.col_status")}</span>
+          <span>{t("container_table.col_service")}</span>
+          <span>{t("container_table.col_image")}</span>
+          <span>{t("container_table.col_uptime")}</span>
+        </div>
         {groups.map(({ name, instances }) => {
           const runningCount = instances.filter(c => c.State?.toLowerCase() === "running").length;
           const anyUnhealthy = instances.some(c => c.Health?.toLowerCase() === "unhealthy");
