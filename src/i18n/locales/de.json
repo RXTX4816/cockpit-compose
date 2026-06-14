@@ -14,7 +14,8 @@
     "scanning": "Wird gescannt…",
     "fetch": "Abrufen",
     "nothing_found": "Nichts gefunden.",
-    "unknown": "unbekannt"
+    "unknown": "unbekannt",
+    "continue": "Weiter"
   },
 
   "stacks": {
@@ -490,5 +491,11 @@
     "error_src_missing": "Entpacktes Verzeichnis nicht gefunden unter {{path}}",
     "error_dest_exists": "Zielpfad {{path}} existiert bereits – Abbruch zum Schutz vor Überschreiben",
     "error_unknown": "Wiederherstellung fehlgeschlagen (Browserkonzole für Details prüfen)"
+  },
+
+  "external_link_modal": {
+    "aria_label": "Warnung: Externer Link",
+    "title": "Externen Link öffnen",
+    "warning_title": "Prüfen Sie stets, ob die Zielseite vertrauenswürdig ist, bevor Sie fortfahren."
   }
 }
