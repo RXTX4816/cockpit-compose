@@ -74,7 +74,9 @@
 
   "footer": {
     "version": "Version: {{version}}",
+    "docker_version": "Docker: {{version}}",
     "compose_version": "Docker Compose: {{version}}",
+    "rootless": "Rootless Docker",
     "help": "Hilfe",
     "feedback": "Feedback / Fehler melden"
   },

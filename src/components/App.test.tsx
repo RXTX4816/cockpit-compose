@@ -4,7 +4,11 @@ import { App } from "./App";
 
 vi.mock("../api", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../api")>();
-  return { ...actual, detectComposeCommand: vi.fn().mockResolvedValue(undefined) };
+  return {
+    ...actual,
+    detectDockerMode: vi.fn().mockResolvedValue(undefined),
+    detectComposeCommand: vi.fn().mockResolvedValue(undefined),
+  };
 });
 
 vi.mock("./StacksView", () => ({

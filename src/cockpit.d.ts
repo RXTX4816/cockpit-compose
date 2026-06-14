@@ -25,6 +25,7 @@ declare const cockpit: {
       superuser?: "try" | "require";
       err?: "out" | "message";
       directory?: string;
+      environ?: string[];
     },
   ): CockpitProcess;
   file(

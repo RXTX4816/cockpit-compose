@@ -77,6 +77,69 @@ describe("composeFileSuperuser()", () => {
   });
 });
 
+describe("detectDockerMode()", () => {
+  const mockUser = vi.fn();
+
+  beforeEach(() => {
+    mockUser.mockReset();
+    vi.stubGlobal("cockpit", { spawn: mockSpawn, user: mockUser });
+    mockUser.mockResolvedValue({ id: 1000, name: "user", home: "/home/user" });
+  });
+
+  it("sets rootless mode when user socket exists and DOCKER_HOST is unset", async () => {
+    let call = 0;
+    mockSpawn.mockImplementation(() => {
+      call++;
+      if (call === 1) return mockProcess(""); // DOCKER_HOST empty
+      if (call === 2) return mockProcess("socket"); // user socket present
+      return mockProcess("", "no such file"); // system socket absent
+    });
+    const { detectDockerMode, isRootlessMode, getDockerSocketPath } = await import("./cockpit");
+    await detectDockerMode();
+    expect(isRootlessMode()).toBe(true);
+    expect(getDockerSocketPath()).toBe("unix:///run/user/1000/docker.sock");
+  });
+
+  it("sets system socket path when only system socket exists", async () => {
+    let call = 0;
+    mockSpawn.mockImplementation(() => {
+      call++;
+      if (call === 1) return mockProcess(""); // DOCKER_HOST empty
+      if (call === 2) return mockProcess("", "no such file"); // user socket absent
+      return mockProcess("socket"); // system socket present
+    });
+    const { detectDockerMode, isRootlessMode, getDockerSocketPath } = await import("./cockpit");
+    await detectDockerMode();
+    expect(isRootlessMode()).toBe(false);
+    expect(getDockerSocketPath()).toBe("unix:///var/run/docker.sock");
+  });
+
+  it("respects DOCKER_HOST already set in environment", async () => {
+    mockSpawn.mockImplementation(() => mockProcess("unix:///run/user/1000/docker.sock"));
+    const { detectDockerMode, isRootlessMode, getDockerSocketPath } = await import("./cockpit");
+    await detectDockerMode();
+    expect(isRootlessMode()).toBe(true);
+    expect(getDockerSocketPath()).toBe("unix:///run/user/1000/docker.sock");
+    // Should not call cockpit.user() or check sockets when DOCKER_HOST is set
+    expect(mockUser).not.toHaveBeenCalled();
+  });
+
+  it("marks non-user DOCKER_HOST as non-rootless", async () => {
+    mockSpawn.mockImplementation(() => mockProcess("unix:///var/run/docker.sock"));
+    const { detectDockerMode, isRootlessMode } = await import("./cockpit");
+    await detectDockerMode();
+    expect(isRootlessMode()).toBe(false);
+  });
+
+  it("leaves everything unset when neither socket exists", async () => {
+    mockSpawn.mockImplementation(() => mockProcess("", "no such file"));
+    const { detectDockerMode, isRootlessMode, getDockerSocketPath } = await import("./cockpit");
+    await detectDockerMode();
+    expect(isRootlessMode()).toBe(false);
+    expect(getDockerSocketPath()).toBeUndefined();
+  });
+});
+
 describe("detectComposeCommand()", () => {
   it("keeps docker compose prefix when docker compose version succeeds", async () => {
     mockSpawn.mockResolvedValue("");

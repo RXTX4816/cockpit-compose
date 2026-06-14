@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { killStack, composeFileSuperuser, readAllProfiles, type ComposeStack } from "../api";
+import { killStack, composeFileSuperuser, readAllProfiles, isRootlessMode, type ComposeStack } from "../api";
 
 export function useKillStack(
   onSuccess: () => void,
@@ -26,7 +26,10 @@ export function useKillStack(
     onActingChange(1);
     setError(null);
     try {
-      const [su, profiles] = await Promise.all([composeFileSuperuser(configFiles), readAllProfiles(configFiles[0])]);
+      const [su, profiles] = await Promise.all([
+        isRootlessMode() ? Promise.resolve<"try" | undefined>(undefined) : composeFileSuperuser(configFiles),
+        readAllProfiles(configFiles[0]),
+      ]);
       await killStack(target.Name, configFiles, profiles, su);
       setTarget(null);
       onSuccess();

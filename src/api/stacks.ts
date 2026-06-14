@@ -1,4 +1,4 @@
-import { compose } from "./cockpit";
+import { compose, dockerSpawnEnviron } from "./cockpit";
 
 function fileFlags(configFiles: string[]): string[] {
   return configFiles.flatMap(f => ["-f", f]);
@@ -6,7 +6,7 @@ function fileFlags(configFiles: string[]): string[] {
 
 export function listStacks(): CockpitProcess {
   return cockpit.spawn(compose("ls", "--all", "--format", "json"), {
-    err: "message",
+    err: "message", ...dockerSpawnEnviron(),
   });
 }
 
@@ -14,7 +14,7 @@ export function startStack(project: string, configFiles: string[], profiles: str
   const profileFlags = profiles.flatMap(p => ["--profile", p]);
   return cockpit.spawn(
     compose(...profileFlags, "-p", project, ...fileFlags(configFiles), "up", "-d"),
-    { superuser, err: "message" },
+    { superuser, err: "message", ...dockerSpawnEnviron() },
   );
 }
 
@@ -22,7 +22,7 @@ export function stopStack(project: string, configFiles: string[], profiles: stri
   const profileFlags = profiles.flatMap(p => ["--profile", p]);
   return cockpit.spawn(
     compose(...profileFlags, "-p", project, ...fileFlags(configFiles), "stop"),
-    { superuser, err: "message" },
+    { superuser, err: "message", ...dockerSpawnEnviron() },
   );
 }
 
@@ -30,7 +30,7 @@ export function restartStack(project: string, configFiles: string[], profiles: s
   const profileFlags = profiles.flatMap(p => ["--profile", p]);
   return cockpit.spawn(
     compose(...profileFlags, "-p", project, ...fileFlags(configFiles), "restart", ...services),
-    { superuser, err: "message" },
+    { superuser, err: "message", ...dockerSpawnEnviron() },
   );
 }
 
@@ -41,7 +41,7 @@ export async function readRunningServiceNames(project: string): Promise<string[]
     const proc = cockpit.spawn(
       ["docker", "ps", "--filter", `label=com.docker.compose.project=${project}`, "--filter", "status=running",
         "--format", `{{index .Labels "com.docker.compose.service"}}`],
-      { err: "message" },
+      { err: "message", ...dockerSpawnEnviron() },
     );
     proc.stream((d: string) => { raw += d; });
     await proc;
@@ -53,7 +53,7 @@ export function streamLogs(project: string, service?: string): CockpitProcess {
   return cockpit.spawn(
     compose("-p", project, "logs", "--follow", "--tail", "200", "--timestamps",
       ...(service ? [service] : [])),
-    { err: "message" },
+    { err: "message", ...dockerSpawnEnviron() },
   );
 }
 
@@ -61,7 +61,7 @@ export function downStack(project: string, configFiles: string[], profiles: stri
   const profileFlags = profiles.flatMap(p => ["--profile", p]);
   return cockpit.spawn(
     compose(...profileFlags, "-p", project, ...fileFlags(configFiles), "down"),
-    { superuser, err: "message" },
+    { superuser, err: "message", ...dockerSpawnEnviron() },
   );
 }
 
@@ -70,7 +70,7 @@ export function upStackStream(project: string, configFiles: string[], profiles: 
   const profileFlags = profiles.flatMap(p => ["--profile", p]);
   return cockpit.spawn(
     compose(...profileFlags, "--progress", "plain", "-p", project, ...fileFlags(configFiles), "up", "-d"),
-    { superuser, err: "out" },
+    { superuser, err: "out", ...dockerSpawnEnviron() },
   );
 }
 
@@ -79,7 +79,7 @@ export function pullStack(project: string, configFiles: string[], profiles: stri
   const profileFlags = profiles.flatMap(p => ["--profile", p]);
   return cockpit.spawn(
     compose(...profileFlags, "--progress", "plain", "-p", project, ...fileFlags(configFiles), "pull"),
-    { superuser, err: "out" },
+    { superuser, err: "out", ...dockerSpawnEnviron() },
   );
 }
 
@@ -87,7 +87,7 @@ export function pauseStack(project: string, configFiles: string[], profiles: str
   const profileFlags = profiles.flatMap(p => ["--profile", p]);
   return cockpit.spawn(
     compose(...profileFlags, "-p", project, ...fileFlags(configFiles), "pause"),
-    { superuser, err: "message" },
+    { superuser, err: "message", ...dockerSpawnEnviron() },
   );
 }
 
@@ -95,7 +95,7 @@ export function unpauseStack(project: string, configFiles: string[], profiles: s
   const profileFlags = profiles.flatMap(p => ["--profile", p]);
   return cockpit.spawn(
     compose(...profileFlags, "-p", project, ...fileFlags(configFiles), "unpause"),
-    { superuser, err: "message" },
+    { superuser, err: "message", ...dockerSpawnEnviron() },
   );
 }
 
@@ -103,39 +103,46 @@ export function killStack(project: string, configFiles: string[], profiles: stri
   const profileFlags = profiles.flatMap(p => ["--profile", p]);
   return cockpit.spawn(
     compose(...profileFlags, "-p", project, ...fileFlags(configFiles), "kill"),
-    { superuser, err: "message" },
+    { superuser, err: "message", ...dockerSpawnEnviron() },
   );
 }
 
 export function listImages(project: string, configFiles: string[]): CockpitProcess {
   return cockpit.spawn(
     compose("-p", project, ...fileFlags(configFiles), "images", "--format", "json"),
-    { err: "message" },
+    { err: "message", ...dockerSpawnEnviron() },
   );
 }
 
 export function listVolumes(project: string, configFiles: string[]): CockpitProcess {
   return cockpit.spawn(
     compose("-p", project, ...fileFlags(configFiles), "volumes", "--format", "json"),
-    { err: "message" },
+    { err: "message", ...dockerSpawnEnviron() },
   );
 }
 
 export function streamEvents(project: string): CockpitProcess {
-  return cockpit.spawn(compose("-p", project, "events", "--json"), { err: "message" });
+  return cockpit.spawn(compose("-p", project, "events", "--json"), { err: "message", ...dockerSpawnEnviron() });
 }
 
 export function composeTop(project: string): CockpitProcess {
   return cockpit.spawn(
     compose("-p", project, "top"),
-    { err: "message" },
+    { err: "message", ...dockerSpawnEnviron() },
   );
 }
 
 export function composeVersion(): CockpitProcess {
   return cockpit.spawn(
     compose("version", "--format", "json"),
-    { err: "message" },
+    { err: "message", ...dockerSpawnEnviron() },
+  );
+}
+
+export function dockerVersion(): CockpitProcess {
+  return cockpit.spawn(
+    ["docker", "version", "--format", "{{.Client.Version}}"],
+    { err: "message", ...dockerSpawnEnviron() },
   );
 }
 
@@ -144,7 +151,7 @@ export function composeVersion(): CockpitProcess {
 export function listProjectContainerImageRefs(project: string): CockpitProcess {
   return cockpit.spawn(
     ["docker", "ps", "-a", "--filter", `label=com.docker.compose.project=${project}`, "--format", "{{.Image}}"],
-    { err: "message" },
+    { err: "message", ...dockerSpawnEnviron() },
   );
 }
 
@@ -152,7 +159,7 @@ export function listProjectContainerImageRefs(project: string): CockpitProcess {
 export function listImagesByRepo(repo: string): CockpitProcess {
   return cockpit.spawn(
     ["docker", "images", repo, "--format", "{{.Repository}}:{{.Tag}}\t{{.Size}}"],
-    { err: "message" },
+    { err: "message", ...dockerSpawnEnviron() },
   );
 }
 
@@ -161,35 +168,35 @@ export function listImagesByRepo(repo: string): CockpitProcess {
 export function listAllContainerImages(): CockpitProcess {
   return cockpit.spawn(
     ["docker", "ps", "-a", "--format", "{{.Image}}"],
-    { err: "message" },
+    { err: "message", ...dockerSpawnEnviron() },
   );
 }
 
 export function removeImages(ids: string[], superuser?: "try"): CockpitProcess {
   return cockpit.spawn(
     ["docker", "rmi", ...ids],
-    { superuser, err: "message" },
+    { superuser, err: "message", ...dockerSpawnEnviron() },
   );
 }
 
 export function listStoppedContainers(project: string): CockpitProcess {
   return cockpit.spawn(
     ["docker", "ps", "-a", "--filter", "status=exited", "--filter", `label=com.docker.compose.project=${project}`, "--format", "{{.Names}} — {{.Status}}"],
-    { err: "message" },
+    { err: "message", ...dockerSpawnEnviron() },
   );
 }
 
 export function listDanglingVolumes(project: string): CockpitProcess {
   return cockpit.spawn(
     ["docker", "volume", "ls", "--filter", "dangling=true", "--filter", `label=com.docker.compose.project=${project}`, "--format", "{{.Name}}"],
-    { err: "message" },
+    { err: "message", ...dockerSpawnEnviron() },
   );
 }
 
 export function listProjectNetworks(project: string): CockpitProcess {
   return cockpit.spawn(
     ["docker", "network", "ls", "--filter", `label=com.docker.compose.project=${project}`, "--format", "{{.Name}}"],
-    { err: "message" },
+    { err: "message", ...dockerSpawnEnviron() },
   );
 }
 
@@ -198,7 +205,7 @@ export function listProjectNetworks(project: string): CockpitProcess {
 export function listNetworkConnectedProjects(networkName: string): CockpitProcess {
   return cockpit.spawn(
     ["docker", "ps", "--filter", `network=${networkName}`, "--format", `{{.Label "com.docker.compose.project"}}`],
-    { err: "message" },
+    { err: "message", ...dockerSpawnEnviron() },
   );
 }
 
@@ -206,7 +213,7 @@ export function listNetworkConnectedProjects(networkName: string): CockpitProces
 export function inspectNetworkContainerCounts(names: string[]): CockpitProcess {
   return cockpit.spawn(
     ["docker", "network", "inspect", ...names, "--format", "{{.Name}}\t{{len .Containers}}"],
-    { err: "message" },
+    { err: "message", ...dockerSpawnEnviron() },
   );
 }
 
@@ -215,21 +222,21 @@ export function inspectNetworkContainerCounts(names: string[]): CockpitProcess {
 export function pruneContainers(project: string, superuser?: "try"): CockpitProcess {
   return cockpit.spawn(
     ["docker", "container", "prune", "-f", "--filter", `label=com.docker.compose.project=${project}`],
-    { superuser, err: "message" },
+    { superuser, err: "message", ...dockerSpawnEnviron() },
   );
 }
 
 export function pruneVolumes(project: string, superuser?: "try"): CockpitProcess {
   return cockpit.spawn(
     ["docker", "volume", "prune", "-f", "--filter", `label=com.docker.compose.project=${project}`],
-    { superuser, err: "message" },
+    { superuser, err: "message", ...dockerSpawnEnviron() },
   );
 }
 
 export function pruneNetworks(project: string, superuser?: "try"): CockpitProcess {
   return cockpit.spawn(
     ["docker", "network", "prune", "-f", "--filter", `label=com.docker.compose.project=${project}`],
-    { superuser, err: "message" },
+    { superuser, err: "message", ...dockerSpawnEnviron() },
   );
 }
 
@@ -244,6 +251,6 @@ export function composeRunStream(
   return cockpit.spawn(
     compose("--progress", "plain", "-p", project, ...fileFlags(configFiles),
       "run", ...(rm ? ["--rm"] : []), service, ...command),
-    { superuser, err: "out" },
+    { superuser, err: "out", ...dockerSpawnEnviron() },
   );
 }

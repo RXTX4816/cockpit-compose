@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { startStack, stopStack, restartStack, readRunningServiceNames, pauseStack, unpauseStack, composeFileSuperuser, readAllProfiles } from "../api";
+import { startStack, stopStack, restartStack, readRunningServiceNames, pauseStack, unpauseStack, composeFileSuperuser, readAllProfiles, isRootlessMode } from "../api";
 
 export function useStackActions(
   stackName: string,
@@ -18,7 +18,10 @@ export function useStackActions(
     onActingChange(1);
     setActionError(null);
     try {
-      const [su, profiles] = await Promise.all([composeFileSuperuser(configFiles), readAllProfiles(configFiles[0])]);
+      const [su, profiles] = await Promise.all([
+        isRootlessMode() ? Promise.resolve<"try" | undefined>(undefined) : composeFileSuperuser(configFiles),
+        readAllProfiles(configFiles[0]),
+      ]);
       if (action === "start") await startStack(stackName, configFiles, profiles, su);
       else if (action === "stop") await stopStack(stackName, configFiles, profiles, su);
       else if (action === "restart") {

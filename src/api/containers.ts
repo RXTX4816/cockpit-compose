@@ -1,9 +1,9 @@
-import { compose } from "./cockpit";
+import { compose, dockerSpawnEnviron } from "./cockpit";
 
 export function listContainers(project: string): CockpitProcess {
   return cockpit.spawn(
     compose("-p", project, "ps", "--all", "--format", "json"),
-    { err: "message" },
+    { err: "message", ...dockerSpawnEnviron() },
   );
 }
 
@@ -15,6 +15,6 @@ export function getContainerStats(containerIds: string[]): CockpitProcess {
       '{"id":"{{.ID}}","name":"{{.Name}}","cpu":"{{.CPUPerc}}","mem":"{{.MemUsage}}","memPerc":"{{.MemPerc}}","net":"{{.NetIO}}","block":"{{.BlockIO}}"}',
       ...containerIds,
     ],
-    { err: "message" },
+    { err: "message", ...dockerSpawnEnviron() },
   );
 }
