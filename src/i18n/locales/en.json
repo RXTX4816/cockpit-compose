@@ -88,7 +88,9 @@
     "docker": "Docker",
     "podman": "Podman",
     "toggle_label": "Container runtime",
-    "not_installed": "{{runtime}} not found — install it to switch"
+    "not_installed": "{{runtime}} not found — install it to switch",
+    "podman_confirm_title": "Switch to Podman",
+    "podman_confirm_body": "Podman support is experimental. Depending on your setup, some features may not work as expected — including stack discovery, log streaming, and certain compose commands."
   },
 
   "error_boundary": {

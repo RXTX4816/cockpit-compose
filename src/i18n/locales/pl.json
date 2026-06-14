@@ -90,7 +90,9 @@
     "docker": "Docker",
     "podman": "Podman",
     "toggle_label": "Środowisko uruchomieniowe kontenerów",
-    "not_installed": "Nie znaleziono {{runtime}} — zainstaluj, aby przełączyć"
+    "not_installed": "Nie znaleziono {{runtime}} — zainstaluj, aby przełączyć",
+    "podman_confirm_title": "Przełącz na Podman",
+    "podman_confirm_body": "Obsługa Podmana jest eksperymentalna. W zależności od konfiguracji niektóre funkcje mogą nie działać zgodnie z oczekiwaniami — w tym wykrywanie stosów, strumieniowanie logów i niektóre polecenia Compose."
   },
 
   "error_boundary": {

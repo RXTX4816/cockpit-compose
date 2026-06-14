@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { ToggleGroup, ToggleGroupItem, Tooltip, Alert } from "@patternfly/react-core";
+import { ToggleGroup, ToggleGroupItem, Tooltip, Alert, Modal, ModalHeader, ModalBody, ModalFooter, Button } from "@patternfly/react-core";
 import { setRuntime, detectComposeCommand, type Runtime } from "../api";
 
 interface Props {
@@ -30,6 +30,7 @@ export function RuntimeToggle({ onRuntimeChange }: Props) {
   );
   const [detecting, setDetecting] = useState(false);
   const [notInstalled, setNotInstalled] = useState<Runtime | null>(null);
+  const [showPodmanConfirm, setShowPodmanConfirm] = useState(false);
 
   const handleChange = useCallback(async (newRuntime: Runtime) => {
     if (newRuntime === runtime || detecting) return;
@@ -59,32 +60,50 @@ export function RuntimeToggle({ onRuntimeChange }: Props) {
   const runtimeLabel = notInstalled === "podman" ? "Podman" : "Docker";
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.25rem" }}>
-      <Tooltip content={t("runtime.toggle_label")}>
-        <ToggleGroup aria-label={t("runtime.toggle_label")} isCompact>
-          <ToggleGroupItem
-            text={<><DockerIcon />{t("runtime.docker")}</>}
-            isSelected={runtime === "docker"}
-            onChange={() => void handleChange("docker")}
-            isDisabled={detecting}
+    <>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.25rem" }}>
+        <Tooltip content={t("runtime.toggle_label")}>
+          <ToggleGroup aria-label={t("runtime.toggle_label")} isCompact>
+            <ToggleGroupItem
+              text={<><DockerIcon />{t("runtime.docker")}</>}
+              isSelected={runtime === "docker"}
+              onChange={() => void handleChange("docker")}
+              isDisabled={detecting}
+            />
+            <ToggleGroupItem
+              text={<><PodmanIcon />{t("runtime.podman")}</>}
+              isSelected={runtime === "podman"}
+              onChange={() => { if (runtime !== "podman") setShowPodmanConfirm(true); }}
+              isDisabled={detecting}
+            />
+          </ToggleGroup>
+        </Tooltip>
+        {notInstalled && (
+          <Alert
+            variant="warning"
+            isInline
+            isPlain
+            title={t("runtime.not_installed", { runtime: runtimeLabel })}
+            style={{ fontSize: "0.75rem", padding: "0.1rem 0.25rem" }}
           />
-          <ToggleGroupItem
-            text={<><PodmanIcon />{t("runtime.podman")}</>}
-            isSelected={runtime === "podman"}
-            onChange={() => void handleChange("podman")}
-            isDisabled={detecting}
-          />
-        </ToggleGroup>
-      </Tooltip>
-      {notInstalled && (
-        <Alert
-          variant="warning"
-          isInline
-          isPlain
-          title={t("runtime.not_installed", { runtime: runtimeLabel })}
-          style={{ fontSize: "0.75rem", padding: "0.1rem 0.25rem" }}
-        />
+        )}
+      </div>
+      {showPodmanConfirm && (
+        <Modal isOpen onClose={() => setShowPodmanConfirm(false)} variant="small" aria-label={t("runtime.podman_confirm_title")}>
+          <ModalHeader title={t("runtime.podman_confirm_title")} />
+          <ModalBody>
+            <Alert variant="warning" isInline isPlain title={t("runtime.podman_confirm_body")} />
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="primary" onClick={() => { setShowPodmanConfirm(false); void handleChange("podman"); }}>
+              {t("common.continue")}
+            </Button>
+            <Button variant="link" onClick={() => setShowPodmanConfirm(false)}>
+              {t("common.cancel")}
+            </Button>
+          </ModalFooter>
+        </Modal>
       )}
-    </div>
+    </>
   );
 }
