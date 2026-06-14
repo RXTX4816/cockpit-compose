@@ -35,6 +35,7 @@
 
   "actions": {
     "up": "Hochfahren",
+    "up_title": "Stack starten oder geänderte Container neu erstellen",
     "down": "Herunterfahren",
     "down_title": "Herunterfahren (Container entfernen)",
     "stop": "Stoppen",

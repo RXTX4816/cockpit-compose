@@ -148,14 +148,16 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
 
             <DataListCell key="actions" width={2} alignRight>
               <span className="sr-actions-cell">
-                <Button
-                  variant="primary"
-                  size="sm"
-                  onClick={onUp}
-                  isDisabled={acting}
-                >
-                  {t("actions.up")}
-                </Button>
+                <Tooltip content={t("actions.up_title")}>
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={onUp}
+                    isDisabled={acting}
+                  >
+                    {t("actions.up")}
+                  </Button>
+                </Tooltip>
 
                 {(status === "running" || status === "partial") ? (
                   <Button

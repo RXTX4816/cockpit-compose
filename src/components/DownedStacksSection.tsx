@@ -11,8 +11,9 @@ import {
   Spinner,
   Label,
   TextInput,
+  Tooltip,
 } from "@patternfly/react-core";
-import { PlusCircleIcon, FolderOpenIcon, AngleUpIcon, HistoryIcon } from "@patternfly/react-icons";
+import { PlusCircleIcon, FolderOpenIcon, AngleUpIcon, HistoryIcon, PencilAltIcon, ArchiveIcon, TrashIcon } from "@patternfly/react-icons";
 import { type ComposeStack } from "../api";
 import { type DownedStack, useDownedStacksScan } from "../hooks/useDownedStacksScan";
 import { UpModal } from "./UpModal";
@@ -267,24 +268,34 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
                             )}
                           </DataListCell>,
                           <DataListCell key="actions" width={2} className="dss-actions">
-                            <Button variant="primary" size="sm" onClick={() => setUpConfirmTarget(d)}>
-                              ↑ {t("actions.up")}
-                            </Button>
-                            <Button variant="plain" size="sm" onClick={() => setYamlTarget(d)} title={t("downed_section.edit_title")}>
-                              {t("common.edit")}
-                            </Button>
-                            <Button variant="plain" size="sm" onClick={() => setBackupTarget(d)} title={t("actions.backup")}>
-                              {t("actions.backup")}
-                            </Button>
-                            <Button
-                              variant="plain"
-                              size="sm"
-                              onClick={() => setDeleteTarget(d)}
-                              title={t("downed_section.delete_title")}
-                              className="dss-delete-btn"
-                            >
-                              ✕ {t("common.delete")}
-                            </Button>
+                            <Tooltip content={t("actions.up_title")}>
+                              <Button variant="primary" size="sm" onClick={() => setUpConfirmTarget(d)}>
+                                {t("actions.up")}
+                              </Button>
+                            </Tooltip>
+                            <span className="dss-icon-group">
+                              <Tooltip content={t("downed_section.edit_title")}>
+                                <Button variant="plain" size="sm" onClick={() => setYamlTarget(d)} aria-label={t("downed_section.edit_title")}>
+                                  <PencilAltIcon />
+                                </Button>
+                              </Tooltip>
+                              <Tooltip content={t("actions.backup")}>
+                                <Button variant="plain" size="sm" onClick={() => setBackupTarget(d)} aria-label={t("actions.backup")}>
+                                  <ArchiveIcon />
+                                </Button>
+                              </Tooltip>
+                              <Tooltip content={t("downed_section.delete_title")}>
+                                <Button
+                                  variant="plain"
+                                  size="sm"
+                                  onClick={() => setDeleteTarget(d)}
+                                  aria-label={t("downed_section.delete_title")}
+                                  className="dss-delete-btn"
+                                >
+                                  <TrashIcon />
+                                </Button>
+                              </Tooltip>
+                            </span>
                           </DataListCell>,
                         ]}
                       />

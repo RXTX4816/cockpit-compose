@@ -35,6 +35,7 @@
 
   "actions": {
     "up": "Up",
+    "up_title": "Start stack or recreate changed containers",
     "down": "Down",
     "down_title": "Down (remove containers)",
     "stop": "Stop",

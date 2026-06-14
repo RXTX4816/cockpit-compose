@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { PageSection, Label } from "@patternfly/react-core";
+import { PageSection, Label, Tooltip } from "@patternfly/react-core";
 import { composeVersion, dockerVersion, isRootlessMode, getDockerSocketPath, type ComposeVersion } from "../api";
 // @ts-expect-error: ESM import assertion for JSON
 import pkg from "../../package.json" assert { type: "json" };
@@ -50,15 +50,18 @@ export function AppFooter() {
     >
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6, justifyContent: "center", alignItems: "center" }}>
-          <Label isCompact color="grey">{t("footer.version", { version: pkg.version })}</Label>
+          {socketPath ? (
+            <Tooltip content={socketPath}>
+              <Label isCompact color="grey" style={{ cursor: "default" }}>{t("footer.version", { version: pkg.version })}</Label>
+            </Tooltip>
+          ) : (
+            <Label isCompact color="grey">{t("footer.version", { version: pkg.version })}</Label>
+          )}
           {dockerVer && (
             <Label isCompact color="blue">{t("footer.docker_version", { version: dockerVer })}</Label>
           )}
           {version && (
             <Label isCompact color="blue">{t("footer.compose_version", { version: version.version })}</Label>
-          )}
-          {socketPath && (
-            <Label isCompact color="grey" style={{ fontFamily: "monospace" }}>{socketPath}</Label>
           )}
           {rootless && (
             <Label isCompact color="green">{t("footer.rootless")}</Label>
