@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Button, Label } from "@patternfly/react-core";
+import { Badge, Button, Label } from "@patternfly/react-core";
 import { CheckCircleIcon, ExclamationTriangleIcon, ExternalLinkAltIcon, InProgressIcon } from "@patternfly/react-icons";
 import type { ComposeContainer } from "../../api";
 import { getImageChangelogUrl } from "../../lib/imageUrl";
@@ -23,32 +23,53 @@ export function ContainerTable({ containers }: { containers: ComposeContainer[] 
   const { t } = useTranslation();
   const [pendingUrl, setPendingUrl] = useState<string | null>(null);
 
+  const serviceNames = [...new Set(containers.map(c => c.Service || c.Name))];
+  const groups = serviceNames.map(name => ({
+    name,
+    instances: containers.filter(c => (c.Service || c.Name) === name),
+  }));
+
   return (
     <>
       {pendingUrl && <ExternalLinkModal url={pendingUrl} onClose={() => setPendingUrl(null)} />}
       <div className="ct-list">
-        {containers.map(c => {
-          const isRunning = c.State?.toLowerCase() === "running";
-          const imageUrl = getImageChangelogUrl(c.Image);
+        {groups.map(({ name, instances }) => {
+          const runningCount = instances.filter(c => c.State?.toLowerCase() === "running").length;
+          const anyUnhealthy = instances.some(c => c.Health?.toLowerCase() === "unhealthy");
+          const anyStarting = !anyUnhealthy && instances.some(c => c.Health?.toLowerCase() === "starting");
+          const anyHealthy = !anyUnhealthy && !anyStarting && instances.some(c => c.Health?.toLowerCase() === "healthy");
+          const rep = instances[0];
+          const imageUrl = rep ? getImageChangelogUrl(rep.Image) : null;
+          const repState = rep?.State;
+
           return (
-            <div key={c.ID || c.Name} className="ct-row">
-              <Label color={isRunning ? "green" : "grey"} isCompact>
-                {c.State ? t(`container_state.${c.State.toLowerCase()}`, { defaultValue: c.State }) : t("common.unknown")}
+            <div key={name} className="ct-row">
+              <Label color={runningCount > 0 ? "green" : "grey"} isCompact>
+                {repState
+                  ? t(`container_state.${repState.toLowerCase()}`, { defaultValue: repState })
+                  : t("common.unknown")}
               </Label>
               <span className="ct-name">
                 {imageUrl
                   ? (
                     <Button variant="link" isInline onClick={() => setPendingUrl(imageUrl)}>
-                      {c.Service || c.Name}
+                      {name}
                       {" "}
                       <ExternalLinkAltIcon />
                     </Button>
                   )
-                  : (c.Service || c.Name)}
-                {c.Health && <HealthIcon health={c.Health} />}
+                  : name}
+                {instances.length > 1 && (
+                  <Badge isRead style={{ marginLeft: "0.35em" }}>
+                    {t("container_table.replica_count", { count: instances.length })}
+                  </Badge>
+                )}
+                {anyUnhealthy && <HealthIcon health="unhealthy" />}
+                {anyStarting && <HealthIcon health="starting" />}
+                {anyHealthy && <HealthIcon health="healthy" />}
               </span>
-              <span className="ct-image">{c.Image}</span>
-              <span className="ct-uptime">{c.Status}</span>
+              <span className="ct-image">{rep?.Image}</span>
+              <span className="ct-uptime">{rep?.Status}</span>
             </div>
           );
         })}

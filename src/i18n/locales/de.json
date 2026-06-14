@@ -58,7 +58,8 @@
     "more_actions_for": "Weitere Aktionen für {{name}}",
     "find_best_match": "Besten Treffer finden",
     "find_best_match_title": "Compose-Stammverzeichnis aus aktiven Stacks ableiten",
-    "backup": "Sicherung"
+    "backup": "Sicherung",
+    "scale": "Skalieren"
   },
 
   "health": {
@@ -497,5 +498,27 @@
     "aria_label": "Warnung: Externer Link",
     "title": "Externen Link öffnen",
     "warning_title": "Prüfen Sie stets, ob die Zielseite vertrauenswürdig ist, bevor Sie fortfahren."
+  },
+
+  "container_table": {
+    "replica_count": "×{{count}}"
+  },
+
+  "scale_modal": {
+    "title": "Dienste skalieren – {{name}}",
+    "confirm_title": "Skalierung bestätigen – {{name}}",
+    "aria_label": "Dienste skalieren",
+    "sideeffects_title": "Skalierung ändert laufende Instanzen",
+    "sideeffects_body": "Jedes Replikat ist ein separater Container mit demselben Image und derselben Konfiguration. Hochskalieren startet neue Container sofort. Herunterskalieren stoppt und entfernt überschüssige Container. Host-Port-Bindungen, Volume-Mounts oder Netzwerk-Aliases können dabei zu Konflikten führen.",
+    "what_is_scale_title": "So funktioniert docker compose Skalierung",
+    "what_is_scale_body": "Dies führt \"docker compose up -d --scale <Dienst>=<n>\" aus. Docker Compose startet oder stoppt Container, um die gewünschte Anzahl zu erreichen. Bestehende Container werden nicht neu erstellt, es sei denn, Image oder Konfiguration haben sich geändert.",
+    "apply_button": "Übernehmen",
+    "service_label": "Replikatanzahl für {{service}}",
+    "minus_aria": "Replikate für {{service}} verringern",
+    "plus_aria": "Replikate für {{service}} erhöhen",
+    "port_conflict_inline": "Dieser Dienst hat statische Host-Port-Bindungen – mehr als 1 Replikat schlägt fehl, da ein Host-Port immer nur von einem Container belegt werden kann.",
+    "port_conflict_title": "Port-Konflikt wahrscheinlich",
+    "port_conflict_body": "Die folgenden Dienste haben statische Host-Port-Bindungen. Docker kann nicht mehr als ein Replikat starten, da ein Host-Port nur von einem einzelnen Container belegt werden kann:",
+    "port_conflict_icon_title": "Hat statische Host-Port-Bindungen"
   }
 }

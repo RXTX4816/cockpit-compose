@@ -36,6 +36,7 @@ import { ExecModal } from "../ExecModal";
 import { RunModal } from "../RunModal";
 import { PruneModal } from "../PruneModal";
 import { BackupModal } from "../BackupModal";
+import { ScaleModal } from "../ScaleModal";
 import { DownedStacksSection } from "../DownedStacksSection";
 import { StackRow } from "./StackRow";
 import "./StacksView.css";
@@ -59,6 +60,7 @@ export function StacksView() {
   const [runTarget, setRunTarget] = useState<ComposeStack | null>(null);
   const [pruneTarget, setPruneTarget] = useState<ComposeStack | null>(null);
   const [backupTarget, setBackupTarget] = useState<ComposeStack | null>(null);
+  const [scaleTarget, setScaleTarget] = useState<ComposeStack | null>(null);
   // Counts how many stack actions are currently in flight.
   // We pause the auto-refresh while any action is running so that Docker
   // being temporarily busy (e.g. mid-restart) never causes a spurious error.
@@ -156,6 +158,7 @@ export function StacksView() {
               onRun={() => setRunTarget(stack)}
               onPrune={() => setPruneTarget(stack)}
               onBackup={() => setBackupTarget(stack)}
+              onScale={() => setScaleTarget(stack)}
               onActingChange={onActingChange}
             />
           ))}
@@ -221,6 +224,9 @@ export function StacksView() {
       )}
       {backupTarget && (
         <BackupModal stack={backupTarget} onClose={() => setBackupTarget(null)} />
+      )}
+      {scaleTarget && (
+        <ScaleModal stack={scaleTarget} onClose={() => setScaleTarget(null)} />
       )}
 
       {downTarget && (
