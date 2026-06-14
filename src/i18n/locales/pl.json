@@ -14,7 +14,8 @@
     "scanning": "Skanowanie…",
     "fetch": "Pobierz",
     "nothing_found": "Nic nie znaleziono.",
-    "unknown": "nieznany"
+    "unknown": "nieznany",
+    "continue": "Kontynuuj"
   },
 
   "stacks": {
@@ -500,5 +501,11 @@
     "error_src_missing": "Nie znaleziono wypakowanego katalogu w {{path}}",
     "error_dest_exists": "Ścieżka docelowa {{path}} już istnieje – przerwano, aby uniknąć nadpisania",
     "error_unknown": "Przywracanie nie powiodło się (sprawdź konsolę przeglądarki)"
+  },
+
+  "external_link_modal": {
+    "aria_label": "Ostrzeżenie: zewnętrzny link",
+    "title": "Otwieranie zewnętrznego linku",
+    "warning_title": "Przed kontynuowaniem zawsze sprawdź, czy strona docelowa jest godna zaufania."
   }
 }

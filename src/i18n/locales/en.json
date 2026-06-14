@@ -14,7 +14,8 @@
     "scanning": "Scanning…",
     "fetch": "Fetch",
     "nothing_found": "Nothing found.",
-    "unknown": "unknown"
+    "unknown": "unknown",
+    "continue": "Continue"
   },
 
   "stacks": {
@@ -490,5 +491,11 @@
     "error_src_missing": "Extracted directory not found at {{path}}",
     "error_dest_exists": "Target path {{path}} already exists — aborting to prevent overwrite",
     "error_unknown": "Restore failed (check browser console for details)"
+  },
+
+  "external_link_modal": {
+    "aria_label": "External link warning",
+    "title": "Opening external link",
+    "warning_title": "Always verify that the destination site is trustworthy before continuing."
   }
 }
