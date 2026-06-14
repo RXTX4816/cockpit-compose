@@ -73,3 +73,9 @@ describe("formatBytes", () => {
     expect(formatBytes(0)).toBe("0B");
   });
 });
+
+describe("parseDockerBytes — edge cases", () => {
+  it("treats a bare number with no unit as bytes", () => {
+    expect(parseDockerBytes("42")).toBe(42);
+  });
+});

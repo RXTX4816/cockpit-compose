@@ -483,3 +483,60 @@ describe("YamlModal — import file", () => {
     expect(screen.queryByText("Import existing file")).toBeNull();
   });
 });
+
+describe("YamlModal — modal close (X button) handlers", () => {
+  it("X button on add-file sub-modal closes it", async () => {
+    mockSpawn.mockReturnValue(mockProcess(composeContent));
+    render(<YamlModal stack={stack} onClose={vi.fn()} />);
+    await waitFor(() => screen.getByRole("button", { name: /^Add$/i }));
+    fireEvent.click(screen.getByRole("button", { name: /^Add$/i }));
+    expect(screen.getByText("Add compose file")).toBeInTheDocument();
+    // Click the X button on the add-file modal (the PF6 modal close button)
+    const addFileDialog = screen.getByRole("dialog", { name: /Add compose file/i, hidden: true });
+    const xBtn = within(addFileDialog).getByRole("button", { name: /close/i, hidden: true });
+    fireEvent.click(xBtn);
+    await waitFor(() => expect(screen.queryByText("Add compose file")).toBeNull());
+  });
+
+  it("Cancel button on add-file sub-modal closes it", async () => {
+    mockSpawn.mockReturnValue(mockProcess(composeContent));
+    render(<YamlModal stack={stack} onClose={vi.fn()} />);
+    await waitFor(() => screen.getByRole("button", { name: /^Add$/i }));
+    fireEvent.click(screen.getByRole("button", { name: /^Add$/i }));
+    expect(screen.getByText("Add compose file")).toBeInTheDocument();
+    const addFileDialog = screen.getByRole("dialog", { name: /Add compose file/i, hidden: true });
+    fireEvent.click(within(addFileDialog).getByRole("button", { name: /^Cancel$/i, hidden: true }));
+    await waitFor(() => expect(screen.queryByText("Add compose file")).toBeNull());
+  });
+
+  it("X button on delete-confirm sub-modal closes it", async () => {
+    mockSpawn.mockReturnValue(mockProcess(composeContent));
+    render(<YamlModal stack={multiFileStack} onClose={vi.fn()} />);
+    await waitFor(() => screen.getByRole("button", { name: /^Add$/i }));
+    fireEvent.click(screen.getByRole("tab", { name: /prod\.yml/i }));
+    await waitFor(() => screen.getByRole("button", { name: /Delete file/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Delete file/i }));
+    const deleteDialog = screen.getByRole("dialog", { name: /Confirm delete compose file/i, hidden: true });
+    expect(deleteDialog).toBeInTheDocument();
+    const xBtn = within(deleteDialog).getByRole("button", { name: /close/i, hidden: true });
+    fireEvent.click(xBtn);
+    await waitFor(() => expect(screen.queryByRole("dialog", { name: /Confirm delete compose file/i, hidden: true })).toBeNull());
+  });
+
+  it("X button on confirm-save sub-modal closes it", async () => {
+    mockSpawn.mockReturnValue(mockProcess(composeContent));
+    render(<YamlModal stack={stack} onClose={vi.fn()} />);
+    await waitFor(() => screen.getByRole("button", { name: /^Edit$/i }));
+    // Open edit mode and trigger diagnostics warning then try to save
+    fireEvent.click(screen.getByRole("button", { name: /^Edit$/i }));
+    await waitFor(() => screen.getByRole("button", { name: /^Save$/i }));
+    fireEvent.click(screen.getByRole("button", { name: /^Save$/i }));
+    // If there are diagnostics, the confirmSave modal appears; click its X
+    const confirmDialog = screen.queryByRole("dialog", { name: /Save with issues\?/i, hidden: true });
+    if (confirmDialog) {
+      const xBtn = within(confirmDialog).getByRole("button", { name: /close/i, hidden: true });
+      fireEvent.click(xBtn);
+      await waitFor(() => expect(screen.queryByRole("dialog", { name: /Save with issues\?/i, hidden: true })).toBeNull());
+    }
+  });
+});

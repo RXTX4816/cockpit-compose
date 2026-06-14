@@ -6,6 +6,9 @@ import {
   listProjectContainerImageRefs, listImagesByRepo, listAllContainerImages, removeImages,
   listStoppedContainers, listDanglingVolumes, listProjectNetworks,
   pruneContainers, pruneVolumes, pruneNetworks, composeRunStream,
+  readRunningServiceNames, pauseStack, unpauseStack, killStack,
+  streamEvents, composeTop, composeVersion, listImages, listVolumes,
+  listNetworkConnectedProjects, inspectNetworkContainerCounts,
 } from "./stacks";
 
 beforeEach(() => { mockSpawn.mockReset(); });
@@ -357,5 +360,167 @@ describe("composeRunStream", () => {
     expect(args.filter(a => a === "-f")).toHaveLength(2);
     expect(args).toContain("/path/base.yml");
     expect(args).toContain("/path/override.yml");
+  });
+});
+
+describe("readRunningServiceNames", () => {
+  it("returns deduplicated service names from docker ps output", async () => {
+    mockSpawn.mockReturnValue(mockProcess("web\nweb\nworker\n"));
+    const names = await readRunningServiceNames("myapp");
+    expect(names).toEqual(["web", "worker"]);
+  });
+
+  it("filters out empty lines", async () => {
+    mockSpawn.mockReturnValue(mockProcess("web\n\n"));
+    const names = await readRunningServiceNames("myapp");
+    expect(names).toEqual(["web"]);
+  });
+
+  it("spawns docker ps with correct filters and format", async () => {
+    mockSpawn.mockReturnValue(mockProcess("web\n"));
+    await readRunningServiceNames("myapp");
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args).toContain("ps");
+    expect(args.join(" ")).toContain("com.docker.compose.project=myapp");
+    expect(args).toContain("status=running");
+  });
+
+  it("returns empty array when spawn rejects", async () => {
+    mockSpawn.mockReturnValue(mockProcess("", "permission denied"));
+    const names = await readRunningServiceNames("myapp");
+    expect(names).toEqual([]);
+  });
+});
+
+describe("pauseStack", () => {
+  it("spawns compose pause with project and config file", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    pauseStack("myapp", ["/path/compose.yml"]);
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args).toContain("pause");
+    expect(args).toContain("myapp");
+    expect(args).toContain("-f");
+    expect(args).toContain("/path/compose.yml");
+  });
+
+  it("passes superuser option when provided", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    pauseStack("myapp", ["/path/compose.yml"], [], "try");
+    const opts = mockSpawn.mock.calls[0][1] as Record<string, unknown>;
+    expect(opts.superuser).toBe("try");
+  });
+});
+
+describe("unpauseStack", () => {
+  it("spawns compose unpause with project and config file", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    unpauseStack("myapp", ["/path/compose.yml"]);
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args).toContain("unpause");
+    expect(args).toContain("myapp");
+  });
+
+  it("passes superuser option when provided", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    unpauseStack("myapp", ["/path/compose.yml"], [], "try");
+    const opts = mockSpawn.mock.calls[0][1] as Record<string, unknown>;
+    expect(opts.superuser).toBe("try");
+  });
+});
+
+describe("killStack", () => {
+  it("spawns compose kill with project and config file", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    killStack("myapp", ["/path/compose.yml"]);
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args).toContain("kill");
+    expect(args).toContain("myapp");
+  });
+
+  it("passes superuser option when provided", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    killStack("myapp", ["/path/compose.yml"], [], "try");
+    const opts = mockSpawn.mock.calls[0][1] as Record<string, unknown>;
+    expect(opts.superuser).toBe("try");
+  });
+});
+
+describe("streamEvents", () => {
+  it("spawns compose events --json for the given project", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    streamEvents("myapp");
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args).toContain("events");
+    expect(args).toContain("--json");
+    expect(args).toContain("myapp");
+  });
+});
+
+describe("composeTop", () => {
+  it("spawns compose top for the given project", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    composeTop("myapp");
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args).toContain("top");
+    expect(args).toContain("myapp");
+  });
+});
+
+describe("composeVersion", () => {
+  it("spawns compose version --format json", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    composeVersion();
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args).toContain("version");
+    expect(args).toContain("--format");
+    expect(args).toContain("json");
+  });
+});
+
+describe("listImages", () => {
+  it("spawns compose images --format json for the project", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    listImages("myapp", ["/path/compose.yml"]);
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args).toContain("images");
+    expect(args).toContain("--format");
+    expect(args).toContain("json");
+    expect(args).toContain("myapp");
+  });
+});
+
+describe("listVolumes", () => {
+  it("spawns compose volumes --format json for the project", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    listVolumes("myapp", ["/path/compose.yml"]);
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args).toContain("volumes");
+    expect(args).toContain("--format");
+    expect(args).toContain("json");
+    expect(args).toContain("myapp");
+  });
+});
+
+describe("listNetworkConnectedProjects", () => {
+  it("spawns docker ps with network filter and compose project label format", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    listNetworkConnectedProjects("my-network");
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args).toContain("ps");
+    expect(args).toContain("network=my-network");
+    expect(args.join(" ")).toContain("com.docker.compose.project");
+  });
+});
+
+describe("inspectNetworkContainerCounts", () => {
+  it("spawns docker network inspect with format template", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    inspectNetworkContainerCounts(["net1", "net2"]);
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args).toContain("network");
+    expect(args).toContain("inspect");
+    expect(args).toContain("net1");
+    expect(args).toContain("net2");
+    expect(args.join(" ")).toContain("{{.Name}}");
   });
 });

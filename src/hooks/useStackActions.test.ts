@@ -140,4 +140,18 @@ describe("useStackActions", () => {
     const args = mockSpawn.mock.calls[0][0] as string[];
     expect(args).toContain("unpause");
   });
+
+  it("doAction sets actionError via String(ex) when rejection is not an Error instance", async () => {
+    mockSpawn.mockReturnValue(
+      Object.assign(
+        new Promise<string>((_, reject) => queueMicrotask(() => reject("plain string error"))),
+        { stream: vi.fn().mockReturnThis(), close: vi.fn(), input: vi.fn() },
+      ) as CockpitProcess,
+    );
+    const { result } = renderHook(() =>
+      useStackActions("myapp", ["/path/compose.yml"], vi.fn()),
+    );
+    await act(() => result.current.doAction("restart"));
+    await waitFor(() => expect(result.current.actionError).toBe("plain string error"));
+  });
 });

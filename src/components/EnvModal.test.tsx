@@ -237,4 +237,113 @@ describe("EnvModal", () => {
     fireEvent.click(screen.getByRole("button", { name: /^Create file$/i }));
     await waitFor(() => expect(screen.getByRole("tab", { name: ".env.staging" })).toBeInTheDocument());
   });
+
+  it("Escape key cancels new file form without creating a tab", async () => {
+    mockRead.mockResolvedValue(null);
+    render(<EnvModal stack={stack} onClose={vi.fn()} />);
+    await waitFor(() => screen.getByTestId("env-editor"));
+    fireEvent.click(screen.getByRole("button", { name: /Add new env file/i }));
+    const input = await waitFor(() => screen.getByPlaceholderText(".env.prod"));
+    fireEvent.change(input, { target: { value: ".env.test" } });
+    fireEvent.keyDown(input, { key: "Escape" });
+    expect(screen.queryByPlaceholderText(".env.prod")).toBeNull();
+    expect(screen.queryByRole("tab", { name: ".env.test" })).toBeNull();
+  });
+
+  it("Enter key submits new file form", async () => {
+    mockRead.mockResolvedValue(null);
+    render(<EnvModal stack={stack} onClose={vi.fn()} />);
+    await waitFor(() => screen.getByTestId("env-editor"));
+    fireEvent.click(screen.getByRole("button", { name: /Add new env file/i }));
+    const input = await waitFor(() => screen.getByPlaceholderText(".env.prod"));
+    fireEvent.change(input, { target: { value: ".env.test" } });
+    fireEvent.keyDown(input, { key: "Enter" });
+    await waitFor(() => expect(screen.getByRole("tab", { name: ".env.test" })).toBeInTheDocument());
+  });
+
+  it("Cancel (✕) button hides new file form", async () => {
+    mockRead.mockResolvedValue(null);
+    render(<EnvModal stack={stack} onClose={vi.fn()} />);
+    await waitFor(() => screen.getByTestId("env-editor"));
+    fireEvent.click(screen.getByRole("button", { name: /Add new env file/i }));
+    const input = await waitFor(() => screen.getByPlaceholderText(".env.prod"));
+    // Find the ✕ cancel button inside the new file form (plain button with text ✕)
+    const cancelBtn = screen.getAllByRole("button").find(b => b.textContent?.trim() === "✕");
+    expect(cancelBtn).toBeDefined();
+    fireEvent.click(cancelBtn!);
+    expect(screen.queryByPlaceholderText(".env.prod")).toBeNull();
+    // input reference must not be re-used after it's unmounted
+    expect(input).not.toBeInTheDocument();
+  });
+
+  it("creates file at existing path just activates that tab", async () => {
+    mockSpawn.mockImplementation(() => makeSpawnProcess("/path/.env\n/path/.env.prod\n"));
+    mockRead.mockResolvedValue("A=1\n");
+    render(<EnvModal stack={stack} onClose={vi.fn()} />);
+    await waitFor(() => screen.getByRole("tab", { name: ".env.prod" }));
+    fireEvent.click(screen.getByRole("button", { name: /Add new env file/i }));
+    const input = await waitFor(() => screen.getByPlaceholderText(".env.prod"));
+    fireEvent.change(input, { target: { value: ".env.prod" } });
+    fireEvent.click(screen.getByRole("button", { name: /^Create file$/i }));
+    // Still only two tabs; no duplicate created
+    const tabs = screen.getAllByRole("tab");
+    expect(tabs.filter(t => t.textContent === ".env.prod")).toHaveLength(1);
+  });
+
+  it("switches back to table mode from raw mode", async () => {
+    mockRead.mockResolvedValue("FOO=bar\n");
+    render(<EnvModal stack={stack} onClose={vi.fn()} />);
+    await waitFor(() => screen.getByTestId("env-editor"));
+    fireEvent.click(screen.getByRole("button", { name: /^Raw$/i }));
+    await waitFor(() => screen.getByTestId("env-editor-raw"));
+    fireEvent.click(screen.getByRole("button", { name: /^Table$/i }));
+    await waitFor(() => expect(screen.getByTestId("env-editor")).toBeInTheDocument());
+    expect(screen.queryByTestId("env-editor-raw")).toBeNull();
+  });
+
+  it("shows error alert with save error message when saving fails", async () => {
+    mockRead.mockResolvedValue("FOO=bar\n");
+    mockReplace.mockRejectedValue(new Error("disk full"));
+    render(<EnvModal stack={stack} onClose={vi.fn()} />);
+    await waitFor(() => screen.getByTestId("env-editor"));
+    fireEvent.click(screen.getByRole("button", { name: /^Save$/i }));
+    await waitFor(() => expect(screen.getByText("disk full")).toBeInTheDocument());
+  });
+
+  it("switches to second tab and loads its file", async () => {
+    mockSpawn.mockImplementation(() => makeSpawnProcess("/path/.env\n/path/.env.prod\n"));
+    mockRead.mockResolvedValue("INITIAL=1\n");
+    render(<EnvModal stack={stack} onClose={vi.fn()} />);
+    await waitFor(() => screen.getByRole("tab", { name: ".env.prod" }));
+    // Click the second tab
+    fireEvent.click(screen.getByRole("tab", { name: ".env.prod" }));
+    // The second tab is loaded (mockRead called again for that path)
+    await waitFor(() => expect(mockRead).toHaveBeenCalledTimes(2));
+  });
+
+  it("closes confirm-save modal when the X (onClose) is clicked", async () => {
+    mockRead.mockResolvedValue("FOO=bar\n");
+    render(<EnvModal stack={stack} onClose={vi.fn()} />);
+    await waitFor(() => screen.getByTestId("env-editor"));
+    fireEvent.change(screen.getByTestId("env-editor"), { target: { value: "__DUPLICATE__" } });
+    fireEvent.click(screen.getByRole("button", { name: /^Save$/i }));
+    await waitFor(() => screen.getByText(/Save with issues\?/i));
+    // Click the X on the confirm modal (first "Close" button in the confirm dialog scope)
+    const confirmModal = screen.getByRole("dialog", { name: /Confirm save/i });
+    const xBtn = within(confirmModal).getAllByRole("button").find(b =>
+      b.getAttribute("aria-label")?.toLowerCase().includes("close")
+    );
+    if (xBtn) fireEvent.click(xBtn);
+    await waitFor(() => expect(screen.queryByText(/Save with issues\?/i)).toBeNull());
+  });
+
+  it("shows error alert when findEnvFiles spawn fails", async () => {
+    mockSpawn.mockImplementation(() => ({
+      stream() { return this; },
+      then() { return Promise.reject(new Error("spawn failed")); },
+      catch(fn: (e: unknown) => void) { Promise.resolve().then(() => fn(new Error("spawn failed"))); return this; },
+    }));
+    render(<EnvModal stack={stack} onClose={vi.fn()} />);
+    await waitFor(() => expect(screen.getByText(/Could not read file/i)).toBeInTheDocument());
+  });
 });

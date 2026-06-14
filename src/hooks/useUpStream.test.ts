@@ -104,4 +104,24 @@ describe("useUpStream", () => {
     unmount();
     expect((proc as unknown as { close: ReturnType<typeof vi.fn> }).close).toHaveBeenCalled();
   });
+
+  it("produces no line entries when stream only contains whitespace-only lines", async () => {
+    withStatMocks(() => mockProcess("   \n   \n"));
+    const { result } = renderHook(() => useUpStream("myapp", ["/path/compose.yml"]));
+    await waitFor(() => expect(result.current.done).toBe(true));
+    expect(result.current.lines).toHaveLength(0);
+  });
+
+  it("uses String(ex) when rejection is not an Error instance", async () => {
+    withStatMocks(() =>
+      Object.assign(
+        new Promise<string>((_, reject) => queueMicrotask(() => reject("plain string error"))),
+        { stream: vi.fn().mockReturnThis(), close: vi.fn(), input: vi.fn() },
+      ) as CockpitProcess,
+    );
+    const { result } = renderHook(() => useUpStream("myapp", ["/path/compose.yml"]));
+    await waitFor(() => expect(result.current.done).toBe(true));
+    expect(result.current.failed).toBe(true);
+    expect(result.current.errorMsg).toBe("plain string error");
+  });
 });
