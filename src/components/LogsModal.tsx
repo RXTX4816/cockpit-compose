@@ -22,6 +22,7 @@ import {
 } from "../lib/logParser";
 import { useLogStream, LOG_MAX_LINES } from "../hooks/useLogStream";
 import "./LogsModal.css";
+import { splitConfigFiles } from "../lib/configFiles";
 
 // ── Search highlighting ────────────────────────────────────────────────────────
 
@@ -91,7 +92,7 @@ export function LogsModal({ stack, onClose }: Props) {
   const [searchTerm, setSearchTerm] = useState("");
   const [services, setServices] = useState<string[]>([]);
 
-  const configFile = stack.ConfigFiles.split(",")[0].trim();
+  const configFile = splitConfigFiles(stack.ConfigFiles)[0] ?? "";
 
   useEffect(() => {
     let raw = "";

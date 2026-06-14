@@ -50,6 +50,7 @@ import { StatusLabel } from "./StatusLabel";
 import { StatsCell } from "./StatsCell";
 import { ContainerTable } from "./ContainerTable";
 import "./StackRow.css";
+import { splitConfigFiles } from "../../lib/configFiles";
 
 function effectiveStatus(base: ReturnType<typeof parseStackStatus>, containers: ComposeContainer[]): ReturnType<typeof parseStackStatus> {
   if (base !== "partial" || containers.length === 0) return base;
@@ -92,7 +93,7 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
 
   const baseStatus = parseStackStatus(stack.Status);
   const count = parseServiceCount(stack.Status);
-  const configFiles = stack.ConfigFiles.split(",").map(f => f.trim());
+  const configFiles = splitConfigFiles(stack.ConfigFiles);
 
   const { acting, actionError, doAction } = useStackActions(stack.Name, configFiles, onActingChange);
   const { containers, loading: loadingContainers, load: loadContainers, clear: clearContainers } = useStackContainers(stack.Name, configFiles, baseStatus);

@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { mockSpawn } from "../test/setup";
 import { mockProcess } from "../test/helpers";
 import {
-  listStacks, startStack, stopStack, restartStack, streamLogs, downStack, upStackStream, pullStack,
+  listStacks, groupPodmanContainers, startStack, stopStack, restartStack, streamLogs, downStack, upStackStream, pullStack,
   listProjectContainerImageRefs, listImagesByRepo, listAllContainerImages, removeImages,
   listStoppedContainers, listDanglingVolumes, listProjectNetworks,
   pruneContainers, pruneVolumes, pruneNetworks, composeRunStream,
@@ -11,9 +11,9 @@ import {
   listNetworkConnectedProjects, inspectNetworkContainerCounts,
 } from "./stacks";
 
-beforeEach(() => { mockSpawn.mockReset(); });
+beforeEach(() => { mockSpawn.mockReset(); vi.resetModules(); });
 
-describe("listStacks", () => {
+describe("listStacks [docker]", () => {
   it("spawns compose ls --all --format json", () => {
     mockSpawn.mockReturnValue(mockProcess("[]"));
     listStacks();
@@ -22,6 +22,120 @@ describe("listStacks", () => {
     expect(args).toContain("--all");
     expect(args).toContain("--format");
     expect(args).toContain("json");
+  });
+});
+
+describe("listStacks [podman]", () => {
+  it("spawns podman ps with compose label filter and emits grouped JSON", async () => {
+    const podmanPsOutput = JSON.stringify([
+      { State: "running", Labels: { "com.docker.compose.project": "myapp", "com.docker.compose.project.config_files": "/home/user/myapp/compose.yml" } },
+      { State: "running", Labels: { "com.docker.compose.project": "myapp", "com.docker.compose.project.config_files": "/home/user/myapp/compose.yml" } },
+      { State: "exited",  Labels: { "com.docker.compose.project": "other",  "com.docker.compose.project.config_files": "/home/user/other/compose.yml" } },
+    ]);
+    // mockImplementation (not mockReturnValue) so mockProcess is created lazily when spawn is
+    // called — avoids a race where the queueMicrotask fires before proc.stream() is registered.
+    mockSpawn.mockImplementation(() => mockProcess(podmanPsOutput));
+
+    const { listStacks: ls } = await import("./stacks");
+    const cockpitMod = await import("./cockpit");
+    cockpitMod.setRuntime("podman");
+
+    let received = "";
+    const proc = ls();
+    proc.stream(d => { received += d; });
+    await proc;
+
+    const result = JSON.parse(received) as { Name: string; Status: string; ConfigFiles: string }[];
+    expect(result).toHaveLength(2);
+    const myapp = result.find(r => r.Name === "myapp")!;
+    expect(myapp.Status).toBe("running(2)");
+    expect(myapp.ConfigFiles).toBe("/home/user/myapp/compose.yml");
+    const other = result.find(r => r.Name === "other")!;
+    expect(other.Status).toBe("exited(1)");
+
+    const spawnArgs = mockSpawn.mock.calls[0][0] as string[];
+    expect(spawnArgs).toContain("ps");
+    expect(spawnArgs).toContain("--filter");
+    expect(spawnArgs).toContain("label=com.docker.compose.project");
+    expect(spawnArgs).toContain("--format");
+    expect(spawnArgs).toContain("json");
+  });
+
+  it("rejects when podman ps fails", async () => {
+    mockSpawn.mockImplementation(() => mockProcess("", "permission denied"));
+    const cockpitMod = await import("./cockpit");
+    cockpitMod.setRuntime("podman");
+    const { listStacks: ls } = await import("./stacks");
+    await expect(ls()).rejects.toThrow();
+  });
+
+  it("returns empty array when no compose containers exist", async () => {
+    mockSpawn.mockImplementation(() => mockProcess("[]"));
+    const cockpitMod = await import("./cockpit");
+    cockpitMod.setRuntime("podman");
+    const { listStacks: ls } = await import("./stacks");
+    let received = "";
+    const proc = ls();
+    proc.stream(d => { received += d; });
+    await proc;
+    expect(JSON.parse(received)).toEqual([]);
+  });
+});
+
+describe("groupPodmanContainers", () => {
+  it("groups single-container project", () => {
+    const result = groupPodmanContainers([
+      { State: "running", Labels: { "com.docker.compose.project": "myapp", "com.docker.compose.project.config_files": "/myapp/compose.yml" } },
+    ]);
+    expect(result).toEqual([{ Name: "myapp", Status: "running(1)", ConfigFiles: "/myapp/compose.yml" }]);
+  });
+
+  it("groups multi-container project into single entry", () => {
+    const result = groupPodmanContainers([
+      { State: "running", Labels: { "com.docker.compose.project": "myapp", "com.docker.compose.project.config_files": "/myapp/compose.yml" } },
+      { State: "running", Labels: { "com.docker.compose.project": "myapp", "com.docker.compose.project.config_files": "/myapp/compose.yml" } },
+    ]);
+    expect(result).toHaveLength(1);
+    expect(result[0].Status).toBe("running(2)");
+  });
+
+  it("produces mixed status when containers have different states", () => {
+    const result = groupPodmanContainers([
+      { State: "running", Labels: { "com.docker.compose.project": "myapp", "com.docker.compose.project.config_files": "/myapp/compose.yml" } },
+      { State: "exited",  Labels: { "com.docker.compose.project": "myapp", "com.docker.compose.project.config_files": "/myapp/compose.yml" } },
+    ]);
+    expect(result[0].Status).toBe("exited(1), running(1)");
+  });
+
+  it("handles multiple distinct projects", () => {
+    const result = groupPodmanContainers([
+      { State: "running", Labels: { "com.docker.compose.project": "alpha", "com.docker.compose.project.config_files": "/alpha/compose.yml" } },
+      { State: "exited",  Labels: { "com.docker.compose.project": "beta",  "com.docker.compose.project.config_files": "/beta/compose.yml" } },
+    ]);
+    expect(result).toHaveLength(2);
+    expect(result.find(r => r.Name === "alpha")?.Status).toBe("running(1)");
+    expect(result.find(r => r.Name === "beta")?.Status).toBe("exited(1)");
+  });
+
+  it("skips containers without the project label", () => {
+    const result = groupPodmanContainers([
+      { State: "running", Labels: {} },
+      { State: "running", Labels: { "com.docker.compose.project": "myapp", "com.docker.compose.project.config_files": "/myapp/compose.yml" } },
+    ]);
+    expect(result).toHaveLength(1);
+    expect(result[0].Name).toBe("myapp");
+  });
+
+  it("returns empty array for empty input", () => {
+    expect(groupPodmanContainers([])).toEqual([]);
+  });
+
+  it("uses config_files from the first container seen for a project", () => {
+    const result = groupPodmanContainers([
+      { State: "running", Labels: { "com.docker.compose.project": "myapp", "com.docker.compose.project.config_files": "/first/compose.yml" } },
+      { State: "running", Labels: { "com.docker.compose.project": "myapp", "com.docker.compose.project.config_files": "/first/compose.yml" } },
+    ]);
+    expect(result[0].ConfigFiles).toBe("/first/compose.yml");
   });
 });
 
@@ -513,14 +627,13 @@ describe("listNetworkConnectedProjects", () => {
 });
 
 describe("inspectNetworkContainerCounts", () => {
-  it("spawns docker network inspect with format template", () => {
-    mockSpawn.mockReturnValue(mockProcess(""));
-    inspectNetworkContainerCounts(["net1", "net2"]);
+  it("spawns network inspect with format template", async () => {
+    mockSpawn.mockReturnValue(mockProcess("net1\t2\nnet2\t0"));
+    await inspectNetworkContainerCounts(["net1", "net2"]);
     const args = mockSpawn.mock.calls[0][0] as string[];
     expect(args).toContain("network");
     expect(args).toContain("inspect");
     expect(args).toContain("net1");
     expect(args).toContain("net2");
-    expect(args.join(" ")).toContain("{{.Name}}");
   });
 });

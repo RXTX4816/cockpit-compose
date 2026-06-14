@@ -22,7 +22,7 @@
     "title": "Compose-Stacks",
     "aria_label": "Compose-Stacks",
     "empty_title": "Keine Compose-Stacks gefunden",
-    "empty_body": "Starte ein Projekt mit docker compose up -d und es erscheint hier.",
+    "empty_body": "Starte ein Projekt mit docker/podman compose up -d und es erscheint hier.",
     "load_failed": "Stacks konnten nicht geladen werden",
     "service_count_one": "{{count}} Dienst",
     "service_count_other": "{{count}} Dienste",
@@ -77,11 +77,18 @@
 
   "footer": {
     "version": "Version: {{version}}",
-    "docker_version": "Docker: {{version}}",
-    "compose_version": "Docker Compose: {{version}}",
-    "rootless": "Rootless Docker",
+    "docker_version": "{{runtime}}: {{version}}",
+    "compose_version": "{{runtime}} Compose: {{version}}",
+    "rootless": "Rootless",
     "help": "Hilfe",
     "feedback": "Feedback / Fehler melden"
+  },
+
+  "runtime": {
+    "docker": "Docker",
+    "podman": "Podman",
+    "toggle_label": "Container-Laufzeitumgebung",
+    "not_installed": "{{runtime}} nicht gefunden — installieren Sie es, um zu wechseln"
   },
 
   "error_boundary": {

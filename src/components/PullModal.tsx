@@ -12,6 +12,7 @@ import { type ComposeStack } from "../api";
 import { kindColor } from "../lib/pullParser";
 import { usePullStream } from "../hooks/usePullStream";
 import "./PullModal.css";
+import { splitConfigFiles } from "../lib/configFiles";
 
 interface Props {
   stack: ComposeStack;
@@ -20,7 +21,7 @@ interface Props {
 
 export function PullModal({ stack, onClose }: Props) {
   const { t } = useTranslation();
-  const configFiles = stack.ConfigFiles.split(",").map(f => f.trim());
+  const configFiles = splitConfigFiles(stack.ConfigFiles);
   const { lines, done, failed, errorMsg, cancel } = usePullStream(stack.Name, configFiles);
   const logRef = useRef<HTMLDivElement>(null);
 

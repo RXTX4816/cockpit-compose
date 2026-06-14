@@ -17,7 +17,7 @@ import {
   ModalBody,
   ModalFooter,
 } from "@patternfly/react-core";
-import { type ComposeStack } from "../../api";
+import { type ComposeStack, type Runtime } from "../../api";
 import { TimesCircleIcon, BanIcon } from "@patternfly/react-icons";
 import { type DownedStack } from "../../hooks/useDownedStacksScan";
 import { useComposeStacks } from "../../hooks/useComposeStacks";
@@ -40,9 +40,15 @@ import { BackupModal } from "../BackupModal";
 import { ScaleModal } from "../ScaleModal";
 import { DownedStacksSection } from "../DownedStacksSection";
 import { StackRow } from "./StackRow";
+import { RuntimeToggle } from "../RuntimeToggle";
 import "./StacksView.css";
+import { splitConfigFiles } from "../../lib/configFiles";
 
-export function StacksView() {
+interface Props {
+  onRuntimeChange?: (runtime: Runtime) => void;
+}
+
+export function StacksView({ onRuntimeChange }: Props) {
   const { t } = useTranslation();
   const { stacks, loading, error, refresh } = useComposeStacks();
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
@@ -75,7 +81,7 @@ export function StacksView() {
     setManuallyDownedStacks(prev =>
       prev.some(d => d.name.toLowerCase() === stack.Name.toLowerCase())
         ? prev
-        : [...prev, { name: stack.Name, configFiles: stack.ConfigFiles.split(",").map(f => f.trim()) }]
+        : [...prev, { name: stack.Name, configFiles: splitConfigFiles(stack.ConfigFiles) }]
     );
   }, []);
 
@@ -112,6 +118,9 @@ export function StacksView() {
         <ToolbarContent>
           <ToolbarItem>
             <Title headingLevel="h2">{t("stacks.title")}</Title>
+          </ToolbarItem>
+          <ToolbarItem align={{ default: "alignEnd" }}>
+            <RuntimeToggle onRuntimeChange={(r) => { void refresh(); onRuntimeChange?.(r); }} />
           </ToolbarItem>
         </ToolbarContent>
       </Toolbar>

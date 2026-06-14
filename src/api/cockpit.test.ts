@@ -141,29 +141,29 @@ describe("detectDockerMode()", () => {
 });
 
 describe("detectComposeCommand()", () => {
-  it("keeps docker compose prefix when docker compose version succeeds", async () => {
+  it("returns true and sets docker compose prefix when found", async () => {
     mockSpawn.mockResolvedValue("");
     const { detectComposeCommand, compose } = await import("./cockpit");
-    await detectComposeCommand();
+    expect(await detectComposeCommand()).toBe(true);
     expect(compose("ls")).toEqual(["docker", "compose", "ls"]);
     expect(mockSpawn).toHaveBeenCalledWith(["docker", "compose", "version"], expect.anything());
   });
 
-  it("falls back to docker-compose when docker compose version fails", async () => {
+  it("returns true and falls back to docker-compose when docker compose version fails", async () => {
     mockSpawn
       .mockRejectedValueOnce(new Error("not found"))
       .mockResolvedValueOnce("");
     const { detectComposeCommand, compose } = await import("./cockpit");
-    await detectComposeCommand();
+    expect(await detectComposeCommand()).toBe(true);
     expect(compose("ls")).toEqual(["docker-compose", "ls"]);
   });
 
-  it("falls back to docker compose when both commands fail", async () => {
+  it("returns false and falls back to docker compose when both commands fail", async () => {
     mockSpawn
       .mockRejectedValueOnce(new Error("not found"))
       .mockRejectedValueOnce(new Error("not found"));
     const { detectComposeCommand, compose } = await import("./cockpit");
-    await detectComposeCommand();
+    expect(await detectComposeCommand()).toBe(false);
     expect(compose("ls")).toEqual(["docker", "compose", "ls"]);
   });
 
@@ -173,5 +173,168 @@ describe("detectComposeCommand()", () => {
     await detectComposeCommand();
     await detectComposeCommand();
     expect(mockSpawn).toHaveBeenCalledTimes(1);
+  });
+
+  // Podman tests need cockpit.user mocked (for detectPodmanSocket) and must account
+  // for the two stat calls that check for the Podman socket before version detection.
+  it("returns true and uses podman compose prefix when runtime is podman", async () => {
+    const mockUser = vi.fn().mockResolvedValue({ id: 1000 });
+    vi.stubGlobal("cockpit", { spawn: mockSpawn, user: mockUser });
+    // stat calls return "" (not "socket") → no Podman socket found; compose version succeeds
+    mockSpawn.mockResolvedValue("");
+    const { setRuntime, detectComposeCommand, compose } = await import("./cockpit");
+    setRuntime("podman");
+    expect(await detectComposeCommand()).toBe(true);
+    expect(compose("ls")).toEqual(["podman", "compose", "ls"]);
+    expect(mockSpawn).toHaveBeenCalledWith(["podman", "compose", "version"], expect.anything());
+  });
+
+  it("returns true and falls back to podman-compose when podman compose version fails", async () => {
+    const mockUser = vi.fn().mockResolvedValue({ id: 1000 });
+    vi.stubGlobal("cockpit", { spawn: mockSpawn, user: mockUser });
+    mockSpawn
+      .mockRejectedValueOnce(new Error("no socket"))  // stat: user podman socket absent
+      .mockRejectedValueOnce(new Error("no socket"))  // stat: system podman socket absent
+      .mockRejectedValueOnce(new Error("not found"))  // podman compose version fails
+      .mockResolvedValueOnce("");                      // podman-compose version succeeds
+    const { setRuntime, detectComposeCommand, compose } = await import("./cockpit");
+    setRuntime("podman");
+    expect(await detectComposeCommand()).toBe(true);
+    expect(compose("ls")).toEqual(["podman-compose", "ls"]);
+  });
+
+  it("returns false when neither podman compose nor podman-compose is found", async () => {
+    const mockUser = vi.fn().mockResolvedValue({ id: 1000 });
+    vi.stubGlobal("cockpit", { spawn: mockSpawn, user: mockUser });
+    mockSpawn
+      .mockRejectedValueOnce(new Error("no socket"))  // stat: user podman socket absent
+      .mockRejectedValueOnce(new Error("no socket"))  // stat: system podman socket absent
+      .mockRejectedValueOnce(new Error("not-found"))  // podman compose version fails
+      .mockRejectedValueOnce(new Error("not-found")); // podman-compose version fails
+    const { setRuntime, detectComposeCommand } = await import("./cockpit");
+    setRuntime("podman");
+    expect(await detectComposeCommand()).toBe(false);
+  });
+});
+
+describe("detectPodmanSocket() via detectComposeCommand()", () => {
+  const mockUser = vi.fn();
+
+  beforeEach(() => {
+    mockUser.mockReset();
+    vi.stubGlobal("cockpit", { spawn: mockSpawn, user: mockUser });
+  });
+
+  it("sets rootless podman socket when user socket exists", async () => {
+    mockUser.mockResolvedValue({ id: 1000 });
+    let call = 0;
+    mockSpawn.mockImplementation(() => {
+      call++;
+      if (call === 1) return mockProcess("socket"); // user podman socket present
+      return mockProcess(""); // compose version succeeds
+    });
+    const { setRuntime, detectComposeCommand, getPodmanSocketPath, isRootlessMode, dockerSpawnEnviron } = await import("./cockpit");
+    setRuntime("podman");
+    await detectComposeCommand();
+    expect(getPodmanSocketPath()).toBe("unix:///run/user/1000/podman/podman.sock");
+    expect(isRootlessMode()).toBe(true);
+    expect(dockerSpawnEnviron()).toEqual({ environ: ["DOCKER_HOST=unix:///run/user/1000/podman/podman.sock"] });
+  });
+
+  it("sets system podman socket when only system socket exists", async () => {
+    mockUser.mockResolvedValue({ id: 1000 });
+    let call = 0;
+    mockSpawn.mockImplementation(() => {
+      call++;
+      if (call === 1) return mockProcess("", "no such file"); // user socket absent
+      if (call === 2) return mockProcess("socket");           // system socket present
+      return mockProcess("");                                  // compose version succeeds
+    });
+    const { setRuntime, detectComposeCommand, getPodmanSocketPath, isRootlessMode } = await import("./cockpit");
+    setRuntime("podman");
+    await detectComposeCommand();
+    expect(getPodmanSocketPath()).toBe("unix:///run/podman/podman.sock");
+    expect(isRootlessMode()).toBe(false);
+  });
+
+  it("leaves podman socket unset when no socket exists", async () => {
+    mockUser.mockResolvedValue({ id: 1000 });
+    mockSpawn
+      .mockRejectedValueOnce(new Error("no such file")) // user socket absent
+      .mockRejectedValueOnce(new Error("no such file")) // system socket absent
+      .mockResolvedValue("");                            // compose version succeeds
+    const { setRuntime, detectComposeCommand, getPodmanSocketPath, dockerSpawnEnviron } = await import("./cockpit");
+    setRuntime("podman");
+    await detectComposeCommand();
+    expect(getPodmanSocketPath()).toBeUndefined();
+    expect(dockerSpawnEnviron()).toEqual({});
+  });
+
+  it("is idempotent — socket detection only runs once across multiple calls", async () => {
+    mockUser.mockResolvedValue({ id: 1000 });
+    mockSpawn.mockResolvedValue("");
+    const { setRuntime, detectComposeCommand } = await import("./cockpit");
+    setRuntime("podman");
+    await detectComposeCommand();
+    await detectComposeCommand(); // second call hits prefix cache, socket already detected
+    // stat for user socket + compose version = 2 calls on first run; second run is fully cached
+    expect(mockUser).toHaveBeenCalledTimes(1);
+  });
+
+  it("falls back gracefully when cockpit.user() throws during socket detection", async () => {
+    mockUser.mockRejectedValue(new Error("unavailable"));
+    // after user() throws, only the system socket stat is tried
+    mockSpawn
+      .mockRejectedValueOnce(new Error("no such file")) // system socket absent
+      .mockResolvedValueOnce("");                        // compose version succeeds
+    const { setRuntime, detectComposeCommand, getPodmanSocketPath } = await import("./cockpit");
+    setRuntime("podman");
+    await detectComposeCommand();
+    expect(getPodmanSocketPath()).toBeUndefined();
+  });
+});
+
+describe("dockerSpawnEnviron() runtime awareness", () => {
+  const mockUser = vi.fn();
+
+  beforeEach(() => {
+    mockUser.mockReset();
+    vi.stubGlobal("cockpit", { spawn: mockSpawn, user: mockUser });
+  });
+
+  it("returns docker environ for docker runtime", async () => {
+    let call = 0;
+    mockSpawn.mockImplementation(() => {
+      call++;
+      if (call === 1) return mockProcess("");       // DOCKER_HOST empty
+      if (call === 2) return mockProcess("socket"); // user docker socket present
+      return mockProcess("");
+    });
+    mockUser.mockResolvedValue({ id: 1000 });
+    const { detectDockerMode, dockerSpawnEnviron } = await import("./cockpit");
+    await detectDockerMode();
+    expect(dockerSpawnEnviron()).toEqual({ environ: ["DOCKER_HOST=unix:///run/user/1000/docker.sock"] });
+  });
+
+  it("returns podman environ for podman runtime", async () => {
+    mockUser.mockResolvedValue({ id: 1000 });
+    let call = 0;
+    mockSpawn.mockImplementation(() => {
+      call++;
+      if (call === 1) return mockProcess("socket"); // user podman socket present
+      return mockProcess("");
+    });
+    const { setRuntime, detectComposeCommand, dockerSpawnEnviron } = await import("./cockpit");
+    setRuntime("podman");
+    await detectComposeCommand();
+    expect(dockerSpawnEnviron()).toEqual({ environ: ["DOCKER_HOST=unix:///run/user/1000/podman/podman.sock"] });
+  });
+
+  it("returns {} when no socket is configured for the active runtime", async () => {
+    mockSpawn.mockResolvedValue(""); // all stat checks return "" → not a socket
+    mockUser.mockResolvedValue({ id: 1000 });
+    const { detectComposeCommand, dockerSpawnEnviron } = await import("./cockpit");
+    await detectComposeCommand(); // docker runtime, no rootless socket
+    expect(dockerSpawnEnviron()).toEqual({});
   });
 });

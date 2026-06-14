@@ -22,6 +22,7 @@ import {
   composeFileSuperuser,
 } from "../api";
 import "./ExecModal.css";
+import { splitConfigFiles } from "../lib/configFiles";
 
 interface Props {
   stack: ComposeStack;
@@ -40,7 +41,7 @@ function makeXtermTheme(dark: boolean) {
 
 export function ExecModal({ stack, onClose }: Props) {
   const { t } = useTranslation();
-  const configFile = stack.ConfigFiles.split(",")[0].trim();
+  const configFile = splitConfigFiles(stack.ConfigFiles)[0] ?? "";
 
   const [services, setServices] = useState<string[]>([]);
   const [selectedService, setSelectedService] = useState("");
@@ -92,7 +93,7 @@ export function ExecModal({ stack, onClose }: Props) {
     setConnectError(null);
     setStep("terminal");
 
-    const su = await composeFileSuperuser(stack.ConfigFiles.split(",").map(f => f.trim()));
+    const su = await composeFileSuperuser(splitConfigFiles(stack.ConfigFiles));
 
     // Defer mounting until the div is in the DOM
     requestAnimationFrame(() => {

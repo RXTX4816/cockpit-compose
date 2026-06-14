@@ -20,6 +20,7 @@ import { EnvTable } from "./EnvTable";
 import { EnvEditor } from "./EnvEditor";
 import "./YamlModal.css";
 import "./EnvModal.css";
+import { splitConfigFiles } from "../lib/configFiles";
 
 interface Props {
   stack: ComposeStack;
@@ -47,7 +48,7 @@ export function EnvModal({ stack, onClose }: Props) {
   const [newFileName, setNewFileName] = useState("");
   const newFileInputRef = useRef<HTMLInputElement>(null);
 
-  const configFile = stack.ConfigFiles.split(",")[0].trim();
+  const configFile = splitConfigFiles(stack.ConfigFiles)[0] ?? "";
   const dir = configFile.substring(0, configFile.lastIndexOf("/"));
   const defaultEnv = dir + "/.env";
 

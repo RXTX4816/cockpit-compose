@@ -22,7 +22,7 @@
     "title": "Stosy Compose",
     "aria_label": "Stosy Compose",
     "empty_title": "Nie znaleziono stosów Compose",
-    "empty_body": "Uruchom projekt za pomocą docker compose up -d, a pojawi się tutaj.",
+    "empty_body": "Uruchom projekt za pomocą docker/podman compose up -d, a pojawi się tutaj.",
     "load_failed": "Nie udało się załadować stosów",
     "service_count_one": "{{count}} usługa",
     "service_count_few": "{{count}} usługi",
@@ -79,11 +79,18 @@
 
   "footer": {
     "version": "Wersja: {{version}}",
-    "docker_version": "Docker: {{version}}",
-    "compose_version": "Docker Compose: {{version}}",
-    "rootless": "Rootless Docker",
+    "docker_version": "{{runtime}}: {{version}}",
+    "compose_version": "{{runtime}} Compose: {{version}}",
+    "rootless": "Rootless",
     "help": "Pomoc",
     "feedback": "Opinia / Zgłoś błąd"
+  },
+
+  "runtime": {
+    "docker": "Docker",
+    "podman": "Podman",
+    "toggle_label": "Środowisko uruchomieniowe kontenerów",
+    "not_installed": "Nie znaleziono {{runtime}} — zainstaluj, aby przełączyć"
   },
 
   "error_boundary": {

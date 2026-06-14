@@ -1,8 +1,17 @@
-let composePrefix: string[] = ["docker", "compose"];
-let composeDetected = false;
+export type Runtime = "docker" | "podman";
+
+let currentRuntime: Runtime = (localStorage.getItem("cockpit-compose:runtime") ?? "docker") as Runtime;
+let composePrefix: string[] = [currentRuntime, "compose"];
+const detectedPrefixes = new Map<Runtime, string[]>();
+
 let dockerEnviron: string[] | undefined;
 let dockerSocketPath: string | undefined;
 let rootlessMode = false;
+
+let podmanEnviron: string[] | undefined;
+let podmanSocketPath: string | undefined;
+let podmanRootless = false;
+let podmanSocketDetected = false;
 
 async function isSocket(path: string): Promise<boolean> {
   try {
@@ -45,20 +54,71 @@ export async function detectDockerMode(): Promise<void> {
   }
 }
 
-export async function detectComposeCommand(): Promise<void> {
-  if (composeDetected) return;
-  composeDetected = true;
+// Detects the Podman socket and sets DOCKER_HOST so that `podman compose` (which
+// delegates to docker-compose) queries Podman's Docker-compat API instead of Docker.
+async function detectPodmanSocket(): Promise<void> {
+  if (podmanSocketDetected) return;
+  podmanSocketDetected = true;
+
   try {
-    await cockpit.spawn(["docker", "compose", "version"], { err: "message", ...dockerSpawnEnviron() });
-    composePrefix = ["docker", "compose"];
+    const user = await cockpit.user();
+    const userSocket = `/run/user/${user.id}/podman/podman.sock`;
+    if (await isSocket(userSocket)) {
+      podmanRootless = true;
+      podmanSocketPath = `unix://${userSocket}`;
+      podmanEnviron = [`DOCKER_HOST=${podmanSocketPath}`];
+      return;
+    }
+  } catch { /* cockpit.user() unavailable or user socket check failed */ }
+
+  if (await isSocket("/run/podman/podman.sock")) {
+    podmanSocketPath = "unix:///run/podman/podman.sock";
+    podmanEnviron = [`DOCKER_HOST=${podmanSocketPath}`];
+  }
+}
+
+// Returns true when a working compose binary was found, false when falling back to default.
+export async function detectComposeCommand(): Promise<boolean> {
+  if (currentRuntime === "podman") {
+    await detectPodmanSocket();
+  }
+
+  if (detectedPrefixes.has(currentRuntime)) {
+    composePrefix = detectedPrefixes.get(currentRuntime)!;
+    return true;
+  }
+
+  const r = currentRuntime;
+  let found = false;
+  try {
+    await cockpit.spawn([r, "compose", "version"], { err: "message", ...dockerSpawnEnviron() });
+    composePrefix = [r, "compose"];
+    found = true;
   } catch {
     try {
-      await cockpit.spawn(["docker-compose", "version"], { err: "message", ...dockerSpawnEnviron() });
-      composePrefix = ["docker-compose"];
+      const legacy = r === "docker" ? "docker-compose" : "podman-compose";
+      await cockpit.spawn([legacy, "version"], { err: "message", ...dockerSpawnEnviron() });
+      composePrefix = [legacy];
+      found = true;
     } catch {
-      composePrefix = ["docker", "compose"];
+      composePrefix = [r, "compose"];
     }
   }
+  if (found) detectedPrefixes.set(r, composePrefix);
+  return found;
+}
+
+export function setRuntime(runtime: Runtime): void {
+  currentRuntime = runtime;
+  composePrefix = detectedPrefixes.get(runtime) ?? [runtime, "compose"];
+}
+
+export function getIsPodman(): boolean {
+  return currentRuntime === "podman";
+}
+
+export function cli(...args: string[]): string[] {
+  return [currentRuntime, ...args];
 }
 
 export function compose(...args: string[]): string[] {
@@ -66,15 +126,20 @@ export function compose(...args: string[]): string[] {
 }
 
 export function dockerSpawnEnviron(): { environ?: string[] } {
-  return dockerEnviron ? { environ: dockerEnviron } : {};
+  const env = currentRuntime === "podman" ? podmanEnviron : dockerEnviron;
+  return env ? { environ: env } : {};
 }
 
 export function isRootlessMode(): boolean {
-  return rootlessMode;
+  return currentRuntime === "podman" ? podmanRootless : rootlessMode;
 }
 
 export function getDockerSocketPath(): string | undefined {
   return dockerSocketPath;
+}
+
+export function getPodmanSocketPath(): string | undefined {
+  return podmanSocketPath;
 }
 
 async function statOwnerUid(path: string): Promise<number> {

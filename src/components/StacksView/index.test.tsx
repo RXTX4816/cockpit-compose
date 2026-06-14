@@ -118,6 +118,14 @@ vi.mock("../BackupModal", () => ({
   ),
 }));
 
+vi.mock("../RuntimeToggle", () => ({
+  RuntimeToggle: ({ onRuntimeChange }: { onRuntimeChange?: (r: string) => void }) => (
+    <button data-testid="runtime-toggle" onClick={() => onRuntimeChange?.("podman")}>
+      Switch runtime
+    </button>
+  ),
+}));
+
 import { useComposeStacks } from "../../hooks/useComposeStacks";
 import { useDownStack } from "../../hooks/useDownStack";
 import { useKillStack } from "../../hooks/useKillStack";
@@ -466,6 +474,28 @@ describe("StacksView — kill confirm button", () => {
     render(<StacksView />);
     fireEvent.click(screen.getByRole("button", { name: /cancel/i }));
     expect(close).toHaveBeenCalledOnce();
+  });
+});
+
+describe("StacksView — onRuntimeChange prop", () => {
+  it("calls onRuntimeChange when RuntimeToggle fires a runtime change", () => {
+    const onRuntimeChange = vi.fn();
+    render(<StacksView onRuntimeChange={onRuntimeChange} />);
+    fireEvent.click(screen.getByTestId("runtime-toggle"));
+    expect(onRuntimeChange).toHaveBeenCalledWith("podman");
+  });
+
+  it("also refreshes stacks when runtime changes", () => {
+    const refresh = vi.fn();
+    mockUseComposeStacks.mockReturnValue({ stacks: [], loading: false, error: null, refresh });
+    render(<StacksView onRuntimeChange={vi.fn()} />);
+    fireEvent.click(screen.getByTestId("runtime-toggle"));
+    expect(refresh).toHaveBeenCalled();
+  });
+
+  it("works without onRuntimeChange prop (optional)", () => {
+    render(<StacksView />);
+    expect(() => fireEvent.click(screen.getByTestId("runtime-toggle"))).not.toThrow();
   });
 });
 

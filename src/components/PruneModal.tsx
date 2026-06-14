@@ -151,7 +151,8 @@ export function PruneModal({ stack, onClose, onSuccess }: Props) {
       // anyway, but showing them in the preview is misleading (e.g. gitea_gitea while running).
       let networks: string[] = [];
       if (allNetworks.length > 0) {
-        const counts = await fetchLines(inspectNetworkContainerCounts(allNetworks));
+        const raw = await inspectNetworkContainerCounts(allNetworks).catch(() => "");
+        const counts = raw.split("\n").map(l => l.trim()).filter(Boolean);
         networks = counts
           .filter(line => line.endsWith("\t0"))
           .map(line => line.slice(0, line.indexOf("\t")));

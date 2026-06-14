@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { downStack, composeFileSuperuser, readAllProfiles, isRootlessMode, type ComposeStack } from "../api";
+import { splitConfigFiles } from "../lib/configFiles";
 
 export function useDownStack(
   onSuccess: () => void,
@@ -9,23 +10,19 @@ export function useDownStack(
   const [target, setTarget] = useState<ComposeStack | null>(null);
   const [downing, setDowning] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
   const open = useCallback((stack: ComposeStack) => {
     setError(null);
     setTarget(stack);
   }, []);
-
   const close = useCallback(() => {
     setTarget(null);
     setError(null);
   }, []);
-
   const execute = useCallback(async () => {
     if (!target) return;
-    const configFiles = target.ConfigFiles.split(",").map(f => f.trim());
+    const configFiles = splitConfigFiles(target.ConfigFiles);
     setDowning(true);
     onActingChange(1);
-    setError(null);
     try {
       const [su, profiles] = await Promise.all([
         isRootlessMode() ? Promise.resolve<"try" | undefined>(undefined) : composeFileSuperuser(configFiles),
@@ -42,6 +39,5 @@ export function useDownStack(
       onActingChange(-1);
     }
   }, [target, onSuccess, onActingChange, onDownComplete]);
-
   return { target, downing, error, open, close, execute };
 }

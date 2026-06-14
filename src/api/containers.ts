@@ -1,4 +1,4 @@
-import { compose, dockerSpawnEnviron } from "./cockpit";
+import { compose, cli, getIsPodman, dockerSpawnEnviron } from "./cockpit";
 
 export function listContainers(project: string): CockpitProcess {
   return cockpit.spawn(
@@ -8,13 +8,13 @@ export function listContainers(project: string): CockpitProcess {
 }
 
 export function getContainerStats(containerIds: string[]): CockpitProcess {
+  const cpuField = getIsPodman() ? "{{.CPU}}" : "{{.CPUPerc}}";
   return cockpit.spawn(
-    [
-      "docker", "stats", "--no-stream",
+    cli("stats", "--no-stream",
       "--format",
-      '{"id":"{{.ID}}","name":"{{.Name}}","cpu":"{{.CPUPerc}}","mem":"{{.MemUsage}}","memPerc":"{{.MemPerc}}","net":"{{.NetIO}}","block":"{{.BlockIO}}"}',
+      `{"id":"{{.ID}}","name":"{{.Name}}","cpu":"${cpuField}","mem":"{{.MemUsage}}","memPerc":"{{.MemPerc}}","net":"{{.NetIO}}","block":"{{.BlockIO}}"}`,
       ...containerIds,
-    ],
+    ),
     { err: "message", ...dockerSpawnEnviron() },
   );
 }

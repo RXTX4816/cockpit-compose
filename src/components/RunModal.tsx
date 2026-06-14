@@ -22,6 +22,7 @@ import {
 } from "../api";
 import { stripAnsi, classifyLine, kindColor, type LineEntry } from "../lib/pullParser";
 import "./RunModal.css";
+import { splitConfigFiles } from "../lib/configFiles";
 
 interface Props {
   stack: ComposeStack;
@@ -30,7 +31,7 @@ interface Props {
 
 export function RunModal({ stack, onClose }: Props) {
   const { t } = useTranslation();
-  const configFiles = stack.ConfigFiles.split(",").map(f => f.trim());
+  const configFiles = splitConfigFiles(stack.ConfigFiles);
   const configFile = configFiles[0];
 
   const [services, setServices] = useState<string[]>([]);
@@ -70,7 +71,7 @@ export function RunModal({ stack, onClose }: Props) {
     if (!service || !cmd) return;
 
     setStep("running");
-    const files = stack.ConfigFiles.split(",").map(f => f.trim());
+    const files = splitConfigFiles(stack.ConfigFiles);
     const su = await composeFileSuperuser(files);
 
     const proc = composeRunStream(

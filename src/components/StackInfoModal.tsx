@@ -29,6 +29,7 @@ import {
   getPortUrl,
 } from "../api";
 import "./StackInfoModal.css";
+import { splitConfigFiles } from "../lib/configFiles";
 
 const MODAL_BIND_ICONS: Record<ParsedPort["bindType"], { Icon: ComponentType<{ color?: string; style?: CSSProperties }>; color: string }> = {
   external: { Icon: GlobeIcon,   color: "currentColor" },
@@ -62,7 +63,7 @@ export function StackInfoModal({ stack, onClose }: Props) {
 
   const [serviceProfileMap, setServiceProfileMap] = useState<Record<string, string[]>>({});
 
-  const configFiles = stack.ConfigFiles.split(",").map(f => f.trim());
+  const configFiles = splitConfigFiles(stack.ConfigFiles);
   const configFile = configFiles[0];
 
   useEffect(() => {
@@ -89,7 +90,7 @@ export function StackInfoModal({ stack, onClose }: Props) {
 
   useEffect(() => {
     let raw = "";
-    const proc = listImages(stack.Name, stack.ConfigFiles.split(",").map(f => f.trim()));
+    const proc = listImages(stack.Name, splitConfigFiles(stack.ConfigFiles));
     proc.stream(d => { raw += d; });
     proc
       .then(() => {
@@ -104,7 +105,7 @@ export function StackInfoModal({ stack, onClose }: Props) {
 
   useEffect(() => {
     let raw = "";
-    const proc = listVolumes(stack.Name, stack.ConfigFiles.split(",").map(f => f.trim()));
+    const proc = listVolumes(stack.Name, splitConfigFiles(stack.ConfigFiles));
     proc.stream(d => { raw += d; });
     proc
       .then(() => {
