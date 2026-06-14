@@ -6,6 +6,7 @@ interface UseComposeStacksResult {
   loading: boolean;
   error: string | null;
   refresh: () => void;
+  reset: () => void;
 }
 
 // How many consecutive failures before we surface an error to the UI.
@@ -21,6 +22,16 @@ export function useComposeStacks(): UseComposeStacksResult {
   const failCountRef = useRef(0);
 
   const refresh = useCallback(() => setTick(t => t + 1), []);
+
+  // Clears stacks immediately before fetching — use on runtime switch so that
+  // auto-detection in DownedStacksSection doesn't run against stale stacks.
+  const reset = useCallback(() => {
+    setStacks([]);
+    setError(null);
+    setLoading(true);
+    firstLoadRef.current = true;
+    setTick(t => t + 1);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -65,5 +76,5 @@ export function useComposeStacks(): UseComposeStacksResult {
     return () => { cancelled = true; };
   }, [tick]);
 
-  return { stacks, loading, error, refresh };
+  return { stacks, loading, error, refresh, reset };
 }

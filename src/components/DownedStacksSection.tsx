@@ -47,14 +47,6 @@ export function inferComposeRoot(stacks: ComposeStack[]): string {
   return best[0][0];
 }
 
-function isUnambiguousRoot(stacks: ComposeStack[], root: string): boolean {
-  if (!root || stacks.length === 0) return false;
-  return stacks.every(s => {
-    const cf = splitConfigFiles(s.ConfigFiles)[0] ?? "";
-    const stackDir = cf.slice(0, cf.lastIndexOf("/"));
-    return stackDir.slice(0, stackDir.lastIndexOf("/")) === root;
-  });
-}
 
 function toSyntheticStack(d: DownedStack): ComposeStack {
   return { Name: d.name, Status: "", ConfigFiles: d.configFiles.join(",") };
@@ -90,11 +82,11 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
     return override ? { ...d, configFiles: override } : d;
   });
 
-  // Auto-detect the compose root on first stacks load if unambiguous
+  // Auto-detect the compose root on first stacks load
   useEffect(() => {
     if (autoDetectedRef.current || stacks.length === 0) return;
     const root = inferComposeRoot(stacks);
-    if (isUnambiguousRoot(stacks, root)) {
+    if (root) {
       autoDetectedRef.current = true;
       setComposeDir(root);
     }

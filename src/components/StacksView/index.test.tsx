@@ -154,7 +154,7 @@ const defaultKillStack = {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  mockUseComposeStacks.mockReturnValue({ stacks: [], loading: false, error: null, refresh: vi.fn() });
+  mockUseComposeStacks.mockReturnValue({ stacks: [], loading: false, error: null, refresh: vi.fn(), reset: vi.fn() });
   mockUseDownStack.mockReturnValue(defaultDownStack);
   mockUseKillStack.mockReturnValue(defaultKillStack);
   mockUseSharedNetworks.mockReturnValue({ sharedNetworks: [], loading: false, error: null });
@@ -162,7 +162,7 @@ beforeEach(() => {
 
 describe("StacksView — loading and empty states", () => {
   it("shows a spinner when loading with no stacks", () => {
-    mockUseComposeStacks.mockReturnValue({ stacks: [], loading: true, error: null, refresh: vi.fn() });
+    mockUseComposeStacks.mockReturnValue({ stacks: [], loading: true, error: null, refresh: vi.fn(), reset: vi.fn() });
     render(<StacksView />);
     expect(screen.getByRole("progressbar")).toBeInTheDocument();
   });
@@ -173,14 +173,14 @@ describe("StacksView — loading and empty states", () => {
   });
 
   it("shows error alert when error is set", () => {
-    mockUseComposeStacks.mockReturnValue({ stacks: [], loading: false, error: "docker not found", refresh: vi.fn() });
+    mockUseComposeStacks.mockReturnValue({ stacks: [], loading: false, error: "docker not found", refresh: vi.fn(), reset: vi.fn() });
     render(<StacksView />);
     expect(screen.getByText(/docker not found/i)).toBeInTheDocument();
   });
 
   it("shows a retry button in the error alert", () => {
     const refresh = vi.fn();
-    mockUseComposeStacks.mockReturnValue({ stacks: [], loading: false, error: "docker not found", refresh });
+    mockUseComposeStacks.mockReturnValue({ stacks: [], loading: false, error: "docker not found", refresh, reset: vi.fn() });
     render(<StacksView />);
     fireEvent.click(screen.getByRole("button", { name: /retry/i }));
     expect(refresh).toHaveBeenCalledOnce();
@@ -189,14 +189,14 @@ describe("StacksView — loading and empty states", () => {
 
 describe("StacksView — stack list", () => {
   it("renders a StackRow for each stack", () => {
-    mockUseComposeStacks.mockReturnValue({ stacks: [stack], loading: false, error: null, refresh: vi.fn() });
+    mockUseComposeStacks.mockReturnValue({ stacks: [stack], loading: false, error: null, refresh: vi.fn(), reset: vi.fn() });
     render(<StacksView />);
     expect(screen.getByTestId("stack-row-myapp")).toBeInTheDocument();
   });
 
   it("renders multiple StackRows", () => {
     const stack2: ComposeStack = { Name: "otherapp", Status: "exit(1)", ConfigFiles: "/other/compose.yml" };
-    mockUseComposeStacks.mockReturnValue({ stacks: [stack, stack2], loading: false, error: null, refresh: vi.fn() });
+    mockUseComposeStacks.mockReturnValue({ stacks: [stack, stack2], loading: false, error: null, refresh: vi.fn(), reset: vi.fn() });
     render(<StacksView />);
     expect(screen.getByTestId("stack-row-myapp")).toBeInTheDocument();
     expect(screen.getByTestId("stack-row-otherapp")).toBeInTheDocument();
@@ -210,7 +210,7 @@ describe("StacksView — stack list", () => {
 
 describe("StacksView — modal opening via StackRow callbacks", () => {
   beforeEach(() => {
-    mockUseComposeStacks.mockReturnValue({ stacks: [stack], loading: false, error: null, refresh: vi.fn() });
+    mockUseComposeStacks.mockReturnValue({ stacks: [stack], loading: false, error: null, refresh: vi.fn(), reset: vi.fn() });
   });
 
   it("opens LogsModal when onLogs is called", () => {
@@ -284,7 +284,7 @@ describe("StacksView — modal opening via StackRow callbacks", () => {
 
 describe("StacksView — UpConfirmModal → UpModal flow", () => {
   beforeEach(() => {
-    mockUseComposeStacks.mockReturnValue({ stacks: [stack], loading: false, error: null, refresh: vi.fn() });
+    mockUseComposeStacks.mockReturnValue({ stacks: [stack], loading: false, error: null, refresh: vi.fn(), reset: vi.fn() });
   });
 
   it("opens UpModal after confirming in UpConfirmModal", () => {
@@ -297,7 +297,7 @@ describe("StacksView — UpConfirmModal → UpModal flow", () => {
 
 describe("StacksView — PullConfirmModal → PullModal flow", () => {
   beforeEach(() => {
-    mockUseComposeStacks.mockReturnValue({ stacks: [stack], loading: false, error: null, refresh: vi.fn() });
+    mockUseComposeStacks.mockReturnValue({ stacks: [stack], loading: false, error: null, refresh: vi.fn(), reset: vi.fn() });
   });
 
   it("opens PullModal after confirming in PullConfirmModal", () => {
@@ -378,7 +378,7 @@ describe("StacksView — kill confirmation modal", () => {
 
 describe("StacksView — handleDownComplete / handleUpComplete", () => {
   beforeEach(() => {
-    mockUseComposeStacks.mockReturnValue({ stacks: [stack], loading: false, error: null, refresh: vi.fn() });
+    mockUseComposeStacks.mockReturnValue({ stacks: [stack], loading: false, error: null, refresh: vi.fn(), reset: vi.fn() });
   });
 
   it("adds a manually downed stack to DownedStacksSection after down completes", () => {
@@ -395,7 +395,7 @@ describe("StacksView — handleDownComplete / handleUpComplete", () => {
 
 describe("StacksView — additional modal close callbacks", () => {
   beforeEach(() => {
-    mockUseComposeStacks.mockReturnValue({ stacks: [stack], loading: false, error: null, refresh: vi.fn() });
+    mockUseComposeStacks.mockReturnValue({ stacks: [stack], loading: false, error: null, refresh: vi.fn(), reset: vi.fn() });
   });
 
   it("closes EventsModal when CloseEvents is clicked", () => {
@@ -440,7 +440,7 @@ describe("StacksView — additional modal close callbacks", () => {
 
   it("calls refresh when PruneModal onSuccess fires", () => {
     const refresh = vi.fn();
-    mockUseComposeStacks.mockReturnValue({ stacks: [stack], loading: false, error: null, refresh });
+    mockUseComposeStacks.mockReturnValue({ stacks: [stack], loading: false, error: null, refresh, reset: vi.fn() });
     render(<StacksView />);
     fireEvent.click(screen.getByRole("button", { name: "Prune" }));
     fireEvent.click(screen.getByRole("button", { name: "PruneSuccess" }));
@@ -450,7 +450,7 @@ describe("StacksView — additional modal close callbacks", () => {
 
 describe("StacksView — toggle expansion", () => {
   it("calls toggle when Toggle button is clicked on a StackRow", () => {
-    mockUseComposeStacks.mockReturnValue({ stacks: [stack], loading: false, error: null, refresh: vi.fn() });
+    mockUseComposeStacks.mockReturnValue({ stacks: [stack], loading: false, error: null, refresh: vi.fn(), reset: vi.fn() });
     render(<StacksView />);
     fireEvent.click(screen.getByRole("button", { name: "Toggle" }));
     // No crash expected; expanded state is internal
@@ -485,12 +485,12 @@ describe("StacksView — onRuntimeChange prop", () => {
     expect(onRuntimeChange).toHaveBeenCalledWith("podman");
   });
 
-  it("also refreshes stacks when runtime changes", () => {
-    const refresh = vi.fn();
-    mockUseComposeStacks.mockReturnValue({ stacks: [], loading: false, error: null, refresh });
+  it("resets stacks when runtime changes", () => {
+    const reset = vi.fn();
+    mockUseComposeStacks.mockReturnValue({ stacks: [], loading: false, error: null, refresh: vi.fn(), reset });
     render(<StacksView onRuntimeChange={vi.fn()} />);
     fireEvent.click(screen.getByTestId("runtime-toggle"));
-    expect(refresh).toHaveBeenCalled();
+    expect(reset).toHaveBeenCalled();
   });
 
   it("works without onRuntimeChange prop (optional)", () => {
@@ -501,7 +501,7 @@ describe("StacksView — onRuntimeChange prop", () => {
 
 describe("StacksView — YamlModal file callbacks", () => {
   beforeEach(() => {
-    mockUseComposeStacks.mockReturnValue({ stacks: [stack], loading: false, error: null, refresh: vi.fn() });
+    mockUseComposeStacks.mockReturnValue({ stacks: [stack], loading: false, error: null, refresh: vi.fn(), reset: vi.fn() });
   });
 
   it("updates ConfigFiles when onFileAdded is called", () => {
@@ -522,7 +522,7 @@ describe("StacksView — YamlModal file callbacks", () => {
 
 describe("StacksView — modal close callbacks", () => {
   beforeEach(() => {
-    mockUseComposeStacks.mockReturnValue({ stacks: [stack], loading: false, error: null, refresh: vi.fn() });
+    mockUseComposeStacks.mockReturnValue({ stacks: [stack], loading: false, error: null, refresh: vi.fn(), reset: vi.fn() });
   });
 
   it("closes UpConfirmModal when CloseUpConfirm is clicked", () => {
@@ -535,7 +535,7 @@ describe("StacksView — modal close callbacks", () => {
 
   it("closes UpModal when CloseUp is clicked and calls refresh", () => {
     const refresh = vi.fn();
-    mockUseComposeStacks.mockReturnValue({ stacks: [stack], loading: false, error: null, refresh });
+    mockUseComposeStacks.mockReturnValue({ stacks: [stack], loading: false, error: null, refresh, reset: vi.fn() });
     render(<StacksView />);
     fireEvent.click(screen.getByRole("button", { name: "Up" }));
     fireEvent.click(screen.getByRole("button", { name: "Confirm" }));

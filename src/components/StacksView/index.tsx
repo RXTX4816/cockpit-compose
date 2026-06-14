@@ -50,7 +50,7 @@ interface Props {
 
 export function StacksView({ onRuntimeChange }: Props) {
   const { t } = useTranslation();
-  const { stacks, loading, error, refresh } = useComposeStacks();
+  const { stacks, loading, error, refresh, reset } = useComposeStacks();
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [manuallyDownedStacks, setManuallyDownedStacks] = useState<DownedStack[]>([]);
   const [logsTarget, setLogsTarget] = useState<ComposeStack | null>(null);
@@ -72,6 +72,7 @@ export function StacksView({ onRuntimeChange }: Props) {
   // We pause the auto-refresh while any action is running so that Docker
   // being temporarily busy (e.g. mid-restart) never causes a spurious error.
   const [activeOps, setActiveOps] = useState(0);
+  const [runtimeSwitchKey, setRuntimeSwitchKey] = useState(0);
 
   const onActingChange = useCallback((delta: 1 | -1) => {
     setActiveOps(n => Math.max(0, n + delta));
@@ -120,7 +121,7 @@ export function StacksView({ onRuntimeChange }: Props) {
             <Title headingLevel="h2">{t("stacks.title")}</Title>
           </ToolbarItem>
           <ToolbarItem align={{ default: "alignEnd" }}>
-            <RuntimeToggle onRuntimeChange={(r) => { void refresh(); onRuntimeChange?.(r); }} />
+            <RuntimeToggle onRuntimeChange={(r) => { setRuntimeSwitchKey(k => k + 1); reset(); onRuntimeChange?.(r); }} />
           </ToolbarItem>
         </ToolbarContent>
       </Toolbar>
@@ -176,6 +177,7 @@ export function StacksView({ onRuntimeChange }: Props) {
       ))}
 
       <DownedStacksSection
+        key={runtimeSwitchKey}
         stacks={stacks}
         manuallyDownedStacks={manuallyDownedStacks}
         onRefresh={refresh}
