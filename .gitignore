@@ -10,6 +10,7 @@ build/
 src/main.js
 src/main.css
 src/*.map
+src/assets/
 *.tar.gz
 *.tar.gz.sha256
 

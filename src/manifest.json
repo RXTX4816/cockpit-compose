@@ -11,5 +11,5 @@
             "order": 77
         }
     },
-    "content-security-policy": "script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' 'unsafe-hashes'; img-src 'self' data:; font-src 'self'; connect-src 'self'"
+    "content-security-policy": "script-src 'self' 'unsafe-inline' 'unsafe-eval'; script-src-elem 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' 'unsafe-hashes'; style-src-elem 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'"
 }
