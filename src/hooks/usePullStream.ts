@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { pullStack, composeFileSuperuser, readAllProfiles } from "../api";
+import { pullStack, composeFileSuperuser, readAllProfiles, isRootlessMode } from "../api";
 import { stripAnsi, classifyLine, type LineEntry } from "../lib/pullParser";
 
 export function usePullStream(stackName: string, configFiles: string[]) {
@@ -13,7 +13,10 @@ export function usePullStream(stackName: string, configFiles: string[]) {
   const configFilesKey = configFiles.join(",");
   useEffect(() => {
     let cancelled = false;
-    Promise.all([composeFileSuperuser(configFiles), readAllProfiles(configFiles[0])]).then(([su, profiles]) => {
+    Promise.all([
+      isRootlessMode() ? Promise.resolve<"try" | undefined>(undefined) : composeFileSuperuser(configFiles),
+      readAllProfiles(configFiles[0]),
+    ]).then(([su, profiles]) => {
       if (cancelled) return;
       const proc = pullStack(stackName, configFiles, profiles, su);
       procRef.current = proc;

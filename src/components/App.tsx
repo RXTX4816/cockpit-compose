@@ -4,14 +4,14 @@ import { Page, PageSection } from "@patternfly/react-core";
 import { AppFooter } from "./AppFooter";
 import { StacksView } from "./StacksView";
 import { ErrorBoundary } from "./ErrorBoundary";
-import { detectComposeCommand } from "../api";
+import { detectComposeCommand, detectDockerMode } from "../api";
 
 export function App() {
   const { t } = useTranslation();
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    void detectComposeCommand().then(() => setReady(true));
+    void detectDockerMode().then(() => detectComposeCommand()).then(() => setReady(true));
   }, []);
 
   if (!ready) return null;

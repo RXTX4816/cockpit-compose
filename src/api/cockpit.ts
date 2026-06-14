@@ -1,15 +1,59 @@
 let composePrefix: string[] = ["docker", "compose"];
 let composeDetected = false;
+let dockerEnviron: string[] | undefined;
+let dockerSocketPath: string | undefined;
+let rootlessMode = false;
+
+async function isSocket(path: string): Promise<boolean> {
+  try {
+    let out = "";
+    const proc = cockpit.spawn(["stat", "-c", "%F", "--", path], { err: "message" });
+    proc.stream(d => { out += d; });
+    await proc;
+    return out.trim() === "socket";
+  } catch {
+    return false;
+  }
+}
+
+export async function detectDockerMode(): Promise<void> {
+  let envHost = "";
+  try {
+    const proc = cockpit.spawn(["sh", "-c", 'printf "%s" "$DOCKER_HOST"'], { err: "message" });
+    proc.stream(d => { envHost += d; });
+    await proc;
+  } catch { /* ignore */ }
+
+  if (envHost.trim()) {
+    dockerSocketPath = envHost.trim();
+    rootlessMode = envHost.includes("/run/user/");
+    return;
+  }
+
+  const user = await cockpit.user();
+  const userSocket = `/run/user/${user.id}/docker.sock`;
+
+  if (await isSocket(userSocket)) {
+    rootlessMode = true;
+    dockerSocketPath = `unix://${userSocket}`;
+    dockerEnviron = [`DOCKER_HOST=unix://${userSocket}`];
+    return;
+  }
+
+  if (await isSocket("/var/run/docker.sock")) {
+    dockerSocketPath = "unix:///var/run/docker.sock";
+  }
+}
 
 export async function detectComposeCommand(): Promise<void> {
   if (composeDetected) return;
   composeDetected = true;
   try {
-    await cockpit.spawn(["docker", "compose", "version"], { err: "message" });
+    await cockpit.spawn(["docker", "compose", "version"], { err: "message", ...dockerSpawnEnviron() });
     composePrefix = ["docker", "compose"];
   } catch {
     try {
-      await cockpit.spawn(["docker-compose", "version"], { err: "message" });
+      await cockpit.spawn(["docker-compose", "version"], { err: "message", ...dockerSpawnEnviron() });
       composePrefix = ["docker-compose"];
     } catch {
       composePrefix = ["docker", "compose"];
@@ -19,6 +63,18 @@ export async function detectComposeCommand(): Promise<void> {
 
 export function compose(...args: string[]): string[] {
   return [...composePrefix, ...args];
+}
+
+export function dockerSpawnEnviron(): { environ?: string[] } {
+  return dockerEnviron ? { environ: dockerEnviron } : {};
+}
+
+export function isRootlessMode(): boolean {
+  return rootlessMode;
+}
+
+export function getDockerSocketPath(): string | undefined {
+  return dockerSocketPath;
 }
 
 async function statOwnerUid(path: string): Promise<number> {

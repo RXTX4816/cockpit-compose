@@ -89,4 +89,22 @@ If no stacks are found at all, the dashboard shows:
 
 ## Footer
 
-At the bottom of the page you will find the plugin version, the Docker Compose version installed on your server, and links to the **Help** wiki and **Feedback / Report bug** on GitHub.
+At the bottom of the page you will find version and connection information followed by links to the **Help** wiki and **Feedback / Report bug** on GitHub.
+
+| Badge | Description |
+|---|---|
+| **Version: x.y.z** | The installed version of Cockpit Compose |
+| **Docker: x.y.z** | The Docker client version on your server |
+| **Docker Compose: x.y.z** | The Docker Compose version on your server |
+| **unix:///…/docker.sock** | The socket the plugin is communicating with |
+| **Rootless Docker** | Shown in green when a rootless Docker daemon is detected (see below) |
+
+### Rootless Docker
+
+If your system runs a rootless Docker daemon (socket at `/run/user/<uid>/docker.sock`), the plugin detects this automatically at startup and shows a green **Rootless Docker** badge in the footer. In this mode:
+
+- All Docker and Compose commands are directed to your user-level daemon via `DOCKER_HOST`.
+- Privilege escalation is suppressed for Docker operations — no sudo prompt appears.
+- The resolved socket path is shown in the footer so you can confirm which daemon is in use.
+
+If you have `DOCKER_HOST` set in your session environment before opening Cockpit, that value is respected as-is. Otherwise, the plugin checks for a user socket first, then the system socket at `/var/run/docker.sock`.

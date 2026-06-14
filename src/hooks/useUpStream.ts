@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { upStackStream, composeFileSuperuser } from "../api";
+import { upStackStream, composeFileSuperuser, isRootlessMode } from "../api";
 import { stripAnsi, classifyLine, type LineEntry } from "../lib/pullParser";
 
 export function useUpStream(stackName: string, configFiles: string[], profiles: string[] = []) {
@@ -13,7 +13,7 @@ export function useUpStream(stackName: string, configFiles: string[], profiles: 
   const configFilesKey = configFiles.join(",");
   useEffect(() => {
     let cancelled = false;
-    composeFileSuperuser(configFiles).then(su => {
+    (isRootlessMode() ? Promise.resolve<"try" | undefined>(undefined) : composeFileSuperuser(configFiles)).then(su => {
       if (cancelled) return;
       const proc = upStackStream(stackName, configFiles, profiles, su);
       procRef.current = proc;

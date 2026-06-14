@@ -4,17 +4,27 @@ import { mockProcess } from "../test/helpers";
 
 vi.mock("../api", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../api")>();
-  return { ...actual, composeVersion: vi.fn() };
+  return {
+    ...actual,
+    composeVersion: vi.fn(),
+    dockerVersion: vi.fn(),
+    isRootlessMode: vi.fn().mockReturnValue(false),
+    getDockerSocketPath: vi.fn().mockReturnValue(undefined),
+  };
 });
 
-import { composeVersion } from "../api";
+import { composeVersion, dockerVersion, isRootlessMode, getDockerSocketPath } from "../api";
 const mockComposeVersion = vi.mocked(composeVersion);
+const mockDockerVersion = vi.mocked(dockerVersion);
+const mockIsRootlessMode = vi.mocked(isRootlessMode);
+const mockGetDockerSocketPath = vi.mocked(getDockerSocketPath);
 
-// Use mockImplementation so mockProcess is called fresh each time composeVersion() is called,
-// ensuring the stream callback is registered before the microtask fires.
 beforeEach(() => {
   vi.clearAllMocks();
   mockComposeVersion.mockImplementation(() => mockProcess(""));
+  mockDockerVersion.mockImplementation(() => mockProcess(""));
+  mockIsRootlessMode.mockReturnValue(false);
+  mockGetDockerSocketPath.mockReturnValue(undefined);
 });
 
 describe("AppFooter", () => {
@@ -33,8 +43,44 @@ describe("AppFooter", () => {
     });
   });
 
+  it("shows docker version once the process resolves", async () => {
+    mockDockerVersion.mockImplementation(() => mockProcess("27.1.0"));
+    const { AppFooter } = await import("./AppFooter");
+    render(<AppFooter />);
+    await waitFor(() => {
+      expect(screen.getByText(/27\.1\.0/)).toBeInTheDocument();
+    });
+  });
+
+  it("shows rootless badge when isRootlessMode returns true", async () => {
+    mockIsRootlessMode.mockReturnValue(true);
+    const { AppFooter } = await import("./AppFooter");
+    render(<AppFooter />);
+    expect(screen.getByText("Rootless Docker")).toBeInTheDocument();
+  });
+
+  it("does not show rootless badge in system docker mode", async () => {
+    mockIsRootlessMode.mockReturnValue(false);
+    const { AppFooter } = await import("./AppFooter");
+    render(<AppFooter />);
+    expect(screen.queryByText("Rootless Docker")).toBeNull();
+  });
+
+  it("shows socket path when getDockerSocketPath returns a value", async () => {
+    mockGetDockerSocketPath.mockReturnValue("unix:///run/user/1000/docker.sock");
+    const { AppFooter } = await import("./AppFooter");
+    render(<AppFooter />);
+    expect(screen.getByText("unix:///run/user/1000/docker.sock")).toBeInTheDocument();
+  });
+
   it("does not crash when compose version process rejects", async () => {
     mockComposeVersion.mockImplementation(() => mockProcess("", "permission denied"));
+    const { AppFooter } = await import("./AppFooter");
+    expect(() => render(<AppFooter />)).not.toThrow();
+  });
+
+  it("does not crash when docker version process rejects", async () => {
+    mockDockerVersion.mockImplementation(() => mockProcess("", "permission denied"));
     const { AppFooter } = await import("./AppFooter");
     expect(() => render(<AppFooter />)).not.toThrow();
   });
@@ -43,7 +89,6 @@ describe("AppFooter", () => {
     mockComposeVersion.mockImplementation(() => mockProcess("not-valid-json"));
     const { AppFooter } = await import("./AppFooter");
     expect(() => render(<AppFooter />)).not.toThrow();
-    // No compose version span should appear
     await waitFor(() => {
       expect(screen.queryByText(/not-valid-json/)).toBeNull();
     });

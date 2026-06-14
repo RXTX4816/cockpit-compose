@@ -23,11 +23,16 @@ Docker Compose management for [Cockpit](https://cockpit-project.org) — start, 
 
 ## Prerequisites
 
-Docker is not installed by default on most distros. Install it and make sure it is running and add your user to the docker group.
+Docker is not installed by default on most distros. Install it and make sure it is running and add your user to the docker group. Works with rootless docker by setting DOCKER_HOST env in OS.
 
 ```bash
 sudo usermod -aG docker $USER
 ```
+```bash
+# Add this to your startup scripts (e.g. .zshrc) on your OS running cockpit and docker for rootless
+export DOCKER_HOST=unix:///run/user/$(id -u)/docker.sock
+```
+
 
 Cockpit comes pre-installed on Fedora and most RHEL-based systems. On other distros it might need to be installed and started:
 
