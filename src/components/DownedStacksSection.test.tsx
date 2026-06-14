@@ -311,7 +311,7 @@ describe("DownedStacksSection — Down section content", () => {
       hasScanned: true,
     }));
     render(<DownedStacksSection {...defaultProps} />);
-    fireEvent.click(screen.getByRole("button", { name: /↑ Up/i }));
+    fireEvent.click(screen.getByRole("button", { name: /^Up$/i }));
     expect(screen.getByTestId("up-confirm-modal")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /ConfirmUp/i }));
     expect(screen.getByTestId("up-modal")).toBeInTheDocument();
@@ -327,7 +327,7 @@ describe("DownedStacksSection — Down section content", () => {
     const onRefresh = vi.fn();
     const onUpComplete = vi.fn();
     render(<DownedStacksSection {...defaultProps} onRefresh={onRefresh} onUpComplete={onUpComplete} />);
-    fireEvent.click(screen.getByRole("button", { name: /↑ Up/i }));
+    fireEvent.click(screen.getByRole("button", { name: /^Up$/i }));
     fireEvent.click(screen.getByRole("button", { name: /ConfirmUp/i }));
     fireEvent.click(screen.getByRole("button", { name: /^Close$/ }));
     expect(onUpComplete).toHaveBeenCalledWith("myapp");
@@ -344,7 +344,7 @@ describe("DownedStacksSection — Down section content", () => {
     const onRefresh = vi.fn();
     const onUpComplete = vi.fn();
     render(<DownedStacksSection {...defaultProps} onRefresh={onRefresh} onUpComplete={onUpComplete} />);
-    fireEvent.click(screen.getByRole("button", { name: /↑ Up/i }));
+    fireEvent.click(screen.getByRole("button", { name: /^Up$/i }));
     fireEvent.click(screen.getByRole("button", { name: /ConfirmUp/i }));
     fireEvent.click(screen.getByRole("button", { name: /CloseFailed/i }));
     expect(onUpComplete).not.toHaveBeenCalled();
@@ -359,7 +359,7 @@ describe("DownedStacksSection — Down section content", () => {
       hasScanned: true,
     }));
     render(<DownedStacksSection {...defaultProps} />);
-    fireEvent.click(screen.getByRole("button", { name: /✕ Delete/i }));
+    fireEvent.click(screen.getByRole("button", { name: /delete compose file/i }));
     expect(screen.getByTestId("delete-modal")).toBeInTheDocument();
     expect(screen.getByText("DeleteModal:myapp")).toBeInTheDocument();
   });
@@ -372,7 +372,7 @@ describe("DownedStacksSection — Down section content", () => {
     }));
     const onUpComplete = vi.fn();
     render(<DownedStacksSection {...defaultProps} onUpComplete={onUpComplete} />);
-    fireEvent.click(screen.getByRole("button", { name: /✕ Delete/i }));
+    fireEvent.click(screen.getByRole("button", { name: /delete compose file/i }));
     fireEvent.click(screen.getByRole("button", { name: /ConfirmDelete/i }));
     expect(noopRemove).toHaveBeenCalledWith("myapp");
     expect(onUpComplete).toHaveBeenCalledWith("myapp");
@@ -421,7 +421,7 @@ describe("DownedStacksSection — Down section content", () => {
       hasScanned: true,
     }));
     render(<DownedStacksSection {...defaultProps} />);
-    fireEvent.click(screen.getByRole("button", { name: /↑ Up/i }));
+    fireEvent.click(screen.getByRole("button", { name: /^Up$/i }));
     expect(screen.getByTestId("up-confirm-modal")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "CancelConfirm" }));
     expect(screen.queryByTestId("up-confirm-modal")).not.toBeInTheDocument();
@@ -461,7 +461,7 @@ describe("DownedStacksSection — Down section content", () => {
       hasScanned: true,
     }));
     render(<DownedStacksSection {...defaultProps} />);
-    fireEvent.click(screen.getByRole("button", { name: /✕ Delete/i }));
+    fireEvent.click(screen.getByRole("button", { name: /delete compose file/i }));
     expect(screen.getByTestId("delete-modal")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "CloseDelete" }));
     expect(screen.queryByTestId("delete-modal")).not.toBeInTheDocument();

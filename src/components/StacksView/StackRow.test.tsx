@@ -199,14 +199,14 @@ describe("StackRow", () => {
   it("calls onPull when Pull button clicked", () => {
     const onPull = vi.fn();
     render(<StackRow {...defaultProps} onPull={onPull} />);
-    fireEvent.click(screen.getByRole("button", { name: /^Pull$/i }));
+    fireEvent.click(screen.getByRole("button", { name: /pull latest images/i }));
     expect(onPull).toHaveBeenCalledOnce();
   });
 
   it("calls onDown when ↓ Down button clicked", () => {
     const onDown = vi.fn();
     render(<StackRow {...defaultProps} onDown={onDown} />);
-    fireEvent.click(screen.getByRole("button", { name: /↓ Down/i }));
+    fireEvent.click(screen.getByRole("button", { name: /down \(remove containers\)/i }));
     expect(onDown).toHaveBeenCalledOnce();
   });
 

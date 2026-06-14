@@ -37,6 +37,7 @@
 
   "actions": {
     "up": "Uruchom",
+    "up_title": "Uruchom stos lub odtwórz zmienione kontenery",
     "down": "Wyłącz",
     "down_title": "Wyłącz (usuń kontenery)",
     "stop": "Zatrzymaj",
@@ -511,7 +512,11 @@
   },
 
   "container_table": {
-    "replica_count": "×{{count}}"
+    "replica_count": "×{{count}}",
+    "col_status": "Status",
+    "col_service": "Usługa",
+    "col_image": "Obraz",
+    "col_uptime": "Czas pracy"
   },
 
   "scale_modal": {

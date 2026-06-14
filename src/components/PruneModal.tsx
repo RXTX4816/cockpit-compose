@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { BroomIcon } from "@patternfly/react-icons";
 import { useTranslation } from "react-i18next";
 import {
   Modal,
@@ -302,6 +303,7 @@ export function PruneModal({ stack, onClose, onSuccess }: Props) {
       <ModalFooter>
         <Button
           variant="danger"
+          icon={<BroomIcon />}
           onClick={() => void executePrune()}
           isLoading={pruning}
           isDisabled={pruning}

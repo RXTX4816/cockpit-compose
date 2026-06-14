@@ -35,6 +35,7 @@
 
   "actions": {
     "up": "Hochfahren",
+    "up_title": "Stack starten oder geänderte Container neu erstellen",
     "down": "Herunterfahren",
     "down_title": "Herunterfahren (Container entfernen)",
     "stop": "Stoppen",
@@ -501,7 +502,11 @@
   },
 
   "container_table": {
-    "replica_count": "×{{count}}"
+    "replica_count": "×{{count}}",
+    "col_status": "Status",
+    "col_service": "Dienst",
+    "col_image": "Image",
+    "col_uptime": "Laufzeit"
   },
 
   "scale_modal": {

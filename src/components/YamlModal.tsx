@@ -16,7 +16,7 @@ import {
   FormSelect,
   FormSelectOption,
 } from "@patternfly/react-core";
-import { LockIcon, LockOpenIcon } from "@patternfly/react-icons";
+import { LockIcon, LockOpenIcon, SaveIcon, TrashIcon, PlusCircleIcon } from "@patternfly/react-icons";
 import { load } from "js-yaml";
 import type { Diagnostic } from "@codemirror/lint";
 import { validateComposeSpec } from "../compose-schema";
@@ -425,7 +425,7 @@ export function YamlModal({ stack, onClose, onFileAdded, onFileRemoved }: Props)
           <Button variant="secondary" onClick={handleCancel} isDisabled={saving}>
             {t("common.cancel")}
           </Button>
-          <Button variant="primary" onClick={handleSave} isLoading={saving}>
+          <Button variant="primary" icon={<SaveIcon />} onClick={handleSave} isLoading={saving}>
             {t("common.save")}
           </Button>
         </ModalFooter>
@@ -481,7 +481,7 @@ export function YamlModal({ stack, onClose, onFileAdded, onFileRemoved }: Props)
           <Button variant="link" onClick={() => setDeleteConfirmOpen(false)} isDisabled={deleteFileSaving}>
             {t("common.cancel")}
           </Button>
-          <Button variant="danger" onClick={() => void handleDeleteFile()} isLoading={deleteFileSaving}>
+          <Button variant="danger" icon={<TrashIcon />} onClick={() => void handleDeleteFile()} isLoading={deleteFileSaving}>
             {t("yaml_modal.delete_file_confirm_button")}
           </Button>
         </ModalFooter>
@@ -516,7 +516,7 @@ export function YamlModal({ stack, onClose, onFileAdded, onFileRemoved }: Props)
           <Button variant="secondary" onClick={() => setAddFileOpen(false)} isDisabled={addFileSaving}>
             {t("common.cancel")}
           </Button>
-          <Button variant="primary" onClick={() => void handleAddFile()} isLoading={addFileSaving}>
+          <Button variant="primary" icon={<PlusCircleIcon />} onClick={() => void handleAddFile()} isLoading={addFileSaving}>
             {t("yaml_modal.add_file_create_button")}
           </Button>
         </ModalFooter>
@@ -543,7 +543,7 @@ export function YamlModal({ stack, onClose, onFileAdded, onFileRemoved }: Props)
           <Button variant="secondary" onClick={() => setConfirmSave(false)}>
             {t("common.cancel")}
           </Button>
-          <Button variant="primary" onClick={performSave} isLoading={saving}>
+          <Button variant="primary" icon={<SaveIcon />} onClick={performSave} isLoading={saving}>
             {t("yaml_modal.save_anyway_button")}
           </Button>
         </ModalFooter>

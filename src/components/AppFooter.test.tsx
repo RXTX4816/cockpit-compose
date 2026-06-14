@@ -66,11 +66,13 @@ describe("AppFooter", () => {
     expect(screen.queryByText("Rootless Docker")).toBeNull();
   });
 
-  it("shows socket path when getDockerSocketPath returns a value", async () => {
+  it("shows socket path as tooltip on version label (not standalone text)", async () => {
     mockGetDockerSocketPath.mockReturnValue("unix:///run/user/1000/docker.sock");
     const { AppFooter } = await import("./AppFooter");
     render(<AppFooter />);
-    expect(screen.getByText("unix:///run/user/1000/docker.sock")).toBeInTheDocument();
+    // Socket path is now a tooltip on the version label, not a visible standalone label
+    expect(screen.queryByText("unix:///run/user/1000/docker.sock")).toBeNull();
+    expect(document.querySelector(".cc-footer")).toBeInTheDocument();
   });
 
   it("does not crash when compose version process rejects", async () => {

@@ -18,6 +18,7 @@ import {
   ModalFooter,
 } from "@patternfly/react-core";
 import { type ComposeStack } from "../../api";
+import { TimesCircleIcon, BanIcon } from "@patternfly/react-icons";
 import { type DownedStack } from "../../hooks/useDownedStacksScan";
 import { useComposeStacks } from "../../hooks/useComposeStacks";
 import { useAutoRefresh } from "../../hooks/useAutoRefresh";
@@ -266,7 +267,7 @@ export function StacksView() {
             )}
           </ModalBody>
           <ModalFooter>
-            <Button variant="danger" onClick={() => void performDown()} isLoading={downing}>
+            <Button variant="danger" icon={<TimesCircleIcon />} onClick={() => void performDown()} isLoading={downing}>
               {t("down_modal.confirm_button")}
             </Button>
             <Button variant="link" onClick={closeDown} isDisabled={downing}>
@@ -294,7 +295,7 @@ export function StacksView() {
             )}
           </ModalBody>
           <ModalFooter>
-            <Button variant="danger" onClick={() => void performKill()} isLoading={killing}>
+            <Button variant="danger" icon={<BanIcon />} onClick={() => void performKill()} isLoading={killing}>
               {t("kill_modal.confirm_button")}
             </Button>
             <Button variant="link" onClick={closeKill} isDisabled={killing}>

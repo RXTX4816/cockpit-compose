@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { TerminalIcon, UnlinkIcon } from "@patternfly/react-icons";
 import { useTranslation } from "react-i18next";
 import {
   Modal,
@@ -226,6 +227,7 @@ export function ExecModal({ stack, onClose }: Props) {
           <>
             <Button
               variant="primary"
+              icon={<TerminalIcon />}
               onClick={() => void launchTerminal()}
               isDisabled={!selectedService.trim()}
             >
@@ -235,7 +237,7 @@ export function ExecModal({ stack, onClose }: Props) {
           </>
         )}
         {step === "terminal" && (
-          <Button variant="secondary" onClick={handleClose}>{t("exec_modal.disconnect_button")}</Button>
+          <Button variant="secondary" icon={<UnlinkIcon />} onClick={handleClose}>{t("exec_modal.disconnect_button")}</Button>
         )}
       </ModalFooter>
     </Modal>

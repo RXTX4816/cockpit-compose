@@ -12,6 +12,7 @@ import {
   Spinner,
   Alert,
 } from "@patternfly/react-core";
+import { PlayCircleIcon, StopCircleIcon, TimesIcon } from "@patternfly/react-icons";
 import { type ComposeStack } from "../api";
 import { useEventStream } from "../hooks/useEventStream";
 import "./EventsModal.css";
@@ -61,11 +62,11 @@ export function EventsModal({ stack, onClose }: Props) {
           <ToolbarContent>
             <ToolbarItem>
               {streaming ? (
-                <Button variant="secondary" size="sm" onClick={stop}>
+                <Button variant="secondary" size="sm" icon={<StopCircleIcon />} onClick={stop}>
                   {t("events_modal.stop_button")}
                 </Button>
               ) : (
-                <Button variant="primary" size="sm" onClick={handleStart}>
+                <Button variant="primary" size="sm" icon={<PlayCircleIcon />} onClick={handleStart}>
                   {t("events_modal.stream_button")}
                 </Button>
               )}
@@ -77,7 +78,7 @@ export function EventsModal({ stack, onClose }: Props) {
             )}
             {events.length > 0 && !streaming && (
               <ToolbarItem>
-                <Button variant="plain" size="sm" onClick={clear}>{t("events_modal.clear_button")}</Button>
+                <Button variant="plain" size="sm" icon={<TimesIcon />} onClick={clear} aria-label={t("events_modal.clear_button")} title={t("events_modal.clear_button")}>{t("events_modal.clear_button")}</Button>
               </ToolbarItem>
             )}
           </ToolbarContent>

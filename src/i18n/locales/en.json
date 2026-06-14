@@ -35,6 +35,7 @@
 
   "actions": {
     "up": "Up",
+    "up_title": "Start stack or recreate changed containers",
     "down": "Down",
     "down_title": "Down (remove containers)",
     "stop": "Stop",
@@ -501,7 +502,11 @@
   },
 
   "container_table": {
-    "replica_count": "×{{count}}"
+    "replica_count": "×{{count}}",
+    "col_status": "Status",
+    "col_service": "Service",
+    "col_image": "Image",
+    "col_uptime": "Uptime"
   },
 
   "scale_modal": {

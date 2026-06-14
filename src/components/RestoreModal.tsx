@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { HistoryIcon, SyncAltIcon } from "@patternfly/react-icons";
 import { useTranslation } from "react-i18next";
 import {
   Modal,
@@ -328,6 +329,7 @@ export function RestoreModal({ existingStacks, defaultScanDir, onClose, onRestor
                   />
                   <Button
                     variant="secondary"
+                    icon={<SyncAltIcon />}
                     isDisabled={!scanDir.trim() || scanning || restoring}
                     isLoading={scanning}
                     onClick={() => void runScan(scanDir)}
@@ -500,6 +502,7 @@ export function RestoreModal({ existingStacks, defaultScanDir, onClose, onRestor
           <>
             <Button
               variant="primary"
+              icon={<HistoryIcon />}
               isDisabled={!canRestore || restoring}
               isLoading={restoring}
               onClick={() => void handleRestore()}

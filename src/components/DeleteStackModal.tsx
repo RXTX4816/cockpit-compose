@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { TrashIcon } from "@patternfly/react-icons";
 import { useTranslation } from "react-i18next";
 import {
   Modal,
@@ -116,7 +117,7 @@ export function DeleteStackModal({ stack, onClose, onDeleted }: Props) {
         </ModalBody>
 
         <ModalFooter>
-          <Button variant="danger" onClick={() => setConfirmed(true)}>
+          <Button variant="danger" icon={<TrashIcon />} onClick={() => setConfirmed(true)}>
             {t("common.delete")}
           </Button>
           <Button variant="link" onClick={onClose}>
@@ -141,6 +142,7 @@ export function DeleteStackModal({ stack, onClose, onDeleted }: Props) {
           <ModalFooter>
             <Button
               variant="danger"
+              icon={<TrashIcon />}
               isDisabled={deleting}
               isLoading={deleting}
               onClick={() => { void handleDelete(); }}

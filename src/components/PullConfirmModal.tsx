@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { DownloadIcon } from "@patternfly/react-icons";
 import { useTranslation } from "react-i18next";
 import {
   Modal,
@@ -97,7 +98,7 @@ export function PullConfirmModal({ stack, onConfirm, onClose }: Props) {
         )}
       </ModalBody>
       <ModalFooter>
-        <Button variant="primary" onClick={onConfirm}>{t("pull_confirm_modal.pull_button")}</Button>
+        <Button variant="primary" icon={<DownloadIcon />} onClick={onConfirm}>{t("pull_confirm_modal.pull_button")}</Button>
         <Button variant="link" onClick={onClose}>{t("common.cancel")}</Button>
       </ModalFooter>
     </Modal>

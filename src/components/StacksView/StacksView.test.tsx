@@ -118,10 +118,10 @@ describe("StacksView", () => {
       refresh: noopRefresh,
     });
     render(<StacksView />);
-    expect(screen.getByText("↑ Up")).toBeInTheDocument();
-    expect(screen.getByText("Logs")).toBeInTheDocument();
-    expect(screen.getByText("Edit")).toBeInTheDocument();
-    expect(screen.getByText("↓ Down")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Up" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /view logs/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /edit compose file/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /down \(remove containers\)/i })).toBeInTheDocument();
   });
 
   it("Retry button in error alert calls refresh", () => {
@@ -158,7 +158,7 @@ describe("StacksView", () => {
       refresh: noopRefresh,
     });
     render(<StacksView />);
-    fireEvent.click(screen.getByRole("button", { name: /↓ Down/i }));
+    fireEvent.click(screen.getByRole("button", { name: /down \(remove containers\)/i }));
     expect(screen.getByText(/Remove "myapp"/i)).toBeInTheDocument();
   });
 
@@ -170,7 +170,7 @@ describe("StacksView", () => {
       refresh: noopRefresh,
     });
     render(<StacksView />);
-    fireEvent.click(screen.getByRole("button", { name: /↓ Down/i }));
+    fireEvent.click(screen.getByRole("button", { name: /down \(remove containers\)/i }));
     expect(screen.getByText(/Remove "myapp"/i)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /^Cancel$/i }));
     expect(screen.queryByText(/Remove "myapp"/i)).toBeNull();
@@ -220,7 +220,7 @@ describe("StacksView", () => {
       refresh: noopRefresh,
     });
     render(<StacksView />);
-    fireEvent.click(screen.getByRole("button", { name: /^Pull$/i }));
+    fireEvent.click(screen.getByRole("button", { name: /pull latest images/i }));
     expect(screen.getByTestId("pull-confirm-modal")).toBeInTheDocument();
     expect(screen.queryByTestId("pull-modal")).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /Confirm pull/i }));
@@ -264,7 +264,7 @@ describe("StacksView", () => {
     const { mockProcess } = await import("../../test/helpers");
     mockSpawn.mockReturnValue(mockProcess(""));
     render(<StacksView />);
-    fireEvent.click(screen.getByRole("button", { name: /↓ Down/i }));
+    fireEvent.click(screen.getByRole("button", { name: /down \(remove containers\)/i }));
     fireEvent.click(screen.getByRole("button", { name: /^Down \(remove\)$/i }));
     // downStack is now called asynchronously (after composeFileSuperuser resolves).
     await waitFor(() => expect(mockSpawn).toHaveBeenCalled());

@@ -34,3 +34,12 @@
 .sr-down-btn {
   color: var(--pf-t--global--color--status--danger--default, #c9190b);
 }
+
+.sr-icon-group {
+  display: flex;
+  align-items: center;
+  gap: 0.1rem;
+  border-left: 1px solid var(--pf-t--global--border--color--default);
+  padding-left: 0.4rem;
+  margin-left: 0.1rem;
+}

@@ -12,7 +12,7 @@ import {
   Spinner,
   SearchInput,
 } from "@patternfly/react-core";
-import { SyncAltIcon } from "@patternfly/react-icons";
+import { SyncAltIcon, PlayIcon, PauseIcon, TimesIcon } from "@patternfly/react-icons";
 import { type ComposeStack, readComposeFile, getServicesFromCompose } from "../api";
 import {
   serviceColor,
@@ -172,8 +172,8 @@ export function LogsModal({ stack, onClose }: Props) {
               {streaming && (
                 <ToolbarItem>
                   {paused
-                    ? <Button variant="primary" size="sm" onClick={resume}>{t("logs_modal.continue_button")}</Button>
-                    : <Button variant="secondary" size="sm" onClick={pause}>{t("logs_modal.pause_button")}</Button>
+                    ? <Button variant="primary" size="sm" icon={<PlayIcon />} onClick={resume}>{t("logs_modal.continue_button")}</Button>
+                    : <Button variant="secondary" size="sm" icon={<PauseIcon />} onClick={pause}>{t("logs_modal.pause_button")}</Button>
                   }
                 </ToolbarItem>
               )}
@@ -190,7 +190,7 @@ export function LogsModal({ stack, onClose }: Props) {
               </ToolbarItem>
               {lines.length > 0 && (
                 <ToolbarItem>
-                  <Button variant="plain" size="sm" onClick={clear}>{t("logs_modal.clear_button")}</Button>
+                  <Button variant="plain" size="sm" icon={<TimesIcon />} onClick={clear} aria-label={t("logs_modal.clear_button")} title={t("logs_modal.clear_button")}>{t("logs_modal.clear_button")}</Button>
                 </ToolbarItem>
               )}
             </ToolbarGroup>
