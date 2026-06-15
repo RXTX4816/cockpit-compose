@@ -1,16 +1,21 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { PageSection, Label, Tooltip } from "@patternfly/react-core";
-import { composeVersion, dockerVersion, isRootlessMode, getDockerSocketPath, type ComposeVersion } from "../api";
+import { composeVersion, containerVersion, isRootlessMode, getDockerSocketPath, getPodmanSocketPath, type ComposeVersion, type Runtime } from "../api";
 // @ts-expect-error: ESM import assertion for JSON
 import pkg from "../../package.json" assert { type: "json" };
 
-export function AppFooter() {
+interface Props {
+  runtime: Runtime;
+}
+
+export function AppFooter({ runtime }: Props) {
   const { t } = useTranslation();
   const [version, setVersion] = useState<ComposeVersion | null>(null);
   const [dockerVer, setDockerVer] = useState<string | null>(null);
 
   useEffect(() => {
+    setVersion(null);
     let raw = "";
     const proc = composeVersion();
     proc.stream(d => { raw += d; });
@@ -19,19 +24,21 @@ export function AppFooter() {
         try { setVersion(JSON.parse(raw) as ComposeVersion); } catch { /* ignore */ }
       })
       .catch(() => { /* best-effort */ });
-  }, []);
+  }, [runtime]);
 
   useEffect(() => {
+    setDockerVer(null);
     let raw = "";
-    const proc = dockerVersion();
+    const proc = containerVersion();
     proc.stream(d => { raw += d; });
     proc
       .then(() => { const v = raw.trim(); if (v) setDockerVer(v); })
       .catch(() => { /* best-effort */ });
-  }, []);
+  }, [runtime]);
 
-  const socketPath = getDockerSocketPath();
+  const socketPath = runtime === "podman" ? getPodmanSocketPath() : getDockerSocketPath();
   const rootless = isRootlessMode();
+  const runtimeLabel = runtime === "podman" ? "Podman" : "Docker";
 
   return (
     <PageSection
@@ -58,10 +65,10 @@ export function AppFooter() {
             <Label isCompact color="grey">{t("footer.version", { version: pkg.version })}</Label>
           )}
           {dockerVer && (
-            <Label isCompact color="blue">{t("footer.docker_version", { version: dockerVer })}</Label>
+            <Label isCompact color="blue">{t("footer.docker_version", { version: dockerVer, runtime: runtimeLabel })}</Label>
           )}
           {version && (
-            <Label isCompact color="blue">{t("footer.compose_version", { version: version.version })}</Label>
+            <Label isCompact color="blue">{t("footer.compose_version", { version: version.version, runtime: runtimeLabel })}</Label>
           )}
           {rootless && (
             <Label isCompact color="green">{t("footer.rootless")}</Label>

@@ -6,6 +6,9 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: ["./src/test/setup.ts"],
     include: ["src/**/*.test.{ts,tsx}"],
+    pool: "forks",
+    maxWorkers: 4,
+    minWorkers: 2,
     coverage: {
       provider: "v8",
       reporter: ["text", "html"],

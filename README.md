@@ -106,6 +106,93 @@ Open `http://localhost:9090` — **Docker Compose** appears in the sidebar autom
 | `npm run test` | Run tests |
 | `npm run test:coverage` | Coverage report |
 
+### Testing on Arch / Debian / Fedora
+
+`scripts/test-vm.sh` spins up QEMU cloud VMs across three distros × three runtime scenarios
+(`podman`, `docker`, `both`). Your `src/` folder is mounted live so `npm run watch` changes
+appear in the browser without restarting anything.
+
+This can be particularly useful when testing the new experimental podman feature, since that ensures a reproducible system.
+
+```bash
+sudo pacman -S qemu-full cloud-image-utils wget   # one-time
+npm run build
+npm run vm:init
+npm run vm:startall # Wait until cockpit is up (~2 min)
+# Open https://localhost:9093 — login: test / test
+# To rebuild (Clean the data and images of qemu, after change to test-vm.sh):
+npm run vm:rebuild
+```
+
+> `wait` runs `cloud-init status --wait` inside the VM and only exits once all packages
+> are installed and cockpit.socket is active. Don't open the browser until it says ready.
+
+```bash
+./scripts/test-vm.sh status          # see all 9 VMs with ports and state
+./scripts/test-vm.sh start podman    # start podman scenario on all three distros
+./scripts/test-vm.sh clean debian    # wipe all three debian VMs (re-provisions on next start)
+```
+
+| VM | Cockpit | SSH |
+|---|---|---|
+| arch-podman | https://localhost:9090 | `ssh -p 2220 test@localhost` |
+| arch-docker | https://localhost:9091 | `ssh -p 2221 test@localhost` |
+| arch-both | https://localhost:9092 | `ssh -p 2222 test@localhost` |
+| debian-podman | https://localhost:9093 | `ssh -p 2223 test@localhost` |
+| debian-docker | https://localhost:9094 | `ssh -p 2224 test@localhost` |
+| debian-both | https://localhost:9095 | `ssh -p 2225 test@localhost` |
+| fedora-podman | https://localhost:9096 | `ssh -p 2226 test@localhost` |
+| fedora-docker | https://localhost:9097 | `ssh -p 2227 test@localhost` |
+| fedora-both | https://localhost:9098 | `ssh -p 2228 test@localhost` |
+
+**VMs are persistent** — the disk is an overlay on the base image and survives stop/start cycles.
+Only `clean` (wipes disk, re-provisions on next start) or `reset` (removes everything) destroy state.
+
+**Script commands:**
+
+| Command | What it does |
+|---|---|
+| `./scripts/test-vm.sh status` | Show which VMs are running and their ports |
+| `./scripts/test-vm.sh start [arch\|debian\|fedora\|all]` | Start VM(s) in background |
+| `./scripts/test-vm.sh wait [arch\|debian\|fedora]` | Block until cloud-init fully finishes |
+| `./scripts/test-vm.sh stop [arch\|debian\|fedora\|all]` | Stop VM(s) |
+| `./scripts/test-vm.sh ssh [arch\|debian\|fedora]` | Open SSH session |
+| `./scripts/test-vm.sh logs [arch\|debian\|fedora]` | Tail serial console |
+| `./scripts/test-vm.sh clean [arch\|debian\|fedora]` | Wipe disk and re-provision on next start |
+
+**Useful commands inside the VM** (after `./scripts/test-vm.sh ssh debian`):
+
+```bash
+# Check podman and socket
+sudo systemctl status podman.socket
+sudo podman ps -a
+
+# Check cockpit
+sudo systemctl status cockpit.socket
+
+# Check what compose binary was picked up
+podman compose version        # if docker-compose is installed (external provider)
+podman-compose version        # standalone Python implementation
+
+# Verify the plugin is mounted from your host
+ls /usr/share/cockpit/cockpit-compose/
+
+# Start a test stack (podman-compose)
+mkdir -p ~/test && cat > ~/test/docker-compose.yml << 'EOF'
+services:
+  app:
+    image: busybox
+    command: sh -c "while true; do echo hello; sleep 2; done"
+EOF
+cd ~/test && podman-compose up -d
+
+# Check cloud-init logs if something went wrong
+sudo cloud-init status --long
+sudo journalctl -u cloud-init --no-pager -n 50
+```
+
+See [docs/wiki/VM-Testing.md](docs/wiki/VM-Testing.md) for all commands and troubleshooting.
+
 ## Translations
 
 The UI language follows Cockpit's language setting.

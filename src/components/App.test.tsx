@@ -7,7 +7,7 @@ vi.mock("../api", async (importOriginal) => {
   return {
     ...actual,
     detectDockerMode: vi.fn().mockResolvedValue(undefined),
-    detectComposeCommand: vi.fn().mockResolvedValue(undefined),
+    detectComposeCommand: vi.fn().mockResolvedValue(true),
   };
 });
 
@@ -26,15 +26,15 @@ beforeEach(() => { vi.clearAllMocks(); });
 
 describe("App", () => {
   it("renders nothing until detectComposeCommand resolves", async () => {
-    let resolve!: () => void;
-    mockDetect.mockReturnValue(new Promise<void>(r => { resolve = r; }));
+    let resolve!: (v: boolean) => void;
+    mockDetect.mockReturnValue(new Promise<boolean>(r => { resolve = r; }));
     const { container } = render(<App />);
     expect(container.firstChild).toBeNull();
-    await act(async () => { resolve(); });
+    await act(async () => { resolve(true); });
   });
 
   it("renders StacksView after detectComposeCommand resolves", async () => {
-    mockDetect.mockResolvedValue(undefined);
+    mockDetect.mockResolvedValue(true);
     render(<App />);
     await waitFor(() => expect(screen.getByText("StacksView rendered")).toBeInTheDocument());
   });

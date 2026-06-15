@@ -12,6 +12,7 @@ import { type ComposeStack } from "../api";
 import { kindColor } from "../lib/pullParser";
 import { useUpStream } from "../hooks/useUpStream";
 import "./UpModal.css";
+import { splitConfigFiles } from "../lib/configFiles";
 
 interface Props {
   stack: ComposeStack;
@@ -21,7 +22,7 @@ interface Props {
 
 export function UpModal({ stack, profiles = [], onClose }: Props) {
   const { t } = useTranslation();
-  const configFiles = stack.ConfigFiles.split(",").map(f => f.trim());
+  const configFiles = splitConfigFiles(stack.ConfigFiles);
   const { lines, done, failed, errorMsg, cancel } = useUpStream(stack.Name, configFiles, profiles);
   const logRef = useRef<HTMLDivElement>(null);
 

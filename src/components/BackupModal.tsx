@@ -15,6 +15,7 @@ import {
 } from "@patternfly/react-core";
 import { type ComposeStack } from "../api";
 import { createBackupArchive } from "../api/files";
+import { splitConfigFiles } from "../lib/configFiles";
 
 interface Props {
   stack: ComposeStack;
@@ -29,7 +30,7 @@ function formatTimestamp(d: Date): string {
 export function BackupModal({ stack, onClose }: Props) {
   const { t } = useTranslation();
 
-  const primaryConfigFile = stack.ConfigFiles.split(",")[0].trim();
+  const primaryConfigFile = splitConfigFiles(stack.ConfigFiles)[0] ?? "";
   const stackDir = primaryConfigFile.substring(0, primaryConfigFile.lastIndexOf("/"));
   const dirName = stackDir.substring(stackDir.lastIndexOf("/") + 1);
   const stackParentDir = stackDir.substring(0, stackDir.lastIndexOf("/"));

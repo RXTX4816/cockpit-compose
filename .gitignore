@@ -40,6 +40,9 @@ Thumbs.db
 *.bak
 .tmp/
 
+# Test VM images and state (managed by scripts/test-vm.sh)
+.vms/
+
 # AI tooling — developer-local, not part of project
 CLAUDE.md
 .claude/

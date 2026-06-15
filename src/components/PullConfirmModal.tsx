@@ -11,6 +11,7 @@ import {
 } from "@patternfly/react-core";
 import { load as loadYaml } from "js-yaml";
 import { type ComposeStack, readComposeFile } from "../api";
+import { splitConfigFiles } from "../lib/configFiles";
 
 interface ImageEntry {
   service: string;
@@ -44,7 +45,7 @@ interface Props {
 
 export function PullConfirmModal({ stack, onConfirm, onClose }: Props) {
   const { t } = useTranslation();
-  const configFile = stack.ConfigFiles.split(",")[0].trim();
+  const configFile = splitConfigFiles(stack.ConfigFiles)[0] ?? "";
   const [images, setImages] = useState<ImageEntry[]>([]);
 
   useEffect(() => {

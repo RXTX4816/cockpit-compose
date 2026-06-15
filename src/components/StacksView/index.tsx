@@ -17,7 +17,7 @@ import {
   ModalBody,
   ModalFooter,
 } from "@patternfly/react-core";
-import { type ComposeStack } from "../../api";
+import { type ComposeStack, type Runtime } from "../../api";
 import { TimesCircleIcon, BanIcon } from "@patternfly/react-icons";
 import { type DownedStack } from "../../hooks/useDownedStacksScan";
 import { useComposeStacks } from "../../hooks/useComposeStacks";
@@ -40,11 +40,17 @@ import { BackupModal } from "../BackupModal";
 import { ScaleModal } from "../ScaleModal";
 import { DownedStacksSection } from "../DownedStacksSection";
 import { StackRow } from "./StackRow";
+import { RuntimeToggle } from "../RuntimeToggle";
 import "./StacksView.css";
+import { splitConfigFiles } from "../../lib/configFiles";
 
-export function StacksView() {
+interface Props {
+  onRuntimeChange?: (runtime: Runtime) => void;
+}
+
+export function StacksView({ onRuntimeChange }: Props) {
   const { t } = useTranslation();
-  const { stacks, loading, error, refresh } = useComposeStacks();
+  const { stacks, loading, error, refresh, reset } = useComposeStacks();
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [manuallyDownedStacks, setManuallyDownedStacks] = useState<DownedStack[]>([]);
   const [logsTarget, setLogsTarget] = useState<ComposeStack | null>(null);
@@ -66,6 +72,7 @@ export function StacksView() {
   // We pause the auto-refresh while any action is running so that Docker
   // being temporarily busy (e.g. mid-restart) never causes a spurious error.
   const [activeOps, setActiveOps] = useState(0);
+  const [runtimeSwitchKey, setRuntimeSwitchKey] = useState(0);
 
   const onActingChange = useCallback((delta: 1 | -1) => {
     setActiveOps(n => Math.max(0, n + delta));
@@ -75,7 +82,7 @@ export function StacksView() {
     setManuallyDownedStacks(prev =>
       prev.some(d => d.name.toLowerCase() === stack.Name.toLowerCase())
         ? prev
-        : [...prev, { name: stack.Name, configFiles: stack.ConfigFiles.split(",").map(f => f.trim()) }]
+        : [...prev, { name: stack.Name, configFiles: splitConfigFiles(stack.ConfigFiles) }]
     );
   }, []);
 
@@ -112,6 +119,9 @@ export function StacksView() {
         <ToolbarContent>
           <ToolbarItem>
             <Title headingLevel="h2">{t("stacks.title")}</Title>
+          </ToolbarItem>
+          <ToolbarItem align={{ default: "alignEnd" }}>
+            <RuntimeToggle onRuntimeChange={(r) => { setRuntimeSwitchKey(k => k + 1); reset(); onRuntimeChange?.(r); }} />
           </ToolbarItem>
         </ToolbarContent>
       </Toolbar>
@@ -167,6 +177,7 @@ export function StacksView() {
       ))}
 
       <DownedStacksSection
+        key={runtimeSwitchKey}
         stacks={stacks}
         manuallyDownedStacks={manuallyDownedStacks}
         onRefresh={refresh}

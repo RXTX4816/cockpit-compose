@@ -26,6 +26,7 @@ import { YamlDiffView } from "./YamlDiffView";
 import { EnvModal } from "./EnvModal";
 import { useSnapshots } from "../hooks/useSnapshots";
 import "./YamlModal.css";
+import { splitConfigFiles } from "../lib/configFiles";
 
 const ADDITIONAL_STUB = `services:\n  my-service:\n    image: my-image:latest\n`;
 const PRIMARY_FILENAMES = new Set(["docker-compose.yml", "docker-compose.yaml", "compose.yml", "compose.yaml"]);
@@ -54,7 +55,7 @@ export function YamlModal({ stack, onClose, onFileAdded, onFileRemoved }: Props)
   const [showEnv, setShowEnv] = useState(false);
 
   const [configFiles, setConfigFiles] = useState(
-    () => stack.ConfigFiles.split(",").map(f => f.trim()),
+    () => splitConfigFiles(stack.ConfigFiles),
   );
   const [activeIdx, setActiveIdx] = useState(0);
   const configFile = configFiles[activeIdx];

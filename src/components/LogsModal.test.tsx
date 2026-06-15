@@ -177,7 +177,7 @@ describe("LogsModal", () => {
     mockGetServicesFromCompose.mockReturnValue(["web", "db"]);
     render(<LogsModal stack={stack} onClose={vi.fn()} />);
     fireEvent.change(screen.getByRole("combobox"), { target: { value: "db" } });
-    expect(mockUseLogStream).toHaveBeenCalledWith("myapp", "db");
+    expect(mockUseLogStream).toHaveBeenCalledWith("myapp", ["/path/compose.yml"], "db", ["web", "db"]);
   });
 
   it("passes undefined to useLogStream when All services is selected", () => {
@@ -186,7 +186,7 @@ describe("LogsModal", () => {
     const select = screen.getByRole("combobox");
     fireEvent.change(select, { target: { value: "web" } });
     fireEvent.change(select, { target: { value: "" } });
-    expect(mockUseLogStream).toHaveBeenLastCalledWith("myapp", undefined);
+    expect(mockUseLogStream).toHaveBeenLastCalledWith("myapp", ["/path/compose.yml"], undefined, ["web", "db"]);
   });
 
   // ── Search ────────────────────────────────────────────────────────────────

@@ -24,6 +24,7 @@ import { DeleteStackModal } from "./DeleteStackModal";
 import { RestoreModal } from "./RestoreModal";
 import { BackupModal } from "./BackupModal";
 import "./DownedStacksSection.css";
+import { splitConfigFiles } from "../lib/configFiles";
 
 interface Props {
   stacks: ComposeStack[];
@@ -36,7 +37,7 @@ export function inferComposeRoot(stacks: ComposeStack[]): string {
   if (stacks.length === 0) return "";
   const tally = new Map<string, number>();
   for (const stack of stacks) {
-    const configFile = stack.ConfigFiles.split(",")[0].trim();
+    const configFile = splitConfigFiles(stack.ConfigFiles)[0] ?? "";
     const stackDir = configFile.slice(0, configFile.lastIndexOf("/"));
     const parent = stackDir.slice(0, stackDir.lastIndexOf("/"));
     if (parent) tally.set(parent, (tally.get(parent) ?? 0) + 1);
@@ -46,14 +47,6 @@ export function inferComposeRoot(stacks: ComposeStack[]): string {
   return best[0][0];
 }
 
-function isUnambiguousRoot(stacks: ComposeStack[], root: string): boolean {
-  if (!root || stacks.length === 0) return false;
-  return stacks.every(s => {
-    const cf = s.ConfigFiles.split(",")[0].trim();
-    const stackDir = cf.slice(0, cf.lastIndexOf("/"));
-    return stackDir.slice(0, stackDir.lastIndexOf("/")) === root;
-  });
-}
 
 function toSyntheticStack(d: DownedStack): ComposeStack {
   return { Name: d.name, Status: "", ConfigFiles: d.configFiles.join(",") };
@@ -89,11 +82,11 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
     return override ? { ...d, configFiles: override } : d;
   });
 
-  // Auto-detect the compose root on first stacks load if unambiguous
+  // Auto-detect the compose root on first stacks load
   useEffect(() => {
     if (autoDetectedRef.current || stacks.length === 0) return;
     const root = inferComposeRoot(stacks);
-    if (isUnambiguousRoot(stacks, root)) {
+    if (root) {
       autoDetectedRef.current = true;
       setComposeDir(root);
     }

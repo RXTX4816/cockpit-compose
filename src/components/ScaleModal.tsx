@@ -20,6 +20,7 @@ import {
   DescriptionListDescription,
 } from "@patternfly/react-core";
 import { ExclamationTriangleIcon } from "@patternfly/react-icons";
+import { splitConfigFiles } from "../lib/configFiles";
 import {
   type ComposeStack,
   type ComposeContainer,
@@ -79,7 +80,7 @@ async function loadServiceInfo(
 
 export function ScaleModal({ stack, onClose }: Props) {
   const { t } = useTranslation();
-  const configFiles = stack.ConfigFiles.split(",").map(f => f.trim());
+  const configFiles = splitConfigFiles(stack.ConfigFiles);
 
   const [step, setStep] = useState<"config" | "confirm">("config");
   const [serviceInfo, setServiceInfo] = useState<Record<string, ServiceInfo>>({});

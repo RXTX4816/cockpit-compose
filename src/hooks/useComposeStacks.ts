@@ -6,6 +6,7 @@ interface UseComposeStacksResult {
   loading: boolean;
   error: string | null;
   refresh: () => void;
+  reset: () => void;
 }
 
 // How many consecutive failures before we surface an error to the UI.
@@ -21,6 +22,16 @@ export function useComposeStacks(): UseComposeStacksResult {
   const failCountRef = useRef(0);
 
   const refresh = useCallback(() => setTick(t => t + 1), []);
+
+  // Clears stacks immediately before fetching — use on runtime switch so that
+  // auto-detection in DownedStacksSection doesn't run against stale stacks.
+  const reset = useCallback(() => {
+    setStacks([]);
+    setError(null);
+    setLoading(true);
+    firstLoadRef.current = true;
+    setTick(t => t + 1);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -51,11 +62,13 @@ export function useComposeStacks(): UseComposeStacksResult {
         // don't flash the error banner and kill the refresh interval.
         if (failCountRef.current >= FAIL_THRESHOLD) {
           const msg = ex instanceof Error ? ex.message : String(ex);
-          setError(
-            msg.toLowerCase().includes("not found") || msg.toLowerCase().includes("no such file")
-              ? "Docker not found. Install Docker with the Compose plugin (docker compose v2) to use this plugin."
-              : msg
-          );
+          let displayMsg = msg;
+          if (msg.toLowerCase().includes("not found") || msg.toLowerCase().includes("no such file")) {
+            displayMsg = "Docker not found. Install Docker with the Compose plugin (docker compose v2) to use this plugin.";
+          } else if (msg.includes("No such command") || msg.includes("no such command")) {
+            displayMsg = "Docker Compose v2 is required but an older version (v1) was detected. Upgrade to Docker Compose v2, or switch to Podman mode.";
+          }
+          setError(displayMsg);
           setStacks([]);
         }
       }
@@ -65,5 +78,5 @@ export function useComposeStacks(): UseComposeStacksResult {
     return () => { cancelled = true; };
   }, [tick]);
 
-  return { stacks, loading, error, refresh };
+  return { stacks, loading, error, refresh, reset };
 }

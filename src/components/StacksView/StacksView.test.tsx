@@ -65,6 +65,7 @@ describe("StacksView", () => {
       loading: true,
       error: null,
       refresh: noopRefresh,
+      reset: vi.fn(),
     });
     render(<StacksView />);
     expect(screen.getByRole("progressbar")).toBeInTheDocument();
@@ -76,6 +77,7 @@ describe("StacksView", () => {
       loading: false,
       error: null,
       refresh: noopRefresh,
+      reset: vi.fn(),
     });
     render(<StacksView />);
     expect(screen.getByText(/No compose stacks found/i)).toBeInTheDocument();
@@ -90,6 +92,7 @@ describe("StacksView", () => {
       loading: false,
       error: null,
       refresh: noopRefresh,
+      reset: vi.fn(),
     });
     render(<StacksView />);
     expect(screen.getByText("myapp")).toBeInTheDocument();
@@ -102,6 +105,7 @@ describe("StacksView", () => {
       loading: false,
       error: "Docker daemon not responding",
       refresh: noopRefresh,
+      reset: vi.fn(),
     });
     render(<StacksView />);
     expect(screen.getByText(/Failed to load stacks/i)).toBeInTheDocument();
@@ -116,6 +120,7 @@ describe("StacksView", () => {
       loading: false,
       error: null,
       refresh: noopRefresh,
+      reset: vi.fn(),
     });
     render(<StacksView />);
     expect(screen.getByRole("button", { name: "Up" })).toBeInTheDocument();
@@ -130,6 +135,7 @@ describe("StacksView", () => {
       loading: false,
       error: "Docker daemon not responding",
       refresh: noopRefresh,
+      reset: vi.fn(),
     });
     render(<StacksView />);
     fireEvent.click(screen.getByRole("button", { name: /Retry/i }));
@@ -142,6 +148,7 @@ describe("StacksView", () => {
       loading: false,
       error: null,
       refresh: noopRefresh,
+      reset: vi.fn(),
     });
     render(<StacksView />);
     const toggleBtn = document.getElementById("toggle-myapp")!;
@@ -156,6 +163,7 @@ describe("StacksView", () => {
       loading: false,
       error: null,
       refresh: noopRefresh,
+      reset: vi.fn(),
     });
     render(<StacksView />);
     fireEvent.click(screen.getByRole("button", { name: /down \(remove containers\)/i }));
@@ -168,6 +176,7 @@ describe("StacksView", () => {
       loading: false,
       error: null,
       refresh: noopRefresh,
+      reset: vi.fn(),
     });
     render(<StacksView />);
     fireEvent.click(screen.getByRole("button", { name: /down \(remove containers\)/i }));
@@ -182,6 +191,7 @@ describe("StacksView", () => {
       loading: false,
       error: null,
       refresh: noopRefresh,
+      reset: vi.fn(),
     });
     render(<StacksView />);
     fireEvent.click(screen.getByRole("button", { name: /Logs/i }));
@@ -194,6 +204,7 @@ describe("StacksView", () => {
       loading: false,
       error: null,
       refresh: noopRefresh,
+      reset: vi.fn(),
     });
     render(<StacksView />);
     fireEvent.click(screen.getByRole("button", { name: /Edit/i }));
@@ -206,6 +217,7 @@ describe("StacksView", () => {
       loading: false,
       error: null,
       refresh: noopRefresh,
+      reset: vi.fn(),
     });
     render(<StacksView />);
     fireEvent.click(screen.getByRole("button", { name: /Info/i }));
@@ -218,6 +230,7 @@ describe("StacksView", () => {
       loading: false,
       error: null,
       refresh: noopRefresh,
+      reset: vi.fn(),
     });
     render(<StacksView />);
     fireEvent.click(screen.getByRole("button", { name: /pull latest images/i }));
@@ -233,6 +246,7 @@ describe("StacksView", () => {
       loading: false,
       error: null,
       refresh: noopRefresh,
+      reset: vi.fn(),
     });
     render(<StacksView />);
     fireEvent.click(screen.getByRole("button", { name: /More actions for myapp/i }));
@@ -248,6 +262,7 @@ describe("StacksView", () => {
       loading: false,
       error: null,
       refresh: noopRefresh,
+      reset: vi.fn(),
     });
     render(<StacksView />);
     expect(screen.getByTestId("downed-stacks-section")).toBeInTheDocument();
@@ -259,6 +274,7 @@ describe("StacksView", () => {
       loading: false,
       error: null,
       refresh: noopRefresh,
+      reset: vi.fn(),
     });
     const { mockSpawn } = await import("../../test/setup");
     const { mockProcess } = await import("../../test/helpers");

@@ -28,7 +28,15 @@ export function useEventStream(project: string) {
       for (const line of parts) {
         if (!line.trim()) continue;
         try {
-          parsed.push(JSON.parse(line) as ComposeEvent);
+          // Normalize Docker (lowercase) and Podman (capitalized) event key casing
+          const raw = JSON.parse(line) as Record<string, unknown>;
+          const ev: ComposeEvent = {
+            time:   (raw["time"]   ?? raw["Time"]   ?? "") as string | number,
+            type:   (raw["type"]   ?? raw["Type"]   ?? "") as string,
+            action: (raw["action"] ?? raw["Action"] ?? raw["Status"] ?? "") as string,
+            actor:  (raw["actor"]  ?? raw["Actor"]  ?? { ID: "", Attributes: {} }) as ComposeEvent["actor"],
+          };
+          parsed.push(ev);
         } catch {
           // skip malformed lines
         }

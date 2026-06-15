@@ -22,7 +22,7 @@
     "title": "Compose Stacks",
     "aria_label": "Compose stacks",
     "empty_title": "No compose stacks found",
-    "empty_body": "Start a project with docker compose up -d and it will appear here.",
+    "empty_body": "Start a project with docker/podman compose up -d and it will appear here.",
     "load_failed": "Failed to load stacks",
     "service_count_one": "{{count}} service",
     "service_count_other": "{{count}} services",
@@ -77,11 +77,20 @@
 
   "footer": {
     "version": "Version: {{version}}",
-    "docker_version": "Docker: {{version}}",
-    "compose_version": "Docker Compose: {{version}}",
-    "rootless": "Rootless Docker",
+    "docker_version": "{{runtime}}: {{version}}",
+    "compose_version": "{{runtime}} Compose: {{version}}",
+    "rootless": "Rootless",
     "help": "Help",
     "feedback": "Feedback / Report bug"
+  },
+
+  "runtime": {
+    "docker": "Docker",
+    "podman": "Podman",
+    "toggle_label": "Container runtime",
+    "not_installed": "{{runtime}} not found — install it to switch",
+    "podman_confirm_title": "Switch to Podman",
+    "podman_confirm_body": "Podman support is experimental. Depending on your setup, some features may not work as expected — including stack discovery, log streaming, and certain compose commands."
   },
 
   "error_boundary": {
