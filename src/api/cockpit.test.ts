@@ -167,12 +167,13 @@ describe("detectComposeCommand()", () => {
     expect(compose("ls")).toEqual(["docker", "compose", "ls"]);
   });
 
-  it("is idempotent — only spawns once even when called twice", async () => {
+  it("is idempotent — only spawns for version+progress probe on first call, not second", async () => {
     mockSpawn.mockResolvedValue("");
     const { detectComposeCommand } = await import("./cockpit");
     await detectComposeCommand();
     await detectComposeCommand();
-    expect(mockSpawn).toHaveBeenCalledTimes(1);
+    // first call: version probe + --progress plain probe = 2 spawns; second call hits cache
+    expect(mockSpawn).toHaveBeenCalledTimes(2);
   });
 
   // Podman tests need cockpit.user mocked (for detectPodmanSocket) and must account
@@ -196,11 +197,30 @@ describe("detectComposeCommand()", () => {
       .mockRejectedValueOnce(new Error("no socket"))  // stat: user podman socket absent
       .mockRejectedValueOnce(new Error("no socket"))  // stat: system podman socket absent
       .mockRejectedValueOnce(new Error("not found"))  // podman compose version fails
-      .mockResolvedValueOnce("");                      // podman-compose version succeeds
-    const { setRuntime, detectComposeCommand, compose } = await import("./cockpit");
+      .mockResolvedValueOnce("")                       // podman-compose version succeeds
+      .mockRejectedValueOnce(new Error("unknown flag")); // --progress plain probe fails
+    const { setRuntime, detectComposeCommand, compose, composeSupportsProgress } = await import("./cockpit");
     setRuntime("podman");
     expect(await detectComposeCommand()).toBe(true);
     expect(compose("ls")).toEqual(["podman-compose", "ls"]);
+    expect(composeSupportsProgress()).toBe(false);
+  });
+
+  // Fedora: `podman compose` delegates to the standalone podman-compose binary, which
+  // doesn't support --progress plain. The probe detects this at startup.
+  it("detects that podman compose delegates to podman-compose and disables --progress", async () => {
+    const mockUser = vi.fn().mockResolvedValue({ id: 1000 });
+    vi.stubGlobal("cockpit", { spawn: mockSpawn, user: mockUser });
+    mockSpawn
+      .mockResolvedValueOnce("")                       // stat: user podman socket (not a socket)
+      .mockResolvedValueOnce("")                       // stat: system podman socket (not a socket)
+      .mockResolvedValueOnce("")                       // podman compose version succeeds
+      .mockRejectedValueOnce(new Error("invalid choice: 'plain'")); // --progress plain probe fails
+    const { setRuntime, detectComposeCommand, compose, composeSupportsProgress } = await import("./cockpit");
+    setRuntime("podman");
+    expect(await detectComposeCommand()).toBe(true);
+    expect(compose("ls")).toEqual(["podman", "compose", "ls"]);
+    expect(composeSupportsProgress()).toBe(false);
   });
 
   it("returns false when neither podman compose nor podman-compose is found", async () => {

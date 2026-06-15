@@ -62,11 +62,13 @@ export function useComposeStacks(): UseComposeStacksResult {
         // don't flash the error banner and kill the refresh interval.
         if (failCountRef.current >= FAIL_THRESHOLD) {
           const msg = ex instanceof Error ? ex.message : String(ex);
-          setError(
-            msg.toLowerCase().includes("not found") || msg.toLowerCase().includes("no such file")
-              ? "Docker not found. Install Docker with the Compose plugin (docker compose v2) to use this plugin."
-              : msg
-          );
+          let displayMsg = msg;
+          if (msg.toLowerCase().includes("not found") || msg.toLowerCase().includes("no such file")) {
+            displayMsg = "Docker not found. Install Docker with the Compose plugin (docker compose v2) to use this plugin.";
+          } else if (msg.includes("No such command") || msg.includes("no such command")) {
+            displayMsg = "Docker Compose v2 is required but an older version (v1) was detected. Upgrade to Docker Compose v2, or switch to Podman mode.";
+          }
+          setError(displayMsg);
           setStacks([]);
         }
       }

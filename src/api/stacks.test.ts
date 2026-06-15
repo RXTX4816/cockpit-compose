@@ -190,13 +190,24 @@ describe("restartStack", () => {
 });
 
 describe("streamLogs", () => {
-  it("spawns compose logs --follow with timestamps", () => {
+  it("spawns compose logs --follow with timestamps and file flags", () => {
     mockSpawn.mockReturnValue(mockProcess(""));
-    streamLogs("myapp");
+    streamLogs("myapp", ["/path/compose.yml"]);
     const args = mockSpawn.mock.calls[0][0] as string[];
     expect(args).toContain("logs");
     expect(args).toContain("--follow");
     expect(args).toContain("--timestamps");
+    expect(args).toContain("-f");
+    expect(args).toContain("/path/compose.yml");
+  });
+
+  it("passes explicit service names when allServices provided with no service selected", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    streamLogs("myapp", ["/path/compose.yml"], undefined, ["web", "db"]);
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    // For non-limited backend (docker), allServices are ignored — no service args appended
+    expect(args).not.toContain("web");
+    expect(args).not.toContain("db");
   });
 });
 
@@ -474,6 +485,77 @@ describe("composeRunStream", () => {
     expect(args.filter(a => a === "-f")).toHaveLength(2);
     expect(args).toContain("/path/base.yml");
     expect(args).toContain("/path/override.yml");
+  });
+});
+
+describe("listImages [podman-compose limited backend]", () => {
+  it("falls back to podman ps + image inspect when compose is limited backend", async () => {
+    const psOutput = JSON.stringify([
+      { ImageID: "sha256:deadbeef1234", Names: ["myapp-web-1"], Labels: { "com.docker.compose.project": "myapp" } },
+    ]);
+    const inspectOutput = JSON.stringify([
+      { Id: "sha256:deadbeef1234", RepoTags: ["docker.io/nginx:alpine"], Size: 12345678, Created: "2024-01-01T00:00:00Z" },
+    ]);
+    mockSpawn
+      .mockImplementationOnce(() => mockProcess(psOutput))    // podman ps
+      .mockImplementationOnce(() => mockProcess(inspectOutput)); // podman image inspect
+
+    const { listImages: li } = await import("./stacks");
+    const cockpitMod = await import("./cockpit");
+    cockpitMod.setRuntime("podman");
+    vi.spyOn(cockpitMod, "composeIsLimitedBackend").mockReturnValue(true);
+
+    let received = "";
+    const proc = li("myapp", []);
+    proc.stream(d => { received += d; });
+    await proc;
+
+    const result = JSON.parse(received) as { ID: string; Repository: string; Tag: string; ContainerName: string }[];
+    expect(result).toHaveLength(1);
+    expect(result[0].Repository).toBe("docker.io/nginx");
+    expect(result[0].Tag).toBe("alpine");
+    expect(result[0].ContainerName).toBe("myapp-web-1");
+
+    const psArgs = mockSpawn.mock.calls[0][0] as string[];
+    expect(psArgs).toContain("ps");
+    expect(psArgs).toContain("-a");
+    expect(psArgs.join(" ")).toContain("com.docker.compose.project=myapp");
+    expect(psArgs).not.toContain("images");
+
+    const inspectArgs = mockSpawn.mock.calls[1][0] as string[];
+    expect(inspectArgs).toContain("image");
+    expect(inspectArgs).toContain("inspect");
+    expect(inspectArgs).toContain("sha256:deadbeef1234");
+  });
+});
+
+describe("listVolumes [podman-compose limited backend]", () => {
+  it("falls back to podman volume ls when compose is limited backend", async () => {
+    const volOutput = JSON.stringify([
+      { Name: "myapp_pgdata", Driver: "local", Mountpoint: "/var/lib/containers/storage/volumes/myapp_pgdata/_data" },
+    ]);
+    mockSpawn.mockImplementation(() => mockProcess(volOutput));
+
+    const { listVolumes: lv } = await import("./stacks");
+    const cockpitMod = await import("./cockpit");
+    cockpitMod.setRuntime("podman");
+    vi.spyOn(cockpitMod, "composeIsLimitedBackend").mockReturnValue(true);
+
+    let received = "";
+    const proc = lv("myapp", []);
+    proc.stream(d => { received += d; });
+    await proc;
+
+    const result = JSON.parse(received) as { Name: string; Driver: string; Mountpoint: string }[];
+    expect(result).toHaveLength(1);
+    expect(result[0].Name).toBe("myapp_pgdata");
+    expect(result[0].Driver).toBe("local");
+
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args).toContain("volume");
+    expect(args).toContain("ls");
+    expect(args.join(" ")).toContain("com.docker.compose.project=myapp");
+    expect(args).not.toContain("volumes");
   });
 });
 

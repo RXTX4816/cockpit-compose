@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { ToggleGroup, ToggleGroupItem, Tooltip, Alert, Modal, ModalHeader, ModalBody, ModalFooter, Button } from "@patternfly/react-core";
+import { CubeIcon } from "@patternfly/react-icons";
 import { setRuntime, detectComposeCommand, type Runtime } from "../api";
 
 interface Props {
@@ -16,11 +17,7 @@ function DockerIcon() {
 }
 
 function PodmanIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style={{ marginRight: 4 }}>
-      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
-    </svg>
-  );
+  return <CubeIcon aria-hidden="true" style={{ marginRight: 4, verticalAlign: "middle" }} />;
 }
 
 export function RuntimeToggle({ onRuntimeChange }: Props) {

@@ -3,6 +3,7 @@ export type Runtime = "docker" | "podman";
 let currentRuntime: Runtime = (localStorage.getItem("cockpit-compose:runtime") ?? "docker") as Runtime;
 let composePrefix: string[] = [currentRuntime, "compose"];
 const detectedPrefixes = new Map<Runtime, string[]>();
+const detectedProgressSupport = new Map<Runtime, boolean>();
 
 let dockerEnviron: string[] | undefined;
 let dockerSocketPath: string | undefined;
@@ -104,7 +105,15 @@ export async function detectComposeCommand(): Promise<boolean> {
       composePrefix = [r, "compose"];
     }
   }
-  if (found) detectedPrefixes.set(r, composePrefix);
+  if (found) {
+    detectedPrefixes.set(r, composePrefix);
+    let progressSupported = false;
+    try {
+      await cockpit.spawn([...composePrefix, "--progress", "plain", "version"], { err: "message", ...dockerSpawnEnviron() });
+      progressSupported = true;
+    } catch { /* --progress not supported */ }
+    detectedProgressSupport.set(r, progressSupported);
+  }
   return found;
 }
 
@@ -115,6 +124,22 @@ export function setRuntime(runtime: Runtime): void {
 
 export function getIsPodman(): boolean {
   return currentRuntime === "podman";
+}
+
+// True when the compose backend is the standalone podman-compose Python tool (either invoked
+// directly or via `podman compose` external-provider delegation on Fedora). These backends
+// lack --format json on ps/images and have no `volumes` subcommand.
+export function composeIsLimitedBackend(): boolean {
+  return !composeSupportsProgress() && getIsPodman();
+}
+
+// `podman compose` may delegate to standalone podman-compose (which lacks --progress);
+// probe at detection time to know for sure.
+export function composeSupportsProgress(): boolean {
+  if (detectedProgressSupport.has(currentRuntime)) {
+    return detectedProgressSupport.get(currentRuntime)!;
+  }
+  return composePrefix[0] !== "podman-compose";
 }
 
 export function cli(...args: string[]): string[] {

@@ -3,7 +3,9 @@ import { streamLogs } from "../api";
 
 export const LOG_MAX_LINES = 500;
 
-export function useLogStream(stackName: string, service?: string) {
+const ANSI_RE = new RegExp(String.fromCharCode(27) + "\\[[0-9;]*[A-Za-z]", "g");
+
+export function useLogStream(stackName: string, configFiles: string[], service?: string, allServices?: string[]) {
   const [lines, setLines] = useState<string[]>([]);
   const [streaming, setStreaming] = useState(true);
   const [paused, setPaused] = useState(false);
@@ -11,6 +13,9 @@ export function useLogStream(stackName: string, service?: string) {
   const bufRef = useRef("");
   const pausedRef = useRef(false);
   const sessionRef = useRef(0);
+
+  const configFilesKey = configFiles.join("\0");
+  const allServicesKey = allServices?.join("\0");
 
   useEffect(() => {
     let cancelled = false;
@@ -21,10 +26,10 @@ export function useLogStream(stackName: string, service?: string) {
     setLines([]);
     setStreaming(true);
     setPaused(false);
-    const proc = streamLogs(stackName, service);
+    const proc = streamLogs(stackName, configFiles, service, allServices);
     proc.stream(data => {
       if (cancelled || pausedRef.current) return;
-      bufRef.current += data;
+      bufRef.current += data.replace(ANSI_RE, "");
       const parts = bufRef.current.split("\n");
       bufRef.current = parts.pop() ?? "";
       if (parts.length > 0) {
@@ -38,7 +43,8 @@ export function useLogStream(stackName: string, service?: string) {
     proc.then(() => { if (!cancelled) setStreaming(false); })
        .catch(() => { if (!cancelled) setStreaming(false); });
     return () => { cancelled = true; proc.close(); };
-  }, [stackName, service, revision]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stackName, configFilesKey, service, allServicesKey, revision]);
 
   const pause = useCallback(() => {
     pausedRef.current = true;

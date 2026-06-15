@@ -1,6 +1,69 @@
-import { compose, cli, getIsPodman, dockerSpawnEnviron } from "./cockpit";
+import { compose, cli, getIsPodman, dockerSpawnEnviron, composeIsLimitedBackend } from "./cockpit";
+
+interface PodmanPort {
+  host_ip?: string;
+  container_port: number;
+  host_port: number;
+  protocol: string;
+}
+
+interface PodmanPsJson {
+  Id: string;
+  Names?: string[];
+  Image: string;
+  ImageID?: string;
+  State: string;
+  Status: string;
+  Ports?: PodmanPort[] | null;
+  Labels?: Record<string, string>;
+}
+
+function podmanPortsToString(ports: PodmanPort[] | null | undefined): string {
+  if (!ports || ports.length === 0) return "";
+  return ports
+    .map(p => `${p.host_ip || "0.0.0.0"}:${p.host_port}->${p.container_port}/${p.protocol}`)
+    .join(", ");
+}
+
+function listContainersPodmanFallback(project: string): CockpitProcess {
+  const callbacks: ((d: string) => void)[] = [];
+  let res!: (v: string) => void, rej!: (e: unknown) => void;
+  const p = new Promise<string>((r, e) => { res = r; rej = e; });
+
+  void (async () => {
+    try {
+      let raw = "";
+      const proc = cockpit.spawn(
+        cli("ps", "-a", "--filter", `label=com.docker.compose.project=${project}`, "--format", "json"),
+        { err: "message", ...dockerSpawnEnviron() },
+      );
+      proc.stream((d: string) => { raw += d; });
+      await proc;
+      const items = JSON.parse(raw) as PodmanPsJson[];
+      const out = JSON.stringify(items.map(c => ({
+        ID: c.Id,
+        Name: c.Names?.[0] ?? "",
+        Image: c.Image,
+        State: c.State,
+        Status: c.Status,
+        Health: "",
+        Ports: podmanPortsToString(c.Ports),
+        Service: c.Labels?.["com.docker.compose.service"] ?? "",
+      })));
+      for (const cb of callbacks) cb(out);
+      res(out);
+    } catch (e) { rej(e); }
+  })();
+
+  return Object.assign(p, {
+    stream(cb: (d: string) => void): CockpitProcess { callbacks.push(cb); return this as unknown as CockpitProcess; },
+    close() {},
+    input() {},
+  }) as unknown as CockpitProcess;
+}
 
 export function listContainers(project: string): CockpitProcess {
+  if (composeIsLimitedBackend()) return listContainersPodmanFallback(project);
   return cockpit.spawn(
     compose("-p", project, "ps", "--all", "--format", "json"),
     { err: "message", ...dockerSpawnEnviron() },

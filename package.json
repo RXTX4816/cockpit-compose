@@ -15,9 +15,16 @@
     "watch": "mkdir -p src/assets && cp -r node_modules/@patternfly/react-core/dist/styles/assets/fonts node_modules/@patternfly/react-core/dist/styles/assets/pficon src/assets/ && esbuild src/index.tsx --bundle --outfile=src/main.js --target=es2020 --jsx=automatic --loader:.tsx=tsx --loader:.ts=ts --loader:.svg=dataurl --external:*.woff --external:*.woff2 --external:*.ttf --external:*.eot --external:*.png --external:*.jpg --external:*.gif --watch",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src/",
-    "test": "vitest run",
+    "test": "NODE_OPTIONS='--max-old-space-size=8192' vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "vm": "bash scripts/test-vm.sh",
+    "vm:init": "bash scripts/test-vm.sh download && bash scripts/test-vm.sh start",
+    "vm:rebuild": "bash scripts/test-vm.sh rebuild",
+    "vm:start": "bash scripts/test-vm.sh start",
+    "vm:stop": "bash scripts/test-vm.sh stop",
+    "vm:status": "bash scripts/test-vm.sh status",
+    "build:watch": "npm run watch"
   },
   "devDependencies": {
     "@patternfly/react-core": "^6.5.1",

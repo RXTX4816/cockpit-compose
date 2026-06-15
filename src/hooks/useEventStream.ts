@@ -33,7 +33,7 @@ export function useEventStream(project: string) {
           const ev: ComposeEvent = {
             time:   (raw["time"]   ?? raw["Time"]   ?? "") as string | number,
             type:   (raw["type"]   ?? raw["Type"]   ?? "") as string,
-            action: (raw["action"] ?? raw["Action"] ?? "") as string,
+            action: (raw["action"] ?? raw["Action"] ?? raw["Status"] ?? "") as string,
             actor:  (raw["actor"]  ?? raw["Actor"]  ?? { ID: "", Attributes: {} }) as ComposeEvent["actor"],
           };
           parsed.push(ev);
