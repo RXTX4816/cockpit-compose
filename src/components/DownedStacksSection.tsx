@@ -9,7 +9,6 @@ import {
   Button,
   Alert,
   Spinner,
-  Label,
   TextInput,
   Tooltip,
 } from "@patternfly/react-core";
@@ -244,7 +243,7 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
             <div className="dss-list-wrapper">
               <DataList aria-label={t("downed_section.down_stacks_aria")} isCompact className="dss-list">
                 {combinedStacks.map(d => (
-                  <DataListItem key={d.name} aria-labelledby={`dss-name-${d.name}`}>
+                  <DataListItem key={d.name} aria-labelledby={`dss-name-${d.name}`} data-status="down">
                     <DataListItemRow>
                       <DataListItemCells
                         dataListCells={[
@@ -252,12 +251,11 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
                             <span id={`dss-name-${d.name}`} className="dss-stack-name">
                               {d.name}
                             </span>
-                            <Label color="grey" isCompact className="dss-status-label">{t("downed_section.down_status")}</Label>
                           </DataListCell>,
                           <DataListCell key="path" width={3}>
-                            <code className="dss-config-path">{d.configFiles[0]?.replace(/\/[^/]+$/, "") ?? ""}</code>
+                            <span className="dss-path-dir">{d.configFiles[0]?.replace(/\/[^/]+$/, "") ?? ""}</span>
                             {d.configFiles.length > 1 && (
-                              <><br /><code className="dss-config-path">{d.configFiles.map(f => f.replace(/.*\//, "")).join(" + ")}</code></>
+                              <span className="dss-path-files">{d.configFiles.map(f => f.replace(/.*\//, "")).join(" + ")}</span>
                             )}
                           </DataListCell>,
                           <DataListCell key="actions" width={2} className="dss-actions">
