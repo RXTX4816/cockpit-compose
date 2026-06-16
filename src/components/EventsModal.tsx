@@ -36,6 +36,9 @@ export function EventsModal({ stack, onClose }: Props) {
   const { events, streaming, error, start, stop, clear } = useEventStream(stack.Name);
   const tableBodyRef = useRef<HTMLTableSectionElement>(null);
 
+  // Auto-start streaming on open
+  useEffect(() => { start(); }, []);  // eslint-disable-line react-hooks/exhaustive-deps
+
   // Auto-scroll to bottom when new events arrive
   useEffect(() => {
     if (tableBodyRef.current?.scrollIntoView) {

@@ -19,7 +19,6 @@
     "copy": "Kopiera",
     "copied": "Kopierat!"
   },
-
   "stacks": {
     "title": "Compose-stackar",
     "aria_label": "Compose-stackar",
@@ -49,7 +48,6 @@
     "bulk_selected": "{{count}} valda",
     "bulk_clear": "Rensa urval"
   },
-
   "actions": {
     "up": "Starta",
     "up_title": "Starta stack eller återskapa ändrade containers",
@@ -79,19 +77,16 @@
     "backup": "Säkerhetskopia",
     "scale": "Skala"
   },
-
   "health": {
     "passing": "Hälsokontroll godkänd",
     "failing": "Hälsokontroll misslyckades",
     "starting": "Hälsokontroll startar"
   },
-
   "ports": {
     "external_tooltip": "Exponerad på alla gränssnitt — öppna stackinfo för fullständiga detaljer",
     "localhost_tooltip": "Bunden endast till localhost — öppna stackinfo för fullständiga detaljer",
     "specific_tooltip": "Bunden till en specifik IP — öppna stackinfo för fullständiga detaljer"
   },
-
   "footer": {
     "version": "Version: {{version}}",
     "docker_version": "{{runtime}}: {{version}}",
@@ -102,7 +97,6 @@
     "help": "Hjälp",
     "feedback": "Feedback / Rapportera bugg"
   },
-
   "runtime": {
     "docker": "Docker",
     "podman": "Podman",
@@ -112,11 +106,9 @@
     "podman_confirm_body": "Podman-stöd är experimentellt. Beroende på din konfiguration kanske vissa funktioner inte fungerar som förväntat — inklusive stackupptäckt, loggströmning och vissa compose-kommandon.",
     "podman_suggest_docker_missing": "Docker hittades inte på det här systemet. Byt till Podman för att hantera dina containers."
   },
-
   "error_boundary": {
     "load_stacks_error": "Det gick inte att läsa in stackar"
   },
-
   "down_modal": {
     "aria_label": "Bekräfta stopp",
     "title": "Ta bort \"{{name}}\"?",
@@ -128,7 +120,6 @@
     "shared_networks_title": "Delade nätverk hittades",
     "shared_with": "används också av"
   },
-
   "kill_modal": {
     "aria_label": "Bekräfta forcerat avslut",
     "title": "Avsluta \"{{name}}\"?",
@@ -137,7 +128,18 @@
     "body_suffix": ", vilket tvångsstopar dem omedelbart. Till skillnad från Stoppa får processer ingen chans att städa upp. Använd bara när Stoppa inte svarar.",
     "confirm_button": "Avsluta alla containers"
   },
-
+  "stop_modal": {
+    "aria_label": "Confirm stop",
+    "title": "Stop \"{{name}}\"?",
+    "body": "This will stop all running containers in the stack. They will not be removed and can be started again.",
+    "confirm_button": "Stop"
+  },
+  "restart_modal": {
+    "aria_label": "Confirm restart",
+    "title": "Restart \"{{name}}\"?",
+    "body": "This will restart all running services. Services will briefly be unavailable.",
+    "confirm_button": "Restart"
+  },
   "delete_modal": {
     "aria_label": "Ta bort compose-stack — {{name}}",
     "title": "Ta bort — {{name}}",
@@ -159,7 +161,6 @@
     "shared_networks_title": "Delade nätverk hittades",
     "shared_with": "används också av"
   },
-
   "create_modal": {
     "aria_label": "Skapa ny compose-stack",
     "title": "Skapa compose-stack",
@@ -215,7 +216,6 @@
     "validation_extra_name_duplicate_primary": "Kan inte använda samma namn som den primära compose-filen",
     "validation_extra_name_duplicate": "Filnamnet måste vara unikt"
   },
-
   "yaml_modal": {
     "aria_label": "Compose-fil — {{name}}",
     "title": "{{name}} — compose-fil",
@@ -264,7 +264,6 @@
     "import_file_none": "Inga ytterligare YAML-filer hittades i den här katalogen.",
     "import_file_confirm_button": "Importera"
   },
-
   "env_modal": {
     "aria_label": "Env-fil — {{name}}",
     "title": "{{name}} — env-fil",
@@ -285,7 +284,6 @@
     "confirm_save_question": "Vill du spara ändå?",
     "save_anyway_button": "Spara ändå"
   },
-
   "logs_modal": {
     "aria_label": "Loggar — {{name}}",
     "title": "Loggar — {{name}}",
@@ -309,7 +307,6 @@
     "line_count": "{{count}} rader",
     "line_count_filtered": "{{shown}} / {{total}} rader"
   },
-
   "run_modal": {
     "aria_label": "Kör — {{name}}",
     "title": "Kör — {{name}}",
@@ -324,7 +321,6 @@
     "complete": "✓ Kommando slutfört",
     "failed": "✗ Kommando misslyckades"
   },
-
   "exec_modal": {
     "aria_label": "Terminal — {{name}}",
     "title": "Terminal — {{name}}",
@@ -340,7 +336,6 @@
     "font_size_decrease": "Minska teckenstorlek",
     "font_size_increase": "Öka teckenstorlek"
   },
-
   "events_modal": {
     "aria_label": "Händelser — {{name}}",
     "title": "Händelser — {{name}}",
@@ -355,7 +350,6 @@
     "col_service": "Tjänst",
     "col_details": "Detaljer"
   },
-
   "top_modal": {
     "aria_label": "Processer — {{name}}",
     "title": "Processer — {{name}}",
@@ -363,7 +357,6 @@
     "error_title": "Det gick inte att läsa in processer",
     "empty": "Inga körande processer hittades."
   },
-
   "pull_modal": {
     "aria_label": "Hämtning — {{name}}",
     "title": "Hämtning — {{name}}",
@@ -372,7 +365,6 @@
     "failed": "✗ Hämtning misslyckades",
     "starting": "Startar hämtning…"
   },
-
   "pull_confirm_modal": {
     "aria_label": "Bekräfta hämtning — {{name}}",
     "title": "Hämta senaste images — {{name}}",
@@ -384,7 +376,6 @@
     "unpinned_notice": "Ej fastsatta images hämtar alltid vad registret anser vara \"senaste\" och är mer benägna att ändra beteende mellan hämtningar.",
     "pull_button": "Hämta"
   },
-
   "up_modal": {
     "aria_label": "Start — {{name}}",
     "title": "Start — {{name}}",
@@ -393,7 +384,6 @@
     "complete": "✓ Start slutförd",
     "failed": "✗ Start misslyckades"
   },
-
   "up_confirm_modal": {
     "aria_label": "Bekräfta start — {{name}}",
     "title": "Start — {{name}}",
@@ -408,7 +398,6 @@
     "profiles_hint": "Endast tjänster markerade med en vald profil startas.",
     "up_button": "Starta"
   },
-
   "info_modal": {
     "aria_label": "Info — {{name}}",
     "title": "{{name}} — info",
@@ -441,7 +430,6 @@
     "copy_container_id": "Kopiera container-ID",
     "copy_image_ref": "Kopiera bildreferens"
   },
-
   "prune_modal": {
     "aria_label_select": "Rensa resurser — {{name}}",
     "title_select": "Rensa resurser — {{name}}",
@@ -465,7 +453,6 @@
     "prune_button": "Rensa valda",
     "nothing_to_remove": "Inget att ta bort."
   },
-
   "downed_section": {
     "create_button": "Skapa",
     "import_button": "Importera",
@@ -485,12 +472,10 @@
     "depth_plus_aria": "Öka skanningsdjup",
     "restore_button": "Återställ"
   },
-
   "stack_row": {
     "no_containers": "Inga containers hittades.",
     "containers_aria": "Containers för {{name}}"
   },
-
   "container_state": {
     "running": "körs",
     "paused": "pausad",
@@ -500,12 +485,10 @@
     "created": "skapad",
     "removing": "tar bort"
   },
-
   "stats": {
     "cpu": "CPU",
     "mem": "Minne"
   },
-
   "backup_modal": {
     "title": "Säkerhetskopia av {{name}}",
     "base_name_label": "Filnamn",
@@ -519,7 +502,6 @@
     "success_body": "Sparad i {{path}}",
     "warning_partial": "Vissa filer hoppades över på grund av behörighetsfel"
   },
-
   "restore_modal": {
     "title": "Återställ stack från säkerhetskopia",
     "scan_dir_label": "Katalog att söka i",
@@ -540,13 +522,11 @@
     "error_dest_exists": "Målsökvägen {{path}} finns redan — avbryter för att undvika överskrivning",
     "error_unknown": "Återställning misslyckades (kontrollera webbläsarkonsolen för detaljer)"
   },
-
   "external_link_modal": {
     "aria_label": "Varning om extern länk",
     "title": "Öppnar extern länk",
     "warning_title": "Kontrollera alltid att målwebbplatsen är betrodd innan du fortsätter."
   },
-
   "container_table": {
     "replica_count": "×{{count}}",
     "col_status": "Status",
@@ -554,7 +534,6 @@
     "col_image": "Image",
     "col_uptime": "Drifttid"
   },
-
   "scale_modal": {
     "title": "Skala tjänster — {{name}}",
     "confirm_title": "Bekräfta skalning — {{name}}",
@@ -572,7 +551,6 @@
     "port_conflict_body": "Följande tjänster har statiska värd-portbindningar. Docker kan inte starta mer än en replika eftersom en värdport bara kan bindas av en enda container:",
     "port_conflict_icon_title": "Har statiska värd-portbindningar"
   },
-
   "settings": {
     "title": "Inställningar",
     "open_button": "Inställningar",
@@ -589,7 +567,6 @@
     "confirm_down_hint": "När inaktiverat körs 'Stoppa' omedelbart utan att fråga.",
     "reset_defaults": "Återställ standardinställningar"
   },
-
   "toast": {
     "start_success": "{{name}} startad",
     "start_failed": "Det gick inte att starta {{name}}",

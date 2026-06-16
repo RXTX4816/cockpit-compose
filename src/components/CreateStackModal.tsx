@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 import { load } from "js-yaml";
@@ -12,11 +12,11 @@ import {
   Button,
   FormGroup,
   TextInput,
-  Radio,
   Alert,
   InputGroup,
   InputGroupItem,
 } from "@patternfly/react-core";
+import { CodeBranchIcon, CubesIcon, PencilAltIcon } from "@patternfly/react-icons";
 import { type ComposeStack, COMPOSE_TEMPLATES, type ComposeTemplate, makeTempDir, fetchComposeFromGit, removeDirectory, createDirectory } from "../api";
 import { type DownedStack } from "../hooks/useDownedStacksScan";
 import { inferComposeRoot } from "./DownedStacksSection";
@@ -73,14 +73,24 @@ function additionalFilenameError(filename: string, idx: number, allEntries: Addi
   return null;
 }
 
+function generateStackName() {
+  return `stack-${Math.floor(1000000 + Math.random() * 9000000)}`;
+}
+
 export function CreateStackModal({ stacks, onClose, onCreated }: Props) {
   const { t } = useTranslation();
   const [step, setStep] = useState<Step>("setup");
 
   // Step 1 fields
-  const [stackName, setStackName] = useState("");
+  const [stackName, setStackName] = useState(() => generateStackName());
   const [composeDir, setComposeDir] = useState("");
   const [method, setMethod] = useState<Method | null>(null);
+
+  // Prefill compose dir from active stacks on mount
+  useEffect(() => {
+    const root = inferComposeRoot(stacks);
+    if (root) setComposeDir(root);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const [setupError, setSetupError] = useState<string | null>(null);
   const [checkingDir, setCheckingDir] = useState(false);
 
@@ -367,31 +377,24 @@ export function CreateStackModal({ stacks, onClose, onCreated }: Props) {
             </FormGroup>
 
             <FormGroup label={t("create_modal.field_method")} isRequired fieldId="csm-method" className="csm-form-group">
-              <div className="csm-radio-group">
-                <Radio
-                  id="csm-method-git"
-                  name="csm-method"
-                  label={t("create_modal.method_git_label")}
-                  description={t("create_modal.method_git_description")}
-                  isChecked={method === "git"}
-                  onChange={() => setMethod("git")}
-                />
-                <Radio
-                  id="csm-method-template"
-                  name="csm-method"
-                  label={t("create_modal.method_template_label")}
-                  description={t("create_modal.method_template_description")}
-                  isChecked={method === "template"}
-                  onChange={() => setMethod("template")}
-                />
-                <Radio
-                  id="csm-method-manual"
-                  name="csm-method"
-                  label={t("create_modal.method_manual_label")}
-                  description={t("create_modal.method_manual_description")}
-                  isChecked={method === "manual"}
-                  onChange={() => setMethod("manual")}
-                />
+              <div className="csm-method-tiles">
+                {([
+                  { key: "git" as Method, icon: <CodeBranchIcon />, label: t("create_modal.method_git_label"), desc: t("create_modal.method_git_description") },
+                  { key: "template" as Method, icon: <CubesIcon />, label: t("create_modal.method_template_label"), desc: t("create_modal.method_template_description") },
+                  { key: "manual" as Method, icon: <PencilAltIcon />, label: t("create_modal.method_manual_label"), desc: t("create_modal.method_manual_description") },
+                ] as const).map(({ key, icon, label, desc }) => (
+                  <button
+                    key={key}
+                    type="button"
+                    className={`csm-method-tile${method === key ? " csm-method-tile--selected" : ""}`}
+                    onClick={() => setMethod(key)}
+                    aria-pressed={method === key}
+                  >
+                    <span className="csm-method-tile-icon">{icon}</span>
+                    <span className="csm-method-tile-label">{label}</span>
+                    <span className="csm-method-tile-desc">{desc}</span>
+                  </button>
+                ))}
               </div>
             </FormGroup>
 

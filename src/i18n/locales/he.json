@@ -19,7 +19,6 @@
     "copy": "העתק",
     "copied": "הועתק!"
   },
-
   "stacks": {
     "title": "ערימות Compose",
     "aria_label": "ערימות Compose",
@@ -49,7 +48,6 @@
     "bulk_selected": "{{count}} נבחרו",
     "bulk_clear": "נקה בחירה"
   },
-
   "actions": {
     "up": "הפעלה",
     "up_title": "הפעל ערימה או צור מחדש מכולות שהשתנו",
@@ -79,19 +77,16 @@
     "backup": "גיבוי",
     "scale": "שינוי קנה מידה"
   },
-
   "health": {
     "passing": "בדיקת בריאות עברה",
     "failing": "בדיקת בריאות נכשלה",
     "starting": "בדיקת בריאות מתחילה"
   },
-
   "ports": {
     "external_tooltip": "חשוף בכל הממשקים — פתח מידע על הערימה לפרטים מלאים",
     "localhost_tooltip": "מחובר ל-localhost בלבד — פתח מידע על הערימה לפרטים מלאים",
     "specific_tooltip": "מחובר לכתובת IP ספציפית — פתח מידע על הערימה לפרטים מלאים"
   },
-
   "footer": {
     "version": "גרסה: {{version}}",
     "docker_version": "{{runtime}}: {{version}}",
@@ -102,7 +97,6 @@
     "help": "עזרה",
     "feedback": "משוב / דווח על באג"
   },
-
   "runtime": {
     "docker": "Docker",
     "podman": "Podman",
@@ -112,11 +106,9 @@
     "podman_confirm_body": "תמיכת Podman היא ניסיונית. בהתאם להגדרות שלך, חלק מהתכונות עשויות לא לעבוד כצפוי — כולל גילוי ערימות, שידור יומנים ופקודות compose מסוימות.",
     "podman_suggest_docker_missing": "Docker לא נמצא במערכת זו. עבור ל-Podman לניהול המכולות שלך."
   },
-
   "error_boundary": {
     "load_stacks_error": "שגיאה בטעינת הערימות"
   },
-
   "down_modal": {
     "aria_label": "אישור כיבוי",
     "title": "להסיר את \"{{name}}\"?",
@@ -128,7 +120,6 @@
     "shared_networks_title": "זוהו רשתות משותפות",
     "shared_with": "בשימוש גם על ידי"
   },
-
   "kill_modal": {
     "aria_label": "אישור סיום כפוי",
     "title": "לסיים בכפייה את \"{{name}}\"?",
@@ -137,7 +128,18 @@
     "body_suffix": ", ומסיימת אותן מיידית בכפייה. בניגוד לעצירה, לתהליכים אין הזדמנות לנקות. השתמש רק כאשר עצירה לא מגיבה.",
     "confirm_button": "סיים כפוי את כל המכולות"
   },
-
+  "stop_modal": {
+    "aria_label": "Confirm stop",
+    "title": "Stop \"{{name}}\"?",
+    "body": "This will stop all running containers in the stack. They will not be removed and can be started again.",
+    "confirm_button": "Stop"
+  },
+  "restart_modal": {
+    "aria_label": "Confirm restart",
+    "title": "Restart \"{{name}}\"?",
+    "body": "This will restart all running services. Services will briefly be unavailable.",
+    "confirm_button": "Restart"
+  },
   "delete_modal": {
     "aria_label": "מחק ערימת compose — {{name}}",
     "title": "מחיקה — {{name}}",
@@ -159,7 +161,6 @@
     "shared_networks_title": "זוהו רשתות משותפות",
     "shared_with": "בשימוש גם על ידי"
   },
-
   "create_modal": {
     "aria_label": "צור ערימת compose חדשה",
     "title": "צור ערימת compose",
@@ -215,7 +216,6 @@
     "validation_extra_name_duplicate_primary": "לא ניתן להשתמש באותו שם כמו קובץ ה-compose הראשי",
     "validation_extra_name_duplicate": "שם הקובץ חייב להיות ייחודי"
   },
-
   "yaml_modal": {
     "aria_label": "קובץ Compose — {{name}}",
     "title": "{{name}} — קובץ compose",
@@ -264,7 +264,6 @@
     "import_file_none": "לא נמצאו קובצי YAML נוספים בתיקייה זו.",
     "import_file_confirm_button": "ייבא"
   },
-
   "env_modal": {
     "aria_label": "קובץ env — {{name}}",
     "title": "{{name}} — קובץ env",
@@ -285,7 +284,6 @@
     "confirm_save_question": "האם ברצונך לשמור בכל מקרה?",
     "save_anyway_button": "שמור בכל מקרה"
   },
-
   "logs_modal": {
     "aria_label": "יומנים — {{name}}",
     "title": "יומנים — {{name}}",
@@ -309,7 +307,6 @@
     "line_count": "{{count}} שורות",
     "line_count_filtered": "{{shown}} / {{total}} שורות"
   },
-
   "run_modal": {
     "aria_label": "הרצה — {{name}}",
     "title": "הרצה — {{name}}",
@@ -324,7 +321,6 @@
     "complete": "✓ הפקודה הושלמה",
     "failed": "✗ הפקודה נכשלה"
   },
-
   "exec_modal": {
     "aria_label": "מסוף — {{name}}",
     "title": "מסוף — {{name}}",
@@ -340,7 +336,6 @@
     "font_size_decrease": "הקטן גופן",
     "font_size_increase": "הגדל גופן"
   },
-
   "events_modal": {
     "aria_label": "אירועים — {{name}}",
     "title": "אירועים — {{name}}",
@@ -355,7 +350,6 @@
     "col_service": "שירות",
     "col_details": "פרטים"
   },
-
   "top_modal": {
     "aria_label": "תהליכים — {{name}}",
     "title": "תהליכים — {{name}}",
@@ -363,7 +357,6 @@
     "error_title": "לא ניתן לטעון תהליכים",
     "empty": "לא נמצאו תהליכים פעילים."
   },
-
   "pull_modal": {
     "aria_label": "משיכה — {{name}}",
     "title": "משיכה — {{name}}",
@@ -372,7 +365,6 @@
     "failed": "✗ המשיכה נכשלה",
     "starting": "מתחיל משיכה…"
   },
-
   "pull_confirm_modal": {
     "aria_label": "אשר משיכה — {{name}}",
     "title": "משוך תמונות עדכניות — {{name}}",
@@ -384,7 +376,6 @@
     "unpinned_notice": "תמונות לא מקובעות תמיד מושכות את מה שהרשם רואה כ\"עדכני ביותר\" וסביר ביותר שישנו התנהגות בין משיכות.",
     "pull_button": "משוך"
   },
-
   "up_modal": {
     "aria_label": "הפעלה — {{name}}",
     "title": "הפעלה — {{name}}",
@@ -393,7 +384,6 @@
     "complete": "✓ ההפעלה הושלמה",
     "failed": "✗ ההפעלה נכשלה"
   },
-
   "up_confirm_modal": {
     "aria_label": "אשר הפעלה — {{name}}",
     "title": "הפעלה — {{name}}",
@@ -408,7 +398,6 @@
     "profiles_hint": "רק שירותים המתויגים בפרופיל נבחר יופעלו.",
     "up_button": "הפעל"
   },
-
   "info_modal": {
     "aria_label": "מידע — {{name}}",
     "title": "{{name}} — מידע",
@@ -441,7 +430,6 @@
     "copy_container_id": "העתק מזהה מכולה",
     "copy_image_ref": "העתק הפניית תמונה"
   },
-
   "prune_modal": {
     "aria_label_select": "נקה משאבים — {{name}}",
     "title_select": "נקה משאבים — {{name}}",
@@ -465,7 +453,6 @@
     "prune_button": "נקה נבחרים",
     "nothing_to_remove": "אין מה להסיר."
   },
-
   "downed_section": {
     "create_button": "צור",
     "import_button": "ייבא",
@@ -485,12 +472,10 @@
     "depth_plus_aria": "הגדל עומק סריקה",
     "restore_button": "שחזר"
   },
-
   "stack_row": {
     "no_containers": "לא נמצאו מכולות.",
     "containers_aria": "מכולות {{name}}"
   },
-
   "container_state": {
     "running": "פועל",
     "paused": "מושהה",
@@ -500,12 +485,10 @@
     "created": "נוצר",
     "removing": "מוסר"
   },
-
   "stats": {
     "cpu": "מעבד",
     "mem": "זיכרון"
   },
-
   "backup_modal": {
     "title": "גיבוי {{name}}",
     "base_name_label": "שם הארכיון",
@@ -519,7 +502,6 @@
     "success_body": "נשמר ב-{{path}}",
     "warning_partial": "חלק מהקבצים דולגו עקב שגיאות הרשאות"
   },
-
   "restore_modal": {
     "title": "שחזר ערימה מגיבוי",
     "scan_dir_label": "תיקיית חיפוש",
@@ -540,13 +522,11 @@
     "error_dest_exists": "נתיב היעד {{path}} כבר קיים — מבטל כדי למנוע החלפה",
     "error_unknown": "השחזור נכשל (בדוק את קונסולת הדפדפן לפרטים)"
   },
-
   "external_link_modal": {
     "aria_label": "אזהרת קישור חיצוני",
     "title": "פותח קישור חיצוני",
     "warning_title": "תמיד ודא שאתר היעד מהימן לפני המשך."
   },
-
   "container_table": {
     "replica_count": "×{{count}}",
     "col_status": "סטטוס",
@@ -554,7 +534,6 @@
     "col_image": "תמונה",
     "col_uptime": "זמן פעילות"
   },
-
   "scale_modal": {
     "title": "שנה קנה מידה לשירותים — {{name}}",
     "confirm_title": "אשר שינוי קנה מידה — {{name}}",
@@ -572,7 +551,6 @@
     "port_conflict_body": "לשירותים הבאים יש קישורי פורטים סטטיים של המארח. Docker לא יוכל להפעיל יותר מרפליקה אחת מאחר שפורט מארח יכול להיות מחובר רק על ידי מכולה בודדת:",
     "port_conflict_icon_title": "יש לו קישורי פורטים סטטיים של המארח"
   },
-
   "settings": {
     "title": "הגדרות",
     "open_button": "הגדרות",
@@ -589,7 +567,6 @@
     "confirm_down_hint": "כשמבוטל, 'כיבוי' פועל מיידית ללא שאלה.",
     "reset_defaults": "אפס לברירות מחדל"
   },
-
   "toast": {
     "start_success": "{{name}} הופעל",
     "start_failed": "ההפעלה של {{name}} נכשלה",

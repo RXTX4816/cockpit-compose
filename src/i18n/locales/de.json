@@ -19,7 +19,6 @@
     "copy": "Kopieren",
     "copied": "Kopiert!"
   },
-
   "stacks": {
     "title": "Compose-Stacks",
     "aria_label": "Compose-Stacks",
@@ -49,7 +48,6 @@
     "bulk_selected": "{{count}} ausgewählt",
     "bulk_clear": "Auswahl aufheben"
   },
-
   "actions": {
     "up": "Hochfahren",
     "up_title": "Stack starten oder geänderte Container neu erstellen",
@@ -79,19 +77,16 @@
     "backup": "Sicherung",
     "scale": "Skalieren"
   },
-
   "health": {
     "passing": "Gesundheitsprüfung erfolgreich",
     "failing": "Gesundheitsprüfung fehlgeschlagen",
     "starting": "Gesundheitsprüfung wird gestartet"
   },
-
   "ports": {
     "external_tooltip": "Auf allen Netzwerkschnittstellen verfügbar — Stack-Info für Details öffnen",
     "localhost_tooltip": "Nur an localhost gebunden — Stack-Info für Details öffnen",
     "specific_tooltip": "An eine bestimmte IP gebunden — Stack-Info für Details öffnen"
   },
-
   "footer": {
     "version": "Version: {{version}}",
     "docker_version": "{{runtime}}: {{version}}",
@@ -102,7 +97,6 @@
     "help": "Hilfe",
     "feedback": "Feedback / Fehler melden"
   },
-
   "runtime": {
     "docker": "Docker",
     "podman": "Podman",
@@ -112,11 +106,9 @@
     "podman_confirm_body": "Die Podman-Unterstützung ist experimentell. Je nach Konfiguration funktionieren einige Funktionen möglicherweise nicht wie erwartet — darunter Stack-Erkennung, Log-Streaming und bestimmte Compose-Befehle.",
     "podman_suggest_docker_missing": "Docker wurde auf diesem System nicht gefunden. Wechseln Sie zu Podman, um Ihre Container zu verwalten."
   },
-
   "error_boundary": {
     "load_stacks_error": "Fehler beim Laden der Stacks"
   },
-
   "down_modal": {
     "aria_label": "Herunterfahren bestätigen",
     "title": "\"{{name}}\" entfernen?",
@@ -128,7 +120,6 @@
     "shared_networks_title": "Gemeinsame Netzwerke erkannt",
     "shared_with": "wird ebenfalls verwendet von"
   },
-
   "kill_modal": {
     "aria_label": "Beenden bestätigen",
     "title": "\"{{name}}\" beenden?",
@@ -137,7 +128,18 @@
     "body_suffix": " und beendet sie sofort. Im Gegensatz zu Stoppen haben Prozesse keine Möglichkeit zum Aufräumen. Nur verwenden, wenn Stoppen nicht reagiert.",
     "confirm_button": "Alle Container beenden"
   },
-
+  "stop_modal": {
+    "aria_label": "Confirm stop",
+    "title": "Stop \"{{name}}\"?",
+    "body": "This will stop all running containers in the stack. They will not be removed and can be started again.",
+    "confirm_button": "Stop"
+  },
+  "restart_modal": {
+    "aria_label": "Confirm restart",
+    "title": "Restart \"{{name}}\"?",
+    "body": "This will restart all running services. Services will briefly be unavailable.",
+    "confirm_button": "Restart"
+  },
   "delete_modal": {
     "aria_label": "Compose-Stack löschen — {{name}}",
     "title": "Löschen — {{name}}",
@@ -159,7 +161,6 @@
     "shared_networks_title": "Gemeinsame Netzwerke erkannt",
     "shared_with": "wird ebenfalls verwendet von"
   },
-
   "create_modal": {
     "aria_label": "Neuen Compose-Stack erstellen",
     "title": "Compose-Stack erstellen",
@@ -215,7 +216,6 @@
     "validation_extra_name_duplicate_primary": "Darf nicht denselben Namen wie die primäre Compose-Datei verwenden",
     "validation_extra_name_duplicate": "Dateiname muss eindeutig sein"
   },
-
   "yaml_modal": {
     "aria_label": "Compose-Datei — {{name}}",
     "title": "{{name}} — Compose-Datei",
@@ -264,7 +264,6 @@
     "import_file_none": "Keine weiteren YAML-Dateien in diesem Verzeichnis gefunden.",
     "import_file_confirm_button": "Importieren"
   },
-
   "env_modal": {
     "aria_label": "Env-Datei — {{name}}",
     "title": "{{name}} — Env-Datei",
@@ -285,7 +284,6 @@
     "confirm_save_question": "Trotzdem speichern?",
     "save_anyway_button": "Trotzdem speichern"
   },
-
   "logs_modal": {
     "aria_label": "Protokolle — {{name}}",
     "title": "Protokolle — {{name}}",
@@ -309,7 +307,6 @@
     "line_count": "{{count}} Zeilen",
     "line_count_filtered": "{{shown}} / {{total}} Zeilen"
   },
-
   "run_modal": {
     "aria_label": "Ausführen — {{name}}",
     "title": "Ausführen — {{name}}",
@@ -324,7 +321,6 @@
     "complete": "✓ Befehl abgeschlossen",
     "failed": "✗ Befehl fehlgeschlagen"
   },
-
   "exec_modal": {
     "aria_label": "Terminal — {{name}}",
     "title": "Terminal — {{name}}",
@@ -340,7 +336,6 @@
     "font_size_decrease": "Schriftgröße verkleinern",
     "font_size_increase": "Schriftgröße vergrößern"
   },
-
   "events_modal": {
     "aria_label": "Ereignisse — {{name}}",
     "title": "Ereignisse — {{name}}",
@@ -355,7 +350,6 @@
     "col_service": "Dienst",
     "col_details": "Details"
   },
-
   "top_modal": {
     "aria_label": "Prozesse — {{name}}",
     "title": "Prozesse — {{name}}",
@@ -363,7 +357,6 @@
     "error_title": "Prozesse konnten nicht geladen werden",
     "empty": "Keine laufenden Prozesse gefunden."
   },
-
   "pull_modal": {
     "aria_label": "Images laden — {{name}}",
     "title": "Images laden — {{name}}",
@@ -372,7 +365,6 @@
     "failed": "✗ Images laden fehlgeschlagen",
     "starting": "Laden wird gestartet…"
   },
-
   "pull_confirm_modal": {
     "aria_label": "Images laden bestätigen — {{name}}",
     "title": "Neueste Images laden — {{name}}",
@@ -384,7 +376,6 @@
     "unpinned_notice": "Nicht fixierte Images laden immer das, was die Registry als \"latest\" betrachtet, und ändern ihr Verhalten zwischen Ladevorgängen am häufigsten.",
     "pull_button": "Laden"
   },
-
   "up_modal": {
     "aria_label": "Hochfahren — {{name}}",
     "title": "Hochfahren — {{name}}",
@@ -393,7 +384,6 @@
     "complete": "✓ Hochfahren abgeschlossen",
     "failed": "✗ Hochfahren fehlgeschlagen"
   },
-
   "up_confirm_modal": {
     "aria_label": "Hochfahren bestätigen — {{name}}",
     "title": "Hochfahren — {{name}}",
@@ -408,7 +398,6 @@
     "profiles_hint": "Nur Dienste, die einem ausgewählten Profil zugeordnet sind, werden gestartet.",
     "up_button": "Hochfahren"
   },
-
   "info_modal": {
     "aria_label": "Info — {{name}}",
     "title": "{{name}} — Info",
@@ -441,7 +430,6 @@
     "copy_container_id": "Container-ID kopieren",
     "copy_image_ref": "Image-Referenz kopieren"
   },
-
   "prune_modal": {
     "aria_label_select": "Ressourcen bereinigen — {{name}}",
     "title_select": "Ressourcen bereinigen — {{name}}",
@@ -465,7 +453,6 @@
     "prune_button": "Auswahl bereinigen",
     "nothing_to_remove": "Nichts zu entfernen."
   },
-
   "downed_section": {
     "create_button": "Erstellen",
     "import_button": "Importieren",
@@ -485,12 +472,10 @@
     "depth_plus_aria": "Suchtiefe erhöhen",
     "restore_button": "Wiederherstellen"
   },
-
   "stack_row": {
     "no_containers": "Keine Container gefunden.",
     "containers_aria": "{{name}} Container"
   },
-
   "container_state": {
     "running": "läuft",
     "paused": "pausiert",
@@ -500,12 +485,10 @@
     "created": "erstellt",
     "removing": "wird entfernt"
   },
-
   "stats": {
     "cpu": "CPU",
     "mem": "Speicher"
   },
-
   "backup_modal": {
     "title": "Sicherung von {{name}}",
     "base_name_label": "Archivname",
@@ -519,7 +502,6 @@
     "success_body": "Gespeichert unter {{path}}",
     "warning_partial": "Einige Dateien wurden aufgrund von Berechtigungsfehlern übersprungen"
   },
-
   "restore_modal": {
     "title": "Stack aus Sicherung wiederherstellen",
     "scan_dir_label": "Suchverzeichnis",
@@ -540,13 +522,11 @@
     "error_dest_exists": "Zielpfad {{path}} existiert bereits – Abbruch zum Schutz vor Überschreiben",
     "error_unknown": "Wiederherstellung fehlgeschlagen (Browserkonzole für Details prüfen)"
   },
-
   "external_link_modal": {
     "aria_label": "Warnung: Externer Link",
     "title": "Externen Link öffnen",
     "warning_title": "Prüfen Sie stets, ob die Zielseite vertrauenswürdig ist, bevor Sie fortfahren."
   },
-
   "container_table": {
     "replica_count": "×{{count}}",
     "col_status": "Status",
@@ -554,7 +534,6 @@
     "col_image": "Image",
     "col_uptime": "Laufzeit"
   },
-
   "scale_modal": {
     "title": "Dienste skalieren – {{name}}",
     "confirm_title": "Skalierung bestätigen – {{name}}",
@@ -572,7 +551,6 @@
     "port_conflict_body": "Die folgenden Dienste haben statische Host-Port-Bindungen. Docker kann nicht mehr als ein Replikat starten, da ein Host-Port nur von einem einzelnen Container belegt werden kann:",
     "port_conflict_icon_title": "Hat statische Host-Port-Bindungen"
   },
-
   "settings": {
     "title": "Einstellungen",
     "open_button": "Einstellungen",
@@ -589,7 +567,6 @@
     "confirm_down_hint": "Wenn deaktiviert, wird 'Herunterfahren' sofort ohne Rückfrage ausgeführt.",
     "reset_defaults": "Standardwerte wiederherstellen"
   },
-
   "toast": {
     "start_success": "{{name}} gestartet",
     "start_failed": "{{name}} konnte nicht gestartet werden",

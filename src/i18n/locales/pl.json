@@ -19,7 +19,6 @@
     "copy": "Kopiuj",
     "copied": "Skopiowano!"
   },
-
   "stacks": {
     "title": "Stosy Compose",
     "aria_label": "Stosy Compose",
@@ -51,7 +50,6 @@
     "bulk_selected": "{{count}} zaznaczonych",
     "bulk_clear": "Wyczyść zaznaczenie"
   },
-
   "actions": {
     "up": "Uruchom",
     "up_title": "Uruchom stos lub odtwórz zmienione kontenery",
@@ -81,19 +79,16 @@
     "backup": "Kopia zapasowa",
     "scale": "Skaluj"
   },
-
   "health": {
     "passing": "Kontrola zdrowia: poprawna",
     "failing": "Kontrola zdrowia: błąd",
     "starting": "Kontrola zdrowia: uruchamianie"
   },
-
   "ports": {
     "external_tooltip": "Dostępny na wszystkich interfejsach — otwórz info stosu po szczegóły",
     "localhost_tooltip": "Powiązany tylko z localhost — otwórz info stosu po szczegóły",
     "specific_tooltip": "Powiązany z konkretnym IP — otwórz info stosu po szczegóły"
   },
-
   "footer": {
     "version": "Wersja: {{version}}",
     "docker_version": "{{runtime}}: {{version}}",
@@ -104,7 +99,6 @@
     "help": "Pomoc",
     "feedback": "Opinia / Zgłoś błąd"
   },
-
   "runtime": {
     "docker": "Docker",
     "podman": "Podman",
@@ -114,11 +108,9 @@
     "podman_confirm_body": "Obsługa Podmana jest eksperymentalna. W zależności od konfiguracji niektóre funkcje mogą nie działać zgodnie z oczekiwaniami — w tym wykrywanie stosów, strumieniowanie logów i niektóre polecenia Compose.",
     "podman_suggest_docker_missing": "Docker nie został znaleziony w tym systemie. Przełącz się na Podman, aby zarządzać swoimi kontenerami."
   },
-
   "error_boundary": {
     "load_stacks_error": "Błąd podczas ładowania stosów"
   },
-
   "down_modal": {
     "aria_label": "Potwierdź wyłączenie",
     "title": "Usunąć \"{{name}}\"?",
@@ -130,7 +122,6 @@
     "shared_networks_title": "Wykryto wspólne sieci",
     "shared_with": "używany również przez"
   },
-
   "kill_modal": {
     "aria_label": "Potwierdź zakończenie",
     "title": "Zakończyć \"{{name}}\"?",
@@ -139,7 +130,18 @@
     "body_suffix": ", natychmiast je kończąc. W przeciwieństwie do Zatrzymania, procesy nie mają szansy na posprzątanie. Używaj tylko gdy Zatrzymanie nie odpowiada.",
     "confirm_button": "Zakończ wszystkie kontenery"
   },
-
+  "stop_modal": {
+    "aria_label": "Confirm stop",
+    "title": "Stop \"{{name}}\"?",
+    "body": "This will stop all running containers in the stack. They will not be removed and can be started again.",
+    "confirm_button": "Stop"
+  },
+  "restart_modal": {
+    "aria_label": "Confirm restart",
+    "title": "Restart \"{{name}}\"?",
+    "body": "This will restart all running services. Services will briefly be unavailable.",
+    "confirm_button": "Restart"
+  },
   "delete_modal": {
     "aria_label": "Usuń stos Compose — {{name}}",
     "title": "Usuń — {{name}}",
@@ -161,7 +163,6 @@
     "shared_networks_title": "Wykryto wspólne sieci",
     "shared_with": "używany również przez"
   },
-
   "create_modal": {
     "aria_label": "Utwórz nowy stos Compose",
     "title": "Utwórz stos Compose",
@@ -221,7 +222,6 @@
     "validation_extra_name_duplicate_primary": "Nie można używać tej samej nazwy co główny plik Compose",
     "validation_extra_name_duplicate": "Nazwa pliku musi być unikalna"
   },
-
   "yaml_modal": {
     "aria_label": "Plik Compose — {{name}}",
     "title": "{{name}} — plik Compose",
@@ -274,7 +274,6 @@
     "import_file_confirm_button": "Importuj",
     "unsaved_changes": "Niezapisane zmiany"
   },
-
   "env_modal": {
     "aria_label": "Plik Env — {{name}}",
     "title": "{{name}} — plik Env",
@@ -295,7 +294,6 @@
     "confirm_save_question": "Czy chcesz zapisać mimo to?",
     "save_anyway_button": "Zapisz mimo to"
   },
-
   "logs_modal": {
     "aria_label": "Logi — {{name}}",
     "title": "Logi — {{name}}",
@@ -319,7 +317,6 @@
     "line_count": "{{count}} wierszy",
     "line_count_filtered": "{{shown}} / {{total}} wierszy"
   },
-
   "run_modal": {
     "aria_label": "Uruchom polecenie — {{name}}",
     "title": "Uruchom polecenie — {{name}}",
@@ -334,7 +331,6 @@
     "complete": "✓ Polecenie zakończone",
     "failed": "✗ Polecenie nie powiodło się"
   },
-
   "exec_modal": {
     "aria_label": "Terminal — {{name}}",
     "title": "Terminal — {{name}}",
@@ -350,7 +346,6 @@
     "font_size_decrease": "Zmniejsz czcionkę",
     "font_size_increase": "Zwiększ czcionkę"
   },
-
   "events_modal": {
     "aria_label": "Zdarzenia — {{name}}",
     "title": "Zdarzenia — {{name}}",
@@ -365,7 +360,6 @@
     "col_service": "Usługa",
     "col_details": "Szczegóły"
   },
-
   "top_modal": {
     "aria_label": "Procesy — {{name}}",
     "title": "Procesy — {{name}}",
@@ -373,7 +367,6 @@
     "error_title": "Nie można załadować procesów",
     "empty": "Nie znaleziono uruchomionych procesów."
   },
-
   "pull_modal": {
     "aria_label": "Pobieranie obrazów — {{name}}",
     "title": "Pobieranie obrazów — {{name}}",
@@ -382,7 +375,6 @@
     "failed": "✗ Pobieranie nie powiodło się",
     "starting": "Rozpoczynanie pobierania…"
   },
-
   "pull_confirm_modal": {
     "aria_label": "Potwierdź pobieranie — {{name}}",
     "title": "Pobierz najnowsze obrazy — {{name}}",
@@ -394,7 +386,6 @@
     "unpinned_notice": "Nieprzypięte obrazy zawsze pobierają to, co rejestr uważa za \"latest\", i najczęściej zmieniają swoje zachowanie między pobraniami.",
     "pull_button": "Pobierz"
   },
-
   "up_modal": {
     "aria_label": "Uruchamianie — {{name}}",
     "title": "Uruchamianie — {{name}}",
@@ -403,7 +394,6 @@
     "complete": "✓ Uruchomienie zakończone",
     "failed": "✗ Uruchomienie nie powiodło się"
   },
-
   "up_confirm_modal": {
     "aria_label": "Potwierdź uruchomienie — {{name}}",
     "title": "Uruchamianie — {{name}}",
@@ -418,7 +408,6 @@
     "profiles_hint": "Uruchomione zostaną tylko usługi oznaczone wybranym profilem.",
     "up_button": "Uruchom"
   },
-
   "info_modal": {
     "aria_label": "Info — {{name}}",
     "title": "{{name}} — info",
@@ -451,7 +440,6 @@
     "copy_container_id": "Kopiuj ID kontenera",
     "copy_image_ref": "Kopiuj referencję obrazu"
   },
-
   "prune_modal": {
     "aria_label_select": "Wyczyść zasoby — {{name}}",
     "title_select": "Wyczyść zasoby — {{name}}",
@@ -475,7 +463,6 @@
     "prune_button": "Wyczyść zaznaczone",
     "nothing_to_remove": "Nic do usunięcia."
   },
-
   "downed_section": {
     "create_button": "Utwórz",
     "import_button": "Importuj",
@@ -495,12 +482,10 @@
     "depth_plus_aria": "Zwiększ głębokość skanowania",
     "restore_button": "Przywróć"
   },
-
   "stack_row": {
     "no_containers": "Nie znaleziono kontenerów.",
     "containers_aria": "Kontenery {{name}}"
   },
-
   "container_state": {
     "running": "działa",
     "paused": "wstrzymany",
@@ -510,12 +495,10 @@
     "created": "utworzony",
     "removing": "usuwany"
   },
-
   "stats": {
     "cpu": "CPU",
     "mem": "Pam."
   },
-
   "backup_modal": {
     "title": "Kopia zapasowa {{name}}",
     "base_name_label": "Nazwa archiwum",
@@ -529,7 +512,6 @@
     "success_body": "Zapisano w {{path}}",
     "warning_partial": "Niektóre pliki zostały pominięte z powodu braku uprawnień"
   },
-
   "restore_modal": {
     "title": "Przywróć stos z kopii zapasowej",
     "scan_dir_label": "Katalog wyszukiwania",
@@ -550,13 +532,11 @@
     "error_dest_exists": "Ścieżka docelowa {{path}} już istnieje – przerwano, aby uniknąć nadpisania",
     "error_unknown": "Przywracanie nie powiodło się (sprawdź konsolę przeglądarki)"
   },
-
   "external_link_modal": {
     "aria_label": "Ostrzeżenie: zewnętrzny link",
     "title": "Otwieranie zewnętrznego linku",
     "warning_title": "Przed kontynuowaniem zawsze sprawdź, czy strona docelowa jest godna zaufania."
   },
-
   "container_table": {
     "replica_count": "×{{count}}",
     "col_status": "Status",
@@ -564,7 +544,6 @@
     "col_image": "Obraz",
     "col_uptime": "Czas pracy"
   },
-
   "scale_modal": {
     "title": "Skaluj usługi — {{name}}",
     "confirm_title": "Potwierdź skalowanie — {{name}}",
@@ -582,7 +561,6 @@
     "port_conflict_body": "Poniższe usługi mają statyczne przypisania portów hosta. Docker nie będzie mógł uruchomić więcej niż jednej repliki, ponieważ port hosta może być zajęty tylko przez jeden kontener:",
     "port_conflict_icon_title": "Ma statyczne przypisania portów hosta"
   },
-
   "settings": {
     "title": "Ustawienia",
     "open_button": "Ustawienia",
@@ -599,7 +577,6 @@
     "confirm_down_hint": "Po wyłączeniu 'Zatrzymaj' działa natychmiast bez pytania.",
     "reset_defaults": "Przywróć domyślne"
   },
-
   "toast": {
     "start_success": "{{name}} uruchomiony",
     "start_failed": "Uruchomienie {{name}} nie powiodło się",

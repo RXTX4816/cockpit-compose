@@ -84,11 +84,12 @@ const activeStacks = [
 async function fillSetupAndAdvance(method: "git" | "template" | "manual" = "manual") {
   fireEvent.change(screen.getByPlaceholderText("my-stack"), { target: { value: "my-stack" } });
   fireEvent.change(screen.getByPlaceholderText("/etc/docker/compose"), { target: { value: "/etc/compose" } });
-  fireEvent.click(screen.getByLabelText(
-    method === "git" ? /From Git URL/i :
-    method === "template" ? /From template/i :
-    /Manual/i
-  ));
+  // Method is now an icon tile button, not a radio input
+  fireEvent.click(screen.getByRole("button", {
+    name: method === "git" ? /From Git URL/i :
+          method === "template" ? /From template/i :
+          /Manual/i,
+  }));
   await act(async () => {
     fireEvent.click(screen.getByRole("button", { name: /Next/i }));
   });
@@ -100,12 +101,14 @@ describe("CreateStackModal — step 1 rendering", () => {
     render(<CreateStackModal {...defaultProps} />);
     expect(screen.getByPlaceholderText("my-stack")).toBeInTheDocument();
     expect(screen.getByPlaceholderText("/etc/docker/compose")).toBeInTheDocument();
-    expect(screen.getByLabelText(/From Git URL/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/From template/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Manual/i)).toBeInTheDocument();
+    // Method is now icon tiles (buttons), not radio inputs
+    expect(screen.getByRole("button", { name: /From Git URL/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /From template/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Manual/i })).toBeInTheDocument();
   });
 
   it("Next is disabled when nothing filled", () => {
+    // Name is auto-filled; dir and method are still empty/unset with empty stacks prop
     render(<CreateStackModal {...defaultProps} />);
     expect(screen.getByRole("button", { name: /Next/i })).toBeDisabled();
   });
@@ -114,7 +117,7 @@ describe("CreateStackModal — step 1 rendering", () => {
     render(<CreateStackModal {...defaultProps} />);
     fireEvent.change(screen.getByPlaceholderText("my-stack"), { target: { value: "bad/name" } });
     fireEvent.change(screen.getByPlaceholderText("/etc/docker/compose"), { target: { value: "/etc/compose" } });
-    fireEvent.click(screen.getByLabelText(/Manual/i));
+    fireEvent.click(screen.getByRole("button", { name: /Manual/i }));
     expect(screen.getByRole("button", { name: /Next/i })).toBeDisabled();
   });
 
@@ -122,14 +125,15 @@ describe("CreateStackModal — step 1 rendering", () => {
     render(<CreateStackModal {...defaultProps} />);
     fireEvent.change(screen.getByPlaceholderText("my-stack"), { target: { value: "bad name" } });
     fireEvent.change(screen.getByPlaceholderText("/etc/docker/compose"), { target: { value: "/etc/compose" } });
-    fireEvent.click(screen.getByLabelText(/Manual/i));
+    fireEvent.click(screen.getByRole("button", { name: /Manual/i }));
     expect(screen.getByRole("button", { name: /Next/i })).toBeDisabled();
   });
 
   it("Next is disabled when dir is empty", () => {
     render(<CreateStackModal {...defaultProps} />);
     fireEvent.change(screen.getByPlaceholderText("my-stack"), { target: { value: "mystack" } });
-    fireEvent.click(screen.getByLabelText(/Manual/i));
+    fireEvent.change(screen.getByPlaceholderText("/etc/docker/compose"), { target: { value: "" } });
+    fireEvent.click(screen.getByRole("button", { name: /Manual/i }));
     expect(screen.getByRole("button", { name: /Next/i })).toBeDisabled();
   });
 
@@ -144,7 +148,7 @@ describe("CreateStackModal — step 1 rendering", () => {
     render(<CreateStackModal {...defaultProps} />);
     fireEvent.change(screen.getByPlaceholderText("my-stack"), { target: { value: "mystack" } });
     fireEvent.change(screen.getByPlaceholderText("/etc/docker/compose"), { target: { value: "/etc/compose" } });
-    fireEvent.click(screen.getByLabelText(/Manual/i));
+    fireEvent.click(screen.getByRole("button", { name: /Manual/i }));
     expect(screen.getByRole("button", { name: /Next/i })).not.toBeDisabled();
   });
 
@@ -174,7 +178,7 @@ describe("CreateStackModal — folder exists check", () => {
     render(<CreateStackModal {...defaultProps} />);
     fireEvent.change(screen.getByPlaceholderText("my-stack"), { target: { value: "mystack" } });
     fireEvent.change(screen.getByPlaceholderText("/etc/docker/compose"), { target: { value: "/etc/compose" } });
-    fireEvent.click(screen.getByLabelText(/Manual/i));
+    fireEvent.click(screen.getByRole("button", { name: /Manual/i }));
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: /Next/i }));
     });
@@ -188,7 +192,7 @@ describe("CreateStackModal — folder exists check", () => {
     render(<CreateStackModal {...defaultProps} />);
     fireEvent.change(screen.getByPlaceholderText("my-stack"), { target: { value: "mystack" } });
     fireEvent.change(screen.getByPlaceholderText("/etc/docker/compose"), { target: { value: "/etc/compose" } });
-    fireEvent.click(screen.getByLabelText(/Manual/i));
+    fireEvent.click(screen.getByRole("button", { name: /Manual/i }));
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: /Next/i }));
     });

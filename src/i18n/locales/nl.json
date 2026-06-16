@@ -19,7 +19,6 @@
     "copy": "Kopiëren",
     "copied": "Gekopieerd!"
   },
-
   "stacks": {
     "title": "Compose-stacks",
     "aria_label": "Compose-stacks",
@@ -49,7 +48,6 @@
     "bulk_selected": "{{count}} geselecteerd",
     "bulk_clear": "Selectie wissen"
   },
-
   "actions": {
     "up": "Starten",
     "up_title": "Stack starten of gewijzigde containers opnieuw aanmaken",
@@ -79,19 +77,16 @@
     "backup": "Back-up",
     "scale": "Schalen"
   },
-
   "health": {
     "passing": "Gezondheidscontrole geslaagd",
     "failing": "Gezondheidscontrole mislukt",
     "starting": "Gezondheidscontrole wordt gestart"
   },
-
   "ports": {
     "external_tooltip": "Beschikbaar op alle interfaces — open stack-info voor volledige details",
     "localhost_tooltip": "Alleen gebonden aan localhost — open stack-info voor volledige details",
     "specific_tooltip": "Gebonden aan een specifiek IP — open stack-info voor volledige details"
   },
-
   "footer": {
     "version": "Versie: {{version}}",
     "docker_version": "{{runtime}}: {{version}}",
@@ -102,7 +97,6 @@
     "help": "Help",
     "feedback": "Feedback / Bug melden"
   },
-
   "runtime": {
     "docker": "Docker",
     "podman": "Podman",
@@ -112,11 +106,9 @@
     "podman_confirm_body": "Podman-ondersteuning is experimenteel. Afhankelijk van uw configuratie werken sommige functies mogelijk niet zoals verwacht — inclusief stack-detectie, log-streaming en bepaalde compose-opdrachten.",
     "podman_suggest_docker_missing": "Docker is niet gevonden op dit systeem. Schakel over naar Podman om uw containers te beheren."
   },
-
   "error_boundary": {
     "load_stacks_error": "Fout bij het laden van stacks"
   },
-
   "down_modal": {
     "aria_label": "Stoppen bevestigen",
     "title": "\"{{name}}\" verwijderen?",
@@ -128,7 +120,6 @@
     "shared_networks_title": "Gedeelde netwerken gedetecteerd",
     "shared_with": "ook gebruikt door"
   },
-
   "kill_modal": {
     "aria_label": "Geforceerd stoppen bevestigen",
     "title": "\"{{name}}\" geforceerd stoppen?",
@@ -137,7 +128,18 @@
     "body_suffix": ", waardoor ze onmiddellijk geforceerd worden beëindigd. In tegenstelling tot Stoppen krijgen processen geen kans om op te ruimen. Gebruik dit alleen als Stoppen niet reageert.",
     "confirm_button": "Alle containers geforceerd stoppen"
   },
-
+  "stop_modal": {
+    "aria_label": "Confirm stop",
+    "title": "Stop \"{{name}}\"?",
+    "body": "This will stop all running containers in the stack. They will not be removed and can be started again.",
+    "confirm_button": "Stop"
+  },
+  "restart_modal": {
+    "aria_label": "Confirm restart",
+    "title": "Restart \"{{name}}\"?",
+    "body": "This will restart all running services. Services will briefly be unavailable.",
+    "confirm_button": "Restart"
+  },
   "delete_modal": {
     "aria_label": "Compose-stack verwijderen — {{name}}",
     "title": "Verwijderen — {{name}}",
@@ -159,7 +161,6 @@
     "shared_networks_title": "Gedeelde netwerken gedetecteerd",
     "shared_with": "ook gebruikt door"
   },
-
   "create_modal": {
     "aria_label": "Nieuwe compose-stack aanmaken",
     "title": "Compose-stack aanmaken",
@@ -215,7 +216,6 @@
     "validation_extra_name_duplicate_primary": "Kan niet dezelfde naam gebruiken als het primaire compose-bestand",
     "validation_extra_name_duplicate": "Bestandsnaam moet uniek zijn"
   },
-
   "yaml_modal": {
     "aria_label": "Compose-bestand — {{name}}",
     "title": "{{name}} — compose-bestand",
@@ -264,7 +264,6 @@
     "import_file_confirm_button": "Importeren",
     "unsaved_changes": "Niet-opgeslagen wijzigingen"
   },
-
   "env_modal": {
     "aria_label": "Env-bestand — {{name}}",
     "title": "{{name}} — env-bestand",
@@ -285,7 +284,6 @@
     "confirm_save_question": "Wilt u toch opslaan?",
     "save_anyway_button": "Toch opslaan"
   },
-
   "logs_modal": {
     "aria_label": "Logboeken — {{name}}",
     "title": "Logboeken — {{name}}",
@@ -309,7 +307,6 @@
     "line_count": "{{count}} regels",
     "line_count_filtered": "{{shown}} / {{total}} regels"
   },
-
   "run_modal": {
     "aria_label": "Uitvoeren — {{name}}",
     "title": "Uitvoeren — {{name}}",
@@ -324,7 +321,6 @@
     "complete": "✓ Opdracht voltooid",
     "failed": "✗ Opdracht mislukt"
   },
-
   "exec_modal": {
     "aria_label": "Terminal — {{name}}",
     "title": "Terminal — {{name}}",
@@ -340,7 +336,6 @@
     "font_size_decrease": "Lettergrootte verkleinen",
     "font_size_increase": "Lettergrootte vergroten"
   },
-
   "events_modal": {
     "aria_label": "Gebeurtenissen — {{name}}",
     "title": "Gebeurtenissen — {{name}}",
@@ -355,7 +350,6 @@
     "col_service": "Service",
     "col_details": "Details"
   },
-
   "top_modal": {
     "aria_label": "Processen — {{name}}",
     "title": "Processen — {{name}}",
@@ -363,7 +357,6 @@
     "error_title": "Processen kunnen niet worden geladen",
     "empty": "Geen actieve processen gevonden."
   },
-
   "pull_modal": {
     "aria_label": "Ophalen — {{name}}",
     "title": "Ophalen — {{name}}",
@@ -372,7 +365,6 @@
     "failed": "✗ Ophalen mislukt",
     "starting": "Ophalen starten…"
   },
-
   "pull_confirm_modal": {
     "aria_label": "Ophalen bevestigen — {{name}}",
     "title": "Nieuwste images ophalen — {{name}}",
@@ -384,7 +376,6 @@
     "unpinned_notice": "Niet vastgepinde images halen altijd op wat het register als \"nieuwste\" beschouwt en hebben de meeste kans om van gedrag te veranderen tussen pulls.",
     "pull_button": "Ophalen"
   },
-
   "up_modal": {
     "aria_label": "Starten — {{name}}",
     "title": "Starten — {{name}}",
@@ -393,7 +384,6 @@
     "complete": "✓ Starten voltooid",
     "failed": "✗ Starten mislukt"
   },
-
   "up_confirm_modal": {
     "aria_label": "Starten bevestigen — {{name}}",
     "title": "Starten — {{name}}",
@@ -408,7 +398,6 @@
     "profiles_hint": "Alleen services die zijn getagd met een geselecteerd profiel worden gestart.",
     "up_button": "Starten"
   },
-
   "info_modal": {
     "aria_label": "Info — {{name}}",
     "title": "{{name}} — info",
@@ -441,7 +430,6 @@
     "copy_container_id": "Container-ID kopiëren",
     "copy_image_ref": "Afbeeldingsreferentie kopiëren"
   },
-
   "prune_modal": {
     "aria_label_select": "Bronnen opruimen — {{name}}",
     "title_select": "Bronnen opruimen — {{name}}",
@@ -465,7 +453,6 @@
     "prune_button": "Geselecteerde opruimen",
     "nothing_to_remove": "Niets te verwijderen."
   },
-
   "downed_section": {
     "create_button": "Aanmaken",
     "import_button": "Importeren",
@@ -485,12 +472,10 @@
     "depth_plus_aria": "Scandiepte verhogen",
     "restore_button": "Herstellen"
   },
-
   "stack_row": {
     "no_containers": "Geen containers gevonden.",
     "containers_aria": "{{name}} containers"
   },
-
   "container_state": {
     "running": "actief",
     "paused": "gepauzeerd",
@@ -500,12 +485,10 @@
     "created": "aangemaakt",
     "removing": "verwijderen"
   },
-
   "stats": {
     "cpu": "CPU",
     "mem": "Mem"
   },
-
   "backup_modal": {
     "title": "Back-up {{name}}",
     "base_name_label": "Archiefnaam",
@@ -519,7 +502,6 @@
     "success_body": "Opgeslagen in {{path}}",
     "warning_partial": "Sommige bestanden zijn overgeslagen vanwege machtigingsfouten"
   },
-
   "restore_modal": {
     "title": "Stack herstellen uit back-up",
     "scan_dir_label": "Zoekmap",
@@ -540,13 +522,11 @@
     "error_dest_exists": "Doelpad {{path}} bestaat al — afgebroken om overschrijven te voorkomen",
     "error_unknown": "Herstellen mislukt (controleer de browserconsole voor details)"
   },
-
   "external_link_modal": {
     "aria_label": "Waarschuwing externe koppeling",
     "title": "Externe koppeling openen",
     "warning_title": "Controleer altijd of de doelsite betrouwbaar is voordat u doorgaat."
   },
-
   "container_table": {
     "replica_count": "×{{count}}",
     "col_status": "Status",
@@ -554,7 +534,6 @@
     "col_image": "Image",
     "col_uptime": "Uptime"
   },
-
   "scale_modal": {
     "title": "Services schalen — {{name}}",
     "confirm_title": "Schalen bevestigen — {{name}}",
@@ -572,7 +551,6 @@
     "port_conflict_body": "De volgende services hebben statische hostpoortbindingen. Docker kan niet meer dan één replica starten omdat een hostpoort slechts door één container kan worden gebonden:",
     "port_conflict_icon_title": "Heeft statische hostpoortbindingen"
   },
-
   "settings": {
     "title": "Instellingen",
     "open_button": "Instellingen",
@@ -589,7 +567,6 @@
     "confirm_down_hint": "Wanneer uitgeschakeld, wordt 'Stoppen' onmiddellijk uitgevoerd zonder te vragen.",
     "reset_defaults": "Standaardinstellingen herstellen"
   },
-
   "toast": {
     "start_success": "{{name}} gestart",
     "start_failed": "Starten van {{name}} mislukt",

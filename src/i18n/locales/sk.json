@@ -19,7 +19,6 @@
     "copy": "Kopírovať",
     "copied": "Skopírované!"
   },
-
   "stacks": {
     "title": "Compose zásobníky",
     "aria_label": "Compose zásobníky",
@@ -49,7 +48,6 @@
     "bulk_selected": "{{count}} vybraných",
     "bulk_clear": "Zrušiť výber"
   },
-
   "actions": {
     "up": "Spustiť",
     "up_title": "Spustiť zásobník alebo znova vytvoriť zmenené kontajnery",
@@ -79,19 +77,16 @@
     "backup": "Záloha",
     "scale": "Škálovať"
   },
-
   "health": {
     "passing": "Kontrola stavu prebehla úspešne",
     "failing": "Kontrola stavu zlyhala",
     "starting": "Spúšťanie kontroly stavu"
   },
-
   "ports": {
     "external_tooltip": "Vystavené na všetkých rozhraniach — otvorte informácie o zásobníku pre úplné podrobnosti",
     "localhost_tooltip": "Viazané iba na localhost — otvorte informácie o zásobníku pre úplné podrobnosti",
     "specific_tooltip": "Viazané na konkrétnu IP — otvorte informácie o zásobníku pre úplné podrobnosti"
   },
-
   "footer": {
     "version": "Verzia: {{version}}",
     "docker_version": "{{runtime}}: {{version}}",
@@ -102,7 +97,6 @@
     "help": "Pomoc",
     "feedback": "Spätná väzba / Nahlásiť chybu"
   },
-
   "runtime": {
     "docker": "Docker",
     "podman": "Podman",
@@ -112,11 +106,9 @@
     "podman_confirm_body": "Podpora Podmana je experimentálna. V závislosti od vašej konfigurácie niektoré funkcie nemusia fungovať podľa očakávania — vrátane objavovania zásobníkov, streamovania záznamov a určitých compose príkazov.",
     "podman_suggest_docker_missing": "Docker nebol na tomto systéme nájdený. Prepnite na Podman na správu vašich kontajnerov."
   },
-
   "error_boundary": {
     "load_stacks_error": "Chyba pri načítaní zásobníkov"
   },
-
   "down_modal": {
     "aria_label": "Potvrdiť zastavenie",
     "title": "Odstrániť {{name}}?",
@@ -128,7 +120,6 @@
     "shared_networks_title": "Zistené zdieľané siete",
     "shared_with": "používa aj"
   },
-
   "kill_modal": {
     "aria_label": "Potvrdiť vynútené ukončenie",
     "title": "Ukončiť {{name}}?",
@@ -137,7 +128,18 @@
     "body_suffix": ", čo ich okamžite vynútene ukončí. Na rozdiel od Zastaviť, procesy nemajú možnosť vykonať čistenie. Použite iba keď Zastaviť nereaguje.",
     "confirm_button": "Ukončiť všetky kontajnery"
   },
-
+  "stop_modal": {
+    "aria_label": "Confirm stop",
+    "title": "Stop \"{{name}}\"?",
+    "body": "This will stop all running containers in the stack. They will not be removed and can be started again.",
+    "confirm_button": "Stop"
+  },
+  "restart_modal": {
+    "aria_label": "Confirm restart",
+    "title": "Restart \"{{name}}\"?",
+    "body": "This will restart all running services. Services will briefly be unavailable.",
+    "confirm_button": "Restart"
+  },
   "delete_modal": {
     "aria_label": "Odstrániť compose zásobník — {{name}}",
     "title": "Odstrániť — {{name}}",
@@ -159,7 +161,6 @@
     "shared_networks_title": "Zistené zdieľané siete",
     "shared_with": "používa aj"
   },
-
   "create_modal": {
     "aria_label": "Vytvoriť nový compose zásobník",
     "title": "Vytvoriť compose zásobník",
@@ -215,7 +216,6 @@
     "validation_extra_name_duplicate_primary": "Nie je možné použiť rovnaký názov ako hlavný compose súbor",
     "validation_extra_name_duplicate": "Názov súboru musí byť jedinečný"
   },
-
   "yaml_modal": {
     "aria_label": "Compose súbor — {{name}}",
     "title": "{{name}} — compose súbor",
@@ -264,7 +264,6 @@
     "import_file_confirm_button": "Importovať",
     "unsaved_changes": "Neuložené zmeny"
   },
-
   "env_modal": {
     "aria_label": "Env súbor — {{name}}",
     "title": "{{name}} — env súbor",
@@ -285,7 +284,6 @@
     "confirm_save_question": "Chcete napriek tomu uložiť?",
     "save_anyway_button": "Uložiť napriek tomu"
   },
-
   "logs_modal": {
     "aria_label": "Záznamy — {{name}}",
     "title": "Záznamy — {{name}}",
@@ -309,7 +307,6 @@
     "line_count": "{{count}} riadkov",
     "line_count_filtered": "{{shown}} / {{total}} riadkov"
   },
-
   "run_modal": {
     "aria_label": "Spustiť — {{name}}",
     "title": "Spustiť — {{name}}",
@@ -324,7 +321,6 @@
     "complete": "✓ Príkaz dokončený",
     "failed": "✗ Príkaz zlyhal"
   },
-
   "exec_modal": {
     "aria_label": "Terminál — {{name}}",
     "title": "Terminál — {{name}}",
@@ -340,7 +336,6 @@
     "font_size_decrease": "Zmenšiť písmo",
     "font_size_increase": "Zväčšiť písmo"
   },
-
   "events_modal": {
     "aria_label": "Udalosti — {{name}}",
     "title": "Udalosti — {{name}}",
@@ -355,7 +350,6 @@
     "col_service": "Služba",
     "col_details": "Podrobnosti"
   },
-
   "top_modal": {
     "aria_label": "Procesy — {{name}}",
     "title": "Procesy — {{name}}",
@@ -363,7 +357,6 @@
     "error_title": "Nepodarilo sa načítať procesy",
     "empty": "Nenašli sa žiadne bežiace procesy."
   },
-
   "pull_modal": {
     "aria_label": "Stiahnutie — {{name}}",
     "title": "Stiahnutie — {{name}}",
@@ -372,7 +365,6 @@
     "failed": "✗ Stiahnutie zlyhalo",
     "starting": "Spúšťam stiahnutie…"
   },
-
   "pull_confirm_modal": {
     "aria_label": "Potvrdiť stiahnutie — {{name}}",
     "title": "Stiahnuť najnovšie obrazy — {{name}}",
@@ -384,7 +376,6 @@
     "unpinned_notice": "Nefixované obrazy vždy sťahujú to, čo register považuje za najnovšie a s väčšou pravdepodobnosťou zmenia správanie medzi stiahnutiami.",
     "pull_button": "Stiahnuť"
   },
-
   "up_modal": {
     "aria_label": "Spustenie — {{name}}",
     "title": "Spustenie — {{name}}",
@@ -393,7 +384,6 @@
     "complete": "✓ Spustenie dokončené",
     "failed": "✗ Spustenie zlyhalo"
   },
-
   "up_confirm_modal": {
     "aria_label": "Potvrdiť spustenie — {{name}}",
     "title": "Spustenie — {{name}}",
@@ -408,7 +398,6 @@
     "profiles_hint": "Spustia sa iba služby označené vybraným profilom.",
     "up_button": "Spustiť"
   },
-
   "info_modal": {
     "aria_label": "Informácie — {{name}}",
     "title": "{{name}} — informácie",
@@ -441,7 +430,6 @@
     "copy_container_id": "Kopírovať ID kontajnera",
     "copy_image_ref": "Kopírovať referenciu obrazu"
   },
-
   "prune_modal": {
     "aria_label_select": "Vyčistiť zdroje — {{name}}",
     "title_select": "Vyčistiť zdroje — {{name}}",
@@ -465,7 +453,6 @@
     "prune_button": "Vyčistiť vybrané",
     "nothing_to_remove": "Nič na odstránenie."
   },
-
   "downed_section": {
     "create_button": "Vytvoriť",
     "import_button": "Importovať",
@@ -485,12 +472,10 @@
     "depth_plus_aria": "Zvýšiť hĺbku skenovania",
     "restore_button": "Obnoviť"
   },
-
   "stack_row": {
     "no_containers": "Nenašli sa žiadne kontajnery.",
     "containers_aria": "Kontajnery {{name}}"
   },
-
   "container_state": {
     "running": "beží",
     "paused": "pozastavený",
@@ -500,12 +485,10 @@
     "created": "vytvorený",
     "removing": "odstraňuje sa"
   },
-
   "stats": {
     "cpu": "CPU",
     "mem": "Pamäť"
   },
-
   "backup_modal": {
     "title": "Záloha {{name}}",
     "base_name_label": "Názov súboru",
@@ -519,7 +502,6 @@
     "success_body": "Uložená v {{path}}",
     "warning_partial": "Niektoré súbory boli preskočené z dôvodu chýb oprávnení"
   },
-
   "restore_modal": {
     "title": "Obnoviť zásobník zo zálohy",
     "scan_dir_label": "Adresár na prehľadávanie",
@@ -540,13 +522,11 @@
     "error_dest_exists": "Cieľová cesta {{path}} už existuje — zrušujem, aby nedošlo k prepísaniu",
     "error_unknown": "Obnovenie zlyhalo (skontrolujte konzolu prehliadača pre podrobnosti)"
   },
-
   "external_link_modal": {
     "aria_label": "Upozornenie na externý odkaz",
     "title": "Otváranie externého odkazu",
     "warning_title": "Pred pokračovaním vždy overte, že cieľová stránka je dôveryhodná."
   },
-
   "container_table": {
     "replica_count": "×{{count}}",
     "col_status": "Stav",
@@ -554,7 +534,6 @@
     "col_image": "Obraz",
     "col_uptime": "Doba behu"
   },
-
   "scale_modal": {
     "title": "Škálovanie služieb — {{name}}",
     "confirm_title": "Potvrdiť škálovanie — {{name}}",
@@ -572,7 +551,6 @@
     "port_conflict_body": "Nasledujúce služby majú statické väzby portov hostiteľa. Docker nebude môcť spustiť viac ako jednu repliku, pretože port hostiteľa môže viazať iba jeden kontajner:",
     "port_conflict_icon_title": "Má statické väzby portov hostiteľa"
   },
-
   "settings": {
     "title": "Nastavenia",
     "open_button": "Nastavenia",
@@ -589,7 +567,6 @@
     "confirm_down_hint": "Keď je vypnuté, 'Zastaviť' prebehne okamžite bez opýtania.",
     "reset_defaults": "Obnoviť predvolené nastavenia"
   },
-
   "toast": {
     "start_success": "{{name}} spustený",
     "start_failed": "Spustenie {{name}} zlyhalo",

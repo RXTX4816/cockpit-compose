@@ -19,7 +19,6 @@
     "copy": "Copiere",
     "copied": "Copiat!"
   },
-
   "stacks": {
     "title": "Stive Compose",
     "aria_label": "Stive Compose",
@@ -49,7 +48,6 @@
     "bulk_selected": "{{count}} selectate",
     "bulk_clear": "Deselectați"
   },
-
   "actions": {
     "up": "Pornire",
     "up_title": "Pornire stivă sau recreare containere modificate",
@@ -79,19 +77,16 @@
     "backup": "Copie de rezervă",
     "scale": "Scalare"
   },
-
   "health": {
     "passing": "Verificare stare de sănătate reușită",
     "failing": "Verificare stare de sănătate eșuată",
     "starting": "Pornire verificare stare de sănătate"
   },
-
   "ports": {
     "external_tooltip": "Expus pe toate interfețele — deschideți informațiile stivei pentru detalii complete",
     "localhost_tooltip": "Legat doar la localhost — deschideți informațiile stivei pentru detalii complete",
     "specific_tooltip": "Legat la un IP specific — deschideți informațiile stivei pentru detalii complete"
   },
-
   "footer": {
     "version": "Versiune: {{version}}",
     "docker_version": "{{runtime}}: {{version}}",
@@ -102,7 +97,6 @@
     "help": "Ajutor",
     "feedback": "Feedback / Raportare eroare"
   },
-
   "runtime": {
     "docker": "Docker",
     "podman": "Podman",
@@ -112,11 +106,9 @@
     "podman_confirm_body": "Suportul Podman este experimental. În funcție de configurația dumneavoastră, unele funcționalități pot să nu funcționeze conform așteptărilor — inclusiv descoperirea stivelor, streaming de jurnale și anumite comenzi compose.",
     "podman_suggest_docker_missing": "Docker nu a fost găsit pe acest sistem. Comutați la Podman pentru a vă gestiona containerele."
   },
-
   "error_boundary": {
     "load_stacks_error": "Eroare la încărcarea stivelor"
   },
-
   "down_modal": {
     "aria_label": "Confirmare oprire",
     "title": "Eliminare \"{{name}}\"?",
@@ -128,7 +120,6 @@
     "shared_networks_title": "Rețele partajate detectate",
     "shared_with": "folosit și de"
   },
-
   "kill_modal": {
     "aria_label": "Confirmare terminare forțată",
     "title": "Terminare \"{{name}}\"?",
@@ -137,7 +128,18 @@
     "body_suffix": ", terminându-le forțat imediat. Spre deosebire de Oprire, procesele nu au șansa de a face curățenie. Folosiți doar când Oprire nu răspunde.",
     "confirm_button": "Terminare toate containerele"
   },
-
+  "stop_modal": {
+    "aria_label": "Confirm stop",
+    "title": "Stop \"{{name}}\"?",
+    "body": "This will stop all running containers in the stack. They will not be removed and can be started again.",
+    "confirm_button": "Stop"
+  },
+  "restart_modal": {
+    "aria_label": "Confirm restart",
+    "title": "Restart \"{{name}}\"?",
+    "body": "This will restart all running services. Services will briefly be unavailable.",
+    "confirm_button": "Restart"
+  },
   "delete_modal": {
     "aria_label": "Ștergere stivă compose — {{name}}",
     "title": "Ștergere — {{name}}",
@@ -159,7 +161,6 @@
     "shared_networks_title": "Rețele partajate detectate",
     "shared_with": "folosit și de"
   },
-
   "create_modal": {
     "aria_label": "Creare stivă compose nouă",
     "title": "Creare stivă compose",
@@ -215,7 +216,6 @@
     "validation_extra_name_duplicate_primary": "Nu se poate folosi același nume ca fișierul compose principal",
     "validation_extra_name_duplicate": "Numele fișierului trebuie să fie unic"
   },
-
   "yaml_modal": {
     "aria_label": "Fișier Compose — {{name}}",
     "title": "{{name}} — fișier compose",
@@ -264,7 +264,6 @@
     "import_file_confirm_button": "Import",
     "unsaved_changes": "Modificări nesalvate"
   },
-
   "env_modal": {
     "aria_label": "Fișier env — {{name}}",
     "title": "{{name}} — fișier env",
@@ -285,7 +284,6 @@
     "confirm_save_question": "Doriți să salvați oricum?",
     "save_anyway_button": "Salvare oricum"
   },
-
   "logs_modal": {
     "aria_label": "Jurnale — {{name}}",
     "title": "Jurnale — {{name}}",
@@ -309,7 +307,6 @@
     "line_count": "{{count}} linii",
     "line_count_filtered": "{{shown}} / {{total}} linii"
   },
-
   "run_modal": {
     "aria_label": "Executare — {{name}}",
     "title": "Executare — {{name}}",
@@ -324,7 +321,6 @@
     "complete": "✓ Comandă finalizată",
     "failed": "✗ Comandă eșuată"
   },
-
   "exec_modal": {
     "aria_label": "Terminal — {{name}}",
     "title": "Terminal — {{name}}",
@@ -340,7 +336,6 @@
     "font_size_decrease": "Micșorare font",
     "font_size_increase": "Mărire font"
   },
-
   "events_modal": {
     "aria_label": "Evenimente — {{name}}",
     "title": "Evenimente — {{name}}",
@@ -355,7 +350,6 @@
     "col_service": "Serviciu",
     "col_details": "Detalii"
   },
-
   "top_modal": {
     "aria_label": "Procese — {{name}}",
     "title": "Procese — {{name}}",
@@ -363,7 +357,6 @@
     "error_title": "Nu s-au putut încărca procesele",
     "empty": "Nu s-au găsit procese în execuție."
   },
-
   "pull_modal": {
     "aria_label": "Descărcare — {{name}}",
     "title": "Descărcare — {{name}}",
@@ -372,7 +365,6 @@
     "failed": "✗ Descărcare eșuată",
     "starting": "Se inițiază descărcarea…"
   },
-
   "pull_confirm_modal": {
     "aria_label": "Confirmare descărcare — {{name}}",
     "title": "Descărcare imagini noi — {{name}}",
@@ -384,7 +376,6 @@
     "unpinned_notice": "Imaginile nefixate descarcă întotdeauna ceea ce registrul consideră cel mai recent și au mai multe șanse să-și schimbe comportamentul între descărcări.",
     "pull_button": "Descărcare"
   },
-
   "up_modal": {
     "aria_label": "Pornire — {{name}}",
     "title": "Pornire — {{name}}",
@@ -393,7 +384,6 @@
     "complete": "✓ Pornire finalizată",
     "failed": "✗ Pornire eșuată"
   },
-
   "up_confirm_modal": {
     "aria_label": "Confirmare pornire — {{name}}",
     "title": "Pornire — {{name}}",
@@ -408,7 +398,6 @@
     "profiles_hint": "Numai serviciile marcate cu un profil selectat vor fi pornite.",
     "up_button": "Pornire"
   },
-
   "info_modal": {
     "aria_label": "Informații — {{name}}",
     "title": "{{name}} — informații",
@@ -441,7 +430,6 @@
     "copy_container_id": "Copiere ID container",
     "copy_image_ref": "Copiere referință imagine"
   },
-
   "prune_modal": {
     "aria_label_select": "Curățare resurse — {{name}}",
     "title_select": "Curățare resurse — {{name}}",
@@ -465,7 +453,6 @@
     "prune_button": "Curățare selectate",
     "nothing_to_remove": "Nimic de eliminat."
   },
-
   "downed_section": {
     "create_button": "Creare",
     "import_button": "Import",
@@ -485,12 +472,10 @@
     "depth_plus_aria": "Creștere adâncime scanare",
     "restore_button": "Restaurare"
   },
-
   "stack_row": {
     "no_containers": "Nu s-au găsit containere.",
     "containers_aria": "Containere {{name}}"
   },
-
   "container_state": {
     "running": "în execuție",
     "paused": "în pauză",
@@ -500,12 +485,10 @@
     "created": "creat",
     "removing": "eliminare"
   },
-
   "stats": {
     "cpu": "CPU",
     "mem": "Mem"
   },
-
   "backup_modal": {
     "title": "Copie de rezervă {{name}}",
     "base_name_label": "Nume fișier",
@@ -519,7 +502,6 @@
     "success_body": "Salvat în {{path}}",
     "warning_partial": "Unele fișiere au fost omise din cauza erorilor de permisiuni"
   },
-
   "restore_modal": {
     "title": "Restaurare stivă din copie de rezervă",
     "scan_dir_label": "Director de căutare",
@@ -540,13 +522,11 @@
     "error_dest_exists": "Calea de destinație {{path}} există deja — se anulează pentru a evita suprascrierea",
     "error_unknown": "Restaurarea a eșuat (verificați consola browserului pentru detalii)"
   },
-
   "external_link_modal": {
     "aria_label": "Avertisment link extern",
     "title": "Deschidere link extern",
     "warning_title": "Verificați întotdeauna că site-ul de destinație este de încredere înainte de a continua."
   },
-
   "container_table": {
     "replica_count": "×{{count}}",
     "col_status": "Stare",
@@ -554,7 +534,6 @@
     "col_image": "Imagine",
     "col_uptime": "Timp activ"
   },
-
   "scale_modal": {
     "title": "Scalare servicii — {{name}}",
     "confirm_title": "Confirmare scalare — {{name}}",
@@ -572,7 +551,6 @@
     "port_conflict_body": "Următoarele servicii au legături de port gazdă statice. Docker nu va putea porni mai mult de o replică deoarece un port gazdă poate fi legat doar de un singur container:",
     "port_conflict_icon_title": "Are legături de port gazdă statice"
   },
-
   "settings": {
     "title": "Setări",
     "open_button": "Setări",
@@ -589,7 +567,6 @@
     "confirm_down_hint": "Când este dezactivat, 'Oprire' rulează imediat fără a întreba.",
     "reset_defaults": "Resetare la valorile implicite"
   },
-
   "toast": {
     "start_success": "{{name}} pornit",
     "start_failed": "Pornirea {{name}} a eșuat",

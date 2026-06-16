@@ -19,7 +19,6 @@
     "copy": "복사",
     "copied": "복사됨!"
   },
-
   "stacks": {
     "title": "Compose 스택",
     "aria_label": "Compose 스택",
@@ -49,7 +48,6 @@
     "bulk_selected": "{{count}}개 선택됨",
     "bulk_clear": "선택 지우기"
   },
-
   "actions": {
     "up": "시작",
     "up_title": "스택을 시작하거나 변경된 컨테이너를 다시 만들기",
@@ -79,19 +77,16 @@
     "backup": "백업",
     "scale": "스케일"
   },
-
   "health": {
     "passing": "상태 확인 통과",
     "failing": "상태 확인 실패",
     "starting": "상태 확인 시작 중"
   },
-
   "ports": {
     "external_tooltip": "모든 인터페이스에 노출됨 — 전체 세부 정보는 스택 정보를 여세요",
     "localhost_tooltip": "localhost에만 바인딩됨 — 전체 세부 정보는 스택 정보를 여세요",
     "specific_tooltip": "특정 IP에 바인딩됨 — 전체 세부 정보는 스택 정보를 여세요"
   },
-
   "footer": {
     "version": "버전: {{version}}",
     "docker_version": "{{runtime}}: {{version}}",
@@ -102,7 +97,6 @@
     "help": "도움말",
     "feedback": "피드백 / 버그 보고"
   },
-
   "runtime": {
     "docker": "Docker",
     "podman": "Podman",
@@ -112,11 +106,9 @@
     "podman_confirm_body": "Podman 지원은 실험적입니다. 설정에 따라 스택 검색, 로그 스트리밍, 일부 compose 명령 등 일부 기능이 예상대로 작동하지 않을 수 있습니다.",
     "podman_suggest_docker_missing": "이 시스템에서 Docker를 찾을 수 없습니다. 컨테이너를 관리하려면 Podman으로 전환하세요."
   },
-
   "error_boundary": {
     "load_stacks_error": "스택 로드 오류"
   },
-
   "down_modal": {
     "aria_label": "중지 확인",
     "title": "\"{{name}}\"을(를) 제거하시겠습니까?",
@@ -128,7 +120,6 @@
     "shared_networks_title": "공유 네트워크가 감지되었습니다",
     "shared_with": "다음에서도 사용 중:"
   },
-
   "kill_modal": {
     "aria_label": "강제 종료 확인",
     "title": "\"{{name}}\"을(를) 강제 종료하시겠습니까?",
@@ -137,7 +128,18 @@
     "body_suffix": ", 즉시 강제로 종료합니다. 정지와 달리 프로세스가 정리할 기회가 없습니다. 정지가 응답하지 않을 때만 사용하세요.",
     "confirm_button": "모든 컨테이너 강제 종료"
   },
-
+  "stop_modal": {
+    "aria_label": "Confirm stop",
+    "title": "Stop \"{{name}}\"?",
+    "body": "This will stop all running containers in the stack. They will not be removed and can be started again.",
+    "confirm_button": "Stop"
+  },
+  "restart_modal": {
+    "aria_label": "Confirm restart",
+    "title": "Restart \"{{name}}\"?",
+    "body": "This will restart all running services. Services will briefly be unavailable.",
+    "confirm_button": "Restart"
+  },
   "delete_modal": {
     "aria_label": "compose 스택 삭제 — {{name}}",
     "title": "삭제 — {{name}}",
@@ -159,7 +161,6 @@
     "shared_networks_title": "공유 네트워크가 감지되었습니다",
     "shared_with": "다음에서도 사용 중:"
   },
-
   "create_modal": {
     "aria_label": "새 compose 스택 만들기",
     "title": "compose 스택 만들기",
@@ -215,7 +216,6 @@
     "validation_extra_name_duplicate_primary": "기본 compose 파일과 같은 이름을 사용할 수 없습니다",
     "validation_extra_name_duplicate": "파일 이름은 고유해야 합니다"
   },
-
   "yaml_modal": {
     "aria_label": "Compose 파일 — {{name}}",
     "title": "{{name}} — compose 파일",
@@ -264,7 +264,6 @@
     "import_file_none": "이 디렉터리에서 추가 YAML 파일을 찾을 수 없습니다.",
     "import_file_confirm_button": "가져오기"
   },
-
   "env_modal": {
     "aria_label": "Env 파일 — {{name}}",
     "title": "{{name}} — env 파일",
@@ -285,7 +284,6 @@
     "confirm_save_question": "그래도 저장하시겠습니까?",
     "save_anyway_button": "그래도 저장"
   },
-
   "logs_modal": {
     "aria_label": "로그 — {{name}}",
     "title": "로그 — {{name}}",
@@ -309,7 +307,6 @@
     "line_count": "{{count}}줄",
     "line_count_filtered": "{{shown}} / {{total}}줄"
   },
-
   "run_modal": {
     "aria_label": "실행 — {{name}}",
     "title": "실행 — {{name}}",
@@ -324,7 +321,6 @@
     "complete": "✓ 명령 완료",
     "failed": "✗ 명령 실패"
   },
-
   "exec_modal": {
     "aria_label": "셸 — {{name}}",
     "title": "셸 — {{name}}",
@@ -340,7 +336,6 @@
     "font_size_decrease": "글꼴 크기 줄이기",
     "font_size_increase": "글꼴 크기 늘리기"
   },
-
   "events_modal": {
     "aria_label": "이벤트 — {{name}}",
     "title": "이벤트 — {{name}}",
@@ -355,7 +350,6 @@
     "col_service": "서비스",
     "col_details": "세부 정보"
   },
-
   "top_modal": {
     "aria_label": "프로세스 — {{name}}",
     "title": "프로세스 — {{name}}",
@@ -363,7 +357,6 @@
     "error_title": "프로세스를 로드할 수 없습니다",
     "empty": "실행 중인 프로세스를 찾을 수 없습니다."
   },
-
   "pull_modal": {
     "aria_label": "풀 — {{name}}",
     "title": "풀 — {{name}}",
@@ -372,7 +365,6 @@
     "failed": "✗ 풀 실패",
     "starting": "풀 시작 중…"
   },
-
   "pull_confirm_modal": {
     "aria_label": "풀 확인 — {{name}}",
     "title": "최신 이미지 풀 — {{name}}",
@@ -384,7 +376,6 @@
     "unpinned_notice": "고정되지 않은 이미지는 항상 레지스트리가 \"최신\"으로 간주하는 것을 풀하며 풀 간에 동작이 변경될 가능성이 가장 높습니다.",
     "pull_button": "풀"
   },
-
   "up_modal": {
     "aria_label": "시작 — {{name}}",
     "title": "시작 — {{name}}",
@@ -393,7 +384,6 @@
     "complete": "✓ 시작 완료",
     "failed": "✗ 시작 실패"
   },
-
   "up_confirm_modal": {
     "aria_label": "시작 확인 — {{name}}",
     "title": "시작 — {{name}}",
@@ -408,7 +398,6 @@
     "profiles_hint": "선택한 프로필로 태그된 서비스만 시작됩니다.",
     "up_button": "시작"
   },
-
   "info_modal": {
     "aria_label": "정보 — {{name}}",
     "title": "{{name}} — 정보",
@@ -441,7 +430,6 @@
     "copy_container_id": "컨테이너 ID 복사",
     "copy_image_ref": "이미지 참조 복사"
   },
-
   "prune_modal": {
     "aria_label_select": "리소스 정리 — {{name}}",
     "title_select": "리소스 정리 — {{name}}",
@@ -465,7 +453,6 @@
     "prune_button": "선택한 항목 정리",
     "nothing_to_remove": "제거할 것이 없습니다."
   },
-
   "downed_section": {
     "create_button": "만들기",
     "import_button": "가져오기",
@@ -485,12 +472,10 @@
     "depth_plus_aria": "검색 깊이 늘리기",
     "restore_button": "복원"
   },
-
   "stack_row": {
     "no_containers": "컨테이너를 찾을 수 없습니다.",
     "containers_aria": "{{name}} 컨테이너"
   },
-
   "container_state": {
     "running": "실행 중",
     "paused": "일시 중지됨",
@@ -500,12 +485,10 @@
     "created": "만들어짐",
     "removing": "제거 중"
   },
-
   "stats": {
     "cpu": "CPU",
     "mem": "메모리"
   },
-
   "backup_modal": {
     "title": "{{name}} 백업",
     "base_name_label": "아카이브 이름",
@@ -519,7 +502,6 @@
     "success_body": "{{path}}에 저장되었습니다",
     "warning_partial": "권한 오류로 인해 일부 파일을 건너뛰었습니다"
   },
-
   "restore_modal": {
     "title": "백업에서 스택 복원",
     "scan_dir_label": "검색 디렉터리",
@@ -540,13 +522,11 @@
     "error_dest_exists": "대상 경로 {{path}}이(가) 이미 존재합니다 — 덮어쓰기를 방지하기 위해 중단합니다",
     "error_unknown": "복원에 실패했습니다 (자세한 내용은 브라우저 콘솔을 확인하세요)"
   },
-
   "external_link_modal": {
     "aria_label": "외부 링크 경고",
     "title": "외부 링크 열기",
     "warning_title": "계속하기 전에 대상 사이트가 신뢰할 수 있는지 항상 확인하세요."
   },
-
   "container_table": {
     "replica_count": "×{{count}}",
     "col_status": "상태",
@@ -554,7 +534,6 @@
     "col_image": "이미지",
     "col_uptime": "가동 시간"
   },
-
   "scale_modal": {
     "title": "서비스 스케일 — {{name}}",
     "confirm_title": "스케일 확인 — {{name}}",
@@ -572,7 +551,6 @@
     "port_conflict_body": "다음 서비스에는 정적 호스트 포트 바인딩이 있습니다. 호스트 포트는 단일 컨테이너에서만 바인딩할 수 있으므로 Docker는 복제본을 두 개 이상 시작할 수 없습니다:",
     "port_conflict_icon_title": "정적 호스트 포트 바인딩이 있습니다"
   },
-
   "settings": {
     "title": "설정",
     "open_button": "설정",
@@ -589,7 +567,6 @@
     "confirm_down_hint": "비활성화하면 '중지'가 묻지 않고 즉시 실행됩니다.",
     "reset_defaults": "기본값으로 재설정"
   },
-
   "toast": {
     "start_success": "{{name}} 시작됨",
     "start_failed": "{{name}} 시작 실패",

@@ -19,7 +19,6 @@
     "copy": "კოპირება",
     "copied": "დაკოპირდა!"
   },
-
   "stacks": {
     "title": "Compose სტეკები",
     "aria_label": "Compose სტეკები",
@@ -49,7 +48,6 @@
     "bulk_selected": "{{count}} არჩეული",
     "bulk_clear": "არჩევის გასუფთავება"
   },
-
   "actions": {
     "up": "გაშვება",
     "up_title": "სტეკის გაშვება ან შეცვლილი კონტეინერების ხელახლა შექმნა",
@@ -79,19 +77,16 @@
     "backup": "სარეზერვო ასლი",
     "scale": "მასშტაბირება"
   },
-
   "health": {
     "passing": "ჯანმრთელობის შემოწმება წარმატებულია",
     "failing": "ჯანმრთელობის შემოწმება ვერ ხერხდება",
     "starting": "ჯანმრთელობის შემოწმება იწყება"
   },
-
   "ports": {
     "external_tooltip": "ყველა ინტერფეისზე გამოქვეყნებული — სრული დეტალებისთვის გახსენით სტეკის ინფო",
     "localhost_tooltip": "მხოლოდ localhost-ზე მიბმული — სრული დეტალებისთვის გახსენით სტეკის ინფო",
     "specific_tooltip": "კონკრეტულ IP-ზე მიბმული — სრული დეტალებისთვის გახსენით სტეკის ინფო"
   },
-
   "footer": {
     "version": "ვერსია: {{version}}",
     "docker_version": "{{runtime}}: {{version}}",
@@ -102,7 +97,6 @@
     "help": "დახმარება",
     "feedback": "გამოხმაურება / შეცდომის შეტყობინება"
   },
-
   "runtime": {
     "docker": "Docker",
     "podman": "Podman",
@@ -112,11 +106,9 @@
     "podman_confirm_body": "Podman-ის მხარდაჭერა ექსპერიმენტულია. თქვენი კონფიგურაციის მიხედვით, ზოგიერთი ფუნქცია შეიძლება მოსალოდნელად არ მუშაობდეს — მათ შორის სტეკების აღმოჩენა, ლოგების სტრიმინგი და გარკვეული compose ბრძანებები.",
     "podman_suggest_docker_missing": "Docker ამ სისტემაში ვერ მოიძებნა. გადადით Podman-ზე კონტეინერების სამართავად."
   },
-
   "error_boundary": {
     "load_stacks_error": "სტეკების ჩატვირთვისას შეცდომა"
   },
-
   "down_modal": {
     "aria_label": "გამორთვის დადასტურება",
     "title": "\"{{name}}\" წაიშლება?",
@@ -128,7 +120,6 @@
     "shared_networks_title": "გაზიარებული ქსელები აღმოჩენილია",
     "shared_with": "ასევე გამოიყენება"
   },
-
   "kill_modal": {
     "aria_label": "იძულებითი შეჩერების დადასტურება",
     "title": "\"{{name}}\" იძულებით შეჩერდება?",
@@ -137,7 +128,18 @@
     "body_suffix": ", დაუყოვნებლივ ძალით დაასრულებს. შეჩერებისგან განსხვავებით, პროცესებს გასუფთავების შანსი არ ექნებათ. გამოიყენეთ მხოლოდ მაშინ, როდესაც შეჩერება არ პასუხობს.",
     "confirm_button": "ყველა კონტეინერის იძულებით შეჩერება"
   },
-
+  "stop_modal": {
+    "aria_label": "Confirm stop",
+    "title": "Stop \"{{name}}\"?",
+    "body": "This will stop all running containers in the stack. They will not be removed and can be started again.",
+    "confirm_button": "Stop"
+  },
+  "restart_modal": {
+    "aria_label": "Confirm restart",
+    "title": "Restart \"{{name}}\"?",
+    "body": "This will restart all running services. Services will briefly be unavailable.",
+    "confirm_button": "Restart"
+  },
   "delete_modal": {
     "aria_label": "compose სტეკის წაშლა — {{name}}",
     "title": "წაშლა — {{name}}",
@@ -159,7 +161,6 @@
     "shared_networks_title": "გაზიარებული ქსელები აღმოჩენილია",
     "shared_with": "ასევე გამოიყენება"
   },
-
   "create_modal": {
     "aria_label": "ახალი compose სტეკის შექმნა",
     "title": "compose სტეკის შექმნა",
@@ -215,7 +216,6 @@
     "validation_extra_name_duplicate_primary": "არ შეიძლება გამოყენებულ იქნას იგივე სახელი, რაც ძირითადი compose ფაილი",
     "validation_extra_name_duplicate": "ფაილის სახელი უნდა იყოს უნიკალური"
   },
-
   "yaml_modal": {
     "aria_label": "Compose ფაილი — {{name}}",
     "title": "{{name}} — compose ფაილი",
@@ -264,7 +264,6 @@
     "import_file_none": "ამ დირექტორიაში დამატებითი YAML ფაილები ვერ მოიძებნა.",
     "import_file_confirm_button": "იმპორტი"
   },
-
   "env_modal": {
     "aria_label": "env ფაილი — {{name}}",
     "title": "{{name}} — env ფაილი",
@@ -285,7 +284,6 @@
     "confirm_save_question": "გსურთ მაინც შენახვა?",
     "save_anyway_button": "მაინც შენახვა"
   },
-
   "logs_modal": {
     "aria_label": "ლოგები — {{name}}",
     "title": "ლოგები — {{name}}",
@@ -309,7 +307,6 @@
     "line_count": "{{count}} სტრიქონი",
     "line_count_filtered": "{{shown}} / {{total}} სტრიქონი"
   },
-
   "run_modal": {
     "aria_label": "გაშვება — {{name}}",
     "title": "გაშვება — {{name}}",
@@ -324,7 +321,6 @@
     "complete": "✓ ბრძანება შესრულდა",
     "failed": "✗ ბრძანება ვერ შესრულდა"
   },
-
   "exec_modal": {
     "aria_label": "ტერმინალი — {{name}}",
     "title": "ტერმინალი — {{name}}",
@@ -340,7 +336,6 @@
     "font_size_decrease": "შრიფტის ზომის შემცირება",
     "font_size_increase": "შრიფტის ზომის გაზრდა"
   },
-
   "events_modal": {
     "aria_label": "მოვლენები — {{name}}",
     "title": "მოვლენები — {{name}}",
@@ -355,7 +350,6 @@
     "col_service": "სერვისი",
     "col_details": "დეტალები"
   },
-
   "top_modal": {
     "aria_label": "პროცესები — {{name}}",
     "title": "პროცესები — {{name}}",
@@ -363,7 +357,6 @@
     "error_title": "პროცესების ჩატვირთვა ვერ მოხერხდა",
     "empty": "გაშვებული პროცესები ვერ მოიძებნა."
   },
-
   "pull_modal": {
     "aria_label": "Pull — {{name}}",
     "title": "Pull — {{name}}",
@@ -372,7 +365,6 @@
     "failed": "✗ Pull ვერ მოხერხდა",
     "starting": "Pull იწყება…"
   },
-
   "pull_confirm_modal": {
     "aria_label": "Pull-ის დადასტურება — {{name}}",
     "title": "უახლესი სურათების pull — {{name}}",
@@ -384,7 +376,6 @@
     "unpinned_notice": "ფიქსირებული სურათები ყოველთვის იღებენ იმას, რასაც რეესტრი უახლესად თვლის და pull-ებს შორის ქცევის შეცვლის ყველაზე მეტი შანსი აქვთ.",
     "pull_button": "Pull"
   },
-
   "up_modal": {
     "aria_label": "გაშვება — {{name}}",
     "title": "გაშვება — {{name}}",
@@ -393,7 +384,6 @@
     "complete": "✓ გაშვება დასრულდა",
     "failed": "✗ გაშვება ვერ მოხერხდა"
   },
-
   "up_confirm_modal": {
     "aria_label": "გაშვების დადასტურება — {{name}}",
     "title": "გაშვება — {{name}}",
@@ -408,7 +398,6 @@
     "profiles_hint": "მხოლოდ შერჩეული პროფილით მონიშნული სერვისები გაეშვება.",
     "up_button": "გაშვება"
   },
-
   "info_modal": {
     "aria_label": "ინფო — {{name}}",
     "title": "{{name}} — ინფო",
@@ -441,7 +430,6 @@
     "copy_container_id": "კონტეინერის ID-ის კოპირება",
     "copy_image_ref": "სურათის მითითების კოპირება"
   },
-
   "prune_modal": {
     "aria_label_select": "რესურსების გასუფთავება — {{name}}",
     "title_select": "რესურსების გასუფთავება — {{name}}",
@@ -465,7 +453,6 @@
     "prune_button": "შერჩეულის გასუფთავება",
     "nothing_to_remove": "წასაშლელი არაფერია."
   },
-
   "downed_section": {
     "create_button": "შექმნა",
     "import_button": "იმპორტი",
@@ -485,12 +472,10 @@
     "depth_plus_aria": "სკანირების სიღრმის გაზრდა",
     "restore_button": "აღდგენა"
   },
-
   "stack_row": {
     "no_containers": "კონტეინერები ვერ მოიძებნა.",
     "containers_aria": "{{name}}-ის კონტეინერები"
   },
-
   "container_state": {
     "running": "მუშაობს",
     "paused": "შეჩერებული",
@@ -500,12 +485,10 @@
     "created": "შექმნილი",
     "removing": "წაიშლება"
   },
-
   "stats": {
     "cpu": "CPU",
     "mem": "მეხ"
   },
-
   "backup_modal": {
     "title": "{{name}}-ის სარეზერვო ასლი",
     "base_name_label": "არქივის სახელი",
@@ -519,7 +502,6 @@
     "success_body": "შენახულია {{path}}-ში",
     "warning_partial": "ზოგიერთი ფაილი გამოტოვებულია წვდომის შეცდომების გამო"
   },
-
   "restore_modal": {
     "title": "სტეკის სარეზერვო ასლიდან აღდგენა",
     "scan_dir_label": "საძიებო დირექტორია",
@@ -540,13 +522,11 @@
     "error_dest_exists": "სამიზნე გზა {{path}} უკვე არსებობს — გადაწერის თავიდან ასაცილებლად შეჩერდა",
     "error_unknown": "აღდგენა ვერ მოხერხდა (დეტალებისთვის შეამოწმეთ ბრაუზერის კონსოლი)"
   },
-
   "external_link_modal": {
     "aria_label": "გარე ბმულის გაფრთხილება",
     "title": "გარე ბმულის გახსნა",
     "warning_title": "გაგრძელებამდე ყოველთვის გადაამოწმეთ, რომ სამიზნე საიტი სანდოა."
   },
-
   "container_table": {
     "replica_count": "×{{count}}",
     "col_status": "სტატუსი",
@@ -554,7 +534,6 @@
     "col_image": "სურათი",
     "col_uptime": "მუშაობის დრო"
   },
-
   "scale_modal": {
     "title": "სერვისების მასშტაბირება — {{name}}",
     "confirm_title": "მასშტაბირების დადასტურება — {{name}}",
@@ -572,7 +551,6 @@
     "port_conflict_body": "შემდეგ სერვისებს სტატიკური ჰოსტ-პორტ ბაინდინგები აქვთ. Docker ვერ შეძლებს ერთზე მეტი რეპლიკის გაშვებას, რადგან ჰოსტ-პორტი მხოლოდ ერთ კონტეინერს შეუძლია დაუკავშირდეს:",
     "port_conflict_icon_title": "სტატიკური ჰოსტ-პორტ ბაინდინგები აქვს"
   },
-
   "settings": {
     "title": "პარამეტრები",
     "open_button": "პარამეტრები",
@@ -589,7 +567,6 @@
     "confirm_down_hint": "გამორთვისას, 'გამორთვა' დაუყოვნებლივ სრულდება კითხვის გარეშე.",
     "reset_defaults": "ნაგულისხმევის აღდგენა"
   },
-
   "toast": {
     "start_success": "{{name}} გაეშვა",
     "start_failed": "{{name}}-ის გაშვება ვერ მოხერხდა",

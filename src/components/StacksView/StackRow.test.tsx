@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, act } from "@testing-library/react";
+import { render, screen, fireEvent, act, within } from "@testing-library/react";
 import { StackRow } from "./StackRow";
 import type { ComposeStack } from "../../api";
 
@@ -33,9 +33,7 @@ const multiFileStack: ComposeStack = {
 const defaultProps = {
   stack,
   expanded: false,
-  selected: false,
   onToggle: vi.fn(),
-  onSelect: vi.fn(),
   onLogs: vi.fn(),
   onYaml: vi.fn(),
   onInfo: vi.fn(),
@@ -77,7 +75,7 @@ describe("StackRow", () => {
 
   it("renders Up button", () => {
     render(<StackRow {...defaultProps} />);
-    expect(screen.getByRole("button", { name: /Up/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^Up$/i })).toBeInTheDocument();
   });
 
   it("renders Stop button when running", () => {
@@ -87,8 +85,8 @@ describe("StackRow", () => {
 
   it("renders Start button when down", () => {
     render(<StackRow {...defaultProps} stack={{ ...stack, Status: "exit(2)" }} />);
-    expect(screen.queryByRole("button", { name: /Stop/i })).toBeNull();
-    expect(screen.getByRole("button", { name: /Start/i })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /^Stop$/i })).toBeNull();
+    expect(screen.getByRole("button", { name: /^Start$/i })).toBeInTheDocument();
   });
 
   it("renders Logs button", () => {
@@ -154,15 +152,18 @@ describe("StackRow", () => {
   it("calls onUp when Up button clicked", () => {
     const onUp = vi.fn();
     render(<StackRow {...defaultProps} onUp={onUp} />);
-    fireEvent.click(screen.getByRole("button", { name: /Up/i }));
+    fireEvent.click(screen.getByRole("button", { name: /^Up$/i }));
     expect(onUp).toHaveBeenCalledOnce();
   });
 
-  it("calls doAction with stop when Stop button clicked", () => {
+  it("calls doAction with stop when Stop button clicked and confirmed", () => {
     const doAction = vi.fn();
     mockUseStackActions.mockReturnValue({ acting: false, actionError: null, doAction });
     render(<StackRow {...defaultProps} />);
-    fireEvent.click(screen.getByRole("button", { name: /Stop/i }));
+    // Stop opens a confirm modal — click row Stop then confirm
+    fireEvent.click(screen.getByRole("button", { name: /^Stop$/i }));
+    const dialog = screen.getByRole("dialog");
+    fireEvent.click(within(dialog).getByRole("button", { name: /^Stop$/i }));
     expect(doAction).toHaveBeenCalledWith("stop", expect.any(Function));
   });
 
@@ -170,7 +171,7 @@ describe("StackRow", () => {
     const doAction = vi.fn();
     mockUseStackActions.mockReturnValue({ acting: false, actionError: null, doAction });
     render(<StackRow {...defaultProps} stack={{ ...stack, Status: "exit(2)" }} />);
-    fireEvent.click(screen.getByRole("button", { name: /Start/i }));
+    fireEvent.click(screen.getByRole("button", { name: /^Start$/i }));
     expect(doAction).toHaveBeenCalledWith("start", expect.any(Function));
   });
 
@@ -184,16 +185,19 @@ describe("StackRow", () => {
   it("opens dropdown when more-actions toggle clicked", async () => {
     render(<StackRow {...defaultProps} />);
     fireEvent.click(screen.getByRole("button", { name: /More actions for myapp/i }));
-    expect(screen.getByRole("menuitem", { name: /Restart/i })).toBeInTheDocument();
+    // Restart moved to row; dropdown should have Pause
+    expect(screen.getByRole("menuitem", { name: /^Pause$/i })).toBeInTheDocument();
     await act(async () => {});
   });
 
-  it("calls doAction with restart when Restart item clicked", async () => {
+  it("calls doAction with restart when Restart row button clicked and confirmed", async () => {
     const doAction = vi.fn();
     mockUseStackActions.mockReturnValue({ acting: false, actionError: null, doAction });
     render(<StackRow {...defaultProps} />);
-    fireEvent.click(screen.getByRole("button", { name: /More actions for myapp/i }));
-    fireEvent.click(screen.getByRole("menuitem", { name: /Restart/i }));
+    // Restart is now a row icon button that opens a confirm modal
+    fireEvent.click(screen.getByRole("button", { name: /^Restart$/i }));
+    const dialog = screen.getByRole("dialog");
+    fireEvent.click(within(dialog).getByRole("button", { name: /^Restart$/i }));
     expect(doAction).toHaveBeenCalledWith("restart", expect.any(Function));
     await act(async () => {});
   });
@@ -239,13 +243,12 @@ describe("StackRow", () => {
     await act(async () => {});
   });
 
-  it("calls onExec when Shell item clicked", async () => {
+  it("calls onExec when Shell row button clicked", () => {
     const onExec = vi.fn();
     render(<StackRow {...defaultProps} onExec={onExec} />);
-    fireEvent.click(screen.getByRole("button", { name: /More actions for myapp/i }));
-    fireEvent.click(screen.getByRole("menuitem", { name: /^Shell$/i }));
+    // Shell moved from dropdown to row icon button
+    fireEvent.click(screen.getByRole("button", { name: /^Shell$/i }));
     expect(onExec).toHaveBeenCalledOnce();
-    await act(async () => {});
   });
 
   it("calls onRun when Run item clicked", async () => {
@@ -343,8 +346,10 @@ describe("StackRow", () => {
     mockUseStackActions.mockReturnValue({ acting: false, actionError: null, doAction });
     mockUseStackContainers.mockReturnValue({ containers: [], loading: false, load: loadContainers, clear: clearContainers });
     render(<StackRow {...defaultProps} expanded={false} />);
-    loadContainers.mockClear(); // discard the initial on-mount load
-    fireEvent.click(screen.getByRole("button", { name: /Stop/i }));
+    loadContainers.mockClear();
+    // Stop now opens a confirm modal — click Stop then confirm
+    fireEvent.click(screen.getByRole("button", { name: /^Stop$/i }));
+    fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: /^Stop$/i }));
     await act(async () => { await capturedCallback?.(); });
     expect(clearContainers).toHaveBeenCalled();
     expect(loadContainers).not.toHaveBeenCalled();
@@ -361,7 +366,8 @@ describe("StackRow", () => {
     mockUseStackActions.mockReturnValue({ acting: false, actionError: null, doAction });
     mockUseStackContainers.mockReturnValue({ containers: [], loading: false, load: loadContainers, clear: clearContainers });
     render(<StackRow {...defaultProps} expanded />);
-    fireEvent.click(screen.getByRole("button", { name: /Stop/i }));
+    fireEvent.click(screen.getByRole("button", { name: /^Stop$/i }));
+    fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: /^Stop$/i }));
     await act(async () => { await capturedCallback?.(); });
     expect(clearContainers).toHaveBeenCalled();
     expect(loadContainers).toHaveBeenCalled();

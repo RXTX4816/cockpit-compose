@@ -5,7 +5,6 @@ import {
   Toolbar,
   ToolbarContent,
   ToolbarItem,
-  ToolbarGroup,
   Title,
   Button,
   EmptyState,
@@ -83,9 +82,6 @@ export function StacksView({ onRuntimeChange, dockerMissing }: Props) {
   const [manuallyDownedStacks, setManuallyDownedStacks] = useState<DownedStack[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilters, setActiveFilters] = useState<Set<StatusFilter>>(new Set());
-  const [selectedStacks, setSelectedStacks] = useState<Set<string>>(new Set());
-  const [bulkUpTarget, setBulkUpTarget] = useState<ComposeStack[]>([]);
-  const [bulkUpIdx, setBulkUpIdx] = useState(0);
 
   const [logsTarget, setLogsTarget] = useState<ComposeStack | null>(null);
   const [yamlTarget, setYamlTarget] = useState<ComposeStack | null>(null);
@@ -174,55 +170,6 @@ export function StacksView({ onRuntimeChange, dockerMissing }: Props) {
     });
   }, []);
 
-  const toggleSelectStack = useCallback((name: string) => {
-    setSelectedStacks(prev => {
-      const next = new Set(prev);
-      if (next.has(name)) next.delete(name);
-      else next.add(name);
-      return next;
-    });
-  }, []);
-
-  const allSelected = displayedStacks.length > 0 && displayedStacks.every(s => selectedStacks.has(s.Name));
-
-  const toggleSelectAll = useCallback(() => {
-    if (allSelected) {
-      setSelectedStacks(new Set());
-    } else {
-      setSelectedStacks(new Set(displayedStacks.map(s => s.Name)));
-    }
-  }, [allSelected, displayedStacks]);
-
-  const clearSelection = useCallback(() => setSelectedStacks(new Set()), []);
-
-  const handleBulkUp = useCallback(() => {
-    const targets = stacks.filter(s => selectedStacks.has(s.Name));
-    if (targets.length === 0) return;
-    setBulkUpTarget(targets);
-    setBulkUpIdx(0);
-    setUpConfirmTarget(targets[0]);
-    clearSelection();
-  }, [stacks, selectedStacks, clearSelection]);
-
-  const handleBulkDown = useCallback(() => {
-    const targets = stacks.filter(s => selectedStacks.has(s.Name));
-    if (targets.length > 0) { openDown(targets[0]); clearSelection(); }
-  }, [stacks, selectedStacks, openDown, clearSelection]);
-
-  const handleBulkPull = useCallback(() => {
-    const targets = stacks.filter(s => selectedStacks.has(s.Name));
-    if (targets.length > 0) { setPullConfirmTarget(targets[0]); clearSelection(); }
-  }, [stacks, selectedStacks, clearSelection]);
-
-  // Remove stacks that no longer exist from selection
-  useEffect(() => {
-    const names = new Set(stacks.map(s => s.Name));
-    setSelectedStacks(prev => {
-      const cleaned = new Set([...prev].filter(n => names.has(n)));
-      return cleaned.size !== prev.size ? cleaned : prev;
-    });
-  }, [stacks]);
-
   // Keyboard shortcuts: U=up, D=down, L=logs, E=edit, I=info — on the row currently focused
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -308,32 +255,6 @@ export function StacksView({ onRuntimeChange, dockerMissing }: Props) {
         </ToolbarContent>
       </Toolbar>
 
-      {(selectedStacks.size > 0 || displayedStacks.length > 0) && stacks.length > 0 && (
-        <div className="sv-bulk-bar">
-          <label className="sv-select-all-label">
-            <input
-              type="checkbox"
-              className="sv-select-all-checkbox"
-              checked={allSelected}
-              onChange={toggleSelectAll}
-              aria-label={t("stacks.select_all")}
-            />
-            {selectedStacks.size > 0
-              ? <span className="sv-bulk-count">{t("stacks.bulk_selected", { count: selectedStacks.size })}</span>
-              : <span className="sv-bulk-hint">{t("stacks.select_all")}</span>
-            }
-          </label>
-          {selectedStacks.size > 0 && (
-            <ToolbarGroup variant="action-group">
-              <Button variant="primary" size="sm" onClick={handleBulkUp}>{t("actions.up")}</Button>
-              <Button variant="secondary" size="sm" onClick={handleBulkDown}>{t("actions.down")}</Button>
-              <Button variant="secondary" size="sm" onClick={handleBulkPull}>{t("actions.pull")}</Button>
-              <Button variant="plain" size="sm" onClick={clearSelection}>{t("stacks.bulk_clear")}</Button>
-            </ToolbarGroup>
-          )}
-        </div>
-      )}
-
       {error && (
         <Alert
           variant="danger"
@@ -396,9 +317,7 @@ export function StacksView({ onRuntimeChange, dockerMissing }: Props) {
               key={stack.Name}
               stack={stack}
               expanded={expanded.has(stack.Name)}
-              selected={selectedStacks.has(stack.Name)}
               onToggle={() => toggle(stack.Name)}
-              onSelect={() => toggleSelectStack(stack.Name)}
               onLogs={() => setLogsTarget(stack)}
               onYaml={() => setYamlTarget(stack)}
               onInfo={() => setInfoTarget(stack)}
@@ -458,26 +377,14 @@ export function StacksView({ onRuntimeChange, dockerMissing }: Props) {
             setUpTarget(upConfirmTarget);
             setUpConfirmTarget(null);
           }}
-          onClose={() => { setUpConfirmTarget(null); setBulkUpTarget([]); }}
+          onClose={() => { setUpConfirmTarget(null); }}
         />
       )}
       {upTarget && (
         <UpModal
           stack={upTarget}
           profiles={upTargetProfiles}
-          onClose={() => {
-            setUpTarget(null);
-            void refresh();
-            // Advance to next bulk target if any
-            const nextIdx = bulkUpIdx + 1;
-            if (nextIdx < bulkUpTarget.length) {
-              setBulkUpIdx(nextIdx);
-              setUpConfirmTarget(bulkUpTarget[nextIdx]);
-            } else {
-              setBulkUpTarget([]);
-              setBulkUpIdx(0);
-            }
-          }}
+          onClose={() => { setUpTarget(null); void refresh(); }}
         />
       )}
       {pullConfirmTarget && (

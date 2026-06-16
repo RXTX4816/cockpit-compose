@@ -19,7 +19,6 @@
     "copy": "Kopyala",
     "copied": "Kopyalandı!"
   },
-
   "stacks": {
     "title": "Compose Yığınları",
     "aria_label": "Compose Yığınları",
@@ -49,7 +48,6 @@
     "bulk_selected": "{{count}} seçildi",
     "bulk_clear": "Seçimi temizle"
   },
-
   "actions": {
     "up": "Başlat",
     "up_title": "Yığını başlat veya değiştirilen konteynerleri yeniden oluştur",
@@ -79,19 +77,16 @@
     "backup": "Yedekle",
     "scale": "Ölçeklendir"
   },
-
   "health": {
     "passing": "Sağlık kontrolü geçti",
     "failing": "Sağlık kontrolü başarısız",
     "starting": "Sağlık kontrolü başlatılıyor"
   },
-
   "ports": {
     "external_tooltip": "Tüm arayüzlerde açık — tam ayrıntılar için yığın bilgisini açın",
     "localhost_tooltip": "Yalnızca localhost'a bağlı — tam ayrıntılar için yığın bilgisini açın",
     "specific_tooltip": "Belirli bir IP'ye bağlı — tam ayrıntılar için yığın bilgisini açın"
   },
-
   "footer": {
     "version": "Sürüm: {{version}}",
     "docker_version": "{{runtime}}: {{version}}",
@@ -102,7 +97,6 @@
     "help": "Yardım",
     "feedback": "Geri Bildirim / Hata Bildir"
   },
-
   "runtime": {
     "docker": "Docker",
     "podman": "Podman",
@@ -112,11 +106,9 @@
     "podman_confirm_body": "Podman desteği deneyseldir. Yapılandırmanıza bağlı olarak bazı özellikler beklendiği gibi çalışmayabilir — yığın keşfi, günlük akışı ve belirli compose komutları dahil.",
     "podman_suggest_docker_missing": "Bu sistemde Docker bulunamadı. Konteynerlerinizi yönetmek için Podman'a geçin."
   },
-
   "error_boundary": {
     "load_stacks_error": "Yığınlar yüklenemedi"
   },
-
   "down_modal": {
     "aria_label": "Durdurma işlemini onayla",
     "title": "\"{{name}}\" kaldırılsın mı?",
@@ -128,7 +120,6 @@
     "shared_networks_title": "Paylaşılan ağlar tespit edildi",
     "shared_with": "aynı zamanda şu tarafından kullanılıyor"
   },
-
   "kill_modal": {
     "aria_label": "Zorla sonlandırmayı onayla",
     "title": "\"{{name}}\" sonlandırılsın mı?",
@@ -137,7 +128,18 @@
     "body_suffix": ", anında zorla sonlandırır. Durdur'un aksine, süreçlerin temizlik yapma şansı olmaz. Yalnızca Durdur yanıt vermediğinde kullanın.",
     "confirm_button": "Tüm konteynerleri sonlandır"
   },
-
+  "stop_modal": {
+    "aria_label": "Confirm stop",
+    "title": "Stop \"{{name}}\"?",
+    "body": "This will stop all running containers in the stack. They will not be removed and can be started again.",
+    "confirm_button": "Stop"
+  },
+  "restart_modal": {
+    "aria_label": "Confirm restart",
+    "title": "Restart \"{{name}}\"?",
+    "body": "This will restart all running services. Services will briefly be unavailable.",
+    "confirm_button": "Restart"
+  },
   "delete_modal": {
     "aria_label": "Compose yığınını sil — {{name}}",
     "title": "Sil — {{name}}",
@@ -159,7 +161,6 @@
     "shared_networks_title": "Paylaşılan ağlar tespit edildi",
     "shared_with": "aynı zamanda şu tarafından kullanılıyor"
   },
-
   "create_modal": {
     "aria_label": "Yeni compose yığını oluştur",
     "title": "Compose yığını oluştur",
@@ -215,7 +216,6 @@
     "validation_extra_name_duplicate_primary": "Birincil compose dosyasıyla aynı ad kullanılamaz",
     "validation_extra_name_duplicate": "Dosya adı benzersiz olmalıdır"
   },
-
   "yaml_modal": {
     "aria_label": "Compose Dosyası — {{name}}",
     "title": "{{name}} — compose dosyası",
@@ -264,7 +264,6 @@
     "import_file_none": "Bu dizinde ek YAML dosyası bulunamadı.",
     "import_file_confirm_button": "İçe Aktar"
   },
-
   "env_modal": {
     "aria_label": "Env dosyası — {{name}}",
     "title": "{{name}} — env dosyası",
@@ -285,7 +284,6 @@
     "confirm_save_question": "Yine de kaydetmek istiyor musunuz?",
     "save_anyway_button": "Yine de kaydet"
   },
-
   "logs_modal": {
     "aria_label": "Günlükler — {{name}}",
     "title": "Günlükler — {{name}}",
@@ -309,7 +307,6 @@
     "line_count": "{{count}} satır",
     "line_count_filtered": "{{shown}} / {{total}} satır"
   },
-
   "run_modal": {
     "aria_label": "Çalıştır — {{name}}",
     "title": "Çalıştır — {{name}}",
@@ -324,7 +321,6 @@
     "complete": "✓ Komut tamamlandı",
     "failed": "✗ Komut başarısız"
   },
-
   "exec_modal": {
     "aria_label": "Terminal — {{name}}",
     "title": "Terminal — {{name}}",
@@ -340,7 +336,6 @@
     "font_size_decrease": "Yazı tipi boyutunu küçült",
     "font_size_increase": "Yazı tipi boyutunu büyüt"
   },
-
   "events_modal": {
     "aria_label": "Olaylar — {{name}}",
     "title": "Olaylar — {{name}}",
@@ -355,7 +350,6 @@
     "col_service": "Hizmet",
     "col_details": "Ayrıntılar"
   },
-
   "top_modal": {
     "aria_label": "İşlemler — {{name}}",
     "title": "İşlemler — {{name}}",
@@ -363,7 +357,6 @@
     "error_title": "İşlemler yüklenemedi",
     "empty": "Çalışan işlem bulunamadı."
   },
-
   "pull_modal": {
     "aria_label": "İndirme — {{name}}",
     "title": "İndirme — {{name}}",
@@ -372,7 +365,6 @@
     "failed": "✗ İndirme başarısız",
     "starting": "İndirme başlatılıyor…"
   },
-
   "pull_confirm_modal": {
     "aria_label": "İndirmeyi onayla — {{name}}",
     "title": "En son imajları indir — {{name}}",
@@ -384,7 +376,6 @@
     "unpinned_notice": "Sabitlenmemiş imajlar her zaman kayıt defterinin \"en son\" olarak kabul ettiğini indirir ve indirmeler arasında davranışı değiştirme olasılığı daha yüksektir.",
     "pull_button": "İndir"
   },
-
   "up_modal": {
     "aria_label": "Başlatma — {{name}}",
     "title": "Başlatma — {{name}}",
@@ -393,7 +384,6 @@
     "complete": "✓ Başlatma tamamlandı",
     "failed": "✗ Başlatma başarısız"
   },
-
   "up_confirm_modal": {
     "aria_label": "Başlatmayı onayla — {{name}}",
     "title": "Başlatma — {{name}}",
@@ -408,7 +398,6 @@
     "profiles_hint": "Yalnızca seçili profille etiketlenmiş hizmetler başlatılır.",
     "up_button": "Başlat"
   },
-
   "info_modal": {
     "aria_label": "Bilgi — {{name}}",
     "title": "{{name}} — bilgi",
@@ -441,7 +430,6 @@
     "copy_container_id": "Konteyner ID'sini kopyala",
     "copy_image_ref": "İmaj referansını kopyala"
   },
-
   "prune_modal": {
     "aria_label_select": "Kaynakları temizle — {{name}}",
     "title_select": "Kaynakları temizle — {{name}}",
@@ -465,7 +453,6 @@
     "prune_button": "Seçilenleri temizle",
     "nothing_to_remove": "Kaldırılacak hiçbir şey yok."
   },
-
   "downed_section": {
     "create_button": "Oluştur",
     "import_button": "İçe Aktar",
@@ -485,12 +472,10 @@
     "depth_plus_aria": "Tarama derinliğini artır",
     "restore_button": "Geri Yükle"
   },
-
   "stack_row": {
     "no_containers": "Hiç konteyner bulunamadı.",
     "containers_aria": "{{name}} konteynerleri"
   },
-
   "container_state": {
     "running": "çalışıyor",
     "paused": "duraklatıldı",
@@ -500,12 +485,10 @@
     "created": "oluşturuldu",
     "removing": "kaldırılıyor"
   },
-
   "stats": {
     "cpu": "CPU",
     "mem": "Bellek"
   },
-
   "backup_modal": {
     "title": "{{name}} Yedeği",
     "base_name_label": "Dosya adı",
@@ -519,7 +502,6 @@
     "success_body": "{{path}} konumuna kaydedildi",
     "warning_partial": "Bazı dosyalar izin hataları nedeniyle atlandı"
   },
-
   "restore_modal": {
     "title": "Yığını yedekten geri yükle",
     "scan_dir_label": "Aranacak dizin",
@@ -540,13 +522,11 @@
     "error_dest_exists": "Hedef yol {{path}} zaten var — üzerine yazmayı önlemek için iptal ediliyor",
     "error_unknown": "Geri yükleme başarısız oldu (ayrıntılar için tarayıcı konsolunu kontrol edin)"
   },
-
   "external_link_modal": {
     "aria_label": "Dış bağlantı uyarısı",
     "title": "Dış bağlantı açılıyor",
     "warning_title": "Devam etmeden önce hedef sitenin güvenilir olduğunu her zaman doğrulayın."
   },
-
   "container_table": {
     "replica_count": "×{{count}}",
     "col_status": "Durum",
@@ -554,7 +534,6 @@
     "col_image": "İmaj",
     "col_uptime": "Çalışma Süresi"
   },
-
   "scale_modal": {
     "title": "Hizmetleri ölçeklendir — {{name}}",
     "confirm_title": "Ölçeklendirmeyi onayla — {{name}}",
@@ -572,7 +551,6 @@
     "port_conflict_body": "Aşağıdaki hizmetlerin statik ana bilgisayar port bağlamaları var. Docker, bir ana bilgisayar portu yalnızca tek bir konteyner tarafından bağlanabildiğinden birden fazla replika başlatamaz:",
     "port_conflict_icon_title": "Statik ana bilgisayar port bağlamaları var"
   },
-
   "settings": {
     "title": "Ayarlar",
     "open_button": "Ayarlar",
@@ -589,7 +567,6 @@
     "confirm_down_hint": "Devre dışıyken 'Durdur' sormadan hemen çalışır.",
     "reset_defaults": "Varsayılanlara sıfırla"
   },
-
   "toast": {
     "start_success": "{{name}} başlatıldı",
     "start_failed": "{{name}} başlatılamadı",

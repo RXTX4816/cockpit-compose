@@ -19,7 +19,6 @@
     "copy": "Copia",
     "copied": "Copiato!"
   },
-
   "stacks": {
     "title": "Stack Compose",
     "aria_label": "Stack Compose",
@@ -49,7 +48,6 @@
     "bulk_selected": "{{count}} selezionati",
     "bulk_clear": "Annulla selezione"
   },
-
   "actions": {
     "up": "Avvia",
     "up_title": "Avvia lo stack o ricrea i container modificati",
@@ -79,19 +77,16 @@
     "backup": "Backup",
     "scale": "Scala"
   },
-
   "health": {
     "passing": "Controllo salute superato",
     "failing": "Controllo salute fallito",
     "starting": "Controllo salute in avvio"
   },
-
   "ports": {
     "external_tooltip": "Esposto su tutte le interfacce — apri le info dello stack per i dettagli completi",
     "localhost_tooltip": "Vincolato solo a localhost — apri le info dello stack per i dettagli completi",
     "specific_tooltip": "Vincolato a un IP specifico — apri le info dello stack per i dettagli completi"
   },
-
   "footer": {
     "version": "Versione: {{version}}",
     "docker_version": "{{runtime}}: {{version}}",
@@ -102,7 +97,6 @@
     "help": "Aiuto",
     "feedback": "Feedback / Segnala un bug"
   },
-
   "runtime": {
     "docker": "Docker",
     "podman": "Podman",
@@ -112,11 +106,9 @@
     "podman_confirm_body": "Il supporto di Podman è sperimentale. A seconda della tua configurazione, alcune funzionalità potrebbero non funzionare come previsto — incluse la scoperta degli stack, lo streaming dei log e alcuni comandi compose.",
     "podman_suggest_docker_missing": "Docker non è stato trovato su questo sistema. Passa a Podman per gestire i tuoi container."
   },
-
   "error_boundary": {
     "load_stacks_error": "Errore durante il caricamento degli stack"
   },
-
   "down_modal": {
     "aria_label": "Conferma arresto",
     "title": "Rimuovere \"{{name}}\"?",
@@ -128,7 +120,6 @@
     "shared_networks_title": "Reti condivise rilevate",
     "shared_with": "utilizzato anche da"
   },
-
   "kill_modal": {
     "aria_label": "Conferma terminazione forzata",
     "title": "Terminare forzatamente \"{{name}}\"?",
@@ -137,7 +128,18 @@
     "body_suffix": ", terminandoli immediatamente con la forza. A differenza di Ferma, i processi non hanno la possibilità di pulire. Usa solo quando Ferma non risponde.",
     "confirm_button": "Termina forzatamente tutti i container"
   },
-
+  "stop_modal": {
+    "aria_label": "Confirm stop",
+    "title": "Stop \"{{name}}\"?",
+    "body": "This will stop all running containers in the stack. They will not be removed and can be started again.",
+    "confirm_button": "Stop"
+  },
+  "restart_modal": {
+    "aria_label": "Confirm restart",
+    "title": "Restart \"{{name}}\"?",
+    "body": "This will restart all running services. Services will briefly be unavailable.",
+    "confirm_button": "Restart"
+  },
   "delete_modal": {
     "aria_label": "Elimina stack compose — {{name}}",
     "title": "Elimina — {{name}}",
@@ -159,7 +161,6 @@
     "shared_networks_title": "Reti condivise rilevate",
     "shared_with": "utilizzato anche da"
   },
-
   "create_modal": {
     "aria_label": "Crea nuovo stack compose",
     "title": "Crea stack compose",
@@ -215,7 +216,6 @@
     "validation_extra_name_duplicate_primary": "Non è possibile usare lo stesso nome del file compose principale",
     "validation_extra_name_duplicate": "Il nome del file deve essere univoco"
   },
-
   "yaml_modal": {
     "aria_label": "File Compose — {{name}}",
     "title": "{{name}} — file compose",
@@ -264,7 +264,6 @@
     "import_file_none": "Nessun file YAML aggiuntivo trovato in questa directory.",
     "import_file_confirm_button": "Importa"
   },
-
   "env_modal": {
     "aria_label": "File env — {{name}}",
     "title": "{{name}} — file env",
@@ -285,7 +284,6 @@
     "confirm_save_question": "Vuoi salvare comunque?",
     "save_anyway_button": "Salva comunque"
   },
-
   "logs_modal": {
     "aria_label": "Log — {{name}}",
     "title": "Log — {{name}}",
@@ -309,7 +307,6 @@
     "line_count": "{{count}} righe",
     "line_count_filtered": "{{shown}} / {{total}} righe"
   },
-
   "run_modal": {
     "aria_label": "Esegui — {{name}}",
     "title": "Esegui — {{name}}",
@@ -324,7 +321,6 @@
     "complete": "✓ Comando completato",
     "failed": "✗ Comando non riuscito"
   },
-
   "exec_modal": {
     "aria_label": "Terminale — {{name}}",
     "title": "Terminale — {{name}}",
@@ -340,7 +336,6 @@
     "font_size_decrease": "Diminuisci dimensione font",
     "font_size_increase": "Aumenta dimensione font"
   },
-
   "events_modal": {
     "aria_label": "Eventi — {{name}}",
     "title": "Eventi — {{name}}",
@@ -355,7 +350,6 @@
     "col_service": "Servizio",
     "col_details": "Dettagli"
   },
-
   "top_modal": {
     "aria_label": "Processi — {{name}}",
     "title": "Processi — {{name}}",
@@ -363,7 +357,6 @@
     "error_title": "Impossibile caricare i processi",
     "empty": "Nessun processo in esecuzione trovato."
   },
-
   "pull_modal": {
     "aria_label": "Scarica — {{name}}",
     "title": "Scarica — {{name}}",
@@ -372,7 +365,6 @@
     "failed": "✗ Download non riuscito",
     "starting": "Avvio del download…"
   },
-
   "pull_confirm_modal": {
     "aria_label": "Conferma download — {{name}}",
     "title": "Scarica le immagini più recenti — {{name}}",
@@ -384,7 +376,6 @@
     "unpinned_notice": "Le immagini non fissate scaricano sempre ciò che il registry considera \"più recente\" e hanno più probabilità di cambiare comportamento tra i download.",
     "pull_button": "Scarica"
   },
-
   "up_modal": {
     "aria_label": "Avvia — {{name}}",
     "title": "Avvia — {{name}}",
@@ -393,7 +384,6 @@
     "complete": "✓ Avvio completato",
     "failed": "✗ Avvio non riuscito"
   },
-
   "up_confirm_modal": {
     "aria_label": "Conferma avvio — {{name}}",
     "title": "Avvia — {{name}}",
@@ -408,7 +398,6 @@
     "profiles_hint": "Verranno avviati solo i servizi contrassegnati con un profilo selezionato.",
     "up_button": "Avvia"
   },
-
   "info_modal": {
     "aria_label": "Info — {{name}}",
     "title": "{{name}} — info",
@@ -441,7 +430,6 @@
     "copy_container_id": "Copia ID container",
     "copy_image_ref": "Copia riferimento immagine"
   },
-
   "prune_modal": {
     "aria_label_select": "Pulisci risorse — {{name}}",
     "title_select": "Pulisci risorse — {{name}}",
@@ -465,7 +453,6 @@
     "prune_button": "Pulisci selezionati",
     "nothing_to_remove": "Niente da rimuovere."
   },
-
   "downed_section": {
     "create_button": "Crea",
     "import_button": "Importa",
@@ -485,12 +472,10 @@
     "depth_plus_aria": "Aumenta profondità di scansione",
     "restore_button": "Ripristina"
   },
-
   "stack_row": {
     "no_containers": "Nessun container trovato.",
     "containers_aria": "Container {{name}}"
   },
-
   "container_state": {
     "running": "in esecuzione",
     "paused": "in pausa",
@@ -500,12 +485,10 @@
     "created": "creato",
     "removing": "rimozione"
   },
-
   "stats": {
     "cpu": "CPU",
     "mem": "Mem"
   },
-
   "backup_modal": {
     "title": "Backup {{name}}",
     "base_name_label": "Nome archivio",
@@ -519,7 +502,6 @@
     "success_body": "Salvato in {{path}}",
     "warning_partial": "Alcuni file sono stati saltati a causa di errori di permesso"
   },
-
   "restore_modal": {
     "title": "Ripristina stack dal backup",
     "scan_dir_label": "Directory di ricerca",
@@ -540,13 +522,11 @@
     "error_dest_exists": "Il percorso di destinazione {{path}} esiste già — interruzione per evitare la sovrascrittura",
     "error_unknown": "Ripristino non riuscito (controlla la console del browser per i dettagli)"
   },
-
   "external_link_modal": {
     "aria_label": "Avviso link esterno",
     "title": "Apertura di un link esterno",
     "warning_title": "Verifica sempre che il sito di destinazione sia affidabile prima di continuare."
   },
-
   "container_table": {
     "replica_count": "×{{count}}",
     "col_status": "Stato",
@@ -554,7 +534,6 @@
     "col_image": "Immagine",
     "col_uptime": "Tempo di attività"
   },
-
   "scale_modal": {
     "title": "Scala servizi — {{name}}",
     "confirm_title": "Conferma scalatura — {{name}}",
@@ -572,7 +551,6 @@
     "port_conflict_body": "I seguenti servizi hanno binding di porte host statici. Docker non sarà in grado di avviare più di una replica perché una porta host può essere associata solo da un singolo container:",
     "port_conflict_icon_title": "Ha binding di porte host statici"
   },
-
   "settings": {
     "title": "Impostazioni",
     "open_button": "Impostazioni",
@@ -589,7 +567,6 @@
     "confirm_down_hint": "Quando disattivato, 'Arresta' viene eseguito immediatamente senza chiedere.",
     "reset_defaults": "Ripristina impostazioni predefinite"
   },
-
   "toast": {
     "start_success": "{{name}} avviato",
     "start_failed": "Avvio di {{name}} non riuscito",

@@ -81,25 +81,6 @@
   transition: background 120ms ease;
 }
 
-/* Bulk select checkbox */
-.sr-select-wrap {
-  display: flex;
-  align-items: center;
-  padding-left: 0.75rem;
-  flex-shrink: 0;
-}
-
-.sr-select-checkbox {
-  width: 1rem;
-  height: 1rem;
-  cursor: pointer;
-  accent-color: var(--pf-t--global--color--brand--default);
-}
-
-.sr-row--selected {
-  background: rgba(0, 102, 204, 0.06) !important;
-}
-
 /* Health mini-dots */
 .sr-health-dots {
   display: flex;

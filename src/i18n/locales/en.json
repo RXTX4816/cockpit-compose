@@ -19,7 +19,6 @@
     "copy": "Copy",
     "copied": "Copied!"
   },
-
   "stacks": {
     "title": "Compose Stacks",
     "aria_label": "Compose stacks",
@@ -49,7 +48,6 @@
     "bulk_selected": "{{count}} selected",
     "bulk_clear": "Clear selection"
   },
-
   "actions": {
     "up": "Up",
     "up_title": "Start stack or recreate changed containers",
@@ -79,19 +77,16 @@
     "backup": "Backup",
     "scale": "Scale"
   },
-
   "health": {
     "passing": "Health check passing",
     "failing": "Health check failing",
     "starting": "Health check starting"
   },
-
   "ports": {
     "external_tooltip": "Exposed on all interfaces — open stack info for full details",
     "localhost_tooltip": "Bound to localhost only — open stack info for full details",
     "specific_tooltip": "Bound to a specific IP — open stack info for full details"
   },
-
   "footer": {
     "version": "Version: {{version}}",
     "docker_version": "{{runtime}}: {{version}}",
@@ -102,7 +97,6 @@
     "help": "Help",
     "feedback": "Feedback / Report bug"
   },
-
   "runtime": {
     "docker": "Docker",
     "podman": "Podman",
@@ -112,11 +106,9 @@
     "podman_confirm_body": "Podman support is experimental. Depending on your setup, some features may not work as expected — including stack discovery, log streaming, and certain compose commands.",
     "podman_suggest_docker_missing": "Docker was not found on this system. Switch to Podman to manage your containers."
   },
-
   "error_boundary": {
     "load_stacks_error": "Error loading stacks"
   },
-
   "down_modal": {
     "aria_label": "Confirm down",
     "title": "Remove \"{{name}}\"?",
@@ -128,7 +120,6 @@
     "shared_networks_title": "Shared networks detected",
     "shared_with": "also used by"
   },
-
   "kill_modal": {
     "aria_label": "Confirm kill",
     "title": "Kill \"{{name}}\"?",
@@ -137,7 +128,18 @@
     "body_suffix": ", forcefully terminating them immediately. Unlike Stop, processes have no chance to clean up. Use only when Stop does not respond.",
     "confirm_button": "Kill all containers"
   },
-
+  "stop_modal": {
+    "aria_label": "Confirm stop",
+    "title": "Stop \"{{name}}\"?",
+    "body": "This will stop all running containers in the stack. They will not be removed and can be started again.",
+    "confirm_button": "Stop"
+  },
+  "restart_modal": {
+    "aria_label": "Confirm restart",
+    "title": "Restart \"{{name}}\"?",
+    "body": "This will restart all running services. Services will briefly be unavailable.",
+    "confirm_button": "Restart"
+  },
   "delete_modal": {
     "aria_label": "Delete compose stack — {{name}}",
     "title": "Delete — {{name}}",
@@ -159,7 +161,6 @@
     "shared_networks_title": "Shared networks detected",
     "shared_with": "also used by"
   },
-
   "create_modal": {
     "aria_label": "Create new compose stack",
     "title": "Create compose stack",
@@ -215,7 +216,6 @@
     "validation_extra_name_duplicate_primary": "Cannot use the same name as the primary compose file",
     "validation_extra_name_duplicate": "Filename must be unique"
   },
-
   "yaml_modal": {
     "aria_label": "Compose file — {{name}}",
     "title": "{{name}} — compose file",
@@ -264,7 +264,6 @@
     "import_file_none": "No additional YAML files found in this directory.",
     "import_file_confirm_button": "Import"
   },
-
   "env_modal": {
     "aria_label": "Env file — {{name}}",
     "title": "{{name}} — env file",
@@ -285,7 +284,6 @@
     "confirm_save_question": "Do you want to save anyway?",
     "save_anyway_button": "Save Anyway"
   },
-
   "logs_modal": {
     "aria_label": "Logs — {{name}}",
     "title": "Logs — {{name}}",
@@ -309,7 +307,6 @@
     "line_count": "{{count}} lines",
     "line_count_filtered": "{{shown}} / {{total}} lines"
   },
-
   "run_modal": {
     "aria_label": "Run — {{name}}",
     "title": "Run — {{name}}",
@@ -324,7 +321,6 @@
     "complete": "✓ Command complete",
     "failed": "✗ Command failed"
   },
-
   "exec_modal": {
     "aria_label": "Shell — {{name}}",
     "title": "Shell — {{name}}",
@@ -340,7 +336,6 @@
     "font_size_decrease": "Decrease font size",
     "font_size_increase": "Increase font size"
   },
-
   "events_modal": {
     "aria_label": "Events — {{name}}",
     "title": "Events — {{name}}",
@@ -355,7 +350,6 @@
     "col_service": "Service",
     "col_details": "Details"
   },
-
   "top_modal": {
     "aria_label": "Top — {{name}}",
     "title": "Top — {{name}}",
@@ -363,7 +357,6 @@
     "error_title": "Could not load processes",
     "empty": "No running processes found."
   },
-
   "pull_modal": {
     "aria_label": "Pull — {{name}}",
     "title": "Pull — {{name}}",
@@ -372,7 +365,6 @@
     "failed": "✗ Pull failed",
     "starting": "Starting pull…"
   },
-
   "pull_confirm_modal": {
     "aria_label": "Confirm pull — {{name}}",
     "title": "Pull latest images — {{name}}",
@@ -384,7 +376,6 @@
     "unpinned_notice": "Unpinned images always pull whatever the registry considers \"latest\" and are most likely to change behaviour between pulls.",
     "pull_button": "Pull"
   },
-
   "up_modal": {
     "aria_label": "Up — {{name}}",
     "title": "Up — {{name}}",
@@ -393,7 +384,6 @@
     "complete": "✓ Up complete",
     "failed": "✗ Up failed"
   },
-
   "up_confirm_modal": {
     "aria_label": "Confirm up — {{name}}",
     "title": "Up — {{name}}",
@@ -408,7 +398,6 @@
     "profiles_hint": "Only services tagged with a selected profile will start.",
     "up_button": "Up"
   },
-
   "info_modal": {
     "aria_label": "Info — {{name}}",
     "title": "{{name}} — info",
@@ -441,7 +430,6 @@
     "copy_container_id": "Copy container ID",
     "copy_image_ref": "Copy image reference"
   },
-
   "prune_modal": {
     "aria_label_select": "Prune resources — {{name}}",
     "title_select": "Prune resources — {{name}}",
@@ -465,7 +453,6 @@
     "prune_button": "Prune selected",
     "nothing_to_remove": "Nothing to remove."
   },
-
   "downed_section": {
     "create_button": "Create",
     "import_button": "Import",
@@ -485,12 +472,10 @@
     "depth_plus_aria": "Increase scan depth",
     "restore_button": "Restore"
   },
-
   "stack_row": {
     "no_containers": "No containers found.",
     "containers_aria": "{{name}} containers"
   },
-
   "container_state": {
     "running": "running",
     "paused": "paused",
@@ -500,12 +485,10 @@
     "created": "created",
     "removing": "removing"
   },
-
   "stats": {
     "cpu": "CPU",
     "mem": "Mem"
   },
-
   "backup_modal": {
     "title": "Backup {{name}}",
     "base_name_label": "Archive name",
@@ -519,7 +502,6 @@
     "success_body": "Saved to {{path}}",
     "warning_partial": "Some files were skipped due to permission errors"
   },
-
   "restore_modal": {
     "title": "Restore stack from backup",
     "scan_dir_label": "Search directory",
@@ -540,13 +522,11 @@
     "error_dest_exists": "Target path {{path}} already exists — aborting to prevent overwrite",
     "error_unknown": "Restore failed (check browser console for details)"
   },
-
   "external_link_modal": {
     "aria_label": "External link warning",
     "title": "Opening external link",
     "warning_title": "Always verify that the destination site is trustworthy before continuing."
   },
-
   "container_table": {
     "replica_count": "×{{count}}",
     "col_status": "Status",
@@ -554,7 +534,6 @@
     "col_image": "Image",
     "col_uptime": "Uptime"
   },
-
   "settings": {
     "title": "Settings",
     "open_button": "Settings",
@@ -571,7 +550,6 @@
     "confirm_down_hint": "When disabled, 'Down' runs immediately without asking.",
     "reset_defaults": "Reset to defaults"
   },
-
   "toast": {
     "start_success": "{{name}} started",
     "start_failed": "Failed to start {{name}}",
@@ -584,7 +562,6 @@
     "unpause_success": "{{name}} unpaused",
     "unpause_failed": "Failed to unpause {{name}}"
   },
-
   "scale_modal": {
     "title": "Scale services — {{name}}",
     "confirm_title": "Confirm scaling — {{name}}",

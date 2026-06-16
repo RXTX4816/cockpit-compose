@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, type MouseEvent } from "react";
 import { useTranslation } from "react-i18next";
 import {
   DataListItem,
@@ -13,6 +13,10 @@ import {
   DropdownList,
   DropdownItem,
   MenuToggle,
+  Modal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
   Divider,
   Spinner,
   Tooltip,
@@ -26,9 +30,10 @@ import {
 import {
   CheckCircleIcon,
   ExclamationTriangleIcon,
-  TimesCircleIcon,
+  ArrowAltCircleDownIcon,
   DownloadIcon,
   TerminalIcon,
+  FileAltIcon,
   PencilAltIcon,
   InfoCircleIcon,
   EllipsisVIcon,
@@ -69,9 +74,7 @@ function stackHealthSummary(containers: ComposeContainer[]): "healthy" | "unheal
 interface StackRowProps {
   stack: ComposeStack;
   expanded: boolean;
-  selected: boolean;
   onToggle: () => void;
-  onSelect: () => void;
   onLogs: () => void;
   onYaml: () => void;
   onInfo: () => void;
@@ -89,9 +92,11 @@ interface StackRowProps {
   onActingChange: (delta: 1 | -1) => void;
 }
 
-export function StackRow({ stack, expanded, selected, onToggle, onSelect, onLogs, onYaml, onInfo, onDown, onKill, onUp, onPull, onEvents, onTop, onExec, onRun, onPrune, onBackup, onScale, onActingChange }: StackRowProps) {
+export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, onDown, onKill, onUp, onPull, onEvents, onTop, onExec, onRun, onPrune, onBackup, onScale, onActingChange }: StackRowProps) {
   const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [confirmStopOpen, setConfirmStopOpen] = useState(false);
+  const [confirmRestartOpen, setConfirmRestartOpen] = useState(false);
 
   const baseStatus = parseStackStatus(stack.Status);
   const count = parseServiceCount(stack.Status);
@@ -103,7 +108,7 @@ export function StackRow({ stack, expanded, selected, onToggle, onSelect, onLogs
   const status = effectiveStatus(baseStatus, containers);
 
   useEffect(() => { void loadContainers(); }, [loadContainers]);
-  useAutoRefresh(loadContainers, 500, !expanded || acting);
+  useAutoRefresh(loadContainers, acting ? 500 : 3000, false);
 
   const handleToggle = () => {
     onToggle();
@@ -119,19 +124,16 @@ export function StackRow({ stack, expanded, selected, onToggle, onSelect, onLogs
 
   const healthSummary = stackHealthSummary(containers);
 
+  const handleRowClick = (e: MouseEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLElement;
+    if (target.closest("button, input, select, a, [role=button], .pf-v6-c-dropdown__toggle, .pf-v6-c-dropdown__menu")) return;
+    handleToggle();
+  };
+
   return (
-    <DataListItem isExpanded={expanded} aria-labelledby={`stack-${stack.Name}`} data-status={status} data-stack-name={stack.Name} className={selected ? "sr-row--selected" : ""}>
-      <DataListItemRow>
-        <div className="sr-select-wrap">
-          <input
-            type="checkbox"
-            className="sr-select-checkbox"
-            checked={selected}
-            onChange={onSelect}
-            aria-label={t("stacks.select_stack", { name: stack.Name })}
-            onClick={e => e.stopPropagation()}
-          />
-        </div>
+    <>
+    <DataListItem isExpanded={expanded} aria-labelledby={`stack-${stack.Name}`} data-status={status} data-stack-name={stack.Name}>
+      <DataListItemRow onClick={handleRowClick} style={{ cursor: "pointer" }}>
         <DataListToggle
           onClick={handleToggle}
           isExpanded={expanded}
@@ -205,7 +207,7 @@ export function StackRow({ stack, expanded, selected, onToggle, onSelect, onLogs
                   <Button
                     variant="secondary"
                     size="sm"
-                    onClick={() => void doAction("stop", afterAction)}
+                    onClick={() => setConfirmStopOpen(true)}
                     isLoading={acting}
                     isDisabled={acting}
                   >
@@ -233,7 +235,19 @@ export function StackRow({ stack, expanded, selected, onToggle, onSelect, onLogs
                       className="sr-down-btn"
                       aria-label={t("actions.down_title")}
                     >
-                      <TimesCircleIcon />
+                      <ArrowAltCircleDownIcon />
+                    </Button>
+                  </Tooltip>
+
+                  <Tooltip content={t("actions.restart")}>
+                    <Button
+                      variant="plain"
+                      size="sm"
+                      onClick={() => setConfirmRestartOpen(true)}
+                      isDisabled={acting || status === "stopped" || status === "unknown"}
+                      aria-label={t("actions.restart")}
+                    >
+                      <RedoAltIcon />
                     </Button>
                   </Tooltip>
 
@@ -243,15 +257,27 @@ export function StackRow({ stack, expanded, selected, onToggle, onSelect, onLogs
                     </Button>
                   </Tooltip>
 
+                  <Tooltip content={t("actions.shell")}>
+                    <Button variant="plain" size="sm" onClick={onExec} aria-label={t("actions.shell")}>
+                      <TerminalIcon />
+                    </Button>
+                  </Tooltip>
+
                   <Tooltip content={t("actions.logs_title")}>
                     <Button variant="plain" size="sm" onClick={onLogs} aria-label={t("actions.logs_title")}>
-                      <TerminalIcon />
+                      <FileAltIcon />
                     </Button>
                   </Tooltip>
 
                   <Tooltip content={t("actions.edit_title")}>
                     <Button variant="plain" size="sm" onClick={onYaml} isDisabled={acting} aria-label={t("actions.edit_title")}>
                       <PencilAltIcon />
+                    </Button>
+                  </Tooltip>
+
+                  <Tooltip content={t("actions.backup")}>
+                    <Button variant="plain" size="sm" onClick={onBackup} aria-label={t("actions.backup")}>
+                      <ArchiveIcon />
                     </Button>
                   </Tooltip>
 
@@ -288,14 +314,6 @@ export function StackRow({ stack, expanded, selected, onToggle, onSelect, onLogs
                     </DropdownItem>
                     <Divider key="div-scale" component="li" />
                     <DropdownItem
-                      key="restart"
-                      icon={<RedoAltIcon />}
-                      isDisabled={status === "stopped" || status === "unknown"}
-                      onClick={() => { setMenuOpen(false); void doAction("restart", afterAction); }}
-                    >
-                      {t("actions.restart")}
-                    </DropdownItem>
-                    <DropdownItem
                       key="pause"
                       icon={status === "paused" ? <PlayCircleIcon /> : <PauseCircleIcon />}
                       isDisabled={status === "stopped" || status === "unknown"}
@@ -312,14 +330,8 @@ export function StackRow({ stack, expanded, selected, onToggle, onSelect, onLogs
                     <DropdownItem key="top" icon={<ListAltIcon />} onClick={() => { setMenuOpen(false); onTop(); }}>
                       {t("actions.top")}
                     </DropdownItem>
-                    <DropdownItem key="exec" icon={<TerminalIcon />} onClick={() => { setMenuOpen(false); onExec(); }}>
-                      {t("actions.shell")}
-                    </DropdownItem>
                     <DropdownItem key="run" icon={<PlayIcon />} onClick={() => { setMenuOpen(false); onRun(); }}>
                       {t("actions.run")}
-                    </DropdownItem>
-                    <DropdownItem key="backup" icon={<ArchiveIcon />} onClick={() => { setMenuOpen(false); onBackup(); }}>
-                      {t("actions.backup")}
                     </DropdownItem>
                     <Divider key="div1" component="li" />
                     <DropdownItem key="prune" icon={<BroomIcon />} isDanger onClick={() => { setMenuOpen(false); onPrune(); }}>
@@ -357,5 +369,56 @@ export function StackRow({ stack, expanded, selected, onToggle, onSelect, onLogs
         </div>
       </DataListContent>
     </DataListItem>
+
+    {confirmStopOpen && (
+      <Modal
+        isOpen
+        variant="small"
+        onClose={() => setConfirmStopOpen(false)}
+        aria-label={t("stop_modal.aria_label")}
+      >
+        <ModalHeader title={t("stop_modal.title", { name: stack.Name })} />
+        <ModalBody>
+          <p>{t("stop_modal.body")}</p>
+        </ModalBody>
+        <ModalFooter>
+          <Button
+            variant="danger"
+            onClick={() => { setConfirmStopOpen(false); void doAction("stop", afterAction); }}
+          >
+            {t("stop_modal.confirm_button")}
+          </Button>
+          <Button variant="link" onClick={() => setConfirmStopOpen(false)}>
+            {t("common.cancel")}
+          </Button>
+        </ModalFooter>
+      </Modal>
+    )}
+
+    {confirmRestartOpen && (
+      <Modal
+        isOpen
+        variant="small"
+        onClose={() => setConfirmRestartOpen(false)}
+        aria-label={t("restart_modal.aria_label")}
+      >
+        <ModalHeader title={t("restart_modal.title", { name: stack.Name })} />
+        <ModalBody>
+          <p>{t("restart_modal.body")}</p>
+        </ModalBody>
+        <ModalFooter>
+          <Button
+            variant="warning"
+            onClick={() => { setConfirmRestartOpen(false); void doAction("restart", afterAction); }}
+          >
+            {t("restart_modal.confirm_button")}
+          </Button>
+          <Button variant="link" onClick={() => setConfirmRestartOpen(false)}>
+            {t("common.cancel")}
+          </Button>
+        </ModalFooter>
+      </Modal>
+    )}
+    </>
   );
 }
