@@ -620,6 +620,85 @@ YAML
         pgdata:
         redisdata:
         appdata:
+  # ── prune feature test stacks (suffix: _prunetest) ───────────────────────────
+  # pinned-version: single service with a pinned semver tag.
+  # Scenario: bump the tag in the file (e.g. v3.0 → v3.1), re-up → old image
+  # should appear in prune Images section.
+  - path: /home/test/testcompose/pinned-version_prunetest/docker-compose.yml
+    permissions: '0644'
+    content: |
+      services:
+        app:
+          image: traefik:v3.0
+          command: ["version"]
+          restart: "no"
+  # shared-image-a + shared-image-b: two independent stacks that both use nginx:alpine.
+  # Scenario: down shared-image-a, open its prune dialog → nginx:alpine must NOT
+  # appear because shared-image-b is still running with the same image.
+  - path: /home/test/testcompose/shared-image-a_prunetest/docker-compose.yml
+    permissions: '0644'
+    content: |
+      services:
+        web:
+          image: nginx:alpine
+          ports:
+            - "8096:80"
+  - path: /home/test/testcompose/shared-image-b_prunetest/docker-compose.yml
+    permissions: '0644'
+    content: |
+      services:
+        proxy:
+          image: nginx:alpine
+          ports:
+            - "8097:80"
+  # latest-tag: stack using an explicit ":latest" tag (no version pinning).
+  # Scenario: prune while running → image must NOT appear (tagless/latest detection).
+  - path: /home/test/testcompose/latest-tag_prunetest/docker-compose.yml
+    permissions: '0644'
+    content: |
+      services:
+        cache:
+          image: redis:latest
+          ports:
+            - "8098:6379"
+  # stable-tag: non-semver channel tag (lts, stable, unstable, etc.).
+  # Scenario: verify prune handles named-channel tags the same as latest.
+  - path: /home/test/testcompose/stable-tag_prunetest/docker-compose.yml
+    permissions: '0644'
+    content: |
+      services:
+        app:
+          image: node:lts-alpine
+          command: node -e "setInterval(()=>{},1000)"
+          ports:
+            - "8099:3000"
+  # exited-containers: one-shot job that exits immediately (restart: "no").
+  # Scenario: up → job exits at once → prune Containers section should list it.
+  # Also: run the same stack a second time without --rm to accumulate more stopped
+  # containers (use the Run action in the UI with "echo hello" twice).
+  - path: /home/test/testcompose/exited-containers_prunetest/docker-compose.yml
+    permissions: '0644'
+    content: |
+      services:
+        job:
+          image: busybox
+          command: sh -c "echo job-done"
+          restart: "no"
+  # named-volumes: stack with a named volume.
+  # Scenario: up, then down (not prune) → volume becomes dangling → prune with
+  # Volumes checkbox enabled should list pgdata_prunetest.
+  - path: /home/test/testcompose/named-volumes_prunetest/docker-compose.yml
+    permissions: '0644'
+    content: |
+      services:
+        db:
+          image: postgres:alpine
+          environment:
+            POSTGRES_PASSWORD: secret
+          volumes:
+            - pgdata_prunetest:/var/lib/postgresql/data
+      volumes:
+        pgdata_prunetest:
 YAML
 
   # ── runcmd ───────────────────────────────────────────────────────────────────
