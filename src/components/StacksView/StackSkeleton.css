@@ -1,0 +1,58 @@
+.ssk-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  border: 1px solid var(--pf-t--global--border--color--default);
+  border-radius: var(--pf-t--global--border--radius--200);
+  overflow: hidden;
+}
+
+.ssk-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.65rem 1rem;
+  background: var(--pf-t--global--background--color--primary--default);
+  border-left: 3px solid var(--pf-t--global--border--color--default);
+}
+
+.ssk-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ssk-toggle {
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 2px;
+  background: var(--pf-t--global--border--color--default);
+  flex-shrink: 0;
+  opacity: 0.4;
+}
+
+.ssk-cell--name    { flex: 2; }
+.ssk-cell--services { flex: 1; }
+.ssk-cell--stats   { flex: 3; }
+.ssk-cell--actions { flex: 2; justify-content: flex-end; }
+
+.ssk-shimmer {
+  height: 0.875rem;
+  border-radius: 4px;
+  background: linear-gradient(
+    90deg,
+    var(--pf-t--global--border--color--default) 25%,
+    rgba(255,255,255,0.06) 50%,
+    var(--pf-t--global--border--color--default) 75%
+  );
+  background-size: 400% 100%;
+  animation: ssk-wave 1.6s ease-in-out infinite;
+}
+
+.ssk-btn  { width: 3.5rem; height: 1.75rem; border-radius: 3px; }
+.ssk-icon { width: 1.5rem; height: 1.5rem; border-radius: 50%; margin-left: 0.15rem; }
+
+@keyframes ssk-wave {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}

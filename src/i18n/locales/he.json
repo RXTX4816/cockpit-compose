@@ -15,7 +15,9 @@
     "fetch": "אחזור",
     "nothing_found": "לא נמצא דבר.",
     "unknown": "לא ידוע",
-    "continue": "המשך"
+    "continue": "המשך",
+    "copy": "העתק",
+    "copied": "הועתק!"
   },
 
   "stacks": {
@@ -30,7 +32,22 @@
     "status_partial": "חלקי",
     "status_stopped": "עצור",
     "status_paused": "מושהה",
-    "status_unknown": "לא ידוע"
+    "status_unknown": "לא ידוע",
+    "empty_create": "צור ערימה",
+    "empty_import": "ייבא קיים",
+    "no_results_title": "לא נמצאו ערימות תואמות",
+    "no_results_body": "נסה שם אחר או נקה את הפילטרים הפעילים.",
+    "clear_filters": "נקה פילטרים",
+    "refreshing": "מרענן ערימות",
+    "search_placeholder": "חפש ערימות…",
+    "filter_tooltip_running": "הצג רק ערימות פעילות",
+    "filter_tooltip_partial": "הצג רק ערימות חלקיות",
+    "filter_tooltip_stopped": "הצג רק ערימות עצורות",
+    "filter_tooltip_paused": "הצג רק ערימות מושהות",
+    "select_stack": "בחר {{name}}",
+    "select_all": "בחר הכל",
+    "bulk_selected": "{{count}} נבחרו",
+    "bulk_clear": "נקה בחירה"
   },
 
   "actions": {
@@ -80,6 +97,8 @@
     "docker_version": "{{runtime}}: {{version}}",
     "compose_version": "{{runtime}} Compose: {{version}}",
     "rootless": "ללא הרשאות root",
+    "rootless_help_title": "מצב ללא הרשאות root",
+    "rootless_help_body": "Docker או Podman פועל במצב ללא הרשאות root — מכולות פועלות כמשתמש שלך, לא כ-root. זה משפר את האבטחה אך עלול להגביל חלק מהתכונות כגון כריכת פורטים מועדפים (<1024), גישה לנתיבי מערכת, או שימוש בנהגי רשת מסוימים.",
     "help": "עזרה",
     "feedback": "משוב / דווח על באג"
   },
@@ -90,7 +109,8 @@
     "toggle_label": "סביבת הרצת מכולות",
     "not_installed": "{{runtime}} לא נמצא — התקן אותו כדי לעבור",
     "podman_confirm_title": "מעבר ל-Podman",
-    "podman_confirm_body": "תמיכת Podman היא ניסיונית. בהתאם להגדרות שלך, חלק מהתכונות עשויות לא לעבוד כצפוי — כולל גילוי ערימות, שידור יומנים ופקודות compose מסוימות."
+    "podman_confirm_body": "תמיכת Podman היא ניסיונית. בהתאם להגדרות שלך, חלק מהתכונות עשויות לא לעבוד כצפוי — כולל גילוי ערימות, שידור יומנים ופקודות compose מסוימות.",
+    "podman_suggest_docker_missing": "Docker לא נמצא במערכת זו. עבור ל-Podman לניהול המכולות שלך."
   },
 
   "error_boundary": {
@@ -199,6 +219,7 @@
   "yaml_modal": {
     "aria_label": "קובץ Compose — {{name}}",
     "title": "{{name}} — קובץ compose",
+    "unsaved_changes": "שינויים שלא נשמרו",
     "env_file_button": "קובץ env",
     "history_button": "היסטוריה ({{count}})",
     "edit_button": "עריכה",
@@ -275,7 +296,18 @@
     "limit_notice": "מציג {{count}} שורות אחרונות",
     "waiting": "ממתין ליומנים…",
     "service_all": "כל השירותים",
-    "search_placeholder": "חפש ביומנים…"
+    "search_placeholder": "חפש ביומנים…",
+    "regex_tooltip": "הפעל חיפוש ביטויים רגולריים",
+    "level_all": "הכל",
+    "level_error": "שגיאה",
+    "level_warn": "אזהרה",
+    "level_info": "מידע",
+    "download_tooltip": "הורד יומנים",
+    "timestamps_tooltip": "הפעל חותמות זמן",
+    "scroll_top": "עבור לראש",
+    "scroll_bottom": "עבור לתחתית",
+    "line_count": "{{count}} שורות",
+    "line_count_filtered": "{{shown}} / {{total}} שורות"
   },
 
   "run_modal": {
@@ -303,7 +335,10 @@
     "field_user": "משתמש (אופציונלי)",
     "field_user_placeholder": "root",
     "open_shell_button": "פתח מסוף",
-    "disconnect_button": "נתק"
+    "disconnect_button": "נתק",
+    "font_size_label": "גודל גופן",
+    "font_size_decrease": "הקטן גופן",
+    "font_size_increase": "הגדל גופן"
   },
 
   "events_modal": {
@@ -402,7 +437,9 @@
     "net_col_name": "רשת",
     "net_col_shared": "משותף עם",
     "net_shared_icon_title": "רשת משותפת",
-    "profiles_label": "פרופילים"
+    "profiles_label": "פרופילים",
+    "copy_container_id": "העתק מזהה מכולה",
+    "copy_image_ref": "העתק הפניית תמונה"
   },
 
   "prune_modal": {
@@ -534,5 +571,35 @@
     "port_conflict_title": "קונפליקט פורטים סביר",
     "port_conflict_body": "לשירותים הבאים יש קישורי פורטים סטטיים של המארח. Docker לא יוכל להפעיל יותר מרפליקה אחת מאחר שפורט מארח יכול להיות מחובר רק על ידי מכולה בודדת:",
     "port_conflict_icon_title": "יש לו קישורי פורטים סטטיים של המארח"
+  },
+
+  "settings": {
+    "title": "הגדרות",
+    "open_button": "הגדרות",
+    "refresh_interval_label": "מרווח רענון אוטומטי",
+    "refresh_interval_hint": "עד כמה לעתים קרובות לשאול את Docker על מצב הערימה (200–5000 מ\"ש).",
+    "log_line_limit_label": "מגבלת שורות יומן",
+    "log_line_limit_hint": "מספר מרבי של שורות יומן לשמור בזיכרון לכל הפעלה (100–20000).",
+    "toasts_label": "התראות",
+    "toasts_on": "מופעל",
+    "toasts_off": "כבוי",
+    "confirm_down_label": "אישור לפני כיבוי",
+    "confirm_down_on": "הצג תיבת אישור",
+    "confirm_down_off": "דלג על אישור",
+    "confirm_down_hint": "כשמבוטל, 'כיבוי' פועל מיידית ללא שאלה.",
+    "reset_defaults": "אפס לברירות מחדל"
+  },
+
+  "toast": {
+    "start_success": "{{name}} הופעל",
+    "start_failed": "ההפעלה של {{name}} נכשלה",
+    "stop_success": "{{name}} עצר",
+    "stop_failed": "העצירה של {{name}} נכשלה",
+    "restart_success": "{{name}} הופעל מחדש",
+    "restart_failed": "ההפעלה מחדש של {{name}} נכשלה",
+    "pause_success": "{{name}} הושהה",
+    "pause_failed": "ההשהיה של {{name}} נכשלה",
+    "unpause_success": "{{name}} הוסר מהשהיה",
+    "unpause_failed": "הסרת ההשהיה של {{name}} נכשלה"
   }
 }

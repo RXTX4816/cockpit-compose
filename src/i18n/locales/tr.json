@@ -15,7 +15,9 @@
     "fetch": "Getir",
     "nothing_found": "Hiçbir şey bulunamadı.",
     "unknown": "bilinmiyor",
-    "continue": "Devam Et"
+    "continue": "Devam Et",
+    "copy": "Kopyala",
+    "copied": "Kopyalandı!"
   },
 
   "stacks": {
@@ -30,7 +32,22 @@
     "status_partial": "kısmi",
     "status_stopped": "durduruldu",
     "status_paused": "duraklatıldı",
-    "status_unknown": "bilinmiyor"
+    "status_unknown": "bilinmiyor",
+    "empty_create": "Yığın oluştur",
+    "empty_import": "Mevcut olanı içe aktar",
+    "no_results_title": "Eşleşen yığın yok",
+    "no_results_body": "Farklı bir ad deneyin veya aktif filtreleri temizleyin.",
+    "clear_filters": "Filtreleri temizle",
+    "refreshing": "Yığınlar yenileniyor",
+    "search_placeholder": "Yığın ara…",
+    "filter_tooltip_running": "Yalnızca çalışan yığınları göster",
+    "filter_tooltip_partial": "Yalnızca kısmen çalışan yığınları göster",
+    "filter_tooltip_stopped": "Yalnızca durdurulan yığınları göster",
+    "filter_tooltip_paused": "Yalnızca duraklatılan yığınları göster",
+    "select_stack": "{{name}} seç",
+    "select_all": "Tümünü seç",
+    "bulk_selected": "{{count}} seçildi",
+    "bulk_clear": "Seçimi temizle"
   },
 
   "actions": {
@@ -80,6 +97,8 @@
     "docker_version": "{{runtime}}: {{version}}",
     "compose_version": "{{runtime}} Compose: {{version}}",
     "rootless": "Rootsuz",
+    "rootless_help_title": "Rootless modu",
+    "rootless_help_body": "Docker veya Podman rootless modda çalışıyor — konteynerler root olarak değil, sizin kullanıcınız olarak çalışıyor. Bu güvenliği artırır ancak ayrıcalıklı bağlantı noktaları (<1024) bağlama, sistem yollarına erişim veya belirli ağ sürücülerini kullanma gibi bazı özellikleri kısıtlayabilir.",
     "help": "Yardım",
     "feedback": "Geri Bildirim / Hata Bildir"
   },
@@ -90,7 +109,8 @@
     "toggle_label": "Konteyner çalışma zamanı",
     "not_installed": "{{runtime}} bulunamadı — geçiş yapmak için yükleyin",
     "podman_confirm_title": "Podman'a Geç",
-    "podman_confirm_body": "Podman desteği deneyseldir. Yapılandırmanıza bağlı olarak bazı özellikler beklendiği gibi çalışmayabilir — yığın keşfi, günlük akışı ve belirli compose komutları dahil."
+    "podman_confirm_body": "Podman desteği deneyseldir. Yapılandırmanıza bağlı olarak bazı özellikler beklendiği gibi çalışmayabilir — yığın keşfi, günlük akışı ve belirli compose komutları dahil.",
+    "podman_suggest_docker_missing": "Bu sistemde Docker bulunamadı. Konteynerlerinizi yönetmek için Podman'a geçin."
   },
 
   "error_boundary": {
@@ -199,6 +219,7 @@
   "yaml_modal": {
     "aria_label": "Compose Dosyası — {{name}}",
     "title": "{{name}} — compose dosyası",
+    "unsaved_changes": "Kaydedilmemiş değişiklikler",
     "env_file_button": "Env dosyası",
     "history_button": "Geçmiş ({{count}})",
     "edit_button": "Düzenle",
@@ -275,7 +296,18 @@
     "limit_notice": "son {{count}} satır gösteriliyor",
     "waiting": "Günlükler bekleniyor…",
     "service_all": "Tüm hizmetler",
-    "search_placeholder": "Günlüklerde ara…"
+    "search_placeholder": "Günlüklerde ara…",
+    "regex_tooltip": "Regex aramayı aç/kapat",
+    "level_all": "Tümü",
+    "level_error": "Hata",
+    "level_warn": "Uyarı",
+    "level_info": "Bilgi",
+    "download_tooltip": "Günlükleri indir",
+    "timestamps_tooltip": "Zaman damgalarını aç/kapat",
+    "scroll_top": "En üste git",
+    "scroll_bottom": "En alta git",
+    "line_count": "{{count}} satır",
+    "line_count_filtered": "{{shown}} / {{total}} satır"
   },
 
   "run_modal": {
@@ -303,7 +335,10 @@
     "field_user": "Kullanıcı (isteğe bağlı)",
     "field_user_placeholder": "root",
     "open_shell_button": "Terminal aç",
-    "disconnect_button": "Bağlantıyı kes"
+    "disconnect_button": "Bağlantıyı kes",
+    "font_size_label": "Yazı tipi boyutu",
+    "font_size_decrease": "Yazı tipi boyutunu küçült",
+    "font_size_increase": "Yazı tipi boyutunu büyüt"
   },
 
   "events_modal": {
@@ -402,7 +437,9 @@
     "net_col_name": "Ağ",
     "net_col_shared": "Paylaşılan",
     "net_shared_icon_title": "Paylaşılan ağ",
-    "profiles_label": "Profiller"
+    "profiles_label": "Profiller",
+    "copy_container_id": "Konteyner ID'sini kopyala",
+    "copy_image_ref": "İmaj referansını kopyala"
   },
 
   "prune_modal": {
@@ -534,5 +571,35 @@
     "port_conflict_title": "Olası port çakışması",
     "port_conflict_body": "Aşağıdaki hizmetlerin statik ana bilgisayar port bağlamaları var. Docker, bir ana bilgisayar portu yalnızca tek bir konteyner tarafından bağlanabildiğinden birden fazla replika başlatamaz:",
     "port_conflict_icon_title": "Statik ana bilgisayar port bağlamaları var"
+  },
+
+  "settings": {
+    "title": "Ayarlar",
+    "open_button": "Ayarlar",
+    "refresh_interval_label": "Otomatik yenileme aralığı",
+    "refresh_interval_hint": "Docker'ın yığın durumu için ne sıklıkta sorgulanacağı (200–5000 ms).",
+    "log_line_limit_label": "Günlük satırı sınırı",
+    "log_line_limit_hint": "Oturum başına bellekte tutulacak maksimum günlük satırı sayısı (100–20000).",
+    "toasts_label": "Bildirimler",
+    "toasts_on": "Etkin",
+    "toasts_off": "Devre dışı",
+    "confirm_down_label": "Durdurmadan önce onayla",
+    "confirm_down_on": "Onay iletişim kutusunu göster",
+    "confirm_down_off": "Onayı atla",
+    "confirm_down_hint": "Devre dışıyken 'Durdur' sormadan hemen çalışır.",
+    "reset_defaults": "Varsayılanlara sıfırla"
+  },
+
+  "toast": {
+    "start_success": "{{name}} başlatıldı",
+    "start_failed": "{{name}} başlatılamadı",
+    "stop_success": "{{name}} durduruldu",
+    "stop_failed": "{{name}} durdurulamadı",
+    "restart_success": "{{name}} yeniden başlatıldı",
+    "restart_failed": "{{name}} yeniden başlatılamadı",
+    "pause_success": "{{name}} duraklatıldı",
+    "pause_failed": "{{name}} duraklatılamadı",
+    "unpause_success": "{{name}} devam ettirildi",
+    "unpause_failed": "{{name}} devam ettirilemedi"
   }
 }

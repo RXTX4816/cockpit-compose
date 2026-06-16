@@ -1,4 +1,4 @@
-import { useState, useEffect, type ComponentType, type CSSProperties } from "react";
+import { useState, useEffect, useCallback, type ComponentType, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Modal,
@@ -7,7 +7,10 @@ import {
   Spinner,
   Alert,
   Label,
+  Tooltip,
+  Button,
 } from "@patternfly/react-core";
+import { CopyIcon } from "@patternfly/react-icons";
 import { CheckCircleIcon, ExclamationTriangleIcon, GlobeIcon, InProgressIcon, LaptopIcon, NetworkIcon } from "@patternfly/react-icons";
 import {
   type ComposeStack,
@@ -40,6 +43,24 @@ const MODAL_BIND_ICONS: Record<ParsedPort["bindType"], { Icon: ComponentType<{ c
 interface Props {
   stack: ComposeStack;
   onClose: () => void;
+}
+
+function CopyButton({ text, label }: { text: string; label?: string }) {
+  const { t } = useTranslation();
+  const [copied, setCopied] = useState(false);
+  const handleCopy = useCallback(() => {
+    void navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    });
+  }, [text]);
+  return (
+    <Tooltip content={copied ? t("common.copied") : (label ?? t("common.copy"))}>
+      <Button variant="plain" size="sm" onClick={handleCopy} aria-label={label ?? t("common.copy")} style={{ padding: "0 0.2rem", minWidth: 0 }}>
+        <CopyIcon style={{ fontSize: "0.8rem", opacity: copied ? 1 : 0.5 }} color={copied ? "var(--pf-t--global--icon--color--status--success--default)" : undefined} />
+      </Button>
+    </Tooltip>
+  );
 }
 
 export function StackInfoModal({ stack, onClose }: Props) {
@@ -216,7 +237,10 @@ export function StackInfoModal({ stack, onClose }: Props) {
                       {c.ID && (
                         <>
                           <span>Container ID</span>
-                          <code className="sim-card-code">{c.ID.slice(0, 12)}</code>
+                          <span style={{ display: "flex", alignItems: "center", gap: "0.2rem" }}>
+                            <code className="sim-card-code">{c.ID.slice(0, 12)}</code>
+                            <CopyButton text={c.ID} label={t("info_modal.copy_container_id")} />
+                          </span>
                         </>
                       )}
 
@@ -297,7 +321,12 @@ export function StackInfoModal({ stack, onClose }: Props) {
                 {images.map((img, i) => (
                   <tr key={img.ID || i}>
                     <td>{img.ContainerName || "—"}</td>
-                    <td><code>{img.Repository || "—"}</code></td>
+                    <td>
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: "0.2rem" }}>
+                        <code>{img.Repository || "—"}</code>
+                        {img.Repository && <CopyButton text={img.Tag ? `${img.Repository}:${img.Tag}` : img.Repository} label={t("info_modal.copy_image_ref")} />}
+                      </span>
+                    </td>
                     <td><code>{img.Tag || "—"}</code></td>
                     <td>{img.Size != null ? formatBytes(Number(img.Size)) : "—"}</td>
                     <td>{img.CreatedAt || "—"}</td>

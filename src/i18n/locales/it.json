@@ -15,7 +15,9 @@
     "fetch": "Recupera",
     "nothing_found": "Nessun risultato trovato.",
     "unknown": "sconosciuto",
-    "continue": "Continua"
+    "continue": "Continua",
+    "copy": "Copia",
+    "copied": "Copiato!"
   },
 
   "stacks": {
@@ -30,7 +32,22 @@
     "status_partial": "parziale",
     "status_stopped": "fermo",
     "status_paused": "in pausa",
-    "status_unknown": "sconosciuto"
+    "status_unknown": "sconosciuto",
+    "empty_create": "Crea stack",
+    "empty_import": "Importa esistente",
+    "no_results_title": "Nessuno stack corrisponde",
+    "no_results_body": "Prova un nome diverso o rimuovi i filtri attivi.",
+    "clear_filters": "Rimuovi filtri",
+    "refreshing": "Aggiornamento stack",
+    "search_placeholder": "Cerca stack…",
+    "filter_tooltip_running": "Mostra solo stack in esecuzione",
+    "filter_tooltip_partial": "Mostra solo stack parzialmente in esecuzione",
+    "filter_tooltip_stopped": "Mostra solo stack fermi",
+    "filter_tooltip_paused": "Mostra solo stack in pausa",
+    "select_stack": "Seleziona {{name}}",
+    "select_all": "Seleziona tutto",
+    "bulk_selected": "{{count}} selezionati",
+    "bulk_clear": "Annulla selezione"
   },
 
   "actions": {
@@ -80,6 +97,8 @@
     "docker_version": "{{runtime}}: {{version}}",
     "compose_version": "{{runtime}} Compose: {{version}}",
     "rootless": "Senza root",
+    "rootless_help_title": "Modalità senza root",
+    "rootless_help_body": "Docker o Podman è in esecuzione in modalità senza root — i container vengono eseguiti come il tuo utente, non come root. Questo migliora la sicurezza ma può limitare alcune funzionalità come l'associazione di porte privilegiate (<1024), l'accesso ai percorsi di sistema o l'utilizzo di determinati driver di rete.",
     "help": "Aiuto",
     "feedback": "Feedback / Segnala un bug"
   },
@@ -90,7 +109,8 @@
     "toggle_label": "Runtime container",
     "not_installed": "{{runtime}} non trovato — installalo per cambiare",
     "podman_confirm_title": "Passa a Podman",
-    "podman_confirm_body": "Il supporto di Podman è sperimentale. A seconda della tua configurazione, alcune funzionalità potrebbero non funzionare come previsto — incluse la scoperta degli stack, lo streaming dei log e alcuni comandi compose."
+    "podman_confirm_body": "Il supporto di Podman è sperimentale. A seconda della tua configurazione, alcune funzionalità potrebbero non funzionare come previsto — incluse la scoperta degli stack, lo streaming dei log e alcuni comandi compose.",
+    "podman_suggest_docker_missing": "Docker non è stato trovato su questo sistema. Passa a Podman per gestire i tuoi container."
   },
 
   "error_boundary": {
@@ -199,6 +219,7 @@
   "yaml_modal": {
     "aria_label": "File Compose — {{name}}",
     "title": "{{name}} — file compose",
+    "unsaved_changes": "Modifiche non salvate",
     "env_file_button": "File env",
     "history_button": "Cronologia ({{count}})",
     "edit_button": "Modifica",
@@ -275,7 +296,18 @@
     "limit_notice": "mostrando le ultime {{count}} righe",
     "waiting": "In attesa dei log…",
     "service_all": "Tutti i servizi",
-    "search_placeholder": "Cerca nei log…"
+    "search_placeholder": "Cerca nei log…",
+    "regex_tooltip": "Attiva ricerca regex",
+    "level_all": "Tutti",
+    "level_error": "Errore",
+    "level_warn": "Avviso",
+    "level_info": "Info",
+    "download_tooltip": "Scarica log",
+    "timestamps_tooltip": "Attiva timestamp",
+    "scroll_top": "Vai all'inizio",
+    "scroll_bottom": "Vai alla fine",
+    "line_count": "{{count}} righe",
+    "line_count_filtered": "{{shown}} / {{total}} righe"
   },
 
   "run_modal": {
@@ -303,7 +335,10 @@
     "field_user": "Utente (opzionale)",
     "field_user_placeholder": "root",
     "open_shell_button": "Apri terminale",
-    "disconnect_button": "Disconnetti"
+    "disconnect_button": "Disconnetti",
+    "font_size_label": "Dimensione font",
+    "font_size_decrease": "Diminuisci dimensione font",
+    "font_size_increase": "Aumenta dimensione font"
   },
 
   "events_modal": {
@@ -402,7 +437,9 @@
     "net_col_name": "Rete",
     "net_col_shared": "Condiviso con",
     "net_shared_icon_title": "Rete condivisa",
-    "profiles_label": "Profili"
+    "profiles_label": "Profili",
+    "copy_container_id": "Copia ID container",
+    "copy_image_ref": "Copia riferimento immagine"
   },
 
   "prune_modal": {
@@ -534,5 +571,35 @@
     "port_conflict_title": "Conflitto di porte probabile",
     "port_conflict_body": "I seguenti servizi hanno binding di porte host statici. Docker non sarà in grado di avviare più di una replica perché una porta host può essere associata solo da un singolo container:",
     "port_conflict_icon_title": "Ha binding di porte host statici"
+  },
+
+  "settings": {
+    "title": "Impostazioni",
+    "open_button": "Impostazioni",
+    "refresh_interval_label": "Intervallo di aggiornamento automatico",
+    "refresh_interval_hint": "Con quale frequenza interrogare Docker per lo stato dello stack (200–5000 ms).",
+    "log_line_limit_label": "Limite righe log",
+    "log_line_limit_hint": "Numero massimo di righe di log da mantenere in memoria per sessione (100–20000).",
+    "toasts_label": "Notifiche",
+    "toasts_on": "Attivate",
+    "toasts_off": "Disattivate",
+    "confirm_down_label": "Conferma prima di arrestare",
+    "confirm_down_on": "Mostra finestra di conferma",
+    "confirm_down_off": "Salta conferma",
+    "confirm_down_hint": "Quando disattivato, 'Arresta' viene eseguito immediatamente senza chiedere.",
+    "reset_defaults": "Ripristina impostazioni predefinite"
+  },
+
+  "toast": {
+    "start_success": "{{name}} avviato",
+    "start_failed": "Avvio di {{name}} non riuscito",
+    "stop_success": "{{name}} arrestato",
+    "stop_failed": "Arresto di {{name}} non riuscito",
+    "restart_success": "{{name}} riavviato",
+    "restart_failed": "Riavvio di {{name}} non riuscito",
+    "pause_success": "{{name}} in pausa",
+    "pause_failed": "Messa in pausa di {{name}} non riuscita",
+    "unpause_success": "{{name}} ripreso",
+    "unpause_failed": "Ripresa di {{name}} non riuscita"
   }
 }

@@ -15,7 +15,9 @@
     "fetch": "取得",
     "nothing_found": "見つかりませんでした。",
     "unknown": "不明",
-    "continue": "続ける"
+    "continue": "続ける",
+    "copy": "コピー",
+    "copied": "コピーしました！"
   },
 
   "stacks": {
@@ -30,7 +32,22 @@
     "status_partial": "一部実行中",
     "status_stopped": "停止",
     "status_paused": "一時停止",
-    "status_unknown": "不明"
+    "status_unknown": "不明",
+    "empty_create": "スタックを作成",
+    "empty_import": "既存をインポート",
+    "no_results_title": "一致するスタックがありません",
+    "no_results_body": "別の名前を試すか、アクティブなフィルターを解除してください。",
+    "clear_filters": "フィルターをクリア",
+    "refreshing": "スタックを更新中",
+    "search_placeholder": "スタックを検索…",
+    "filter_tooltip_running": "実行中のスタックのみ表示",
+    "filter_tooltip_partial": "一部実行中のスタックのみ表示",
+    "filter_tooltip_stopped": "停止中のスタックのみ表示",
+    "filter_tooltip_paused": "一時停止中のスタックのみ表示",
+    "select_stack": "{{name}} を選択",
+    "select_all": "すべて選択",
+    "bulk_selected": "{{count}} 件選択中",
+    "bulk_clear": "選択をクリア"
   },
 
   "actions": {
@@ -80,6 +97,8 @@
     "docker_version": "{{runtime}}: {{version}}",
     "compose_version": "{{runtime}} Compose: {{version}}",
     "rootless": "rootless",
+    "rootless_help_title": "ルートレスモード",
+    "rootless_help_body": "DockerまたはPodmanがルートレスモードで実行されています — コンテナはrootではなくあなたのユーザーとして実行されます。これによりセキュリティが向上しますが、特権ポート（<1024）のバインド、システムパスへのアクセス、特定のネットワークドライバーの使用など、一部の機能が制限される場合があります。",
     "help": "ヘルプ",
     "feedback": "フィードバック / バグ報告"
   },
@@ -90,7 +109,8 @@
     "toggle_label": "コンテナランタイム",
     "not_installed": "{{runtime}} が見つかりません — 切り替えるにはインストールしてください",
     "podman_confirm_title": "Podman に切り替え",
-    "podman_confirm_body": "Podman のサポートは実験的です。設定によっては、スタックの検出、ログのストリーミング、一部の compose コマンドなどが期待通りに動作しない場合があります。"
+    "podman_confirm_body": "Podman のサポートは実験的です。設定によっては、スタックの検出、ログのストリーミング、一部の compose コマンドなどが期待通りに動作しない場合があります。",
+    "podman_suggest_docker_missing": "このシステムにDockerが見つかりませんでした。コンテナを管理するにはPodmanに切り替えてください。"
   },
 
   "error_boundary": {
@@ -199,6 +219,7 @@
   "yaml_modal": {
     "aria_label": "Compose ファイル — {{name}}",
     "title": "{{name}} — compose ファイル",
+    "unsaved_changes": "未保存の変更",
     "env_file_button": "env ファイル",
     "history_button": "履歴 ({{count}})",
     "edit_button": "編集",
@@ -275,7 +296,18 @@
     "limit_notice": "最後の {{count}} 行を表示",
     "waiting": "ログを待機中…",
     "service_all": "すべてのサービス",
-    "search_placeholder": "ログを検索…"
+    "search_placeholder": "ログを検索…",
+    "regex_tooltip": "正規表現検索を切り替え",
+    "level_all": "すべて",
+    "level_error": "エラー",
+    "level_warn": "警告",
+    "level_info": "情報",
+    "download_tooltip": "ログをダウンロード",
+    "timestamps_tooltip": "タイムスタンプを切り替え",
+    "scroll_top": "先頭に移動",
+    "scroll_bottom": "末尾に移動",
+    "line_count": "{{count}} 行",
+    "line_count_filtered": "{{shown}} / {{total}} 行"
   },
 
   "run_modal": {
@@ -303,7 +335,10 @@
     "field_user": "ユーザー（オプション）",
     "field_user_placeholder": "root",
     "open_shell_button": "シェルを開く",
-    "disconnect_button": "切断"
+    "disconnect_button": "切断",
+    "font_size_label": "フォントサイズ",
+    "font_size_decrease": "フォントサイズを小さく",
+    "font_size_increase": "フォントサイズを大きく"
   },
 
   "events_modal": {
@@ -402,7 +437,9 @@
     "net_col_name": "ネットワーク",
     "net_col_shared": "共有先",
     "net_shared_icon_title": "共有ネットワーク",
-    "profiles_label": "プロファイル"
+    "profiles_label": "プロファイル",
+    "copy_container_id": "コンテナIDをコピー",
+    "copy_image_ref": "イメージ参照をコピー"
   },
 
   "prune_modal": {
@@ -534,5 +571,35 @@
     "port_conflict_title": "ポートの競合の可能性",
     "port_conflict_body": "次のサービスには静的なホストポートバインディングがあります。ホストポートは 1 つのコンテナしかバインドできないため、Docker は複数のレプリカを起動できません:",
     "port_conflict_icon_title": "静的なホストポートバインディングがあります"
+  },
+
+  "settings": {
+    "title": "設定",
+    "open_button": "設定",
+    "refresh_interval_label": "自動更新間隔",
+    "refresh_interval_hint": "スタック状態のためにDockerをポーリングする頻度（200〜5000ミリ秒）。",
+    "log_line_limit_label": "ログ行数制限",
+    "log_line_limit_hint": "セッションごとにメモリに保持するログ行の最大数（100〜20000）。",
+    "toasts_label": "通知",
+    "toasts_on": "有効",
+    "toasts_off": "無効",
+    "confirm_down_label": "停止前に確認",
+    "confirm_down_on": "確認ダイアログを表示",
+    "confirm_down_off": "確認をスキップ",
+    "confirm_down_hint": "無効にすると、「停止」は確認なしにすぐ実行されます。",
+    "reset_defaults": "デフォルトにリセット"
+  },
+
+  "toast": {
+    "start_success": "{{name}} を開始しました",
+    "start_failed": "{{name}} の開始に失敗しました",
+    "stop_success": "{{name}} を停止しました",
+    "stop_failed": "{{name}} の停止に失敗しました",
+    "restart_success": "{{name}} を再起動しました",
+    "restart_failed": "{{name}} の再起動に失敗しました",
+    "pause_success": "{{name}} を一時停止しました",
+    "pause_failed": "{{name}} の一時停止に失敗しました",
+    "unpause_success": "{{name}} を再開しました",
+    "unpause_failed": "{{name}} の再開に失敗しました"
   }
 }

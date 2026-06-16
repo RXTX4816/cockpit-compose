@@ -15,7 +15,9 @@
     "fetch": "Получить",
     "nothing_found": "Ничего не найдено.",
     "unknown": "неизвестно",
-    "continue": "Продолжить"
+    "continue": "Продолжить",
+    "copy": "Копировать",
+    "copied": "Скопировано!"
   },
 
   "stacks": {
@@ -30,7 +32,22 @@
     "status_partial": "частично",
     "status_stopped": "остановлен",
     "status_paused": "на паузе",
-    "status_unknown": "неизвестно"
+    "status_unknown": "неизвестно",
+    "empty_create": "Создать стек",
+    "empty_import": "Импортировать существующий",
+    "no_results_title": "Стеки не найдены",
+    "no_results_body": "Попробуйте другое имя или сбросьте активные фильтры.",
+    "clear_filters": "Сбросить фильтры",
+    "refreshing": "Обновление стеков",
+    "search_placeholder": "Поиск стеков…",
+    "filter_tooltip_running": "Показывать только запущенные стеки",
+    "filter_tooltip_partial": "Показывать только частично запущенные стеки",
+    "filter_tooltip_stopped": "Показывать только остановленные стеки",
+    "filter_tooltip_paused": "Показывать только стеки на паузе",
+    "select_stack": "Выбрать {{name}}",
+    "select_all": "Выбрать все",
+    "bulk_selected": "Выбрано: {{count}}",
+    "bulk_clear": "Снять выбор"
   },
 
   "actions": {
@@ -80,6 +97,8 @@
     "docker_version": "{{runtime}}: {{version}}",
     "compose_version": "{{runtime}} Compose: {{version}}",
     "rootless": "Без root",
+    "rootless_help_title": "Режим без root",
+    "rootless_help_body": "Docker или Podman работает в режиме без root — контейнеры запускаются от имени вашего пользователя, а не root. Это повышает безопасность, но может ограничить некоторые функции, такие как привязка привилегированных портов (<1024), доступ к системным путям или использование определённых сетевых драйверов.",
     "help": "Помощь",
     "feedback": "Обратная связь / Сообщить об ошибке"
   },
@@ -90,7 +109,8 @@
     "toggle_label": "Среда выполнения контейнеров",
     "not_installed": "{{runtime}} не найден — установите его для переключения",
     "podman_confirm_title": "Переключиться на Podman",
-    "podman_confirm_body": "Поддержка Podman является экспериментальной. В зависимости от вашей конфигурации некоторые функции могут работать некорректно — в том числе обнаружение стеков, потоковая передача логов и определённые команды compose."
+    "podman_confirm_body": "Поддержка Podman является экспериментальной. В зависимости от вашей конфигурации некоторые функции могут работать некорректно — в том числе обнаружение стеков, потоковая передача логов и определённые команды compose.",
+    "podman_suggest_docker_missing": "Docker не найден в этой системе. Переключитесь на Podman для управления контейнерами."
   },
 
   "error_boundary": {
@@ -241,7 +261,8 @@
     "import_file_title": "Импорт существующего файла",
     "import_file_select_label": "Доступные файлы",
     "import_file_none": "В этом каталоге не найдено дополнительных YAML-файлов.",
-    "import_file_confirm_button": "Импортировать"
+    "import_file_confirm_button": "Импортировать",
+    "unsaved_changes": "Несохранённые изменения"
   },
 
   "env_modal": {
@@ -275,7 +296,18 @@
     "limit_notice": "показаны последние {{count}} строк",
     "waiting": "Ожидание логов…",
     "service_all": "Все сервисы",
-    "search_placeholder": "Поиск в логах…"
+    "search_placeholder": "Поиск в логах…",
+    "regex_tooltip": "Переключить поиск по регулярным выражениям",
+    "level_all": "Все",
+    "level_error": "Ошибка",
+    "level_warn": "Предупреждение",
+    "level_info": "Инфо",
+    "download_tooltip": "Скачать логи",
+    "timestamps_tooltip": "Переключить временные метки",
+    "scroll_top": "Перейти в начало",
+    "scroll_bottom": "Перейти в конец",
+    "line_count": "{{count}} строк",
+    "line_count_filtered": "{{shown}} / {{total}} строк"
   },
 
   "run_modal": {
@@ -303,7 +335,10 @@
     "field_user": "Пользователь (необязательно)",
     "field_user_placeholder": "root",
     "open_shell_button": "Открыть терминал",
-    "disconnect_button": "Отключиться"
+    "disconnect_button": "Отключиться",
+    "font_size_label": "Размер шрифта",
+    "font_size_decrease": "Уменьшить шрифт",
+    "font_size_increase": "Увеличить шрифт"
   },
 
   "events_modal": {
@@ -402,7 +437,9 @@
     "net_col_name": "Сеть",
     "net_col_shared": "Общий с",
     "net_shared_icon_title": "Общая сеть",
-    "profiles_label": "Профили"
+    "profiles_label": "Профили",
+    "copy_container_id": "Копировать ID контейнера",
+    "copy_image_ref": "Копировать ссылку на образ"
   },
 
   "prune_modal": {
@@ -534,5 +571,35 @@
     "port_conflict_title": "Вероятный конфликт портов",
     "port_conflict_body": "Следующие сервисы имеют статические привязки портов хоста. Docker не сможет запустить более одной реплики, так как порт хоста может быть привязан только одним контейнером:",
     "port_conflict_icon_title": "Имеет статические привязки портов хоста"
+  },
+
+  "settings": {
+    "title": "Настройки",
+    "open_button": "Настройки",
+    "refresh_interval_label": "Интервал автообновления",
+    "refresh_interval_hint": "Как часто опрашивать Docker о состоянии стека (200–5000 мс).",
+    "log_line_limit_label": "Лимит строк лога",
+    "log_line_limit_hint": "Максимальное количество строк лога, хранимых в памяти за сессию (100–20000).",
+    "toasts_label": "Уведомления",
+    "toasts_on": "Включены",
+    "toasts_off": "Выключены",
+    "confirm_down_label": "Подтверждать перед остановкой",
+    "confirm_down_on": "Показывать диалог подтверждения",
+    "confirm_down_off": "Пропустить подтверждение",
+    "confirm_down_hint": "При выключении 'Остановить' выполняется сразу без запроса.",
+    "reset_defaults": "Сбросить настройки"
+  },
+
+  "toast": {
+    "start_success": "{{name}} запущен",
+    "start_failed": "Не удалось запустить {{name}}",
+    "stop_success": "{{name}} остановлен",
+    "stop_failed": "Не удалось остановить {{name}}",
+    "restart_success": "{{name}} перезапущен",
+    "restart_failed": "Не удалось перезапустить {{name}}",
+    "pause_success": "{{name}} на паузе",
+    "pause_failed": "Не удалось поставить {{name}} на паузу",
+    "unpause_success": "{{name}} возобновлён",
+    "unpause_failed": "Не удалось возобновить {{name}}"
   }
 }

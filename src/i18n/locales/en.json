@@ -15,22 +15,39 @@
     "fetch": "Fetch",
     "nothing_found": "Nothing found.",
     "unknown": "unknown",
-    "continue": "Continue"
+    "continue": "Continue",
+    "copy": "Copy",
+    "copied": "Copied!"
   },
 
   "stacks": {
     "title": "Compose Stacks",
     "aria_label": "Compose stacks",
-    "empty_title": "No compose stacks found",
-    "empty_body": "Start a project with docker/podman compose up -d and it will appear here.",
+    "empty_title": "No compose stacks are running",
+    "empty_body": "Start a project with docker/podman compose up -d and it will appear here, or create one below.",
+    "empty_create": "Create stack",
+    "empty_import": "Import existing",
+    "no_results_title": "No stacks match",
+    "no_results_body": "Try a different name or clear the active filters.",
+    "clear_filters": "Clear filters",
     "load_failed": "Failed to load stacks",
+    "refreshing": "Refreshing stacks",
     "service_count_one": "{{count}} service",
     "service_count_other": "{{count}} services",
     "status_running": "running",
     "status_partial": "partial",
     "status_stopped": "stopped",
     "status_paused": "paused",
-    "status_unknown": "unknown"
+    "status_unknown": "unknown",
+    "search_placeholder": "Search stacks…",
+    "filter_tooltip_running": "Show only running stacks",
+    "filter_tooltip_partial": "Show only partially running stacks",
+    "filter_tooltip_stopped": "Show only stopped stacks",
+    "filter_tooltip_paused": "Show only paused stacks",
+    "select_stack": "Select {{name}}",
+    "select_all": "Select all",
+    "bulk_selected": "{{count}} selected",
+    "bulk_clear": "Clear selection"
   },
 
   "actions": {
@@ -80,6 +97,8 @@
     "docker_version": "{{runtime}}: {{version}}",
     "compose_version": "{{runtime}} Compose: {{version}}",
     "rootless": "Rootless",
+    "rootless_help_title": "Rootless mode",
+    "rootless_help_body": "Docker or Podman is running in rootless mode — containers run as your user, not root. This improves security but may limit some features such as binding privileged ports (<1024), accessing system paths, or using certain network drivers.",
     "help": "Help",
     "feedback": "Feedback / Report bug"
   },
@@ -200,6 +219,7 @@
   "yaml_modal": {
     "aria_label": "Compose file — {{name}}",
     "title": "{{name}} — compose file",
+    "unsaved_changes": "Unsaved changes",
     "env_file_button": "Env file",
     "history_button": "History ({{count}})",
     "edit_button": "Edit",
@@ -276,7 +296,18 @@
     "limit_notice": "showing last {{count}} lines",
     "waiting": "Waiting for logs…",
     "service_all": "All services",
-    "search_placeholder": "Search logs…"
+    "search_placeholder": "Search logs…",
+    "regex_tooltip": "Toggle regex search",
+    "level_all": "All",
+    "level_error": "Error",
+    "level_warn": "Warn",
+    "level_info": "Info",
+    "download_tooltip": "Download logs",
+    "timestamps_tooltip": "Toggle timestamps",
+    "scroll_top": "Jump to top",
+    "scroll_bottom": "Jump to bottom",
+    "line_count": "{{count}} lines",
+    "line_count_filtered": "{{shown}} / {{total}} lines"
   },
 
   "run_modal": {
@@ -304,7 +335,10 @@
     "field_user": "User (optional)",
     "field_user_placeholder": "root",
     "open_shell_button": "Open shell",
-    "disconnect_button": "Disconnect"
+    "disconnect_button": "Disconnect",
+    "font_size_label": "Font size",
+    "font_size_decrease": "Decrease font size",
+    "font_size_increase": "Increase font size"
   },
 
   "events_modal": {
@@ -403,7 +437,9 @@
     "net_col_name": "Network",
     "net_col_shared": "Shared with",
     "net_shared_icon_title": "Shared network",
-    "profiles_label": "Profiles"
+    "profiles_label": "Profiles",
+    "copy_container_id": "Copy container ID",
+    "copy_image_ref": "Copy image reference"
   },
 
   "prune_modal": {
@@ -517,6 +553,36 @@
     "col_service": "Service",
     "col_image": "Image",
     "col_uptime": "Uptime"
+  },
+
+  "settings": {
+    "title": "Settings",
+    "open_button": "Settings",
+    "refresh_interval_label": "Auto-refresh interval",
+    "refresh_interval_hint": "How often to poll Docker for stack status (200–5000 ms).",
+    "log_line_limit_label": "Log line limit",
+    "log_line_limit_hint": "Maximum number of log lines to keep in memory per session (100–20000).",
+    "toasts_label": "Notifications",
+    "toasts_on": "Enabled",
+    "toasts_off": "Disabled",
+    "confirm_down_label": "Confirm before down",
+    "confirm_down_on": "Show confirmation dialog",
+    "confirm_down_off": "Skip confirmation",
+    "confirm_down_hint": "When disabled, 'Down' runs immediately without asking.",
+    "reset_defaults": "Reset to defaults"
+  },
+
+  "toast": {
+    "start_success": "{{name}} started",
+    "start_failed": "Failed to start {{name}}",
+    "stop_success": "{{name}} stopped",
+    "stop_failed": "Failed to stop {{name}}",
+    "restart_success": "{{name}} restarted",
+    "restart_failed": "Failed to restart {{name}}",
+    "pause_success": "{{name}} paused",
+    "pause_failed": "Failed to pause {{name}}",
+    "unpause_success": "{{name}} unpaused",
+    "unpause_failed": "Failed to unpause {{name}}"
   },
 
   "scale_modal": {

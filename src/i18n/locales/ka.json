@@ -15,7 +15,9 @@
     "fetch": "მიღება",
     "nothing_found": "არაფერი ვერ მოიძებნა.",
     "unknown": "უცნობი",
-    "continue": "გაგრძელება"
+    "continue": "გაგრძელება",
+    "copy": "კოპირება",
+    "copied": "დაკოპირდა!"
   },
 
   "stacks": {
@@ -30,7 +32,22 @@
     "status_partial": "ნაწილობრივ",
     "status_stopped": "გაჩერებული",
     "status_paused": "შეჩერებული",
-    "status_unknown": "უცნობი"
+    "status_unknown": "უცნობი",
+    "empty_create": "სტეკის შექმნა",
+    "empty_import": "არსებულის იმპორტი",
+    "no_results_title": "სტეკები არ მოიძებნა",
+    "no_results_body": "სცადეთ სხვა სახელი ან გაასუფთავეთ აქტიური ფილტრები.",
+    "clear_filters": "ფილტრების გასუფთავება",
+    "refreshing": "სტეკების განახლება",
+    "search_placeholder": "სტეკების ძებნა…",
+    "filter_tooltip_running": "მხოლოდ მომუშავე სტეკების ჩვენება",
+    "filter_tooltip_partial": "მხოლოდ ნაწილობრივ მომუშავე სტეკების ჩვენება",
+    "filter_tooltip_stopped": "მხოლოდ გაჩერებული სტეკების ჩვენება",
+    "filter_tooltip_paused": "მხოლოდ შეჩერებული სტეკების ჩვენება",
+    "select_stack": "{{name}}-ის არჩევა",
+    "select_all": "ყველის არჩევა",
+    "bulk_selected": "{{count}} არჩეული",
+    "bulk_clear": "არჩევის გასუფთავება"
   },
 
   "actions": {
@@ -80,6 +97,8 @@
     "docker_version": "{{runtime}}: {{version}}",
     "compose_version": "{{runtime}} Compose: {{version}}",
     "rootless": "root-ის გარეშე",
+    "rootless_help_title": "Rootless რეჟიმი",
+    "rootless_help_body": "Docker ან Podman მუშაობს rootless რეჟიმში — კონტეინერები მუშაობს თქვენი მომხმარებლის სახელით, არა root-ის. ეს აუმჯობესებს უსაფრთხოებას, მაგრამ შეიძლება შეზღუდოს ზოგიერთი ფუნქცია, მაგალითად, პრივილეგირებული პორტების (<1024) მიბმა, სისტემური მისამართების წვდომა ან გარკვეული ქსელის დრაივერების გამოყენება.",
     "help": "დახმარება",
     "feedback": "გამოხმაურება / შეცდომის შეტყობინება"
   },
@@ -90,7 +109,8 @@
     "toggle_label": "კონტეინერის runtime",
     "not_installed": "{{runtime}} ვერ მოიძებნა — გადართვისთვის დააინსტალირეთ",
     "podman_confirm_title": "Podman-ზე გადართვა",
-    "podman_confirm_body": "Podman-ის მხარდაჭერა ექსპერიმენტულია. თქვენი კონფიგურაციის მიხედვით, ზოგიერთი ფუნქცია შეიძლება მოსალოდნელად არ მუშაობდეს — მათ შორის სტეკების აღმოჩენა, ლოგების სტრიმინგი და გარკვეული compose ბრძანებები."
+    "podman_confirm_body": "Podman-ის მხარდაჭერა ექსპერიმენტულია. თქვენი კონფიგურაციის მიხედვით, ზოგიერთი ფუნქცია შეიძლება მოსალოდნელად არ მუშაობდეს — მათ შორის სტეკების აღმოჩენა, ლოგების სტრიმინგი და გარკვეული compose ბრძანებები.",
+    "podman_suggest_docker_missing": "Docker ამ სისტემაში ვერ მოიძებნა. გადადით Podman-ზე კონტეინერების სამართავად."
   },
 
   "error_boundary": {
@@ -199,6 +219,7 @@
   "yaml_modal": {
     "aria_label": "Compose ფაილი — {{name}}",
     "title": "{{name}} — compose ფაილი",
+    "unsaved_changes": "შეუნახავი ცვლილებები",
     "env_file_button": "env ფაილი",
     "history_button": "ისტორია ({{count}})",
     "edit_button": "რედაქტირება",
@@ -275,7 +296,18 @@
     "limit_notice": "ნაჩვენებია ბოლო {{count}} სტრიქონი",
     "waiting": "ლოგების მოლოდინი…",
     "service_all": "ყველა სერვისი",
-    "search_placeholder": "ლოგებში ძიება…"
+    "search_placeholder": "ლოგებში ძიება…",
+    "regex_tooltip": "რეგულარული გამოთქმის ძებნის ჩართვა/გამორთვა",
+    "level_all": "ყველა",
+    "level_error": "შეცდომა",
+    "level_warn": "გაფრთხილება",
+    "level_info": "ინფო",
+    "download_tooltip": "ლოგების ჩამოტვირთვა",
+    "timestamps_tooltip": "დროის ნიშნების ჩართვა/გამორთვა",
+    "scroll_top": "თავში გადასვლა",
+    "scroll_bottom": "ბოლოში გადასვლა",
+    "line_count": "{{count}} სტრიქონი",
+    "line_count_filtered": "{{shown}} / {{total}} სტრიქონი"
   },
 
   "run_modal": {
@@ -303,7 +335,10 @@
     "field_user": "მომხმარებელი (სურვილისამებრ)",
     "field_user_placeholder": "root",
     "open_shell_button": "ტერმინალის გახსნა",
-    "disconnect_button": "კავშირის გაწყვეტა"
+    "disconnect_button": "კავშირის გაწყვეტა",
+    "font_size_label": "შრიფტის ზომა",
+    "font_size_decrease": "შრიფტის ზომის შემცირება",
+    "font_size_increase": "შრიფტის ზომის გაზრდა"
   },
 
   "events_modal": {
@@ -402,7 +437,9 @@
     "net_col_name": "ქსელი",
     "net_col_shared": "გაზიარებულია",
     "net_shared_icon_title": "გაზიარებული ქსელი",
-    "profiles_label": "პროფილები"
+    "profiles_label": "პროფილები",
+    "copy_container_id": "კონტეინერის ID-ის კოპირება",
+    "copy_image_ref": "სურათის მითითების კოპირება"
   },
 
   "prune_modal": {
@@ -534,5 +571,35 @@
     "port_conflict_title": "პორტის კონფლიქტი სავარაუდოა",
     "port_conflict_body": "შემდეგ სერვისებს სტატიკური ჰოსტ-პორტ ბაინდინგები აქვთ. Docker ვერ შეძლებს ერთზე მეტი რეპლიკის გაშვებას, რადგან ჰოსტ-პორტი მხოლოდ ერთ კონტეინერს შეუძლია დაუკავშირდეს:",
     "port_conflict_icon_title": "სტატიკური ჰოსტ-პორტ ბაინდინგები აქვს"
+  },
+
+  "settings": {
+    "title": "პარამეტრები",
+    "open_button": "პარამეტრები",
+    "refresh_interval_label": "ავტომატური განახლების ინტერვალი",
+    "refresh_interval_hint": "რამდენად ხშირად გამოჰკითხოს Docker სტეკის სტატუსი (200–5000 მ.წ.).",
+    "log_line_limit_label": "ლოგის სტრიქონების ლიმიტი",
+    "log_line_limit_hint": "მეხსიერებაში შენახული ლოგის სტრიქონების მაქსიმალური რაოდენობა სესიაზე (100–20000).",
+    "toasts_label": "შეტყობინებები",
+    "toasts_on": "ჩართული",
+    "toasts_off": "გამორთული",
+    "confirm_down_label": "გამორთვამდე დადასტურება",
+    "confirm_down_on": "დადასტურების დიალოგის ჩვენება",
+    "confirm_down_off": "დადასტურების გამოტოვება",
+    "confirm_down_hint": "გამორთვისას, 'გამორთვა' დაუყოვნებლივ სრულდება კითხვის გარეშე.",
+    "reset_defaults": "ნაგულისხმევის აღდგენა"
+  },
+
+  "toast": {
+    "start_success": "{{name}} გაეშვა",
+    "start_failed": "{{name}}-ის გაშვება ვერ მოხერხდა",
+    "stop_success": "{{name}} გაჩერდა",
+    "stop_failed": "{{name}}-ის გაჩერება ვერ მოხერხდა",
+    "restart_success": "{{name}} გადაიტვირთა",
+    "restart_failed": "{{name}}-ის გადატვირთვა ვერ მოხერხდა",
+    "pause_success": "{{name}} შეჩერდა",
+    "pause_failed": "{{name}}-ის შეჩერება ვერ მოხერხდა",
+    "unpause_success": "{{name}} განახლდა",
+    "unpause_failed": "{{name}}-ის განახლება ვერ მოხერხდა"
   }
 }

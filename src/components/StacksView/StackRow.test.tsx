@@ -33,7 +33,9 @@ const multiFileStack: ComposeStack = {
 const defaultProps = {
   stack,
   expanded: false,
+  selected: false,
   onToggle: vi.fn(),
+  onSelect: vi.fn(),
   onLogs: vi.fn(),
   onYaml: vi.fn(),
   onInfo: vi.fn(),

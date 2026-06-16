@@ -15,7 +15,9 @@
     "fetch": "获取",
     "nothing_found": "未找到任何内容。",
     "unknown": "未知",
-    "continue": "继续"
+    "continue": "继续",
+    "copy": "复制",
+    "copied": "已复制！"
   },
 
   "stacks": {
@@ -30,7 +32,22 @@
     "status_partial": "部分运行",
     "status_stopped": "已停止",
     "status_paused": "已暂停",
-    "status_unknown": "未知"
+    "status_unknown": "未知",
+    "empty_create": "创建堆栈",
+    "empty_import": "导入现有",
+    "no_results_title": "没有匹配的堆栈",
+    "no_results_body": "尝试不同的名称或清除活动过滤器。",
+    "clear_filters": "清除过滤器",
+    "refreshing": "正在刷新堆栈",
+    "search_placeholder": "搜索堆栈…",
+    "filter_tooltip_running": "仅显示运行中的堆栈",
+    "filter_tooltip_partial": "仅显示部分运行的堆栈",
+    "filter_tooltip_stopped": "仅显示已停止的堆栈",
+    "filter_tooltip_paused": "仅显示已暂停的堆栈",
+    "select_stack": "选择 {{name}}",
+    "select_all": "全选",
+    "bulk_selected": "已选择 {{count}} 个",
+    "bulk_clear": "清除选择"
   },
 
   "actions": {
@@ -80,6 +97,8 @@
     "docker_version": "{{runtime}}：{{version}}",
     "compose_version": "{{runtime}} Compose：{{version}}",
     "rootless": "无 root",
+    "rootless_help_title": "无根模式",
+    "rootless_help_body": "Docker 或 Podman 正在无根模式下运行 — 容器以您的用户身份运行，而非 root。这提高了安全性，但可能限制某些功能，例如绑定特权端口（<1024）、访问系统路径或使用某些网络驱动程序。",
     "help": "帮助",
     "feedback": "反馈 / 报告问题"
   },
@@ -90,7 +109,8 @@
     "toggle_label": "容器运行时",
     "not_installed": "未找到 {{runtime}} — 请安装后切换",
     "podman_confirm_title": "切换到 Podman",
-    "podman_confirm_body": "Podman 支持为实验性功能。根据您的配置，某些功能可能无法按预期工作 — 包括堆栈发现、日志流和某些 compose 命令。"
+    "podman_confirm_body": "Podman 支持为实验性功能。根据您的配置，某些功能可能无法按预期工作 — 包括堆栈发现、日志流和某些 compose 命令。",
+    "podman_suggest_docker_missing": "在此系统上未找到 Docker。请切换到 Podman 来管理您的容器。"
   },
 
   "error_boundary": {
@@ -199,6 +219,7 @@
   "yaml_modal": {
     "aria_label": "Compose 文件 — {{name}}",
     "title": "{{name}} — compose 文件",
+    "unsaved_changes": "未保存的更改",
     "env_file_button": "Env 文件",
     "history_button": "历史（{{count}}）",
     "edit_button": "编辑",
@@ -275,7 +296,18 @@
     "limit_notice": "显示最后 {{count}} 行",
     "waiting": "等待日志…",
     "service_all": "所有服务",
-    "search_placeholder": "搜索日志…"
+    "search_placeholder": "搜索日志…",
+    "regex_tooltip": "切换正则表达式搜索",
+    "level_all": "全部",
+    "level_error": "错误",
+    "level_warn": "警告",
+    "level_info": "信息",
+    "download_tooltip": "下载日志",
+    "timestamps_tooltip": "切换时间戳",
+    "scroll_top": "跳转到顶部",
+    "scroll_bottom": "跳转到底部",
+    "line_count": "{{count}} 行",
+    "line_count_filtered": "{{shown}} / {{total}} 行"
   },
 
   "run_modal": {
@@ -303,7 +335,10 @@
     "field_user": "用户（可选）",
     "field_user_placeholder": "root",
     "open_shell_button": "打开终端",
-    "disconnect_button": "断开连接"
+    "disconnect_button": "断开连接",
+    "font_size_label": "字体大小",
+    "font_size_decrease": "减小字体",
+    "font_size_increase": "增大字体"
   },
 
   "events_modal": {
@@ -402,7 +437,9 @@
     "net_col_name": "网络",
     "net_col_shared": "共享于",
     "net_shared_icon_title": "共享网络",
-    "profiles_label": "配置文件"
+    "profiles_label": "配置文件",
+    "copy_container_id": "复制容器 ID",
+    "copy_image_ref": "复制镜像引用"
   },
 
   "prune_modal": {
@@ -534,5 +571,35 @@
     "port_conflict_title": "可能存在端口冲突",
     "port_conflict_body": "以下服务具有静态主机端口绑定。Docker 无法启动超过一个副本，因为主机端口只能由单个容器绑定：",
     "port_conflict_icon_title": "具有静态主机端口绑定"
+  },
+
+  "settings": {
+    "title": "设置",
+    "open_button": "设置",
+    "refresh_interval_label": "自动刷新间隔",
+    "refresh_interval_hint": "轮询 Docker 以获取堆栈状态的频率（200–5000 毫秒）。",
+    "log_line_limit_label": "日志行数限制",
+    "log_line_limit_hint": "每个会话在内存中保留的最大日志行数（100–20000）。",
+    "toasts_label": "通知",
+    "toasts_on": "已启用",
+    "toasts_off": "已禁用",
+    "confirm_down_label": "停止前确认",
+    "confirm_down_on": "显示确认对话框",
+    "confirm_down_off": "跳过确认",
+    "confirm_down_hint": "禁用时，停止将立即运行而不询问。",
+    "reset_defaults": "重置为默认值"
+  },
+
+  "toast": {
+    "start_success": "{{name}} 已启动",
+    "start_failed": "启动 {{name}} 失败",
+    "stop_success": "{{name}} 已停止",
+    "stop_failed": "停止 {{name}} 失败",
+    "restart_success": "{{name}} 已重启",
+    "restart_failed": "重启 {{name}} 失败",
+    "pause_success": "{{name}} 已暂停",
+    "pause_failed": "暂停 {{name}} 失败",
+    "unpause_success": "{{name}} 已恢复",
+    "unpause_failed": "恢复 {{name}} 失败"
   }
 }

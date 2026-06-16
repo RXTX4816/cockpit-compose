@@ -164,7 +164,7 @@ describe("StacksView — loading and empty states", () => {
   it("shows a spinner when loading with no stacks", () => {
     mockUseComposeStacks.mockReturnValue({ stacks: [], loading: true, error: null, refresh: vi.fn(), reset: vi.fn() });
     render(<StacksView />);
-    expect(screen.getByRole("progressbar")).toBeInTheDocument();
+    expect(screen.getByLabelText(/Loading stacks/i)).toBeInTheDocument();
   });
 
   it("shows empty state when stacks is empty and not loading", () => {

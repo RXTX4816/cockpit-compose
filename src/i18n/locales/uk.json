@@ -15,7 +15,9 @@
     "fetch": "Отримати",
     "nothing_found": "Нічого не знайдено.",
     "unknown": "невідомо",
-    "continue": "Продовжити"
+    "continue": "Продовжити",
+    "copy": "Копіювати",
+    "copied": "Скопійовано!"
   },
 
   "stacks": {
@@ -30,7 +32,22 @@
     "status_partial": "частково",
     "status_stopped": "зупинено",
     "status_paused": "на паузі",
-    "status_unknown": "невідомо"
+    "status_unknown": "невідомо",
+    "empty_create": "Створити стек",
+    "empty_import": "Імпортувати існуючий",
+    "no_results_title": "Стеки не знайдено",
+    "no_results_body": "Спробуйте інше ім'я або скиньте активні фільтри.",
+    "clear_filters": "Скинути фільтри",
+    "refreshing": "Оновлення стеків",
+    "search_placeholder": "Пошук стеків…",
+    "filter_tooltip_running": "Показувати тільки запущені стеки",
+    "filter_tooltip_partial": "Показувати тільки частково запущені стеки",
+    "filter_tooltip_stopped": "Показувати тільки зупинені стеки",
+    "filter_tooltip_paused": "Показувати тільки стеки на паузі",
+    "select_stack": "Вибрати {{name}}",
+    "select_all": "Вибрати все",
+    "bulk_selected": "Вибрано: {{count}}",
+    "bulk_clear": "Зняти вибір"
   },
 
   "actions": {
@@ -80,6 +97,8 @@
     "docker_version": "{{runtime}}: {{version}}",
     "compose_version": "{{runtime}} Compose: {{version}}",
     "rootless": "Без root",
+    "rootless_help_title": "Режим без root",
+    "rootless_help_body": "Docker або Podman працює в режимі без root — контейнери запускаються від імені вашого користувача, а не root. Це підвищує безпеку, але може обмежити деякі функції, такі як прив'язка привілейованих портів (<1024), доступ до системних шляхів або використання певних мережевих драйверів.",
     "help": "Допомога",
     "feedback": "Зворотний зв'язок / Повідомити про помилку"
   },
@@ -90,7 +109,8 @@
     "toggle_label": "Середовище виконання контейнерів",
     "not_installed": "{{runtime}} не знайдено — встановіть його для перемикання",
     "podman_confirm_title": "Перемкнутися на Podman",
-    "podman_confirm_body": "Підтримка Podman є експериментальною. Залежно від вашої конфігурації деякі функції можуть працювати неналежним чином — включаючи виявлення стеків, потокову передачу журналів та певні команди compose."
+    "podman_confirm_body": "Підтримка Podman є експериментальною. Залежно від вашої конфігурації деякі функції можуть працювати неналежним чином — включаючи виявлення стеків, потокову передачу журналів та певні команди compose.",
+    "podman_suggest_docker_missing": "Docker не знайдено в цій системі. Перейдіть на Podman для керування контейнерами."
   },
 
   "error_boundary": {
@@ -199,6 +219,7 @@
   "yaml_modal": {
     "aria_label": "Файл Compose — {{name}}",
     "title": "{{name}} — compose-файл",
+    "unsaved_changes": "Незбережені зміни",
     "env_file_button": "Файл env",
     "history_button": "Історія ({{count}})",
     "edit_button": "Редагувати",
@@ -275,7 +296,18 @@
     "limit_notice": "показано останні {{count}} рядків",
     "waiting": "Очікування журналів…",
     "service_all": "Всі сервіси",
-    "search_placeholder": "Пошук у журналах…"
+    "search_placeholder": "Пошук у журналах…",
+    "regex_tooltip": "Переключити пошук за регулярними виразами",
+    "level_all": "Усі",
+    "level_error": "Помилка",
+    "level_warn": "Попередження",
+    "level_info": "Інфо",
+    "download_tooltip": "Завантажити журнали",
+    "timestamps_tooltip": "Переключити часові мітки",
+    "scroll_top": "Перейти на початок",
+    "scroll_bottom": "Перейти в кінець",
+    "line_count": "{{count}} рядків",
+    "line_count_filtered": "{{shown}} / {{total}} рядків"
   },
 
   "run_modal": {
@@ -303,7 +335,10 @@
     "field_user": "Користувач (необов'язково)",
     "field_user_placeholder": "root",
     "open_shell_button": "Відкрити термінал",
-    "disconnect_button": "Відключитися"
+    "disconnect_button": "Відключитися",
+    "font_size_label": "Розмір шрифту",
+    "font_size_decrease": "Зменшити шрифт",
+    "font_size_increase": "Збільшити шрифт"
   },
 
   "events_modal": {
@@ -402,7 +437,9 @@
     "net_col_name": "Мережа",
     "net_col_shared": "Спільна з",
     "net_shared_icon_title": "Спільна мережа",
-    "profiles_label": "Профілі"
+    "profiles_label": "Профілі",
+    "copy_container_id": "Копіювати ID контейнера",
+    "copy_image_ref": "Копіювати посилання на образ"
   },
 
   "prune_modal": {
@@ -534,5 +571,35 @@
     "port_conflict_title": "Ймовірний конфлікт портів",
     "port_conflict_body": "Наступні сервіси мають статичні прив'язки портів хоста. Docker не зможе запустити більше однієї репліки, оскільки порт хоста може бути прив'язаний лише одним контейнером:",
     "port_conflict_icon_title": "Має статичні прив'язки портів хоста"
+  },
+
+  "settings": {
+    "title": "Налаштування",
+    "open_button": "Налаштування",
+    "refresh_interval_label": "Інтервал автооновлення",
+    "refresh_interval_hint": "Як часто опитувати Docker про стан стека (200–5000 мс).",
+    "log_line_limit_label": "Ліміт рядків журналу",
+    "log_line_limit_hint": "Максимальна кількість рядків журналу, що зберігаються в пам'яті за сесію (100–20000).",
+    "toasts_label": "Сповіщення",
+    "toasts_on": "Увімкнено",
+    "toasts_off": "Вимкнено",
+    "confirm_down_label": "Підтверджувати перед зупинкою",
+    "confirm_down_on": "Показувати діалог підтвердження",
+    "confirm_down_off": "Пропустити підтвердження",
+    "confirm_down_hint": "Якщо вимкнено, 'Зупинити' виконується негайно без запиту.",
+    "reset_defaults": "Скинути налаштування"
+  },
+
+  "toast": {
+    "start_success": "{{name}} запущено",
+    "start_failed": "Не вдалося запустити {{name}}",
+    "stop_success": "{{name}} зупинено",
+    "stop_failed": "Не вдалося зупинити {{name}}",
+    "restart_success": "{{name}} перезапущено",
+    "restart_failed": "Не вдалося перезапустити {{name}}",
+    "pause_success": "{{name}} на паузі",
+    "pause_failed": "Не вдалося поставити {{name}} на паузу",
+    "unpause_success": "{{name}} відновлено",
+    "unpause_failed": "Не вдалося відновити {{name}}"
   }
 }

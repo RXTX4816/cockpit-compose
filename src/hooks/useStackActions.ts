@@ -1,11 +1,15 @@
 import { useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { startStack, stopStack, restartStack, readRunningServiceNames, pauseStack, unpauseStack, composeFileSuperuser, readAllProfiles, isRootlessMode } from "../api";
+import { useToast } from "../components/ToastProvider";
 
 export function useStackActions(
   stackName: string,
   configFiles: string[],
   onActingChange: (delta: 1 | -1) => void,
 ) {
+  const { t } = useTranslation();
+  const toast = useToast();
   const [acting, setActing] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
 
@@ -30,14 +34,17 @@ export function useStackActions(
       } else if (action === "pause") await pauseStack(stackName, configFiles, profiles, su);
       else await unpauseStack(stackName, configFiles, profiles, su);
       await onSuccess?.();
+      toast.success(t(`toast.${action}_success`, { name: stackName }));
     } catch (ex: unknown) {
-      setActionError(ex instanceof Error ? ex.message : String(ex));
+      const msg = ex instanceof Error ? ex.message : String(ex);
+      setActionError(msg);
+      toast.error(t(`toast.${action}_failed`, { name: stackName }), msg);
     } finally {
       setActing(false);
       onActingChange(-1);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stackName, configFilesKey, onActingChange]);
+  }, [stackName, configFilesKey, onActingChange, toast, t]);
 
   return { acting, actionError, doAction };
 }

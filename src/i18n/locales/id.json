@@ -15,7 +15,9 @@
     "fetch": "Ambil",
     "nothing_found": "Tidak ditemukan apa pun.",
     "unknown": "tidak diketahui",
-    "continue": "Lanjutkan"
+    "continue": "Lanjutkan",
+    "copy": "Salin",
+    "copied": "Tersalin!"
   },
 
   "stacks": {
@@ -30,7 +32,22 @@
     "status_partial": "sebagian",
     "status_stopped": "berhenti",
     "status_paused": "dijeda",
-    "status_unknown": "tidak diketahui"
+    "status_unknown": "tidak diketahui",
+    "empty_create": "Buat tumpukan",
+    "empty_import": "Impor yang ada",
+    "no_results_title": "Tidak ada tumpukan yang cocok",
+    "no_results_body": "Coba nama yang berbeda atau hapus filter aktif.",
+    "clear_filters": "Hapus filter",
+    "refreshing": "Memuat ulang tumpukan",
+    "search_placeholder": "Cari tumpukan…",
+    "filter_tooltip_running": "Tampilkan hanya tumpukan yang berjalan",
+    "filter_tooltip_partial": "Tampilkan hanya tumpukan yang berjalan sebagian",
+    "filter_tooltip_stopped": "Tampilkan hanya tumpukan yang berhenti",
+    "filter_tooltip_paused": "Tampilkan hanya tumpukan yang dijeda",
+    "select_stack": "Pilih {{name}}",
+    "select_all": "Pilih semua",
+    "bulk_selected": "{{count}} dipilih",
+    "bulk_clear": "Hapus pilihan"
   },
 
   "actions": {
@@ -80,6 +97,8 @@
     "docker_version": "{{runtime}}: {{version}}",
     "compose_version": "{{runtime}} Compose: {{version}}",
     "rootless": "Tanpa root",
+    "rootless_help_title": "Mode tanpa root",
+    "rootless_help_body": "Docker atau Podman berjalan dalam mode tanpa root — kontainer berjalan sebagai pengguna Anda, bukan root. Ini meningkatkan keamanan tetapi mungkin membatasi beberapa fitur seperti mengikat port istimewa (<1024), mengakses jalur sistem, atau menggunakan driver jaringan tertentu.",
     "help": "Bantuan",
     "feedback": "Masukan / Laporkan bug"
   },
@@ -90,7 +109,8 @@
     "toggle_label": "Runtime kontainer",
     "not_installed": "{{runtime}} tidak ditemukan — instal untuk beralih",
     "podman_confirm_title": "Beralih ke Podman",
-    "podman_confirm_body": "Dukungan Podman masih eksperimental. Tergantung pada pengaturan Anda, beberapa fitur mungkin tidak berfungsi seperti yang diharapkan — termasuk penemuan tumpukan, streaming log, dan perintah compose tertentu."
+    "podman_confirm_body": "Dukungan Podman masih eksperimental. Tergantung pada pengaturan Anda, beberapa fitur mungkin tidak berfungsi seperti yang diharapkan — termasuk penemuan tumpukan, streaming log, dan perintah compose tertentu.",
+    "podman_suggest_docker_missing": "Docker tidak ditemukan di sistem ini. Beralih ke Podman untuk mengelola kontainer Anda."
   },
 
   "error_boundary": {
@@ -199,6 +219,7 @@
   "yaml_modal": {
     "aria_label": "File Compose — {{name}}",
     "title": "{{name}} — file compose",
+    "unsaved_changes": "Perubahan belum disimpan",
     "env_file_button": "File env",
     "history_button": "Riwayat ({{count}})",
     "edit_button": "Edit",
@@ -275,7 +296,18 @@
     "limit_notice": "menampilkan {{count}} baris terakhir",
     "waiting": "Menunggu log…",
     "service_all": "Semua layanan",
-    "search_placeholder": "Cari log…"
+    "search_placeholder": "Cari log…",
+    "regex_tooltip": "Aktifkan pencarian regex",
+    "level_all": "Semua",
+    "level_error": "Error",
+    "level_warn": "Peringatan",
+    "level_info": "Info",
+    "download_tooltip": "Unduh log",
+    "timestamps_tooltip": "Aktifkan cap waktu",
+    "scroll_top": "Loncat ke atas",
+    "scroll_bottom": "Loncat ke bawah",
+    "line_count": "{{count}} baris",
+    "line_count_filtered": "{{shown}} / {{total}} baris"
   },
 
   "run_modal": {
@@ -303,7 +335,10 @@
     "field_user": "Pengguna (opsional)",
     "field_user_placeholder": "root",
     "open_shell_button": "Buka terminal",
-    "disconnect_button": "Putuskan koneksi"
+    "disconnect_button": "Putuskan koneksi",
+    "font_size_label": "Ukuran font",
+    "font_size_decrease": "Kecilkan ukuran font",
+    "font_size_increase": "Perbesar ukuran font"
   },
 
   "events_modal": {
@@ -402,7 +437,9 @@
     "net_col_name": "Jaringan",
     "net_col_shared": "Dibagikan dengan",
     "net_shared_icon_title": "Jaringan bersama",
-    "profiles_label": "Profil"
+    "profiles_label": "Profil",
+    "copy_container_id": "Salin ID kontainer",
+    "copy_image_ref": "Salin referensi image"
   },
 
   "prune_modal": {
@@ -534,5 +571,35 @@
     "port_conflict_title": "Kemungkinan konflik port",
     "port_conflict_body": "Layanan berikut memiliki binding port host statis. Docker tidak akan dapat memulai lebih dari satu replika karena port host hanya dapat diikat oleh satu kontainer:",
     "port_conflict_icon_title": "Memiliki binding port host statis"
+  },
+
+  "settings": {
+    "title": "Pengaturan",
+    "open_button": "Pengaturan",
+    "refresh_interval_label": "Interval pembaruan otomatis",
+    "refresh_interval_hint": "Seberapa sering Docker di-poll untuk status tumpukan (200–5000 ms).",
+    "log_line_limit_label": "Batas baris log",
+    "log_line_limit_hint": "Jumlah maksimum baris log yang disimpan di memori per sesi (100–20000).",
+    "toasts_label": "Notifikasi",
+    "toasts_on": "Aktif",
+    "toasts_off": "Nonaktif",
+    "confirm_down_label": "Konfirmasi sebelum menghentikan",
+    "confirm_down_on": "Tampilkan dialog konfirmasi",
+    "confirm_down_off": "Lewati konfirmasi",
+    "confirm_down_hint": "Saat dinonaktifkan, 'Hentikan' berjalan segera tanpa bertanya.",
+    "reset_defaults": "Setel ulang ke default"
+  },
+
+  "toast": {
+    "start_success": "{{name}} dimulai",
+    "start_failed": "Gagal memulai {{name}}",
+    "stop_success": "{{name}} dihentikan",
+    "stop_failed": "Gagal menghentikan {{name}}",
+    "restart_success": "{{name}} dimulai ulang",
+    "restart_failed": "Gagal memulai ulang {{name}}",
+    "pause_success": "{{name}} dijeda",
+    "pause_failed": "Gagal menjeda {{name}}",
+    "unpause_success": "{{name}} dilanjutkan",
+    "unpause_failed": "Gagal melanjutkan {{name}}"
   }
 }

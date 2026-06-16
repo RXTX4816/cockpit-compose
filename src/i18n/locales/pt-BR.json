@@ -15,7 +15,9 @@
     "fetch": "Buscar",
     "nothing_found": "Nenhum resultado encontrado.",
     "unknown": "desconhecido",
-    "continue": "Continuar"
+    "continue": "Continuar",
+    "copy": "Copiar",
+    "copied": "Copiado!"
   },
 
   "stacks": {
@@ -30,7 +32,22 @@
     "status_partial": "parcial",
     "status_stopped": "parado",
     "status_paused": "pausado",
-    "status_unknown": "desconhecido"
+    "status_unknown": "desconhecido",
+    "empty_create": "Criar pilha",
+    "empty_import": "Importar existente",
+    "no_results_title": "Nenhuma pilha encontrada",
+    "no_results_body": "Tente um nome diferente ou limpe os filtros ativos.",
+    "clear_filters": "Limpar filtros",
+    "refreshing": "Atualizando pilhas",
+    "search_placeholder": "Pesquisar pilhas…",
+    "filter_tooltip_running": "Mostrar apenas pilhas em execução",
+    "filter_tooltip_partial": "Mostrar apenas pilhas parcialmente em execução",
+    "filter_tooltip_stopped": "Mostrar apenas pilhas paradas",
+    "filter_tooltip_paused": "Mostrar apenas pilhas pausadas",
+    "select_stack": "Selecionar {{name}}",
+    "select_all": "Selecionar tudo",
+    "bulk_selected": "{{count}} selecionados",
+    "bulk_clear": "Limpar seleção"
   },
 
   "actions": {
@@ -80,6 +97,8 @@
     "docker_version": "{{runtime}}: {{version}}",
     "compose_version": "{{runtime}} Compose: {{version}}",
     "rootless": "Sem root",
+    "rootless_help_title": "Modo sem root",
+    "rootless_help_body": "O Docker ou Podman está sendo executado em modo sem root — os contêineres são executados como seu usuário, não como root. Isso melhora a segurança, mas pode limitar alguns recursos como vincular portas privilegiadas (<1024), acessar caminhos do sistema ou usar determinados drivers de rede.",
     "help": "Ajuda",
     "feedback": "Feedback / Reportar bug"
   },
@@ -90,7 +109,8 @@
     "toggle_label": "Runtime de contêiner",
     "not_installed": "{{runtime}} não encontrado — instale-o para alternar",
     "podman_confirm_title": "Alternar para Podman",
-    "podman_confirm_body": "O suporte ao Podman é experimental. Dependendo da sua configuração, alguns recursos podem não funcionar conforme esperado — incluindo descoberta de pilhas, streaming de logs e determinados comandos compose."
+    "podman_confirm_body": "O suporte ao Podman é experimental. Dependendo da sua configuração, alguns recursos podem não funcionar conforme esperado — incluindo descoberta de pilhas, streaming de logs e determinados comandos compose.",
+    "podman_suggest_docker_missing": "O Docker não foi encontrado neste sistema. Mude para o Podman para gerenciar seus contêineres."
   },
 
   "error_boundary": {
@@ -241,7 +261,8 @@
     "import_file_title": "Importar arquivo existente",
     "import_file_select_label": "Arquivos disponíveis",
     "import_file_none": "Nenhum arquivo YAML adicional encontrado neste diretório.",
-    "import_file_confirm_button": "Importar"
+    "import_file_confirm_button": "Importar",
+    "unsaved_changes": "Alterações não salvas"
   },
 
   "env_modal": {
@@ -275,7 +296,18 @@
     "limit_notice": "mostrando as últimas {{count}} linhas",
     "waiting": "Aguardando logs…",
     "service_all": "Todos os serviços",
-    "search_placeholder": "Pesquisar logs…"
+    "search_placeholder": "Pesquisar logs…",
+    "regex_tooltip": "Alternar pesquisa por regex",
+    "level_all": "Todos",
+    "level_error": "Erro",
+    "level_warn": "Aviso",
+    "level_info": "Info",
+    "download_tooltip": "Baixar logs",
+    "timestamps_tooltip": "Alternar timestamps",
+    "scroll_top": "Ir para o topo",
+    "scroll_bottom": "Ir para o final",
+    "line_count": "{{count}} linhas",
+    "line_count_filtered": "{{shown}} / {{total}} linhas"
   },
 
   "run_modal": {
@@ -303,7 +335,10 @@
     "field_user": "Usuário (opcional)",
     "field_user_placeholder": "root",
     "open_shell_button": "Abrir terminal",
-    "disconnect_button": "Desconectar"
+    "disconnect_button": "Desconectar",
+    "font_size_label": "Tamanho da fonte",
+    "font_size_decrease": "Diminuir tamanho da fonte",
+    "font_size_increase": "Aumentar tamanho da fonte"
   },
 
   "events_modal": {
@@ -402,7 +437,9 @@
     "net_col_name": "Rede",
     "net_col_shared": "Compartilhado com",
     "net_shared_icon_title": "Rede compartilhada",
-    "profiles_label": "Perfis"
+    "profiles_label": "Perfis",
+    "copy_container_id": "Copiar ID do contêiner",
+    "copy_image_ref": "Copiar referência da imagem"
   },
 
   "prune_modal": {
@@ -534,5 +571,35 @@
     "port_conflict_title": "Conflito de porta provável",
     "port_conflict_body": "Os seguintes serviços têm vinculações de porta do host estáticas. O Docker não poderá iniciar mais de uma réplica porque uma porta do host só pode ser vinculada por um único contêiner:",
     "port_conflict_icon_title": "Tem vinculações de porta do host estáticas"
+  },
+
+  "settings": {
+    "title": "Configurações",
+    "open_button": "Configurações",
+    "refresh_interval_label": "Intervalo de atualização automática",
+    "refresh_interval_hint": "Com que frequência consultar o Docker para o status da pilha (200–5000 ms).",
+    "log_line_limit_label": "Limite de linhas de log",
+    "log_line_limit_hint": "Número máximo de linhas de log a manter na memória por sessão (100–20000).",
+    "toasts_label": "Notificações",
+    "toasts_on": "Ativado",
+    "toasts_off": "Desativado",
+    "confirm_down_label": "Confirmar antes de parar",
+    "confirm_down_on": "Exibir diálogo de confirmação",
+    "confirm_down_off": "Ignorar confirmação",
+    "confirm_down_hint": "Quando desativado, 'Parar' é executado imediatamente sem perguntar.",
+    "reset_defaults": "Redefinir para padrões"
+  },
+
+  "toast": {
+    "start_success": "{{name}} iniciado",
+    "start_failed": "Falha ao iniciar {{name}}",
+    "stop_success": "{{name}} parado",
+    "stop_failed": "Falha ao parar {{name}}",
+    "restart_success": "{{name}} reiniciado",
+    "restart_failed": "Falha ao reiniciar {{name}}",
+    "pause_success": "{{name}} pausado",
+    "pause_failed": "Falha ao pausar {{name}}",
+    "unpause_success": "{{name}} retomado",
+    "unpause_failed": "Falha ao retomar {{name}}"
   }
 }

@@ -68,7 +68,7 @@ describe("StacksView", () => {
       reset: vi.fn(),
     });
     render(<StacksView />);
-    expect(screen.getByRole("progressbar")).toBeInTheDocument();
+    expect(screen.getByLabelText(/Loading stacks/i)).toBeInTheDocument();
   });
 
   it("shows empty state when no stacks found", () => {
@@ -80,7 +80,7 @@ describe("StacksView", () => {
       reset: vi.fn(),
     });
     render(<StacksView />);
-    expect(screen.getByText(/No compose stacks found/i)).toBeInTheDocument();
+    expect(screen.getByText(/No compose stacks are running/i)).toBeInTheDocument();
   });
 
   it("renders stack names when stacks are present", () => {

@@ -15,7 +15,9 @@
     "fetch": "Hämta",
     "nothing_found": "Inget hittades.",
     "unknown": "okänd",
-    "continue": "Fortsätt"
+    "continue": "Fortsätt",
+    "copy": "Kopiera",
+    "copied": "Kopierat!"
   },
 
   "stacks": {
@@ -30,7 +32,22 @@
     "status_partial": "delvis",
     "status_stopped": "stoppad",
     "status_paused": "pausad",
-    "status_unknown": "okänd"
+    "status_unknown": "okänd",
+    "empty_create": "Skapa stack",
+    "empty_import": "Importera befintlig",
+    "no_results_title": "Inga stackar matchar",
+    "no_results_body": "Prova ett annat namn eller rensa de aktiva filtren.",
+    "clear_filters": "Rensa filter",
+    "refreshing": "Uppdaterar stackar",
+    "search_placeholder": "Sök stackar…",
+    "filter_tooltip_running": "Visa bara körande stackar",
+    "filter_tooltip_partial": "Visa bara delvis körande stackar",
+    "filter_tooltip_stopped": "Visa bara stoppade stackar",
+    "filter_tooltip_paused": "Visa bara pausade stackar",
+    "select_stack": "Välj {{name}}",
+    "select_all": "Välj alla",
+    "bulk_selected": "{{count}} valda",
+    "bulk_clear": "Rensa urval"
   },
 
   "actions": {
@@ -80,6 +97,8 @@
     "docker_version": "{{runtime}}: {{version}}",
     "compose_version": "{{runtime}} Compose: {{version}}",
     "rootless": "Rootlös",
+    "rootless_help_title": "Rootless-läge",
+    "rootless_help_body": "Docker eller Podman körs i rootless-läge — containers körs som din användare, inte root. Detta förbättrar säkerheten men kan begränsa vissa funktioner som att binda privilegierade portar (<1024), komma åt systemsökvägar eller använda vissa nätverksdrivrutiner.",
     "help": "Hjälp",
     "feedback": "Feedback / Rapportera bugg"
   },
@@ -90,7 +109,8 @@
     "toggle_label": "Container-runtime",
     "not_installed": "{{runtime}} hittades inte — installera det för att växla",
     "podman_confirm_title": "Byt till Podman",
-    "podman_confirm_body": "Podman-stöd är experimentellt. Beroende på din konfiguration kanske vissa funktioner inte fungerar som förväntat — inklusive stackupptäckt, loggströmning och vissa compose-kommandon."
+    "podman_confirm_body": "Podman-stöd är experimentellt. Beroende på din konfiguration kanske vissa funktioner inte fungerar som förväntat — inklusive stackupptäckt, loggströmning och vissa compose-kommandon.",
+    "podman_suggest_docker_missing": "Docker hittades inte på det här systemet. Byt till Podman för att hantera dina containers."
   },
 
   "error_boundary": {
@@ -199,6 +219,7 @@
   "yaml_modal": {
     "aria_label": "Compose-fil — {{name}}",
     "title": "{{name}} — compose-fil",
+    "unsaved_changes": "Osparade ändringar",
     "env_file_button": "Env-fil",
     "history_button": "Historik ({{count}})",
     "edit_button": "Redigera",
@@ -275,7 +296,18 @@
     "limit_notice": "visar de senaste {{count}} raderna",
     "waiting": "Väntar på loggar…",
     "service_all": "Alla tjänster",
-    "search_placeholder": "Sök i loggar…"
+    "search_placeholder": "Sök i loggar…",
+    "regex_tooltip": "Växla regex-sökning",
+    "level_all": "Alla",
+    "level_error": "Fel",
+    "level_warn": "Varning",
+    "level_info": "Info",
+    "download_tooltip": "Ladda ner loggar",
+    "timestamps_tooltip": "Växla tidsstämplar",
+    "scroll_top": "Hoppa till toppen",
+    "scroll_bottom": "Hoppa till botten",
+    "line_count": "{{count}} rader",
+    "line_count_filtered": "{{shown}} / {{total}} rader"
   },
 
   "run_modal": {
@@ -303,7 +335,10 @@
     "field_user": "Användare (valfritt)",
     "field_user_placeholder": "root",
     "open_shell_button": "Öppna terminal",
-    "disconnect_button": "Koppla från"
+    "disconnect_button": "Koppla från",
+    "font_size_label": "Teckenstorlek",
+    "font_size_decrease": "Minska teckenstorlek",
+    "font_size_increase": "Öka teckenstorlek"
   },
 
   "events_modal": {
@@ -402,7 +437,9 @@
     "net_col_name": "Nätverk",
     "net_col_shared": "Delat med",
     "net_shared_icon_title": "Delat nätverk",
-    "profiles_label": "Profiler"
+    "profiles_label": "Profiler",
+    "copy_container_id": "Kopiera container-ID",
+    "copy_image_ref": "Kopiera bildreferens"
   },
 
   "prune_modal": {
@@ -534,5 +571,35 @@
     "port_conflict_title": "Trolig portkonflikter",
     "port_conflict_body": "Följande tjänster har statiska värd-portbindningar. Docker kan inte starta mer än en replika eftersom en värdport bara kan bindas av en enda container:",
     "port_conflict_icon_title": "Har statiska värd-portbindningar"
+  },
+
+  "settings": {
+    "title": "Inställningar",
+    "open_button": "Inställningar",
+    "refresh_interval_label": "Intervall för automatisk uppdatering",
+    "refresh_interval_hint": "Hur ofta Docker ska avsökas för stackstatus (200–5000 ms).",
+    "log_line_limit_label": "Gräns för loggrader",
+    "log_line_limit_hint": "Maximalt antal loggrader att behålla i minnet per session (100–20000).",
+    "toasts_label": "Aviseringar",
+    "toasts_on": "Aktiverade",
+    "toasts_off": "Inaktiverade",
+    "confirm_down_label": "Bekräfta innan stopp",
+    "confirm_down_on": "Visa bekräftelsedialog",
+    "confirm_down_off": "Hoppa över bekräftelse",
+    "confirm_down_hint": "När inaktiverat körs 'Stoppa' omedelbart utan att fråga.",
+    "reset_defaults": "Återställ standardinställningar"
+  },
+
+  "toast": {
+    "start_success": "{{name}} startad",
+    "start_failed": "Det gick inte att starta {{name}}",
+    "stop_success": "{{name}} stoppad",
+    "stop_failed": "Det gick inte att stoppa {{name}}",
+    "restart_success": "{{name}} omstartad",
+    "restart_failed": "Det gick inte att starta om {{name}}",
+    "pause_success": "{{name}} pausad",
+    "pause_failed": "Det gick inte att pausa {{name}}",
+    "unpause_success": "{{name}} återupptagen",
+    "unpause_failed": "Det gick inte att återuppta {{name}}"
   }
 }

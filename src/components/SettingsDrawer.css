@@ -1,0 +1,33 @@
+.cc-settings-body {
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.cc-settings-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cc-settings-unit {
+  font-size: 0.875rem;
+  color: var(--pf-t--global--text--color--subtle);
+}
+
+.cc-settings-hint {
+  font-size: 0.8rem;
+  color: var(--pf-t--global--text--color--subtle);
+  margin-top: 0.3rem;
+}
+
+.cc-settings-reset {
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid var(--pf-t--global--border--color--default);
+}
+
+.cc-settings-drawer .pf-v6-c-drawer__panel {
+  border-left: 1px solid var(--pf-t--global--border--color--default);
+}

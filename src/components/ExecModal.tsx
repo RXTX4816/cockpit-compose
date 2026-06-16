@@ -49,6 +49,9 @@ export function ExecModal({ stack, onClose }: Props) {
   const [user, setUser] = useState("");
   const [step, setStep] = useState<"config" | "terminal">("config");
   const [connectError, setConnectError] = useState<string | null>(null);
+  const [fontSize, setFontSize] = useState<number>(() => {
+    try { const s = localStorage.getItem("cockpit-compose:exec-font-size"); return s ? Number(s) : 13; } catch { return 13; }
+  });
 
   const termDivRef = useRef<HTMLDivElement>(null);
   const terminalRef = useRef<Terminal | null>(null);
@@ -102,7 +105,7 @@ export function ExecModal({ stack, onClose }: Props) {
       const term = new Terminal({
         cursorBlink: true,
         fontFamily: "monospace",
-        fontSize: 13,
+        fontSize,
         theme: makeXtermTheme(isDarkMode()),
       });
       const fitAddon = new FitAddon();
@@ -146,7 +149,7 @@ export function ExecModal({ stack, onClose }: Props) {
         channelRef.current?.send(data);
       });
     });
-  }, [selectedService, shell, user, stack.Name, stack.ConfigFiles, configFile]);
+  }, [selectedService, shell, user, fontSize, stack.Name, stack.ConfigFiles, configFile]);
 
   const disconnect = useCallback(() => {
     channelRef.current?.close();
@@ -219,6 +222,32 @@ export function ExecModal({ stack, onClose }: Props) {
             {connectError && (
               <Alert variant="danger" isInline title={connectError} style={{ marginBottom: "0.5rem" }} />
             )}
+            <div className="em2-font-controls" aria-label={t("exec_modal.font_size_label")}>
+              <span className="em2-font-label">{t("exec_modal.font_size_label")}</span>
+              <button
+                type="button"
+                className="em2-font-btn"
+                onClick={() => {
+                  const next = Math.max(8, fontSize - 1);
+                  setFontSize(next);
+                  localStorage.setItem("cockpit-compose:exec-font-size", String(next));
+                  if (terminalRef.current) { terminalRef.current.options.fontSize = next; fitAddonRef.current?.fit(); }
+                }}
+                aria-label={t("exec_modal.font_size_decrease")}
+              >−</button>
+              <span className="em2-font-value">{fontSize}px</span>
+              <button
+                type="button"
+                className="em2-font-btn"
+                onClick={() => {
+                  const next = Math.min(24, fontSize + 1);
+                  setFontSize(next);
+                  localStorage.setItem("cockpit-compose:exec-font-size", String(next));
+                  if (terminalRef.current) { terminalRef.current.options.fontSize = next; fitAddonRef.current?.fit(); }
+                }}
+                aria-label={t("exec_modal.font_size_increase")}
+              >+</button>
+            </div>
             <div ref={termDivRef} className="em2-terminal" />
           </>
         )}

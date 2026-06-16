@@ -15,7 +15,9 @@
     "fetch": "Načíst",
     "nothing_found": "Nic nenalezeno.",
     "unknown": "neznámý",
-    "continue": "Pokračovat"
+    "continue": "Pokračovat",
+    "copy": "Kopírovat",
+    "copied": "Zkopírováno!"
   },
 
   "stacks": {
@@ -30,7 +32,22 @@
     "status_partial": "částečně",
     "status_stopped": "zastaveno",
     "status_paused": "pozastaveno",
-    "status_unknown": "neznámý"
+    "status_unknown": "neznámý",
+    "empty_create": "Vytvořit zásobník",
+    "empty_import": "Importovat existující",
+    "no_results_title": "Žádné zásobníky neodpovídají",
+    "no_results_body": "Zkuste jiný název nebo zrušte aktivní filtry.",
+    "clear_filters": "Zrušit filtry",
+    "refreshing": "Aktualizuji zásobníky",
+    "search_placeholder": "Hledat zásobníky…",
+    "filter_tooltip_running": "Zobrazit pouze běžící zásobníky",
+    "filter_tooltip_partial": "Zobrazit pouze částečně běžící zásobníky",
+    "filter_tooltip_stopped": "Zobrazit pouze zastavené zásobníky",
+    "filter_tooltip_paused": "Zobrazit pouze pozastavené zásobníky",
+    "select_stack": "Vybrat {{name}}",
+    "select_all": "Vybrat vše",
+    "bulk_selected": "{{count}} vybráno",
+    "bulk_clear": "Zrušit výběr"
   },
 
   "actions": {
@@ -80,6 +97,8 @@
     "docker_version": "{{runtime}}: {{version}}",
     "compose_version": "{{runtime}} Compose: {{version}}",
     "rootless": "Bez práv roota",
+    "rootless_help_title": "Rootless režim",
+    "rootless_help_body": "Docker nebo Podman běží v rootless režimu — kontejnery běží jako váš uživatel, ne jako root. Zlepšuje to bezpečnost, ale může omezit některé funkce, jako je vazba privilegovaných portů (<1024), přístup k systémovým cestám nebo použití určitých síťových ovladačů.",
     "help": "Nápověda",
     "feedback": "Zpětná vazba / Nahlásit chybu"
   },
@@ -90,7 +109,8 @@
     "toggle_label": "Kontejnerový runtime",
     "not_installed": "{{runtime}} nenalezen — nainstalujte jej pro přepnutí",
     "podman_confirm_title": "Přepnout na Podman",
-    "podman_confirm_body": "Podpora Podmanu je experimentální. V závislosti na vašem nastavení nemusí některé funkce fungovat podle očekávání — včetně zjišťování zásobníků, streamování protokolů a určitých příkazů compose."
+    "podman_confirm_body": "Podpora Podmanu je experimentální. V závislosti na vašem nastavení nemusí některé funkce fungovat podle očekávání — včetně zjišťování zásobníků, streamování protokolů a určitých příkazů compose.",
+    "podman_suggest_docker_missing": "Docker nebyl na tomto systému nalezen. Přepněte na Podman pro správu vašich kontejnerů."
   },
 
   "error_boundary": {
@@ -199,6 +219,7 @@
   "yaml_modal": {
     "aria_label": "Soubor Compose — {{name}}",
     "title": "{{name}} — soubor compose",
+    "unsaved_changes": "Neuložené změny",
     "env_file_button": "Soubor env",
     "history_button": "Historie ({{count}})",
     "edit_button": "Upravit",
@@ -275,7 +296,18 @@
     "limit_notice": "zobrazeno posledních {{count}} řádků",
     "waiting": "Čekám na protokoly…",
     "service_all": "Všechny služby",
-    "search_placeholder": "Hledat v protokolech…"
+    "search_placeholder": "Hledat v protokolech…",
+    "regex_tooltip": "Přepnout vyhledávání regulárními výrazy",
+    "level_all": "Vše",
+    "level_error": "Chyba",
+    "level_warn": "Varování",
+    "level_info": "Info",
+    "download_tooltip": "Stáhnout protokoly",
+    "timestamps_tooltip": "Přepnout časová razítka",
+    "scroll_top": "Přejít na začátek",
+    "scroll_bottom": "Přejít na konec",
+    "line_count": "{{count}} řádků",
+    "line_count_filtered": "{{shown}} / {{total}} řádků"
   },
 
   "run_modal": {
@@ -303,7 +335,10 @@
     "field_user": "Uživatel (volitelné)",
     "field_user_placeholder": "root",
     "open_shell_button": "Otevřít terminál",
-    "disconnect_button": "Odpojit"
+    "disconnect_button": "Odpojit",
+    "font_size_label": "Velikost písma",
+    "font_size_decrease": "Zmenšit písmo",
+    "font_size_increase": "Zvětšit písmo"
   },
 
   "events_modal": {
@@ -402,7 +437,9 @@
     "net_col_name": "Síť",
     "net_col_shared": "Sdíleno s",
     "net_shared_icon_title": "Sdílená síť",
-    "profiles_label": "Profily"
+    "profiles_label": "Profily",
+    "copy_container_id": "Kopírovat ID kontejneru",
+    "copy_image_ref": "Kopírovat odkaz na obraz"
   },
 
   "prune_modal": {
@@ -534,5 +571,35 @@
     "port_conflict_title": "Pravděpodobný konflikt portů",
     "port_conflict_body": "Následující služby mají statické mapování hostitelských portů. Docker nebude moci spustit více než jednu repliku, protože hostitelský port může být vázán pouze jedním kontejnerem:",
     "port_conflict_icon_title": "Má statické mapování hostitelských portů"
+  },
+
+  "settings": {
+    "title": "Nastavení",
+    "open_button": "Nastavení",
+    "refresh_interval_label": "Interval automatického obnovení",
+    "refresh_interval_hint": "Jak často se dotazovat Dockeru na stav zásobníku (200–5000 ms).",
+    "log_line_limit_label": "Limit řádků protokolu",
+    "log_line_limit_hint": "Maximální počet řádků protokolu uchovávaných v paměti na relaci (100–20000).",
+    "toasts_label": "Oznámení",
+    "toasts_on": "Povoleno",
+    "toasts_off": "Zakázáno",
+    "confirm_down_label": "Potvrdit před zastavením",
+    "confirm_down_on": "Zobrazit potvrzovací dialog",
+    "confirm_down_off": "Přeskočit potvrzení",
+    "confirm_down_hint": "Při deaktivaci 'Zastavit' proběhne okamžitě bez dotazu.",
+    "reset_defaults": "Obnovit výchozí nastavení"
+  },
+
+  "toast": {
+    "start_success": "{{name}} spuštěn",
+    "start_failed": "Nepodařilo se spustit {{name}}",
+    "stop_success": "{{name}} zastaven",
+    "stop_failed": "Nepodařilo se zastavit {{name}}",
+    "restart_success": "{{name}} restartován",
+    "restart_failed": "Nepodařilo se restartovat {{name}}",
+    "pause_success": "{{name}} pozastaven",
+    "pause_failed": "Nepodařilo se pozastavit {{name}}",
+    "unpause_success": "{{name}} obnoven",
+    "unpause_failed": "Nepodařilo se obnovit {{name}}"
   }
 }

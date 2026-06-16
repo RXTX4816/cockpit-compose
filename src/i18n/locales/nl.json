@@ -15,7 +15,9 @@
     "fetch": "Ophalen",
     "nothing_found": "Niets gevonden.",
     "unknown": "onbekend",
-    "continue": "Doorgaan"
+    "continue": "Doorgaan",
+    "copy": "Kopiëren",
+    "copied": "Gekopieerd!"
   },
 
   "stacks": {
@@ -30,7 +32,22 @@
     "status_partial": "gedeeltelijk",
     "status_stopped": "gestopt",
     "status_paused": "gepauzeerd",
-    "status_unknown": "onbekend"
+    "status_unknown": "onbekend",
+    "empty_create": "Stack aanmaken",
+    "empty_import": "Bestaande importeren",
+    "no_results_title": "Geen stacks gevonden",
+    "no_results_body": "Probeer een andere naam of verwijder de actieve filters.",
+    "clear_filters": "Filters wissen",
+    "refreshing": "Stacks worden vernieuwd",
+    "search_placeholder": "Stacks zoeken…",
+    "filter_tooltip_running": "Alleen actieve stacks tonen",
+    "filter_tooltip_partial": "Alleen gedeeltelijk actieve stacks tonen",
+    "filter_tooltip_stopped": "Alleen gestopte stacks tonen",
+    "filter_tooltip_paused": "Alleen gepauzeerde stacks tonen",
+    "select_stack": "{{name}} selecteren",
+    "select_all": "Alles selecteren",
+    "bulk_selected": "{{count}} geselecteerd",
+    "bulk_clear": "Selectie wissen"
   },
 
   "actions": {
@@ -80,6 +97,8 @@
     "docker_version": "{{runtime}}: {{version}}",
     "compose_version": "{{runtime}} Compose: {{version}}",
     "rootless": "Rootless",
+    "rootless_help_title": "Rootless-modus",
+    "rootless_help_body": "Docker of Podman wordt uitgevoerd in rootless-modus — containers draaien als uw gebruiker, niet als root. Dit verbetert de beveiliging, maar kan sommige functies beperken zoals het binden van geprivilegieerde poorten (<1024), toegang tot systeempaden of het gebruik van bepaalde netwerkstuurprogramma's.",
     "help": "Help",
     "feedback": "Feedback / Bug melden"
   },
@@ -90,7 +109,8 @@
     "toggle_label": "Container-runtime",
     "not_installed": "{{runtime}} niet gevonden — installeer het om te wisselen",
     "podman_confirm_title": "Overschakelen naar Podman",
-    "podman_confirm_body": "Podman-ondersteuning is experimenteel. Afhankelijk van uw configuratie werken sommige functies mogelijk niet zoals verwacht — inclusief stack-detectie, log-streaming en bepaalde compose-opdrachten."
+    "podman_confirm_body": "Podman-ondersteuning is experimenteel. Afhankelijk van uw configuratie werken sommige functies mogelijk niet zoals verwacht — inclusief stack-detectie, log-streaming en bepaalde compose-opdrachten.",
+    "podman_suggest_docker_missing": "Docker is niet gevonden op dit systeem. Schakel over naar Podman om uw containers te beheren."
   },
 
   "error_boundary": {
@@ -241,7 +261,8 @@
     "import_file_title": "Bestaand bestand importeren",
     "import_file_select_label": "Beschikbare bestanden",
     "import_file_none": "Geen extra YAML-bestanden gevonden in deze map.",
-    "import_file_confirm_button": "Importeren"
+    "import_file_confirm_button": "Importeren",
+    "unsaved_changes": "Niet-opgeslagen wijzigingen"
   },
 
   "env_modal": {
@@ -275,7 +296,18 @@
     "limit_notice": "laatste {{count}} regels worden getoond",
     "waiting": "Wachten op logboeken…",
     "service_all": "Alle services",
-    "search_placeholder": "Logboeken doorzoeken…"
+    "search_placeholder": "Logboeken doorzoeken…",
+    "regex_tooltip": "Regex-zoeken in-/uitschakelen",
+    "level_all": "Alle",
+    "level_error": "Fout",
+    "level_warn": "Waarschuwing",
+    "level_info": "Info",
+    "download_tooltip": "Logboeken downloaden",
+    "timestamps_tooltip": "Tijdstempels in-/uitschakelen",
+    "scroll_top": "Naar boven springen",
+    "scroll_bottom": "Naar beneden springen",
+    "line_count": "{{count}} regels",
+    "line_count_filtered": "{{shown}} / {{total}} regels"
   },
 
   "run_modal": {
@@ -303,7 +335,10 @@
     "field_user": "Gebruiker (optioneel)",
     "field_user_placeholder": "root",
     "open_shell_button": "Terminal openen",
-    "disconnect_button": "Verbinding verbreken"
+    "disconnect_button": "Verbinding verbreken",
+    "font_size_label": "Lettergrootte",
+    "font_size_decrease": "Lettergrootte verkleinen",
+    "font_size_increase": "Lettergrootte vergroten"
   },
 
   "events_modal": {
@@ -402,7 +437,9 @@
     "net_col_name": "Netwerk",
     "net_col_shared": "Gedeeld met",
     "net_shared_icon_title": "Gedeeld netwerk",
-    "profiles_label": "Profielen"
+    "profiles_label": "Profielen",
+    "copy_container_id": "Container-ID kopiëren",
+    "copy_image_ref": "Afbeeldingsreferentie kopiëren"
   },
 
   "prune_modal": {
@@ -534,5 +571,35 @@
     "port_conflict_title": "Waarschijnlijk poortconflict",
     "port_conflict_body": "De volgende services hebben statische hostpoortbindingen. Docker kan niet meer dan één replica starten omdat een hostpoort slechts door één container kan worden gebonden:",
     "port_conflict_icon_title": "Heeft statische hostpoortbindingen"
+  },
+
+  "settings": {
+    "title": "Instellingen",
+    "open_button": "Instellingen",
+    "refresh_interval_label": "Interval voor automatisch vernieuwen",
+    "refresh_interval_hint": "Hoe vaak Docker wordt gepolld voor de stackstatus (200–5000 ms).",
+    "log_line_limit_label": "Limiet voor logboekregels",
+    "log_line_limit_hint": "Maximaal aantal logboekregels dat per sessie in het geheugen wordt bewaard (100–20000).",
+    "toasts_label": "Meldingen",
+    "toasts_on": "Ingeschakeld",
+    "toasts_off": "Uitgeschakeld",
+    "confirm_down_label": "Bevestigen voor stoppen",
+    "confirm_down_on": "Bevestigingsvenster tonen",
+    "confirm_down_off": "Bevestiging overslaan",
+    "confirm_down_hint": "Wanneer uitgeschakeld, wordt 'Stoppen' onmiddellijk uitgevoerd zonder te vragen.",
+    "reset_defaults": "Standaardinstellingen herstellen"
+  },
+
+  "toast": {
+    "start_success": "{{name}} gestart",
+    "start_failed": "Starten van {{name}} mislukt",
+    "stop_success": "{{name}} gestopt",
+    "stop_failed": "Stoppen van {{name}} mislukt",
+    "restart_success": "{{name}} opnieuw gestart",
+    "restart_failed": "Opnieuw starten van {{name}} mislukt",
+    "pause_success": "{{name}} gepauzeerd",
+    "pause_failed": "Pauzeren van {{name}} mislukt",
+    "unpause_success": "{{name}} hervat",
+    "unpause_failed": "Hervatten van {{name}} mislukt"
   }
 }

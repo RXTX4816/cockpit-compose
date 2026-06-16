@@ -15,7 +15,9 @@
     "fetch": "Načítať",
     "nothing_found": "Nič sa nenašlo.",
     "unknown": "neznáme",
-    "continue": "Pokračovať"
+    "continue": "Pokračovať",
+    "copy": "Kopírovať",
+    "copied": "Skopírované!"
   },
 
   "stacks": {
@@ -30,7 +32,22 @@
     "status_partial": "čiastočne",
     "status_stopped": "zastavený",
     "status_paused": "pozastavený",
-    "status_unknown": "neznámy"
+    "status_unknown": "neznámy",
+    "empty_create": "Vytvoriť zásobník",
+    "empty_import": "Importovať existujúci",
+    "no_results_title": "Žiadne zásobníky nezodpovedajú",
+    "no_results_body": "Skúste iný názov alebo zrušte aktívne filtre.",
+    "clear_filters": "Zrušiť filtre",
+    "refreshing": "Aktualizujem zásobníky",
+    "search_placeholder": "Hľadať zásobníky…",
+    "filter_tooltip_running": "Zobraziť iba bežiace zásobníky",
+    "filter_tooltip_partial": "Zobraziť iba čiastočne bežiace zásobníky",
+    "filter_tooltip_stopped": "Zobraziť iba zastavené zásobníky",
+    "filter_tooltip_paused": "Zobraziť iba pozastavené zásobníky",
+    "select_stack": "Vybrať {{name}}",
+    "select_all": "Vybrať všetko",
+    "bulk_selected": "{{count}} vybraných",
+    "bulk_clear": "Zrušiť výber"
   },
 
   "actions": {
@@ -80,6 +97,8 @@
     "docker_version": "{{runtime}}: {{version}}",
     "compose_version": "{{runtime}} Compose: {{version}}",
     "rootless": "Bez rootu",
+    "rootless_help_title": "Rootless režim",
+    "rootless_help_body": "Docker alebo Podman beží v rootless režime — kontajnery bežia ako váš používateľ, nie ako root. Zlepšuje to bezpečnosť, ale môže obmedzovať niektoré funkcie, ako je viazanie privilegovaných portov (<1024), prístup k systémovým cestám alebo používanie určitých sieťových ovládačov.",
     "help": "Pomoc",
     "feedback": "Spätná väzba / Nahlásiť chybu"
   },
@@ -90,7 +109,8 @@
     "toggle_label": "Bežové prostredie kontajnerov",
     "not_installed": "{{runtime}} sa nenašiel — nainštalujte ho na prepnutie",
     "podman_confirm_title": "Prepnúť na Podman",
-    "podman_confirm_body": "Podpora Podmana je experimentálna. V závislosti od vašej konfigurácie niektoré funkcie nemusia fungovať podľa očakávania — vrátane objavovania zásobníkov, streamovania záznamov a určitých compose príkazov."
+    "podman_confirm_body": "Podpora Podmana je experimentálna. V závislosti od vašej konfigurácie niektoré funkcie nemusia fungovať podľa očakávania — vrátane objavovania zásobníkov, streamovania záznamov a určitých compose príkazov.",
+    "podman_suggest_docker_missing": "Docker nebol na tomto systéme nájdený. Prepnite na Podman na správu vašich kontajnerov."
   },
 
   "error_boundary": {
@@ -241,7 +261,8 @@
     "import_file_title": "Importovať existujúci súbor",
     "import_file_select_label": "Dostupné súbory",
     "import_file_none": "V tomto adresári sa nenašli žiadne ďalšie YAML súbory.",
-    "import_file_confirm_button": "Importovať"
+    "import_file_confirm_button": "Importovať",
+    "unsaved_changes": "Neuložené zmeny"
   },
 
   "env_modal": {
@@ -275,7 +296,18 @@
     "limit_notice": "zobrazuje sa posledných {{count}} riadkov",
     "waiting": "Čakanie na záznamy…",
     "service_all": "Všetky služby",
-    "search_placeholder": "Hľadať v záznamoch…"
+    "search_placeholder": "Hľadať v záznamoch…",
+    "regex_tooltip": "Prepnúť vyhľadávanie regulárnymi výrazmi",
+    "level_all": "Všetky",
+    "level_error": "Chyba",
+    "level_warn": "Varovanie",
+    "level_info": "Info",
+    "download_tooltip": "Stiahnuť záznamy",
+    "timestamps_tooltip": "Prepnúť časové pečiatky",
+    "scroll_top": "Prejsť na začiatok",
+    "scroll_bottom": "Prejsť na koniec",
+    "line_count": "{{count}} riadkov",
+    "line_count_filtered": "{{shown}} / {{total}} riadkov"
   },
 
   "run_modal": {
@@ -303,7 +335,10 @@
     "field_user": "Používateľ (voliteľný)",
     "field_user_placeholder": "root",
     "open_shell_button": "Otvoriť terminál",
-    "disconnect_button": "Odpojiť"
+    "disconnect_button": "Odpojiť",
+    "font_size_label": "Veľkosť písma",
+    "font_size_decrease": "Zmenšiť písmo",
+    "font_size_increase": "Zväčšiť písmo"
   },
 
   "events_modal": {
@@ -402,7 +437,9 @@
     "net_col_name": "Sieť",
     "net_col_shared": "Zdieľané s",
     "net_shared_icon_title": "Zdieľaná sieť",
-    "profiles_label": "Profily"
+    "profiles_label": "Profily",
+    "copy_container_id": "Kopírovať ID kontajnera",
+    "copy_image_ref": "Kopírovať referenciu obrazu"
   },
 
   "prune_modal": {
@@ -534,5 +571,35 @@
     "port_conflict_title": "Pravdepodobný konflikt portov",
     "port_conflict_body": "Nasledujúce služby majú statické väzby portov hostiteľa. Docker nebude môcť spustiť viac ako jednu repliku, pretože port hostiteľa môže viazať iba jeden kontajner:",
     "port_conflict_icon_title": "Má statické väzby portov hostiteľa"
+  },
+
+  "settings": {
+    "title": "Nastavenia",
+    "open_button": "Nastavenia",
+    "refresh_interval_label": "Interval automatického obnovenia",
+    "refresh_interval_hint": "Ako často sa pýtať Docker na stav zásobníka (200–5000 ms).",
+    "log_line_limit_label": "Limit riadkov záznamu",
+    "log_line_limit_hint": "Maximálny počet riadkov záznamu uchovávaných v pamäti za reláciu (100–20000).",
+    "toasts_label": "Oznámenia",
+    "toasts_on": "Povolené",
+    "toasts_off": "Zakázané",
+    "confirm_down_label": "Potvrdiť pred zastavením",
+    "confirm_down_on": "Zobraziť potvrdzovací dialóg",
+    "confirm_down_off": "Preskočiť potvrdenie",
+    "confirm_down_hint": "Keď je vypnuté, 'Zastaviť' prebehne okamžite bez opýtania.",
+    "reset_defaults": "Obnoviť predvolené nastavenia"
+  },
+
+  "toast": {
+    "start_success": "{{name}} spustený",
+    "start_failed": "Spustenie {{name}} zlyhalo",
+    "stop_success": "{{name}} zastavený",
+    "stop_failed": "Zastavenie {{name}} zlyhalo",
+    "restart_success": "{{name}} reštartovaný",
+    "restart_failed": "Reštart {{name}} zlyhal",
+    "pause_success": "{{name}} pozastavený",
+    "pause_failed": "Pozastavenie {{name}} zlyhalo",
+    "unpause_success": "{{name}} obnovený",
+    "unpause_failed": "Obnovenie {{name}} zlyhalo"
   }
 }

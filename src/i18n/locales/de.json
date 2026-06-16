@@ -15,7 +15,9 @@
     "fetch": "Abrufen",
     "nothing_found": "Nichts gefunden.",
     "unknown": "unbekannt",
-    "continue": "Weiter"
+    "continue": "Weiter",
+    "copy": "Kopieren",
+    "copied": "Kopiert!"
   },
 
   "stacks": {
@@ -30,7 +32,22 @@
     "status_partial": "teilweise",
     "status_stopped": "gestoppt",
     "status_paused": "pausiert",
-    "status_unknown": "unbekannt"
+    "status_unknown": "unbekannt",
+    "empty_create": "Stack erstellen",
+    "empty_import": "Vorhandenen importieren",
+    "no_results_title": "Keine Stacks gefunden",
+    "no_results_body": "Probieren Sie einen anderen Namen oder entfernen Sie aktive Filter.",
+    "clear_filters": "Filter leeren",
+    "refreshing": "Stacks werden aktualisiert",
+    "search_placeholder": "Stacks durchsuchen…",
+    "filter_tooltip_running": "Nur laufende Stacks anzeigen",
+    "filter_tooltip_partial": "Nur teilweise laufende Stacks anzeigen",
+    "filter_tooltip_stopped": "Nur gestoppte Stacks anzeigen",
+    "filter_tooltip_paused": "Nur pausierte Stacks anzeigen",
+    "select_stack": "{{name}} auswählen",
+    "select_all": "Alle auswählen",
+    "bulk_selected": "{{count}} ausgewählt",
+    "bulk_clear": "Auswahl aufheben"
   },
 
   "actions": {
@@ -80,6 +97,8 @@
     "docker_version": "{{runtime}}: {{version}}",
     "compose_version": "{{runtime}} Compose: {{version}}",
     "rootless": "Rootless",
+    "rootless_help_title": "Rootless-Modus",
+    "rootless_help_body": "Docker oder Podman läuft im Rootless-Modus — Container laufen als Ihr Benutzer, nicht als root. Dies verbessert die Sicherheit, kann aber einige Funktionen einschränken, wie das Binden privilegierter Ports (<1024), den Zugriff auf Systempfade oder die Verwendung bestimmter Netzwerktreiber.",
     "help": "Hilfe",
     "feedback": "Feedback / Fehler melden"
   },
@@ -90,7 +109,8 @@
     "toggle_label": "Container-Laufzeitumgebung",
     "not_installed": "{{runtime}} nicht gefunden — installieren Sie es, um zu wechseln",
     "podman_confirm_title": "Zu Podman wechseln",
-    "podman_confirm_body": "Die Podman-Unterstützung ist experimentell. Je nach Konfiguration funktionieren einige Funktionen möglicherweise nicht wie erwartet — darunter Stack-Erkennung, Log-Streaming und bestimmte Compose-Befehle."
+    "podman_confirm_body": "Die Podman-Unterstützung ist experimentell. Je nach Konfiguration funktionieren einige Funktionen möglicherweise nicht wie erwartet — darunter Stack-Erkennung, Log-Streaming und bestimmte Compose-Befehle.",
+    "podman_suggest_docker_missing": "Docker wurde auf diesem System nicht gefunden. Wechseln Sie zu Podman, um Ihre Container zu verwalten."
   },
 
   "error_boundary": {
@@ -199,6 +219,7 @@
   "yaml_modal": {
     "aria_label": "Compose-Datei — {{name}}",
     "title": "{{name}} — Compose-Datei",
+    "unsaved_changes": "Nicht gespeicherte Änderungen",
     "env_file_button": "Env-Datei",
     "history_button": "Verlauf ({{count}})",
     "edit_button": "Bearbeiten",
@@ -275,7 +296,18 @@
     "limit_notice": "Letzte {{count}} Zeilen werden angezeigt",
     "waiting": "Warte auf Protokolle…",
     "service_all": "Alle Dienste",
-    "search_placeholder": "Logs durchsuchen…"
+    "search_placeholder": "Logs durchsuchen…",
+    "regex_tooltip": "Regex-Suche umschalten",
+    "level_all": "Alle",
+    "level_error": "Fehler",
+    "level_warn": "Warnung",
+    "level_info": "Info",
+    "download_tooltip": "Protokolle herunterladen",
+    "timestamps_tooltip": "Zeitstempel umschalten",
+    "scroll_top": "Zum Anfang springen",
+    "scroll_bottom": "Zum Ende springen",
+    "line_count": "{{count}} Zeilen",
+    "line_count_filtered": "{{shown}} / {{total}} Zeilen"
   },
 
   "run_modal": {
@@ -303,7 +335,10 @@
     "field_user": "Benutzer (optional)",
     "field_user_placeholder": "root",
     "open_shell_button": "Terminal öffnen",
-    "disconnect_button": "Trennen"
+    "disconnect_button": "Trennen",
+    "font_size_label": "Schriftgröße",
+    "font_size_decrease": "Schriftgröße verkleinern",
+    "font_size_increase": "Schriftgröße vergrößern"
   },
 
   "events_modal": {
@@ -402,7 +437,9 @@
     "net_col_name": "Netzwerk",
     "net_col_shared": "Geteilt mit",
     "net_shared_icon_title": "Gemeinsames Netzwerk",
-    "profiles_label": "Profile"
+    "profiles_label": "Profile",
+    "copy_container_id": "Container-ID kopieren",
+    "copy_image_ref": "Image-Referenz kopieren"
   },
 
   "prune_modal": {
@@ -534,5 +571,35 @@
     "port_conflict_title": "Port-Konflikt wahrscheinlich",
     "port_conflict_body": "Die folgenden Dienste haben statische Host-Port-Bindungen. Docker kann nicht mehr als ein Replikat starten, da ein Host-Port nur von einem einzelnen Container belegt werden kann:",
     "port_conflict_icon_title": "Hat statische Host-Port-Bindungen"
+  },
+
+  "settings": {
+    "title": "Einstellungen",
+    "open_button": "Einstellungen",
+    "refresh_interval_label": "Automatisches Aktualisierungsintervall",
+    "refresh_interval_hint": "Wie oft Docker nach dem Stack-Status abgefragt wird (200–5000 ms).",
+    "log_line_limit_label": "Protokollzeilenlimit",
+    "log_line_limit_hint": "Maximale Anzahl der pro Sitzung im Speicher gehaltenen Protokollzeilen (100–20000).",
+    "toasts_label": "Benachrichtigungen",
+    "toasts_on": "Aktiviert",
+    "toasts_off": "Deaktiviert",
+    "confirm_down_label": "Vor dem Herunterfahren bestätigen",
+    "confirm_down_on": "Bestätigungsdialog anzeigen",
+    "confirm_down_off": "Bestätigung überspringen",
+    "confirm_down_hint": "Wenn deaktiviert, wird 'Herunterfahren' sofort ohne Rückfrage ausgeführt.",
+    "reset_defaults": "Standardwerte wiederherstellen"
+  },
+
+  "toast": {
+    "start_success": "{{name}} gestartet",
+    "start_failed": "{{name}} konnte nicht gestartet werden",
+    "stop_success": "{{name}} gestoppt",
+    "stop_failed": "{{name}} konnte nicht gestoppt werden",
+    "restart_success": "{{name}} neu gestartet",
+    "restart_failed": "{{name}} konnte nicht neu gestartet werden",
+    "pause_success": "{{name}} pausiert",
+    "pause_failed": "{{name}} konnte nicht pausiert werden",
+    "unpause_success": "{{name}} fortgesetzt",
+    "unpause_failed": "{{name}} konnte nicht fortgesetzt werden"
   }
 }

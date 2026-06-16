@@ -15,7 +15,9 @@
     "fetch": "Pobierz",
     "nothing_found": "Nic nie znaleziono.",
     "unknown": "nieznany",
-    "continue": "Kontynuuj"
+    "continue": "Kontynuuj",
+    "copy": "Kopiuj",
+    "copied": "Skopiowano!"
   },
 
   "stacks": {
@@ -32,7 +34,22 @@
     "status_partial": "częściowy",
     "status_stopped": "zatrzymany",
     "status_paused": "wstrzymany",
-    "status_unknown": "nieznany"
+    "status_unknown": "nieznany",
+    "empty_create": "Utwórz stos",
+    "empty_import": "Importuj istniejący",
+    "no_results_title": "Brak pasujących stosów",
+    "no_results_body": "Spróbuj innej nazwy lub usuń aktywne filtry.",
+    "clear_filters": "Wyczyść filtry",
+    "refreshing": "Odświeżanie stosów",
+    "search_placeholder": "Szukaj stosów…",
+    "filter_tooltip_running": "Pokaż tylko działające stosy",
+    "filter_tooltip_partial": "Pokaż tylko częściowo działające stosy",
+    "filter_tooltip_stopped": "Pokaż tylko zatrzymane stosy",
+    "filter_tooltip_paused": "Pokaż tylko wstrzymane stosy",
+    "select_stack": "Wybierz {{name}}",
+    "select_all": "Wybierz wszystko",
+    "bulk_selected": "{{count}} zaznaczonych",
+    "bulk_clear": "Wyczyść zaznaczenie"
   },
 
   "actions": {
@@ -82,6 +99,8 @@
     "docker_version": "{{runtime}}: {{version}}",
     "compose_version": "{{runtime}} Compose: {{version}}",
     "rootless": "Rootless",
+    "rootless_help_title": "Tryb rootless",
+    "rootless_help_body": "Docker lub Podman działa w trybie rootless — kontenery działają jako Twój użytkownik, nie jako root. Poprawia to bezpieczeństwo, ale może ograniczać niektóre funkcje, takie jak wiązanie uprzywilejowanych portów (<1024), dostęp do ścieżek systemowych lub korzystanie z określonych sterowników sieciowych.",
     "help": "Pomoc",
     "feedback": "Opinia / Zgłoś błąd"
   },
@@ -92,7 +111,8 @@
     "toggle_label": "Środowisko uruchomieniowe kontenerów",
     "not_installed": "Nie znaleziono {{runtime}} — zainstaluj, aby przełączyć",
     "podman_confirm_title": "Przełącz na Podman",
-    "podman_confirm_body": "Obsługa Podmana jest eksperymentalna. W zależności od konfiguracji niektóre funkcje mogą nie działać zgodnie z oczekiwaniami — w tym wykrywanie stosów, strumieniowanie logów i niektóre polecenia Compose."
+    "podman_confirm_body": "Obsługa Podmana jest eksperymentalna. W zależności od konfiguracji niektóre funkcje mogą nie działać zgodnie z oczekiwaniami — w tym wykrywanie stosów, strumieniowanie logów i niektóre polecenia Compose.",
+    "podman_suggest_docker_missing": "Docker nie został znaleziony w tym systemie. Przełącz się na Podman, aby zarządzać swoimi kontenerami."
   },
 
   "error_boundary": {
@@ -251,7 +271,8 @@
     "import_file_title": "Importuj istniejący plik",
     "import_file_select_label": "Dostępne pliki",
     "import_file_none": "Nie znaleziono dodatkowych plików YAML w tym katalogu.",
-    "import_file_confirm_button": "Importuj"
+    "import_file_confirm_button": "Importuj",
+    "unsaved_changes": "Niezapisane zmiany"
   },
 
   "env_modal": {
@@ -285,7 +306,18 @@
     "limit_notice": "Wyświetlanie ostatnich {{count}} linii",
     "waiting": "Oczekiwanie na logi…",
     "service_all": "Wszystkie usługi",
-    "search_placeholder": "Szukaj w logach…"
+    "search_placeholder": "Szukaj w logach…",
+    "regex_tooltip": "Przełącz wyszukiwanie regex",
+    "level_all": "Wszystkie",
+    "level_error": "Błąd",
+    "level_warn": "Ostrzeżenie",
+    "level_info": "Info",
+    "download_tooltip": "Pobierz dzienniki",
+    "timestamps_tooltip": "Przełącz znaczniki czasu",
+    "scroll_top": "Przejdź na górę",
+    "scroll_bottom": "Przejdź na dół",
+    "line_count": "{{count}} wierszy",
+    "line_count_filtered": "{{shown}} / {{total}} wierszy"
   },
 
   "run_modal": {
@@ -313,7 +345,10 @@
     "field_user": "Użytkownik (opcjonalnie)",
     "field_user_placeholder": "root",
     "open_shell_button": "Otwórz terminal",
-    "disconnect_button": "Rozłącz"
+    "disconnect_button": "Rozłącz",
+    "font_size_label": "Rozmiar czcionki",
+    "font_size_decrease": "Zmniejsz czcionkę",
+    "font_size_increase": "Zwiększ czcionkę"
   },
 
   "events_modal": {
@@ -412,7 +447,9 @@
     "net_col_name": "Sieć",
     "net_col_shared": "Udostępniona z",
     "net_shared_icon_title": "Sieć współdzielona",
-    "profiles_label": "Profile"
+    "profiles_label": "Profile",
+    "copy_container_id": "Kopiuj ID kontenera",
+    "copy_image_ref": "Kopiuj referencję obrazu"
   },
 
   "prune_modal": {
@@ -544,5 +581,35 @@
     "port_conflict_title": "Prawdopodobny konflikt portów",
     "port_conflict_body": "Poniższe usługi mają statyczne przypisania portów hosta. Docker nie będzie mógł uruchomić więcej niż jednej repliki, ponieważ port hosta może być zajęty tylko przez jeden kontener:",
     "port_conflict_icon_title": "Ma statyczne przypisania portów hosta"
+  },
+
+  "settings": {
+    "title": "Ustawienia",
+    "open_button": "Ustawienia",
+    "refresh_interval_label": "Interwał automatycznego odświeżania",
+    "refresh_interval_hint": "Jak często odpytywać Docker o stan stosu (200–5000 ms).",
+    "log_line_limit_label": "Limit wierszy dziennika",
+    "log_line_limit_hint": "Maksymalna liczba wierszy dziennika przechowywanych w pamięci na sesję (100–20000).",
+    "toasts_label": "Powiadomienia",
+    "toasts_on": "Włączone",
+    "toasts_off": "Wyłączone",
+    "confirm_down_label": "Potwierdź przed zatrzymaniem",
+    "confirm_down_on": "Pokaż okno potwierdzenia",
+    "confirm_down_off": "Pomiń potwierdzenie",
+    "confirm_down_hint": "Po wyłączeniu 'Zatrzymaj' działa natychmiast bez pytania.",
+    "reset_defaults": "Przywróć domyślne"
+  },
+
+  "toast": {
+    "start_success": "{{name}} uruchomiony",
+    "start_failed": "Uruchomienie {{name}} nie powiodło się",
+    "stop_success": "{{name}} zatrzymany",
+    "stop_failed": "Zatrzymanie {{name}} nie powiodło się",
+    "restart_success": "{{name}} uruchomiony ponownie",
+    "restart_failed": "Ponowne uruchomienie {{name}} nie powiodło się",
+    "pause_success": "{{name}} wstrzymany",
+    "pause_failed": "Wstrzymanie {{name}} nie powiodło się",
+    "unpause_success": "{{name}} wznowiony",
+    "unpause_failed": "Wznowienie {{name}} nie powiodło się"
   }
 }

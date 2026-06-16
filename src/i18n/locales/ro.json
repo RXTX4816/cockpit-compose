@@ -15,7 +15,9 @@
     "fetch": "Preluare",
     "nothing_found": "Nu s-a găsit nimic.",
     "unknown": "necunoscut",
-    "continue": "Continuare"
+    "continue": "Continuare",
+    "copy": "Copiere",
+    "copied": "Copiat!"
   },
 
   "stacks": {
@@ -30,7 +32,22 @@
     "status_partial": "parțial",
     "status_stopped": "oprit",
     "status_paused": "în pauză",
-    "status_unknown": "necunoscut"
+    "status_unknown": "necunoscut",
+    "empty_create": "Creare stivă",
+    "empty_import": "Importare existentă",
+    "no_results_title": "Nicio stivă nu corespunde",
+    "no_results_body": "Încercați un alt nume sau eliminați filtrele active.",
+    "clear_filters": "Ștergere filtre",
+    "refreshing": "Actualizare stive",
+    "search_placeholder": "Căutare stive…",
+    "filter_tooltip_running": "Afișați numai stivele în execuție",
+    "filter_tooltip_partial": "Afișați numai stivele parțial în execuție",
+    "filter_tooltip_stopped": "Afișați numai stivele oprite",
+    "filter_tooltip_paused": "Afișați numai stivele în pauză",
+    "select_stack": "Selectați {{name}}",
+    "select_all": "Selectați tot",
+    "bulk_selected": "{{count}} selectate",
+    "bulk_clear": "Deselectați"
   },
 
   "actions": {
@@ -80,6 +97,8 @@
     "docker_version": "{{runtime}}: {{version}}",
     "compose_version": "{{runtime}} Compose: {{version}}",
     "rootless": "Fără root",
+    "rootless_help_title": "Modul fără root",
+    "rootless_help_body": "Docker sau Podman rulează în modul fără root — containerele rulează ca utilizatorul dvs., nu ca root. Aceasta îmbunătățește securitatea, dar poate limita unele funcții precum legarea porturilor privilegiate (<1024), accesul la căile de sistem sau utilizarea anumitor drivere de rețea.",
     "help": "Ajutor",
     "feedback": "Feedback / Raportare eroare"
   },
@@ -90,7 +109,8 @@
     "toggle_label": "Runtime container",
     "not_installed": "{{runtime}} nu a fost găsit — instalați-l pentru a comuta",
     "podman_confirm_title": "Comutare la Podman",
-    "podman_confirm_body": "Suportul Podman este experimental. În funcție de configurația dumneavoastră, unele funcționalități pot să nu funcționeze conform așteptărilor — inclusiv descoperirea stivelor, streaming de jurnale și anumite comenzi compose."
+    "podman_confirm_body": "Suportul Podman este experimental. În funcție de configurația dumneavoastră, unele funcționalități pot să nu funcționeze conform așteptărilor — inclusiv descoperirea stivelor, streaming de jurnale și anumite comenzi compose.",
+    "podman_suggest_docker_missing": "Docker nu a fost găsit pe acest sistem. Comutați la Podman pentru a vă gestiona containerele."
   },
 
   "error_boundary": {
@@ -241,7 +261,8 @@
     "import_file_title": "Import fișier existent",
     "import_file_select_label": "Fișiere disponibile",
     "import_file_none": "Nu s-au găsit fișiere YAML suplimentare în acest director.",
-    "import_file_confirm_button": "Import"
+    "import_file_confirm_button": "Import",
+    "unsaved_changes": "Modificări nesalvate"
   },
 
   "env_modal": {
@@ -275,7 +296,18 @@
     "limit_notice": "se afișează ultimele {{count}} linii",
     "waiting": "Se așteaptă jurnalele…",
     "service_all": "Toate serviciile",
-    "search_placeholder": "Căutare jurnale…"
+    "search_placeholder": "Căutare jurnale…",
+    "regex_tooltip": "Comutare căutare regex",
+    "level_all": "Toate",
+    "level_error": "Eroare",
+    "level_warn": "Avertisment",
+    "level_info": "Info",
+    "download_tooltip": "Descărcare jurnale",
+    "timestamps_tooltip": "Comutare marcaje de timp",
+    "scroll_top": "Salt la început",
+    "scroll_bottom": "Salt la final",
+    "line_count": "{{count}} linii",
+    "line_count_filtered": "{{shown}} / {{total}} linii"
   },
 
   "run_modal": {
@@ -303,7 +335,10 @@
     "field_user": "Utilizator (opțional)",
     "field_user_placeholder": "root",
     "open_shell_button": "Deschidere terminal",
-    "disconnect_button": "Deconectare"
+    "disconnect_button": "Deconectare",
+    "font_size_label": "Dimensiune font",
+    "font_size_decrease": "Micșorare font",
+    "font_size_increase": "Mărire font"
   },
 
   "events_modal": {
@@ -402,7 +437,9 @@
     "net_col_name": "Rețea",
     "net_col_shared": "Partajat cu",
     "net_shared_icon_title": "Rețea partajată",
-    "profiles_label": "Profiluri"
+    "profiles_label": "Profiluri",
+    "copy_container_id": "Copiere ID container",
+    "copy_image_ref": "Copiere referință imagine"
   },
 
   "prune_modal": {
@@ -534,5 +571,35 @@
     "port_conflict_title": "Conflict de port probabil",
     "port_conflict_body": "Următoarele servicii au legături de port gazdă statice. Docker nu va putea porni mai mult de o replică deoarece un port gazdă poate fi legat doar de un singur container:",
     "port_conflict_icon_title": "Are legături de port gazdă statice"
+  },
+
+  "settings": {
+    "title": "Setări",
+    "open_button": "Setări",
+    "refresh_interval_label": "Interval de reîmprospătare automată",
+    "refresh_interval_hint": "Cât de des să se interogheze Docker pentru starea stivei (200–5000 ms).",
+    "log_line_limit_label": "Limită linii jurnal",
+    "log_line_limit_hint": "Numărul maxim de linii de jurnal păstrate în memorie per sesiune (100–20000).",
+    "toasts_label": "Notificări",
+    "toasts_on": "Activate",
+    "toasts_off": "Dezactivate",
+    "confirm_down_label": "Confirmare înainte de oprire",
+    "confirm_down_on": "Afișare dialog de confirmare",
+    "confirm_down_off": "Omitere confirmare",
+    "confirm_down_hint": "Când este dezactivat, 'Oprire' rulează imediat fără a întreba.",
+    "reset_defaults": "Resetare la valorile implicite"
+  },
+
+  "toast": {
+    "start_success": "{{name}} pornit",
+    "start_failed": "Pornirea {{name}} a eșuat",
+    "stop_success": "{{name}} oprit",
+    "stop_failed": "Oprirea {{name}} a eșuat",
+    "restart_success": "{{name}} repornit",
+    "restart_failed": "Repornirea {{name}} a eșuat",
+    "pause_success": "{{name}} în pauză",
+    "pause_failed": "Punerea în pauză a {{name}} a eșuat",
+    "unpause_success": "{{name}} reluat",
+    "unpause_failed": "Reluarea {{name}} a eșuat"
   }
 }

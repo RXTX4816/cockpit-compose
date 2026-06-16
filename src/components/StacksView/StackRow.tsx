@@ -69,7 +69,9 @@ function stackHealthSummary(containers: ComposeContainer[]): "healthy" | "unheal
 interface StackRowProps {
   stack: ComposeStack;
   expanded: boolean;
+  selected: boolean;
   onToggle: () => void;
+  onSelect: () => void;
   onLogs: () => void;
   onYaml: () => void;
   onInfo: () => void;
@@ -87,7 +89,7 @@ interface StackRowProps {
   onActingChange: (delta: 1 | -1) => void;
 }
 
-export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, onDown, onKill, onUp, onPull, onEvents, onTop, onExec, onRun, onPrune, onBackup, onScale, onActingChange }: StackRowProps) {
+export function StackRow({ stack, expanded, selected, onToggle, onSelect, onLogs, onYaml, onInfo, onDown, onKill, onUp, onPull, onEvents, onTop, onExec, onRun, onPrune, onBackup, onScale, onActingChange }: StackRowProps) {
   const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -115,9 +117,21 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
     if (expanded) await loadContainers();
   }, [clearContainers, expanded, loadContainers]);
 
+  const healthSummary = stackHealthSummary(containers);
+
   return (
-    <DataListItem isExpanded={expanded} aria-labelledby={`stack-${stack.Name}`} data-status={status}>
+    <DataListItem isExpanded={expanded} aria-labelledby={`stack-${stack.Name}`} data-status={status} data-stack-name={stack.Name} className={selected ? "sr-row--selected" : ""}>
       <DataListItemRow>
+        <div className="sr-select-wrap">
+          <input
+            type="checkbox"
+            className="sr-select-checkbox"
+            checked={selected}
+            onChange={onSelect}
+            aria-label={t("stacks.select_stack", { name: stack.Name })}
+            onClick={e => e.stopPropagation()}
+          />
+        </div>
         <DataListToggle
           onClick={handleToggle}
           isExpanded={expanded}
@@ -129,13 +143,13 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
             <DataListCell key="name" width={2}>
               <span className="sr-name-cell">
                 <StatusLabel status={status} />
-                {stackHealthSummary(containers) === "unhealthy" && (
+                {healthSummary === "unhealthy" && (
                   <ExclamationTriangleIcon
                     color="var(--pf-t--global--icon--color--status--warning--default)"
                     title={t("health.failing")}
                   />
                 )}
-                {stackHealthSummary(containers) === "healthy" && (
+                {healthSummary === "healthy" && (
                   <CheckCircleIcon
                     color="var(--pf-t--global--icon--color--status--success--default)"
                     title={t("health.passing")}
@@ -144,6 +158,23 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
                 <span id={`stack-${stack.Name}`} className="sr-stack-name">
                   {stack.Name}
                 </span>
+                {containers.length > 0 && (
+                  <span className="sr-health-dots" aria-hidden="true">
+                    {containers.map(c => {
+                      const h = c.Health?.toLowerCase();
+                      const dotClass = h === "healthy" ? "sr-dot--healthy"
+                        : h === "unhealthy" ? "sr-dot--unhealthy"
+                        : h === "starting" ? "sr-dot--starting"
+                        : c.State?.toLowerCase() === "running" ? "sr-dot--running"
+                        : "sr-dot--stopped";
+                      return (
+                        <Tooltip key={c.Name} content={`${c.Service || c.Name}: ${h ?? c.State ?? "unknown"}`}>
+                          <span className={`sr-dot ${dotClass}`} />
+                        </Tooltip>
+                      );
+                    })}
+                  </span>
+                )}
               </span>
             </DataListCell>,
 
