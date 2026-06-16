@@ -46,6 +46,8 @@ export function StatsCell({ stackName, status }: StatsCellProps) {
                 key={p.label}
                 isCompact
                 color="blue"
+                className="sc-port-pill"
+                data-bind-type={p.bindType}
                 style={{ fontFamily: "var(--pf-t--global--font--family--mono)", fontSize: "0.7rem", ...(url ? { cursor: "pointer" } : {}) }}
                 onClick={url ? () => window.open(url, "_blank", "noopener,noreferrer") : undefined}
               >
@@ -58,7 +60,9 @@ export function StatsCell({ stackName, status }: StatsCellProps) {
       )}
       {stats && (
         <div className="sc-metrics">
-          <span>{t("stats.cpu")} {stats.cpu.toFixed(1)}%</span>
+          <span className={`sc-cpu ${stats.cpu > 80 ? "sc-cpu--high" : stats.cpu > 50 ? "sc-cpu--medium" : "sc-cpu--low"}`}>
+            {t("stats.cpu")} {stats.cpu.toFixed(1)}%
+          </span>
           <span>{t("stats.mem")} {formatBytes(stats.mem)}</span>
         </div>
       )}
