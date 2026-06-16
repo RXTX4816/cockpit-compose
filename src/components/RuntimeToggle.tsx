@@ -6,6 +6,7 @@ import { setRuntime, detectComposeCommand, type Runtime } from "../api";
 
 interface Props {
   onRuntimeChange?: (runtime: Runtime) => void;
+  suggestPodman?: boolean;
 }
 
 function DockerIcon() {
@@ -20,14 +21,14 @@ function PodmanIcon() {
   return <CubeIcon aria-hidden="true" style={{ marginRight: 4, verticalAlign: "middle" }} />;
 }
 
-export function RuntimeToggle({ onRuntimeChange }: Props) {
+export function RuntimeToggle({ onRuntimeChange, suggestPodman }: Props) {
   const { t } = useTranslation();
   const [runtime, setRuntimeState] = useState<Runtime>(
     () => (localStorage.getItem("cockpit-compose:runtime") ?? "docker") as Runtime,
   );
   const [detecting, setDetecting] = useState(false);
   const [notInstalled, setNotInstalled] = useState<Runtime | null>(null);
-  const [showPodmanConfirm, setShowPodmanConfirm] = useState(false);
+  const [showPodmanConfirm, setShowPodmanConfirm] = useState(() => suggestPodman ?? false);
 
   const handleChange = useCallback(async (newRuntime: Runtime) => {
     if (newRuntime === runtime || detecting) return;
@@ -89,6 +90,15 @@ export function RuntimeToggle({ onRuntimeChange }: Props) {
         <Modal isOpen onClose={() => setShowPodmanConfirm(false)} variant="small" aria-label={t("runtime.podman_confirm_title")}>
           <ModalHeader title={t("runtime.podman_confirm_title")} />
           <ModalBody>
+            {suggestPodman && (
+              <Alert
+                variant="info"
+                isInline
+                isPlain
+                title={t("runtime.podman_suggest_docker_missing")}
+                style={{ marginBottom: "0.5rem" }}
+              />
+            )}
             <Alert variant="warning" isInline isPlain title={t("runtime.podman_confirm_body")} />
           </ModalBody>
           <ModalFooter>

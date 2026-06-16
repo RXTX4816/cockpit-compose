@@ -46,9 +46,10 @@ import { splitConfigFiles } from "../../lib/configFiles";
 
 interface Props {
   onRuntimeChange?: (runtime: Runtime) => void;
+  dockerMissing?: boolean;
 }
 
-export function StacksView({ onRuntimeChange }: Props) {
+export function StacksView({ onRuntimeChange, dockerMissing }: Props) {
   const { t } = useTranslation();
   const { stacks, loading, error, refresh, reset } = useComposeStacks();
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
@@ -121,7 +122,7 @@ export function StacksView({ onRuntimeChange }: Props) {
             <Title headingLevel="h2">{t("stacks.title")}</Title>
           </ToolbarItem>
           <ToolbarItem align={{ default: "alignEnd" }}>
-            <RuntimeToggle onRuntimeChange={(r) => { setRuntimeSwitchKey(k => k + 1); reset(); onRuntimeChange?.(r); }} />
+            <RuntimeToggle onRuntimeChange={(r) => { setRuntimeSwitchKey(k => k + 1); reset(); onRuntimeChange?.(r); }} suggestPodman={dockerMissing} />
           </ToolbarItem>
         </ToolbarContent>
       </Toolbar>
