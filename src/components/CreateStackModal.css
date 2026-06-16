@@ -26,10 +26,55 @@
   max-width: 28rem;
 }
 
-.csm-radio-group {
+.csm-method-tiles {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.csm-method-tile {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.875rem 0.625rem;
+  border: 1px solid var(--pf-t--global--border--color--default, #d2d2d2);
+  border-radius: var(--pf-t--global--border--radius--medium, 4px);
+  background: var(--pf-t--global--background--color--primary--default, #fff);
+  cursor: pointer;
+  text-align: center;
+  transition: border-color 0.1s, box-shadow 0.1s;
+}
+
+.csm-method-tile:hover {
+  border-color: var(--pf-t--global--color--brand--default, #0066cc);
+}
+
+.csm-method-tile--selected {
+  border-color: var(--pf-t--global--color--brand--default, #0066cc);
+  box-shadow: 0 0 0 1px var(--pf-t--global--color--brand--default, #0066cc);
+  background: var(--pf-t--global--background--color--secondary--default, #f0f4f9);
+}
+
+.csm-method-tile-icon {
+  font-size: 1.75rem;
+  line-height: 1;
+  color: var(--pf-t--global--color--brand--default, #0066cc);
+}
+
+.csm-method-tile--selected .csm-method-tile-icon {
+  color: var(--pf-t--global--color--brand--default, #0066cc);
+}
+
+.csm-method-tile-label {
+  font-weight: 600;
+  font-size: var(--pf-t--global--font--size--body--default, 0.875rem);
+}
+
+.csm-method-tile-desc {
+  font-size: var(--pf-t--global--font--size--sm, 0.75rem);
+  color: var(--pf-t--global--text--color--subtle, #6a6e73);
+  line-height: 1.3;
 }
 
 .csm-git-row {

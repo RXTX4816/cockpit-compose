@@ -15,9 +15,10 @@
     "fetch": "取得",
     "nothing_found": "找不到任何內容。",
     "unknown": "未知",
-    "continue": "繼續"
+    "continue": "繼續",
+    "copy": "複製",
+    "copied": "已複製！"
   },
-
   "stacks": {
     "title": "Compose 堆疊",
     "aria_label": "Compose 堆疊",
@@ -30,9 +31,23 @@
     "status_partial": "部分執行",
     "status_stopped": "已停止",
     "status_paused": "已暫停",
-    "status_unknown": "未知"
+    "status_unknown": "未知",
+    "empty_create": "建立堆疊",
+    "empty_import": "匯入現有",
+    "no_results_title": "沒有符合的堆疊",
+    "no_results_body": "嘗試不同的名稱或清除活動篩選器。",
+    "clear_filters": "清除篩選器",
+    "refreshing": "正在重新整理堆疊",
+    "search_placeholder": "搜尋堆疊…",
+    "filter_tooltip_running": "僅顯示執行中的堆疊",
+    "filter_tooltip_partial": "僅顯示部分執行的堆疊",
+    "filter_tooltip_stopped": "僅顯示已停止的堆疊",
+    "filter_tooltip_paused": "僅顯示已暫停的堆疊",
+    "select_stack": "選取 {{name}}",
+    "select_all": "全選",
+    "bulk_selected": "已選取 {{count}} 個",
+    "bulk_clear": "清除選取"
   },
-
   "actions": {
     "up": "啟動",
     "up_title": "啟動堆疊或重新建立已變更的容器",
@@ -62,41 +77,38 @@
     "backup": "備份",
     "scale": "擴縮容"
   },
-
   "health": {
     "passing": "健康檢查通過",
     "failing": "健康檢查失敗",
     "starting": "健康檢查啟動中"
   },
-
   "ports": {
     "external_tooltip": "在所有介面上公開 — 開啟堆疊資訊查看完整詳情",
     "localhost_tooltip": "僅繫結到 localhost — 開啟堆疊資訊查看完整詳情",
     "specific_tooltip": "繫結到特定 IP — 開啟堆疊資訊查看完整詳情"
   },
-
   "footer": {
     "version": "版本：{{version}}",
     "docker_version": "{{runtime}}：{{version}}",
     "compose_version": "{{runtime}} Compose：{{version}}",
     "rootless": "無 root",
+    "rootless_help_title": "無根模式",
+    "rootless_help_body": "Docker 或 Podman 正在無根模式下執行 — 容器以您的使用者身份執行，而非 root。這提高了安全性，但可能限制某些功能，例如繫結特殊權限連接埠（<1024）、存取系統路徑或使用某些網路驅動程式。",
     "help": "說明",
     "feedback": "意見回饋 / 回報問題"
   },
-
   "runtime": {
     "docker": "Docker",
     "podman": "Podman",
     "toggle_label": "容器執行環境",
     "not_installed": "找不到 {{runtime}} — 請安裝後切換",
     "podman_confirm_title": "切換到 Podman",
-    "podman_confirm_body": "Podman 支援為實驗性功能。根據您的設定，某些功能可能無法如預期運作 — 包括堆疊探索、日誌串流和某些 compose 命令。"
+    "podman_confirm_body": "Podman 支援為實驗性功能。根據您的設定，某些功能可能無法如預期運作 — 包括堆疊探索、日誌串流和某些 compose 命令。",
+    "podman_suggest_docker_missing": "在此系統上找不到 Docker。請切換到 Podman 來管理您的容器。"
   },
-
   "error_boundary": {
     "load_stacks_error": "載入堆疊時發生錯誤"
   },
-
   "down_modal": {
     "aria_label": "確認停止",
     "title": "移除「{{name}}」？",
@@ -108,7 +120,6 @@
     "shared_networks_title": "偵測到共用網路",
     "shared_with": "也被以下使用"
   },
-
   "kill_modal": {
     "aria_label": "確認強制終止",
     "title": "強制終止「{{name}}」？",
@@ -117,7 +128,18 @@
     "body_suffix": "，立即強制終止它們。與停止不同，程序沒有機會進行清理。僅在停止無回應時使用。",
     "confirm_button": "終止所有容器"
   },
-
+  "stop_modal": {
+    "aria_label": "Confirm stop",
+    "title": "Stop \"{{name}}\"?",
+    "body": "This will stop all running containers in the stack. They will not be removed and can be started again.",
+    "confirm_button": "Stop"
+  },
+  "restart_modal": {
+    "aria_label": "Confirm restart",
+    "title": "Restart \"{{name}}\"?",
+    "body": "This will restart all running services. Services will briefly be unavailable.",
+    "confirm_button": "Restart"
+  },
   "delete_modal": {
     "aria_label": "刪除 compose 堆疊 — {{name}}",
     "title": "刪除 — {{name}}",
@@ -139,7 +161,6 @@
     "shared_networks_title": "偵測到共用網路",
     "shared_with": "也被以下使用"
   },
-
   "create_modal": {
     "aria_label": "建立新的 compose 堆疊",
     "title": "建立 compose 堆疊",
@@ -195,10 +216,10 @@
     "validation_extra_name_duplicate_primary": "不能使用與主 compose 檔案相同的名稱",
     "validation_extra_name_duplicate": "檔案名稱必須唯一"
   },
-
   "yaml_modal": {
     "aria_label": "Compose 檔案 — {{name}}",
     "title": "{{name}} — compose 檔案",
+    "unsaved_changes": "未儲存的變更",
     "env_file_button": "Env 檔案",
     "history_button": "歷程（{{count}}）",
     "edit_button": "編輯",
@@ -243,7 +264,6 @@
     "import_file_none": "此目錄中找不到其他 YAML 檔案。",
     "import_file_confirm_button": "匯入"
   },
-
   "env_modal": {
     "aria_label": "Env 檔案 — {{name}}",
     "title": "{{name}} — env 檔案",
@@ -264,7 +284,6 @@
     "confirm_save_question": "是否仍要儲存？",
     "save_anyway_button": "仍然儲存"
   },
-
   "logs_modal": {
     "aria_label": "日誌 — {{name}}",
     "title": "日誌 — {{name}}",
@@ -275,9 +294,19 @@
     "limit_notice": "顯示最後 {{count}} 行",
     "waiting": "等待日誌…",
     "service_all": "所有服務",
-    "search_placeholder": "搜尋日誌…"
+    "search_placeholder": "搜尋日誌…",
+    "regex_tooltip": "切換規則運算式搜尋",
+    "level_all": "全部",
+    "level_error": "錯誤",
+    "level_warn": "警告",
+    "level_info": "資訊",
+    "download_tooltip": "下載日誌",
+    "timestamps_tooltip": "切換時間戳記",
+    "scroll_top": "跳至頂部",
+    "scroll_bottom": "跳至底部",
+    "line_count": "{{count}} 行",
+    "line_count_filtered": "{{shown}} / {{total}} 行"
   },
-
   "run_modal": {
     "aria_label": "執行 — {{name}}",
     "title": "執行 — {{name}}",
@@ -292,7 +321,6 @@
     "complete": "✓ 命令已完成",
     "failed": "✗ 命令失敗"
   },
-
   "exec_modal": {
     "aria_label": "終端機 — {{name}}",
     "title": "終端機 — {{name}}",
@@ -303,9 +331,11 @@
     "field_user": "使用者（選填）",
     "field_user_placeholder": "root",
     "open_shell_button": "開啟終端機",
-    "disconnect_button": "中斷連線"
+    "disconnect_button": "中斷連線",
+    "font_size_label": "字型大小",
+    "font_size_decrease": "縮小字型",
+    "font_size_increase": "放大字型"
   },
-
   "events_modal": {
     "aria_label": "事件 — {{name}}",
     "title": "事件 — {{name}}",
@@ -320,7 +350,6 @@
     "col_service": "服務",
     "col_details": "詳情"
   },
-
   "top_modal": {
     "aria_label": "程序 — {{name}}",
     "title": "程序 — {{name}}",
@@ -328,7 +357,6 @@
     "error_title": "無法載入程序",
     "empty": "找不到正在執行的程序。"
   },
-
   "pull_modal": {
     "aria_label": "拉取 — {{name}}",
     "title": "拉取 — {{name}}",
@@ -337,7 +365,6 @@
     "failed": "✗ 拉取失敗",
     "starting": "開始拉取…"
   },
-
   "pull_confirm_modal": {
     "aria_label": "確認拉取 — {{name}}",
     "title": "拉取最新映像 — {{name}}",
@@ -349,7 +376,6 @@
     "unpinned_notice": "未固定的映像總是拉取儲存庫認為「最新」的版本，更可能在拉取之間改變行為。",
     "pull_button": "拉取"
   },
-
   "up_modal": {
     "aria_label": "啟動 — {{name}}",
     "title": "啟動 — {{name}}",
@@ -358,7 +384,6 @@
     "complete": "✓ 啟動完成",
     "failed": "✗ 啟動失敗"
   },
-
   "up_confirm_modal": {
     "aria_label": "確認啟動 — {{name}}",
     "title": "啟動 — {{name}}",
@@ -373,7 +398,6 @@
     "profiles_hint": "僅啟動標記了所選設定檔的服務。",
     "up_button": "啟動"
   },
-
   "info_modal": {
     "aria_label": "資訊 — {{name}}",
     "title": "{{name}} — 資訊",
@@ -402,9 +426,10 @@
     "net_col_name": "網路",
     "net_col_shared": "共用於",
     "net_shared_icon_title": "共用網路",
-    "profiles_label": "設定檔"
+    "profiles_label": "設定檔",
+    "copy_container_id": "複製容器 ID",
+    "copy_image_ref": "複製映像參考"
   },
-
   "prune_modal": {
     "aria_label_select": "清理資源 — {{name}}",
     "title_select": "清理資源 — {{name}}",
@@ -428,7 +453,6 @@
     "prune_button": "清理所選",
     "nothing_to_remove": "沒有可刪除的內容。"
   },
-
   "downed_section": {
     "create_button": "建立",
     "import_button": "匯入",
@@ -448,12 +472,10 @@
     "depth_plus_aria": "增加掃描深度",
     "restore_button": "還原"
   },
-
   "stack_row": {
     "no_containers": "找不到容器。",
     "containers_aria": "{{name}} 的容器"
   },
-
   "container_state": {
     "running": "執行中",
     "paused": "已暫停",
@@ -463,12 +485,10 @@
     "created": "已建立",
     "removing": "刪除中"
   },
-
   "stats": {
     "cpu": "CPU",
     "mem": "記憶體"
   },
-
   "backup_modal": {
     "title": "備份 {{name}}",
     "base_name_label": "檔案名稱",
@@ -482,7 +502,6 @@
     "success_body": "已儲存到 {{path}}",
     "warning_partial": "部分檔案因權限錯誤被略過"
   },
-
   "restore_modal": {
     "title": "從備份還原堆疊",
     "scan_dir_label": "搜尋目錄",
@@ -503,13 +522,11 @@
     "error_dest_exists": "目標路徑 {{path}} 已存在 — 正在中止以防止覆寫",
     "error_unknown": "還原失敗（詳情請查看瀏覽器主控台）"
   },
-
   "external_link_modal": {
     "aria_label": "外部連結警告",
     "title": "開啟外部連結",
     "warning_title": "繼續前請務必確認目標網站是否可信。"
   },
-
   "container_table": {
     "replica_count": "×{{count}}",
     "col_status": "狀態",
@@ -517,7 +534,6 @@
     "col_image": "映像",
     "col_uptime": "執行時間"
   },
-
   "scale_modal": {
     "title": "擴縮容服務 — {{name}}",
     "confirm_title": "確認擴縮容 — {{name}}",
@@ -534,5 +550,33 @@
     "port_conflict_title": "可能存在連接埠衝突",
     "port_conflict_body": "以下服務具有靜態主機連接埠繫結。Docker 無法啟動超過一個複本，因為主機連接埠只能由單個容器繫結：",
     "port_conflict_icon_title": "具有靜態主機連接埠繫結"
+  },
+  "settings": {
+    "title": "設定",
+    "open_button": "設定",
+    "refresh_interval_label": "自動重新整理間隔",
+    "refresh_interval_hint": "輪詢 Docker 以取得堆疊狀態的頻率（200–5000 毫秒）。",
+    "log_line_limit_label": "日誌行數限制",
+    "log_line_limit_hint": "每個工作階段在記憶體中保留的最大日誌行數（100–20000）。",
+    "toasts_label": "通知",
+    "toasts_on": "已啟用",
+    "toasts_off": "已停用",
+    "confirm_down_label": "停止前確認",
+    "confirm_down_on": "顯示確認對話方塊",
+    "confirm_down_off": "略過確認",
+    "confirm_down_hint": "停用時，「停止」將立即執行而不詢問。",
+    "reset_defaults": "重設為預設值"
+  },
+  "toast": {
+    "start_success": "{{name}} 已啟動",
+    "start_failed": "啟動 {{name}} 失敗",
+    "stop_success": "{{name}} 已停止",
+    "stop_failed": "停止 {{name}} 失敗",
+    "restart_success": "{{name}} 已重新啟動",
+    "restart_failed": "重新啟動 {{name}} 失敗",
+    "pause_success": "{{name}} 已暫停",
+    "pause_failed": "暫停 {{name}} 失敗",
+    "unpause_success": "{{name}} 已恢復",
+    "unpause_failed": "恢復 {{name}} 失敗"
   }
 }

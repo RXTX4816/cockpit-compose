@@ -23,3 +23,42 @@
   overflow: hidden;
   padding: 4px;
 }
+
+.em2-font-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.4rem;
+  font-size: 0.8rem;
+}
+
+.em2-font-label {
+  color: var(--pf-t--global--text--color--subtle);
+  margin-right: 0.2rem;
+}
+
+.em2-font-btn {
+  width: 1.4rem;
+  height: 1.4rem;
+  border: 1px solid var(--pf-t--global--border--color--default);
+  border-radius: 3px;
+  background: var(--pf-t--global--background--color--secondary--default);
+  color: var(--pf-t--global--text--color--regular);
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.em2-font-btn:hover {
+  background: var(--pf-t--global--background--color--secondary--hover--default);
+}
+
+.em2-font-value {
+  min-width: 2.8rem;
+  text-align: center;
+  font-family: var(--pf-t--global--font--family--mono);
+  color: var(--pf-t--global--text--color--regular);
+}

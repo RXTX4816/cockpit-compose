@@ -15,9 +15,10 @@
     "fetch": "جلب",
     "nothing_found": "لم يُعثر على شيء.",
     "unknown": "غير معروف",
-    "continue": "متابعة"
+    "continue": "متابعة",
+    "copy": "نسخ",
+    "copied": "تم النسخ!"
   },
-
   "stacks": {
     "title": "حزم Compose",
     "aria_label": "حزم Compose",
@@ -30,9 +31,23 @@
     "status_partial": "جزئي",
     "status_stopped": "متوقف",
     "status_paused": "متوقف مؤقتاً",
-    "status_unknown": "غير معروف"
+    "status_unknown": "غير معروف",
+    "empty_create": "إنشاء حزمة",
+    "empty_import": "استيراد موجود",
+    "no_results_title": "لا توجد حزم مطابقة",
+    "no_results_body": "جرب اسماً مختلفاً أو أزل الفلاتر النشطة.",
+    "clear_filters": "مسح الفلاتر",
+    "refreshing": "جارٍ تحديث الحزم",
+    "search_placeholder": "البحث في الحزم…",
+    "filter_tooltip_running": "عرض الحزم النشطة فقط",
+    "filter_tooltip_partial": "عرض الحزم الجزئية فقط",
+    "filter_tooltip_stopped": "عرض الحزم المتوقفة فقط",
+    "filter_tooltip_paused": "عرض الحزم المتوقفة مؤقتاً فقط",
+    "select_stack": "تحديد {{name}}",
+    "select_all": "تحديد الكل",
+    "bulk_selected": "{{count}} محدد",
+    "bulk_clear": "مسح التحديد"
   },
-
   "actions": {
     "up": "تشغيل",
     "up_title": "تشغيل الحزمة أو إعادة إنشاء الحاويات المُعدَّلة",
@@ -62,41 +77,38 @@
     "backup": "نسخ احتياطي",
     "scale": "تحجيم"
   },
-
   "health": {
     "passing": "فحص الصحة ناجح",
     "failing": "فحص الصحة فاشل",
     "starting": "جارٍ بدء فحص الصحة"
   },
-
   "ports": {
     "external_tooltip": "مكشوف على جميع الواجهات — افتح معلومات الحزمة للتفاصيل الكاملة",
     "localhost_tooltip": "مرتبط بـ localhost فقط — افتح معلومات الحزمة للتفاصيل الكاملة",
     "specific_tooltip": "مرتبط بعنوان IP محدد — افتح معلومات الحزمة للتفاصيل الكاملة"
   },
-
   "footer": {
     "version": "الإصدار: {{version}}",
     "docker_version": "{{runtime}}: {{version}}",
     "compose_version": "{{runtime}} Compose: {{version}}",
     "rootless": "بدون صلاحيات",
+    "rootless_help_title": "وضع بدون صلاحيات",
+    "rootless_help_body": "Docker أو Podman يعمل في وضع بدون صلاحيات — تعمل الحاويات كمستخدمك وليس كمستخدم الجذر. يُحسّن هذا الأمان ولكنه قد يُقيّد بعض الميزات مثل ربط المنافذ المُميّزة (<1024) أو الوصول إلى مسارات النظام أو استخدام بعض برامج تشغيل الشبكة.",
     "help": "مساعدة",
     "feedback": "ملاحظات / الإبلاغ عن خطأ"
   },
-
   "runtime": {
     "docker": "Docker",
     "podman": "Podman",
     "toggle_label": "وقت تشغيل الحاوية",
     "not_installed": "لم يُعثر على {{runtime}} — ثبِّته للتبديل",
     "podman_confirm_title": "التبديل إلى Podman",
-    "podman_confirm_body": "دعم Podman تجريبي. بحسب إعداداتك، قد لا تعمل بعض الميزات كما هو متوقع — بما في ذلك اكتشاف الحزم وبث السجلات وبعض أوامر compose."
+    "podman_confirm_body": "دعم Podman تجريبي. بحسب إعداداتك، قد لا تعمل بعض الميزات كما هو متوقع — بما في ذلك اكتشاف الحزم وبث السجلات وبعض أوامر compose.",
+    "podman_suggest_docker_missing": "لم يُعثر على Docker في هذا النظام. قم بالتبديل إلى Podman لإدارة حاوياتك."
   },
-
   "error_boundary": {
     "load_stacks_error": "خطأ في تحميل الحزم"
   },
-
   "down_modal": {
     "aria_label": "تأكيد الإيقاف",
     "title": "إزالة \"{{name}}\"؟",
@@ -108,7 +120,6 @@
     "shared_networks_title": "تم اكتشاف شبكات مشتركة",
     "shared_with": "تُستخدم أيضاً من قِبل"
   },
-
   "kill_modal": {
     "aria_label": "تأكيد الإنهاء القسري",
     "title": "إنهاء قسري لـ \"{{name}}\"؟",
@@ -117,7 +128,18 @@
     "body_suffix": "، مما يُنهيها فوراً بالقوة. على خلاف الوقف، لا يُتاح للعمليات وقت للتنظيف. استخدم هذا فقط عندما لا يستجيب الوقف.",
     "confirm_button": "إنهاء قسري لجميع الحاويات"
   },
-
+  "stop_modal": {
+    "aria_label": "Confirm stop",
+    "title": "Stop \"{{name}}\"?",
+    "body": "This will stop all running containers in the stack. They will not be removed and can be started again.",
+    "confirm_button": "Stop"
+  },
+  "restart_modal": {
+    "aria_label": "Confirm restart",
+    "title": "Restart \"{{name}}\"?",
+    "body": "This will restart all running services. Services will briefly be unavailable.",
+    "confirm_button": "Restart"
+  },
   "delete_modal": {
     "aria_label": "حذف حزمة compose — {{name}}",
     "title": "حذف — {{name}}",
@@ -139,7 +161,6 @@
     "shared_networks_title": "تم اكتشاف شبكات مشتركة",
     "shared_with": "تُستخدم أيضاً من قِبل"
   },
-
   "create_modal": {
     "aria_label": "إنشاء حزمة compose جديدة",
     "title": "إنشاء حزمة compose",
@@ -195,10 +216,10 @@
     "validation_extra_name_duplicate_primary": "لا يمكن استخدام نفس اسم ملف compose الأساسي",
     "validation_extra_name_duplicate": "يجب أن يكون اسم الملف فريداً"
   },
-
   "yaml_modal": {
     "aria_label": "ملف Compose — {{name}}",
     "title": "{{name}} — ملف compose",
+    "unsaved_changes": "تغييرات غير محفوظة",
     "env_file_button": "ملف البيئة",
     "history_button": "السجل ({{count}})",
     "edit_button": "تعديل",
@@ -243,7 +264,6 @@
     "import_file_none": "لم يُعثر على ملفات YAML إضافية في هذا المجلد.",
     "import_file_confirm_button": "استيراد"
   },
-
   "env_modal": {
     "aria_label": "ملف البيئة — {{name}}",
     "title": "{{name}} — ملف البيئة",
@@ -264,7 +284,6 @@
     "confirm_save_question": "هل تريد الحفظ على أي حال؟",
     "save_anyway_button": "حفظ على أي حال"
   },
-
   "logs_modal": {
     "aria_label": "السجلات — {{name}}",
     "title": "السجلات — {{name}}",
@@ -275,9 +294,19 @@
     "limit_notice": "عرض آخر {{count}} سطر",
     "waiting": "في انتظار السجلات…",
     "service_all": "جميع الخدمات",
-    "search_placeholder": "البحث في السجلات…"
+    "search_placeholder": "البحث في السجلات…",
+    "regex_tooltip": "تبديل البحث بالتعبيرات النمطية",
+    "level_all": "الكل",
+    "level_error": "خطأ",
+    "level_warn": "تحذير",
+    "level_info": "معلومات",
+    "download_tooltip": "تنزيل السجلات",
+    "timestamps_tooltip": "تبديل الطوابع الزمنية",
+    "scroll_top": "الانتقال إلى الأعلى",
+    "scroll_bottom": "الانتقال إلى الأسفل",
+    "line_count": "{{count}} سطر",
+    "line_count_filtered": "{{shown}} / {{total}} سطر"
   },
-
   "run_modal": {
     "aria_label": "تشغيل — {{name}}",
     "title": "تشغيل — {{name}}",
@@ -292,7 +321,6 @@
     "complete": "✓ اكتمل الأمر",
     "failed": "✗ فشل الأمر"
   },
-
   "exec_modal": {
     "aria_label": "الطرفية — {{name}}",
     "title": "الطرفية — {{name}}",
@@ -303,9 +331,11 @@
     "field_user": "المستخدم (اختياري)",
     "field_user_placeholder": "root",
     "open_shell_button": "فتح الطرفية",
-    "disconnect_button": "قطع الاتصال"
+    "disconnect_button": "قطع الاتصال",
+    "font_size_label": "حجم الخط",
+    "font_size_decrease": "تصغير حجم الخط",
+    "font_size_increase": "تكبير حجم الخط"
   },
-
   "events_modal": {
     "aria_label": "الأحداث — {{name}}",
     "title": "الأحداث — {{name}}",
@@ -320,7 +350,6 @@
     "col_service": "الخدمة",
     "col_details": "التفاصيل"
   },
-
   "top_modal": {
     "aria_label": "العمليات — {{name}}",
     "title": "العمليات — {{name}}",
@@ -328,7 +357,6 @@
     "error_title": "تعذّر تحميل العمليات",
     "empty": "لم يُعثر على عمليات جارية."
   },
-
   "pull_modal": {
     "aria_label": "سحب — {{name}}",
     "title": "سحب — {{name}}",
@@ -337,7 +365,6 @@
     "failed": "✗ فشل السحب",
     "starting": "جارٍ بدء السحب…"
   },
-
   "pull_confirm_modal": {
     "aria_label": "تأكيد السحب — {{name}}",
     "title": "سحب أحدث الصور — {{name}}",
@@ -349,7 +376,6 @@
     "unpinned_notice": "الصور غير المثبتة تسحب دائماً ما تعتبره السجل \"الأحدث\" وهي الأكثر احتمالاً لتغيير السلوك بين عمليات السحب.",
     "pull_button": "سحب"
   },
-
   "up_modal": {
     "aria_label": "تشغيل — {{name}}",
     "title": "تشغيل — {{name}}",
@@ -358,7 +384,6 @@
     "complete": "✓ اكتمل التشغيل",
     "failed": "✗ فشل التشغيل"
   },
-
   "up_confirm_modal": {
     "aria_label": "تأكيد التشغيل — {{name}}",
     "title": "تشغيل — {{name}}",
@@ -373,7 +398,6 @@
     "profiles_hint": "ستبدأ فقط الخدمات المُعلَّمة بملف تعريف مُحدد.",
     "up_button": "تشغيل"
   },
-
   "info_modal": {
     "aria_label": "معلومات — {{name}}",
     "title": "{{name}} — معلومات",
@@ -402,9 +426,10 @@
     "net_col_name": "الشبكة",
     "net_col_shared": "مشتركة مع",
     "net_shared_icon_title": "شبكة مشتركة",
-    "profiles_label": "ملفات التعريف"
+    "profiles_label": "ملفات التعريف",
+    "copy_container_id": "نسخ معرف الحاوية",
+    "copy_image_ref": "نسخ مرجع الصورة"
   },
-
   "prune_modal": {
     "aria_label_select": "تنظيف الموارد — {{name}}",
     "title_select": "تنظيف الموارد — {{name}}",
@@ -428,7 +453,6 @@
     "prune_button": "تنظيف المحدد",
     "nothing_to_remove": "لا يوجد شيء للإزالة."
   },
-
   "downed_section": {
     "create_button": "إنشاء",
     "import_button": "استيراد",
@@ -448,12 +472,10 @@
     "depth_plus_aria": "زيادة عمق الفحص",
     "restore_button": "استعادة"
   },
-
   "stack_row": {
     "no_containers": "لم يُعثر على حاويات.",
     "containers_aria": "حاويات {{name}}"
   },
-
   "container_state": {
     "running": "يعمل",
     "paused": "متوقف مؤقتاً",
@@ -463,12 +485,10 @@
     "created": "تم الإنشاء",
     "removing": "جارٍ الإزالة"
   },
-
   "stats": {
     "cpu": "المعالج",
     "mem": "الذاكرة"
   },
-
   "backup_modal": {
     "title": "نسخ احتياطي لـ {{name}}",
     "base_name_label": "اسم الأرشيف",
@@ -482,7 +502,6 @@
     "success_body": "تم الحفظ في {{path}}",
     "warning_partial": "تم تخطي بعض الملفات بسبب أخطاء في الأذونات"
   },
-
   "restore_modal": {
     "title": "استعادة الحزمة من نسخة احتياطية",
     "scan_dir_label": "مجلد البحث",
@@ -503,13 +522,11 @@
     "error_dest_exists": "المسار الهدف {{path}} موجود بالفعل — إلغاء العملية لمنع الكتابة فوقه",
     "error_unknown": "فشلت الاستعادة (تحقق من وحدة تحكم المتصفح للتفاصيل)"
   },
-
   "external_link_modal": {
     "aria_label": "تحذير رابط خارجي",
     "title": "فتح رابط خارجي",
     "warning_title": "تحقق دائماً من أن الموقع المقصود موثوق قبل المتابعة."
   },
-
   "container_table": {
     "replica_count": "×{{count}}",
     "col_status": "الحالة",
@@ -517,7 +534,6 @@
     "col_image": "الصورة",
     "col_uptime": "وقت التشغيل"
   },
-
   "scale_modal": {
     "title": "تحجيم الخدمات — {{name}}",
     "confirm_title": "تأكيد التحجيم — {{name}}",
@@ -534,5 +550,33 @@
     "port_conflict_title": "تعارض منافذ محتمل",
     "port_conflict_body": "الخدمات التالية لها ربط منافذ مضيف ثابتة. لن يتمكن Docker من تشغيل أكثر من نسخة واحدة لأن المنفذ المضيف يمكن ربطه بحاوية واحدة فقط:",
     "port_conflict_icon_title": "لها ربط منافذ مضيف ثابتة"
+  },
+  "settings": {
+    "title": "الإعدادات",
+    "open_button": "الإعدادات",
+    "refresh_interval_label": "فترة التحديث التلقائي",
+    "refresh_interval_hint": "عدد مرات استطلاع Docker لحالة الحزمة (200–5000 مللي ثانية).",
+    "log_line_limit_label": "حد سطور السجل",
+    "log_line_limit_hint": "الحد الأقصى لعدد سطور السجل التي تُحفظ في الذاكرة لكل جلسة (100–20000).",
+    "toasts_label": "الإشعارات",
+    "toasts_on": "مفعّل",
+    "toasts_off": "معطّل",
+    "confirm_down_label": "تأكيد قبل الإيقاف",
+    "confirm_down_on": "عرض مربع حوار التأكيد",
+    "confirm_down_off": "تخطي التأكيد",
+    "confirm_down_hint": "عند التعطيل، يعمل 'إيقاف' فوراً دون طلب.",
+    "reset_defaults": "إعادة تعيين الافتراضيات"
+  },
+  "toast": {
+    "start_success": "تم تشغيل {{name}}",
+    "start_failed": "فشل تشغيل {{name}}",
+    "stop_success": "تم إيقاف {{name}}",
+    "stop_failed": "فشل إيقاف {{name}}",
+    "restart_success": "تمت إعادة تشغيل {{name}}",
+    "restart_failed": "فشلت إعادة تشغيل {{name}}",
+    "pause_success": "تم إيقاف {{name}} مؤقتاً",
+    "pause_failed": "فشل إيقاف {{name}} مؤقتاً",
+    "unpause_success": "تم استئناف {{name}}",
+    "unpause_failed": "فشل استئناف {{name}}"
   }
 }

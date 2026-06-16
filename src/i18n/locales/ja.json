@@ -15,9 +15,10 @@
     "fetch": "取得",
     "nothing_found": "見つかりませんでした。",
     "unknown": "不明",
-    "continue": "続ける"
+    "continue": "続ける",
+    "copy": "コピー",
+    "copied": "コピーしました！"
   },
-
   "stacks": {
     "title": "Compose スタック",
     "aria_label": "Compose スタック",
@@ -30,9 +31,23 @@
     "status_partial": "一部実行中",
     "status_stopped": "停止",
     "status_paused": "一時停止",
-    "status_unknown": "不明"
+    "status_unknown": "不明",
+    "empty_create": "スタックを作成",
+    "empty_import": "既存をインポート",
+    "no_results_title": "一致するスタックがありません",
+    "no_results_body": "別の名前を試すか、アクティブなフィルターを解除してください。",
+    "clear_filters": "フィルターをクリア",
+    "refreshing": "スタックを更新中",
+    "search_placeholder": "スタックを検索…",
+    "filter_tooltip_running": "実行中のスタックのみ表示",
+    "filter_tooltip_partial": "一部実行中のスタックのみ表示",
+    "filter_tooltip_stopped": "停止中のスタックのみ表示",
+    "filter_tooltip_paused": "一時停止中のスタックのみ表示",
+    "select_stack": "{{name}} を選択",
+    "select_all": "すべて選択",
+    "bulk_selected": "{{count}} 件選択中",
+    "bulk_clear": "選択をクリア"
   },
-
   "actions": {
     "up": "起動",
     "up_title": "スタックを起動するか、変更されたコンテナを再作成する",
@@ -62,41 +77,38 @@
     "backup": "バックアップ",
     "scale": "スケール"
   },
-
   "health": {
     "passing": "ヘルスチェック正常",
     "failing": "ヘルスチェック失敗",
     "starting": "ヘルスチェック開始中"
   },
-
   "ports": {
     "external_tooltip": "すべてのインターフェースに公開 — 詳細はスタック情報を開いてください",
     "localhost_tooltip": "localhost のみにバインド — 詳細はスタック情報を開いてください",
     "specific_tooltip": "特定の IP にバインド — 詳細はスタック情報を開いてください"
   },
-
   "footer": {
     "version": "バージョン: {{version}}",
     "docker_version": "{{runtime}}: {{version}}",
     "compose_version": "{{runtime}} Compose: {{version}}",
     "rootless": "rootless",
+    "rootless_help_title": "ルートレスモード",
+    "rootless_help_body": "DockerまたはPodmanがルートレスモードで実行されています — コンテナはrootではなくあなたのユーザーとして実行されます。これによりセキュリティが向上しますが、特権ポート（<1024）のバインド、システムパスへのアクセス、特定のネットワークドライバーの使用など、一部の機能が制限される場合があります。",
     "help": "ヘルプ",
     "feedback": "フィードバック / バグ報告"
   },
-
   "runtime": {
     "docker": "Docker",
     "podman": "Podman",
     "toggle_label": "コンテナランタイム",
     "not_installed": "{{runtime}} が見つかりません — 切り替えるにはインストールしてください",
     "podman_confirm_title": "Podman に切り替え",
-    "podman_confirm_body": "Podman のサポートは実験的です。設定によっては、スタックの検出、ログのストリーミング、一部の compose コマンドなどが期待通りに動作しない場合があります。"
+    "podman_confirm_body": "Podman のサポートは実験的です。設定によっては、スタックの検出、ログのストリーミング、一部の compose コマンドなどが期待通りに動作しない場合があります。",
+    "podman_suggest_docker_missing": "このシステムにDockerが見つかりませんでした。コンテナを管理するにはPodmanに切り替えてください。"
   },
-
   "error_boundary": {
     "load_stacks_error": "スタックの読み込みエラー"
   },
-
   "down_modal": {
     "aria_label": "停止の確認",
     "title": "\"{{name}}\" を削除しますか？",
@@ -108,7 +120,6 @@
     "shared_networks_title": "共有ネットワークが検出されました",
     "shared_with": "他にも使用中："
   },
-
   "kill_modal": {
     "aria_label": "強制終了の確認",
     "title": "\"{{name}}\" を強制終了しますか？",
@@ -117,7 +128,18 @@
     "body_suffix": "、強制的に即座に終了させます。停止とは異なり、プロセスにクリーンアップの機会はありません。停止が応答しない場合にのみ使用してください。",
     "confirm_button": "すべてのコンテナを強制終了"
   },
-
+  "stop_modal": {
+    "aria_label": "Confirm stop",
+    "title": "Stop \"{{name}}\"?",
+    "body": "This will stop all running containers in the stack. They will not be removed and can be started again.",
+    "confirm_button": "Stop"
+  },
+  "restart_modal": {
+    "aria_label": "Confirm restart",
+    "title": "Restart \"{{name}}\"?",
+    "body": "This will restart all running services. Services will briefly be unavailable.",
+    "confirm_button": "Restart"
+  },
   "delete_modal": {
     "aria_label": "compose スタックを削除 — {{name}}",
     "title": "削除 — {{name}}",
@@ -139,7 +161,6 @@
     "shared_networks_title": "共有ネットワークが検出されました",
     "shared_with": "他にも使用中："
   },
-
   "create_modal": {
     "aria_label": "新しい compose スタックを作成",
     "title": "compose スタックを作成",
@@ -195,10 +216,10 @@
     "validation_extra_name_duplicate_primary": "プライマリ compose ファイルと同じ名前は使用できません",
     "validation_extra_name_duplicate": "ファイル名は一意である必要があります"
   },
-
   "yaml_modal": {
     "aria_label": "Compose ファイル — {{name}}",
     "title": "{{name}} — compose ファイル",
+    "unsaved_changes": "未保存の変更",
     "env_file_button": "env ファイル",
     "history_button": "履歴 ({{count}})",
     "edit_button": "編集",
@@ -243,7 +264,6 @@
     "import_file_none": "このディレクトリに追加の YAML ファイルが見つかりません。",
     "import_file_confirm_button": "インポート"
   },
-
   "env_modal": {
     "aria_label": "env ファイル — {{name}}",
     "title": "{{name}} — env ファイル",
@@ -264,7 +284,6 @@
     "confirm_save_question": "それでも保存しますか？",
     "save_anyway_button": "それでも保存"
   },
-
   "logs_modal": {
     "aria_label": "ログ — {{name}}",
     "title": "ログ — {{name}}",
@@ -275,9 +294,19 @@
     "limit_notice": "最後の {{count}} 行を表示",
     "waiting": "ログを待機中…",
     "service_all": "すべてのサービス",
-    "search_placeholder": "ログを検索…"
+    "search_placeholder": "ログを検索…",
+    "regex_tooltip": "正規表現検索を切り替え",
+    "level_all": "すべて",
+    "level_error": "エラー",
+    "level_warn": "警告",
+    "level_info": "情報",
+    "download_tooltip": "ログをダウンロード",
+    "timestamps_tooltip": "タイムスタンプを切り替え",
+    "scroll_top": "先頭に移動",
+    "scroll_bottom": "末尾に移動",
+    "line_count": "{{count}} 行",
+    "line_count_filtered": "{{shown}} / {{total}} 行"
   },
-
   "run_modal": {
     "aria_label": "実行 — {{name}}",
     "title": "実行 — {{name}}",
@@ -292,7 +321,6 @@
     "complete": "✓ コマンド完了",
     "failed": "✗ コマンド失敗"
   },
-
   "exec_modal": {
     "aria_label": "シェル — {{name}}",
     "title": "シェル — {{name}}",
@@ -303,9 +331,11 @@
     "field_user": "ユーザー（オプション）",
     "field_user_placeholder": "root",
     "open_shell_button": "シェルを開く",
-    "disconnect_button": "切断"
+    "disconnect_button": "切断",
+    "font_size_label": "フォントサイズ",
+    "font_size_decrease": "フォントサイズを小さく",
+    "font_size_increase": "フォントサイズを大きく"
   },
-
   "events_modal": {
     "aria_label": "イベント — {{name}}",
     "title": "イベント — {{name}}",
@@ -320,7 +350,6 @@
     "col_service": "サービス",
     "col_details": "詳細"
   },
-
   "top_modal": {
     "aria_label": "プロセス — {{name}}",
     "title": "プロセス — {{name}}",
@@ -328,7 +357,6 @@
     "error_title": "プロセスを読み込めませんでした",
     "empty": "実行中のプロセスが見つかりません。"
   },
-
   "pull_modal": {
     "aria_label": "プル — {{name}}",
     "title": "プル — {{name}}",
@@ -337,7 +365,6 @@
     "failed": "✗ プル失敗",
     "starting": "プルを開始中…"
   },
-
   "pull_confirm_modal": {
     "aria_label": "プルを確認 — {{name}}",
     "title": "最新イメージをプル — {{name}}",
@@ -349,7 +376,6 @@
     "unpinned_notice": "固定されていないイメージは常にレジストリが「最新」と見なすものをプルし、プル間で動作が変わる可能性が最も高いです。",
     "pull_button": "プル"
   },
-
   "up_modal": {
     "aria_label": "起動 — {{name}}",
     "title": "起動 — {{name}}",
@@ -358,7 +384,6 @@
     "complete": "✓ 起動完了",
     "failed": "✗ 起動失敗"
   },
-
   "up_confirm_modal": {
     "aria_label": "起動を確認 — {{name}}",
     "title": "起動 — {{name}}",
@@ -373,7 +398,6 @@
     "profiles_hint": "選択したプロファイルでタグ付けされたサービスのみが起動します。",
     "up_button": "起動"
   },
-
   "info_modal": {
     "aria_label": "情報 — {{name}}",
     "title": "{{name}} — 情報",
@@ -402,9 +426,10 @@
     "net_col_name": "ネットワーク",
     "net_col_shared": "共有先",
     "net_shared_icon_title": "共有ネットワーク",
-    "profiles_label": "プロファイル"
+    "profiles_label": "プロファイル",
+    "copy_container_id": "コンテナIDをコピー",
+    "copy_image_ref": "イメージ参照をコピー"
   },
-
   "prune_modal": {
     "aria_label_select": "リソースをクリーンアップ — {{name}}",
     "title_select": "リソースをクリーンアップ — {{name}}",
@@ -428,7 +453,6 @@
     "prune_button": "選択したものをクリーンアップ",
     "nothing_to_remove": "削除するものがありません。"
   },
-
   "downed_section": {
     "create_button": "作成",
     "import_button": "インポート",
@@ -448,12 +472,10 @@
     "depth_plus_aria": "スキャン深度を増やす",
     "restore_button": "復元"
   },
-
   "stack_row": {
     "no_containers": "コンテナが見つかりません。",
     "containers_aria": "{{name}} のコンテナ"
   },
-
   "container_state": {
     "running": "実行中",
     "paused": "一時停止",
@@ -463,12 +485,10 @@
     "created": "作成済み",
     "removing": "削除中"
   },
-
   "stats": {
     "cpu": "CPU",
     "mem": "メモリ"
   },
-
   "backup_modal": {
     "title": "{{name}} をバックアップ",
     "base_name_label": "アーカイブ名",
@@ -482,7 +502,6 @@
     "success_body": "{{path}} に保存されました",
     "warning_partial": "権限エラーによりスキップされたファイルがあります"
   },
-
   "restore_modal": {
     "title": "バックアップからスタックを復元",
     "scan_dir_label": "検索ディレクトリ",
@@ -503,13 +522,11 @@
     "error_dest_exists": "ターゲットパス {{path}} はすでに存在します — 上書きを防ぐために中止します",
     "error_unknown": "復元に失敗しました（詳細はブラウザのコンソールを確認してください）"
   },
-
   "external_link_modal": {
     "aria_label": "外部リンクの警告",
     "title": "外部リンクを開く",
     "warning_title": "続行する前に、リンク先のサイトが信頼できることを必ず確認してください。"
   },
-
   "container_table": {
     "replica_count": "×{{count}}",
     "col_status": "状態",
@@ -517,7 +534,6 @@
     "col_image": "イメージ",
     "col_uptime": "稼働時間"
   },
-
   "scale_modal": {
     "title": "サービスをスケール — {{name}}",
     "confirm_title": "スケールを確認 — {{name}}",
@@ -534,5 +550,33 @@
     "port_conflict_title": "ポートの競合の可能性",
     "port_conflict_body": "次のサービスには静的なホストポートバインディングがあります。ホストポートは 1 つのコンテナしかバインドできないため、Docker は複数のレプリカを起動できません:",
     "port_conflict_icon_title": "静的なホストポートバインディングがあります"
+  },
+  "settings": {
+    "title": "設定",
+    "open_button": "設定",
+    "refresh_interval_label": "自動更新間隔",
+    "refresh_interval_hint": "スタック状態のためにDockerをポーリングする頻度（200〜5000ミリ秒）。",
+    "log_line_limit_label": "ログ行数制限",
+    "log_line_limit_hint": "セッションごとにメモリに保持するログ行の最大数（100〜20000）。",
+    "toasts_label": "通知",
+    "toasts_on": "有効",
+    "toasts_off": "無効",
+    "confirm_down_label": "停止前に確認",
+    "confirm_down_on": "確認ダイアログを表示",
+    "confirm_down_off": "確認をスキップ",
+    "confirm_down_hint": "無効にすると、「停止」は確認なしにすぐ実行されます。",
+    "reset_defaults": "デフォルトにリセット"
+  },
+  "toast": {
+    "start_success": "{{name}} を開始しました",
+    "start_failed": "{{name}} の開始に失敗しました",
+    "stop_success": "{{name}} を停止しました",
+    "stop_failed": "{{name}} の停止に失敗しました",
+    "restart_success": "{{name}} を再起動しました",
+    "restart_failed": "{{name}} の再起動に失敗しました",
+    "pause_success": "{{name}} を一時停止しました",
+    "pause_failed": "{{name}} の一時停止に失敗しました",
+    "unpause_success": "{{name}} を再開しました",
+    "unpause_failed": "{{name}} の再開に失敗しました"
   }
 }

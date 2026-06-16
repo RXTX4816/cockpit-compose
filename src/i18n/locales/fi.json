@@ -15,9 +15,10 @@
     "fetch": "Hae",
     "nothing_found": "Ei löydetty mitään.",
     "unknown": "tuntematon",
-    "continue": "Jatka"
+    "continue": "Jatka",
+    "copy": "Kopioi",
+    "copied": "Kopioitu!"
   },
-
   "stacks": {
     "title": "Compose-pinot",
     "aria_label": "Compose-pinot",
@@ -30,9 +31,23 @@
     "status_partial": "osittainen",
     "status_stopped": "pysäytetty",
     "status_paused": "tauolla",
-    "status_unknown": "tuntematon"
+    "status_unknown": "tuntematon",
+    "empty_create": "Luo pino",
+    "empty_import": "Tuo olemassa oleva",
+    "no_results_title": "Ei vastaavia pinoja",
+    "no_results_body": "Kokeile eri nimeä tai poista aktiiviset suodattimet.",
+    "clear_filters": "Tyhjennä suodattimet",
+    "refreshing": "Päivitetään pinoja",
+    "search_placeholder": "Hae pinoja…",
+    "filter_tooltip_running": "Näytä vain käynnissä olevat pinot",
+    "filter_tooltip_partial": "Näytä vain osittain käynnissä olevat pinot",
+    "filter_tooltip_stopped": "Näytä vain pysäytetyt pinot",
+    "filter_tooltip_paused": "Näytä vain tauolla olevat pinot",
+    "select_stack": "Valitse {{name}}",
+    "select_all": "Valitse kaikki",
+    "bulk_selected": "{{count}} valittu",
+    "bulk_clear": "Tyhjennä valinta"
   },
-
   "actions": {
     "up": "Käynnistä",
     "up_title": "Käynnistä pino tai luo muuttuneet kontit uudelleen",
@@ -62,41 +77,38 @@
     "backup": "Varmuuskopioi",
     "scale": "Skaalaa"
   },
-
   "health": {
     "passing": "Terveystarkistus läpäisty",
     "failing": "Terveystarkistus epäonnistui",
     "starting": "Terveystarkistus käynnistyy"
   },
-
   "ports": {
     "external_tooltip": "Näkyvissä kaikilla rajapinnoilla — avaa pinon tiedot täydellisiä tietoja varten",
     "localhost_tooltip": "Sidottu vain localhostiin — avaa pinon tiedot täydellisiä tietoja varten",
     "specific_tooltip": "Sidottu tiettyyn IP-osoitteeseen — avaa pinon tiedot täydellisiä tietoja varten"
   },
-
   "footer": {
     "version": "Versio: {{version}}",
     "docker_version": "{{runtime}}: {{version}}",
     "compose_version": "{{runtime}} Compose: {{version}}",
     "rootless": "Ilman root-oikeuksia",
+    "rootless_help_title": "Rootless-tila",
+    "rootless_help_body": "Docker tai Podman toimii rootless-tilassa — kontit toimivat käyttäjänäsi, ei rootina. Tämä parantaa tietoturvaa, mutta saattaa rajoittaa joitakin ominaisuuksia, kuten etuoikeutettujen porttien (<1024) sitomista, järjestelmäpolkuihin pääsyä tai tiettyjen verkkoajureiden käyttöä.",
     "help": "Ohje",
     "feedback": "Palaute / Ilmoita virheestä"
   },
-
   "runtime": {
     "docker": "Docker",
     "podman": "Podman",
     "toggle_label": "Konttiympäristö",
     "not_installed": "{{runtime}} ei löydy — asenna se vaihtaaksesi",
     "podman_confirm_title": "Vaihda Podmaniin",
-    "podman_confirm_body": "Podman-tuki on kokeellinen. Asetuksistasi riippuen jotkin ominaisuudet eivät välttämättä toimi odotetusti — mukaan lukien pinojen tunnistus, lokien suoratoisto ja tietyt compose-komennot."
+    "podman_confirm_body": "Podman-tuki on kokeellinen. Asetuksistasi riippuen jotkin ominaisuudet eivät välttämättä toimi odotetusti — mukaan lukien pinojen tunnistus, lokien suoratoisto ja tietyt compose-komennot.",
+    "podman_suggest_docker_missing": "Dockeria ei löydetty tältä järjestelmältä. Vaihda Podmaniin hallitaksesi konttejasi."
   },
-
   "error_boundary": {
     "load_stacks_error": "Virhe pinojen lataamisessa"
   },
-
   "down_modal": {
     "aria_label": "Vahvista sammutus",
     "title": "Poistetaanko \"{{name}}\"?",
@@ -108,7 +120,6 @@
     "shared_networks_title": "Jaettuja verkkoja havaittu",
     "shared_with": "käytössä myös"
   },
-
   "kill_modal": {
     "aria_label": "Vahvista pakkolopetus",
     "title": "Pakotetaanko lopetus kohteelle \"{{name}}\"?",
@@ -117,7 +128,18 @@
     "body_suffix": ", pakottaen ne lopettamaan välittömästi. Toisin kuin Pysäytys, prosesseilla ei ole mahdollisuutta siivota. Käytä vain, kun Pysäytys ei reagoi.",
     "confirm_button": "Pakota kaikki kontit lopettamaan"
   },
-
+  "stop_modal": {
+    "aria_label": "Confirm stop",
+    "title": "Stop \"{{name}}\"?",
+    "body": "This will stop all running containers in the stack. They will not be removed and can be started again.",
+    "confirm_button": "Stop"
+  },
+  "restart_modal": {
+    "aria_label": "Confirm restart",
+    "title": "Restart \"{{name}}\"?",
+    "body": "This will restart all running services. Services will briefly be unavailable.",
+    "confirm_button": "Restart"
+  },
   "delete_modal": {
     "aria_label": "Poista compose-pino — {{name}}",
     "title": "Poista — {{name}}",
@@ -139,7 +161,6 @@
     "shared_networks_title": "Jaettuja verkkoja havaittu",
     "shared_with": "käytössä myös"
   },
-
   "create_modal": {
     "aria_label": "Luo uusi compose-pino",
     "title": "Luo compose-pino",
@@ -195,10 +216,10 @@
     "validation_extra_name_duplicate_primary": "Ei voi käyttää samaa nimeä kuin pääasiallinen compose-tiedosto",
     "validation_extra_name_duplicate": "Tiedostonimen on oltava yksilöllinen"
   },
-
   "yaml_modal": {
     "aria_label": "Compose-tiedosto — {{name}}",
     "title": "{{name}} — compose-tiedosto",
+    "unsaved_changes": "Tallentamattomat muutokset",
     "env_file_button": "Env-tiedosto",
     "history_button": "Historia ({{count}})",
     "edit_button": "Muokkaa",
@@ -243,7 +264,6 @@
     "import_file_none": "Tässä hakemistossa ei löydy lisää YAML-tiedostoja.",
     "import_file_confirm_button": "Tuo"
   },
-
   "env_modal": {
     "aria_label": "Env-tiedosto — {{name}}",
     "title": "{{name}} — env-tiedosto",
@@ -264,7 +284,6 @@
     "confirm_save_question": "Haluatko tallentaa joka tapauksessa?",
     "save_anyway_button": "Tallenna joka tapauksessa"
   },
-
   "logs_modal": {
     "aria_label": "Lokit — {{name}}",
     "title": "Lokit — {{name}}",
@@ -275,9 +294,19 @@
     "limit_notice": "näytetään viimeiset {{count}} riviä",
     "waiting": "Odotetaan lokeja…",
     "service_all": "Kaikki palvelut",
-    "search_placeholder": "Hae lokeista…"
+    "search_placeholder": "Hae lokeista…",
+    "regex_tooltip": "Vaihda regex-haku",
+    "level_all": "Kaikki",
+    "level_error": "Virhe",
+    "level_warn": "Varoitus",
+    "level_info": "Info",
+    "download_tooltip": "Lataa lokit",
+    "timestamps_tooltip": "Vaihda aikaleimoja",
+    "scroll_top": "Hyppää alkuun",
+    "scroll_bottom": "Hyppää loppuun",
+    "line_count": "{{count}} riviä",
+    "line_count_filtered": "{{shown}} / {{total}} riviä"
   },
-
   "run_modal": {
     "aria_label": "Suorita — {{name}}",
     "title": "Suorita — {{name}}",
@@ -292,7 +321,6 @@
     "complete": "✓ Komento valmis",
     "failed": "✗ Komento epäonnistui"
   },
-
   "exec_modal": {
     "aria_label": "Komentorivi — {{name}}",
     "title": "Komentorivi — {{name}}",
@@ -303,9 +331,11 @@
     "field_user": "Käyttäjä (valinnainen)",
     "field_user_placeholder": "root",
     "open_shell_button": "Avaa komentorivi",
-    "disconnect_button": "Katkaise yhteys"
+    "disconnect_button": "Katkaise yhteys",
+    "font_size_label": "Fonttikoko",
+    "font_size_decrease": "Pienennä fonttikokoa",
+    "font_size_increase": "Suurenna fonttikokoa"
   },
-
   "events_modal": {
     "aria_label": "Tapahtumat — {{name}}",
     "title": "Tapahtumat — {{name}}",
@@ -320,7 +350,6 @@
     "col_service": "Palvelu",
     "col_details": "Tiedot"
   },
-
   "top_modal": {
     "aria_label": "Prosessit — {{name}}",
     "title": "Prosessit — {{name}}",
@@ -328,7 +357,6 @@
     "error_title": "Prosesseja ei voitu ladata",
     "empty": "Käynnissä olevia prosesseja ei löydetty."
   },
-
   "pull_modal": {
     "aria_label": "Lataa — {{name}}",
     "title": "Lataa — {{name}}",
@@ -337,7 +365,6 @@
     "failed": "✗ Lataus epäonnistui",
     "starting": "Aloitetaan lataus…"
   },
-
   "pull_confirm_modal": {
     "aria_label": "Vahvista lataus — {{name}}",
     "title": "Lataa uusimmat levykuvat — {{name}}",
@@ -349,7 +376,6 @@
     "unpinned_notice": "Kiinnittämättömät levykuvat lataavat aina sen, mitä rekisteri pitää \"uusimpana\", ja niiden käyttäytyminen muuttuu todennäköisimmin latausten välillä.",
     "pull_button": "Lataa"
   },
-
   "up_modal": {
     "aria_label": "Käynnistä — {{name}}",
     "title": "Käynnistä — {{name}}",
@@ -358,7 +384,6 @@
     "complete": "✓ Käynnistys valmis",
     "failed": "✗ Käynnistys epäonnistui"
   },
-
   "up_confirm_modal": {
     "aria_label": "Vahvista käynnistys — {{name}}",
     "title": "Käynnistä — {{name}}",
@@ -373,7 +398,6 @@
     "profiles_hint": "Vain valitulla profiililla merkityt palvelut käynnistetään.",
     "up_button": "Käynnistä"
   },
-
   "info_modal": {
     "aria_label": "Tiedot — {{name}}",
     "title": "{{name}} — tiedot",
@@ -402,9 +426,10 @@
     "net_col_name": "Verkko",
     "net_col_shared": "Jaettu kohteen kanssa",
     "net_shared_icon_title": "Jaettu verkko",
-    "profiles_label": "Profiilit"
+    "profiles_label": "Profiilit",
+    "copy_container_id": "Kopioi kontin tunnus",
+    "copy_image_ref": "Kopioi levykuvaviite"
   },
-
   "prune_modal": {
     "aria_label_select": "Siivoa resursseja — {{name}}",
     "title_select": "Siivoa resursseja — {{name}}",
@@ -428,7 +453,6 @@
     "prune_button": "Siivoa valitut",
     "nothing_to_remove": "Ei mitään poistettavaa."
   },
-
   "downed_section": {
     "create_button": "Luo",
     "import_button": "Tuo",
@@ -448,12 +472,10 @@
     "depth_plus_aria": "Suurenna etsintäsyvyyttä",
     "restore_button": "Palauta"
   },
-
   "stack_row": {
     "no_containers": "Kontteja ei löydetty.",
     "containers_aria": "{{name}} kontit"
   },
-
   "container_state": {
     "running": "käynnissä",
     "paused": "tauolla",
@@ -463,12 +485,10 @@
     "created": "luotu",
     "removing": "poistetaan"
   },
-
   "stats": {
     "cpu": "CPU",
     "mem": "Muisti"
   },
-
   "backup_modal": {
     "title": "Varmuuskopioi {{name}}",
     "base_name_label": "Arkiston nimi",
@@ -482,7 +502,6 @@
     "success_body": "Tallennettu kohteeseen {{path}}",
     "warning_partial": "Joitakin tiedostoja ohitettiin käyttöoikeusvirheiden vuoksi"
   },
-
   "restore_modal": {
     "title": "Palauta pino varmuuskopiosta",
     "scan_dir_label": "Hakuhakemisto",
@@ -503,13 +522,11 @@
     "error_dest_exists": "Kohdepolku {{path}} on jo olemassa — keskeytetään ylikirjoituksen estämiseksi",
     "error_unknown": "Palautus epäonnistui (tarkista lisätiedot selaimen konsolista)"
   },
-
   "external_link_modal": {
     "aria_label": "Ulkoisen linkin varoitus",
     "title": "Avataan ulkoinen linkki",
     "warning_title": "Varmista aina, että kohdesivu on luotettava ennen jatkamista."
   },
-
   "container_table": {
     "replica_count": "×{{count}}",
     "col_status": "Tila",
@@ -517,7 +534,6 @@
     "col_image": "Levykuva",
     "col_uptime": "Käyttöaika"
   },
-
   "scale_modal": {
     "title": "Skaalaa palveluita — {{name}}",
     "confirm_title": "Vahvista skaalaus — {{name}}",
@@ -534,5 +550,33 @@
     "port_conflict_title": "Porttikonflikti todennäköinen",
     "port_conflict_body": "Seuraavilla palveluilla on staattiset isäntäporttisidokset. Docker ei pysty käynnistämään enemmän kuin yhtä replikaa, koska isäntäportin voi sitoa vain yksi kontti:",
     "port_conflict_icon_title": "Sisältää staattiset isäntäporttisidokset"
+  },
+  "settings": {
+    "title": "Asetukset",
+    "open_button": "Asetukset",
+    "refresh_interval_label": "Automaattinen päivitysväli",
+    "refresh_interval_hint": "Kuinka usein Docker-tilaa pollataaan (200–5000 ms).",
+    "log_line_limit_label": "Lokirivien raja",
+    "log_line_limit_hint": "Muistiin istuntoa kohden säilytettävien lokirivien enimmäismäärä (100–20000).",
+    "toasts_label": "Ilmoitukset",
+    "toasts_on": "Käytössä",
+    "toasts_off": "Ei käytössä",
+    "confirm_down_label": "Vahvista ennen sammutusta",
+    "confirm_down_on": "Näytä vahvistusvalintaikkuna",
+    "confirm_down_off": "Ohita vahvistus",
+    "confirm_down_hint": "Kun poistettu käytöstä, 'Sammuta' suoritetaan välittömästi ilman kysymistä.",
+    "reset_defaults": "Palauta oletukset"
+  },
+  "toast": {
+    "start_success": "{{name}} käynnistetty",
+    "start_failed": "{{name}} käynnistäminen epäonnistui",
+    "stop_success": "{{name}} pysäytetty",
+    "stop_failed": "{{name}} pysäyttäminen epäonnistui",
+    "restart_success": "{{name}} käynnistetty uudelleen",
+    "restart_failed": "{{name}} uudelleenkäynnistys epäonnistui",
+    "pause_success": "{{name}} keskeytetty",
+    "pause_failed": "{{name}} keskeyttäminen epäonnistui",
+    "unpause_success": "{{name}} jatkettu",
+    "unpause_failed": "{{name}} jatkaminen epäonnistui"
   }
 }

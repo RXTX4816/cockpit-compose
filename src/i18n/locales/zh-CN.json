@@ -15,9 +15,10 @@
     "fetch": "获取",
     "nothing_found": "未找到任何内容。",
     "unknown": "未知",
-    "continue": "继续"
+    "continue": "继续",
+    "copy": "复制",
+    "copied": "已复制！"
   },
-
   "stacks": {
     "title": "Compose 堆栈",
     "aria_label": "Compose 堆栈",
@@ -30,9 +31,23 @@
     "status_partial": "部分运行",
     "status_stopped": "已停止",
     "status_paused": "已暂停",
-    "status_unknown": "未知"
+    "status_unknown": "未知",
+    "empty_create": "创建堆栈",
+    "empty_import": "导入现有",
+    "no_results_title": "没有匹配的堆栈",
+    "no_results_body": "尝试不同的名称或清除活动过滤器。",
+    "clear_filters": "清除过滤器",
+    "refreshing": "正在刷新堆栈",
+    "search_placeholder": "搜索堆栈…",
+    "filter_tooltip_running": "仅显示运行中的堆栈",
+    "filter_tooltip_partial": "仅显示部分运行的堆栈",
+    "filter_tooltip_stopped": "仅显示已停止的堆栈",
+    "filter_tooltip_paused": "仅显示已暂停的堆栈",
+    "select_stack": "选择 {{name}}",
+    "select_all": "全选",
+    "bulk_selected": "已选择 {{count}} 个",
+    "bulk_clear": "清除选择"
   },
-
   "actions": {
     "up": "启动",
     "up_title": "启动堆栈或重新创建已更改的容器",
@@ -62,41 +77,38 @@
     "backup": "备份",
     "scale": "扩缩容"
   },
-
   "health": {
     "passing": "健康检查通过",
     "failing": "健康检查失败",
     "starting": "健康检查启动中"
   },
-
   "ports": {
     "external_tooltip": "在所有接口上公开 — 打开堆栈信息查看完整详情",
     "localhost_tooltip": "仅绑定到 localhost — 打开堆栈信息查看完整详情",
     "specific_tooltip": "绑定到特定 IP — 打开堆栈信息查看完整详情"
   },
-
   "footer": {
     "version": "版本：{{version}}",
     "docker_version": "{{runtime}}：{{version}}",
     "compose_version": "{{runtime}} Compose：{{version}}",
     "rootless": "无 root",
+    "rootless_help_title": "无根模式",
+    "rootless_help_body": "Docker 或 Podman 正在无根模式下运行 — 容器以您的用户身份运行，而非 root。这提高了安全性，但可能限制某些功能，例如绑定特权端口（<1024）、访问系统路径或使用某些网络驱动程序。",
     "help": "帮助",
     "feedback": "反馈 / 报告问题"
   },
-
   "runtime": {
     "docker": "Docker",
     "podman": "Podman",
     "toggle_label": "容器运行时",
     "not_installed": "未找到 {{runtime}} — 请安装后切换",
     "podman_confirm_title": "切换到 Podman",
-    "podman_confirm_body": "Podman 支持为实验性功能。根据您的配置，某些功能可能无法按预期工作 — 包括堆栈发现、日志流和某些 compose 命令。"
+    "podman_confirm_body": "Podman 支持为实验性功能。根据您的配置，某些功能可能无法按预期工作 — 包括堆栈发现、日志流和某些 compose 命令。",
+    "podman_suggest_docker_missing": "在此系统上未找到 Docker。请切换到 Podman 来管理您的容器。"
   },
-
   "error_boundary": {
     "load_stacks_error": "加载堆栈时出错"
   },
-
   "down_modal": {
     "aria_label": "确认停止",
     "title": "移除{{name}}？",
@@ -108,7 +120,6 @@
     "shared_networks_title": "检测到共享网络",
     "shared_with": "也被以下使用"
   },
-
   "kill_modal": {
     "aria_label": "确认强制终止",
     "title": "强制终止{{name}}？",
@@ -117,7 +128,18 @@
     "body_suffix": "，立即强制终止它们。与停止不同，进程没有机会进行清理。仅在停止无响应时使用。",
     "confirm_button": "终止所有容器"
   },
-
+  "stop_modal": {
+    "aria_label": "Confirm stop",
+    "title": "Stop \"{{name}}\"?",
+    "body": "This will stop all running containers in the stack. They will not be removed and can be started again.",
+    "confirm_button": "Stop"
+  },
+  "restart_modal": {
+    "aria_label": "Confirm restart",
+    "title": "Restart \"{{name}}\"?",
+    "body": "This will restart all running services. Services will briefly be unavailable.",
+    "confirm_button": "Restart"
+  },
   "delete_modal": {
     "aria_label": "删除 compose 堆栈 — {{name}}",
     "title": "删除 — {{name}}",
@@ -139,7 +161,6 @@
     "shared_networks_title": "检测到共享网络",
     "shared_with": "也被以下使用"
   },
-
   "create_modal": {
     "aria_label": "创建新的 compose 堆栈",
     "title": "创建 compose 堆栈",
@@ -195,10 +216,10 @@
     "validation_extra_name_duplicate_primary": "不能使用与主 compose 文件相同的名称",
     "validation_extra_name_duplicate": "文件名必须唯一"
   },
-
   "yaml_modal": {
     "aria_label": "Compose 文件 — {{name}}",
     "title": "{{name}} — compose 文件",
+    "unsaved_changes": "未保存的更改",
     "env_file_button": "Env 文件",
     "history_button": "历史（{{count}}）",
     "edit_button": "编辑",
@@ -243,7 +264,6 @@
     "import_file_none": "此目录中未找到其他 YAML 文件。",
     "import_file_confirm_button": "导入"
   },
-
   "env_modal": {
     "aria_label": "Env 文件 — {{name}}",
     "title": "{{name}} — env 文件",
@@ -264,7 +284,6 @@
     "confirm_save_question": "是否仍要保存？",
     "save_anyway_button": "仍然保存"
   },
-
   "logs_modal": {
     "aria_label": "日志 — {{name}}",
     "title": "日志 — {{name}}",
@@ -275,9 +294,19 @@
     "limit_notice": "显示最后 {{count}} 行",
     "waiting": "等待日志…",
     "service_all": "所有服务",
-    "search_placeholder": "搜索日志…"
+    "search_placeholder": "搜索日志…",
+    "regex_tooltip": "切换正则表达式搜索",
+    "level_all": "全部",
+    "level_error": "错误",
+    "level_warn": "警告",
+    "level_info": "信息",
+    "download_tooltip": "下载日志",
+    "timestamps_tooltip": "切换时间戳",
+    "scroll_top": "跳转到顶部",
+    "scroll_bottom": "跳转到底部",
+    "line_count": "{{count}} 行",
+    "line_count_filtered": "{{shown}} / {{total}} 行"
   },
-
   "run_modal": {
     "aria_label": "运行 — {{name}}",
     "title": "运行 — {{name}}",
@@ -292,7 +321,6 @@
     "complete": "✓ 命令已完成",
     "failed": "✗ 命令失败"
   },
-
   "exec_modal": {
     "aria_label": "终端 — {{name}}",
     "title": "终端 — {{name}}",
@@ -303,9 +331,11 @@
     "field_user": "用户（可选）",
     "field_user_placeholder": "root",
     "open_shell_button": "打开终端",
-    "disconnect_button": "断开连接"
+    "disconnect_button": "断开连接",
+    "font_size_label": "字体大小",
+    "font_size_decrease": "减小字体",
+    "font_size_increase": "增大字体"
   },
-
   "events_modal": {
     "aria_label": "事件 — {{name}}",
     "title": "事件 — {{name}}",
@@ -320,7 +350,6 @@
     "col_service": "服务",
     "col_details": "详情"
   },
-
   "top_modal": {
     "aria_label": "进程 — {{name}}",
     "title": "进程 — {{name}}",
@@ -328,7 +357,6 @@
     "error_title": "无法加载进程",
     "empty": "未找到正在运行的进程。"
   },
-
   "pull_modal": {
     "aria_label": "拉取 — {{name}}",
     "title": "拉取 — {{name}}",
@@ -337,7 +365,6 @@
     "failed": "✗ 拉取失败",
     "starting": "开始拉取…"
   },
-
   "pull_confirm_modal": {
     "aria_label": "确认拉取 — {{name}}",
     "title": "拉取最新镜像 — {{name}}",
@@ -349,7 +376,6 @@
     "unpinned_notice": "未固定的镜像总是拉取仓库认为最新的版本，更可能在拉取之间改变行为。",
     "pull_button": "拉取"
   },
-
   "up_modal": {
     "aria_label": "启动 — {{name}}",
     "title": "启动 — {{name}}",
@@ -358,7 +384,6 @@
     "complete": "✓ 启动完成",
     "failed": "✗ 启动失败"
   },
-
   "up_confirm_modal": {
     "aria_label": "确认启动 — {{name}}",
     "title": "启动 — {{name}}",
@@ -373,7 +398,6 @@
     "profiles_hint": "仅启动标记了所选配置文件的服务。",
     "up_button": "启动"
   },
-
   "info_modal": {
     "aria_label": "信息 — {{name}}",
     "title": "{{name}} — 信息",
@@ -402,9 +426,10 @@
     "net_col_name": "网络",
     "net_col_shared": "共享于",
     "net_shared_icon_title": "共享网络",
-    "profiles_label": "配置文件"
+    "profiles_label": "配置文件",
+    "copy_container_id": "复制容器 ID",
+    "copy_image_ref": "复制镜像引用"
   },
-
   "prune_modal": {
     "aria_label_select": "清理资源 — {{name}}",
     "title_select": "清理资源 — {{name}}",
@@ -428,7 +453,6 @@
     "prune_button": "清理所选",
     "nothing_to_remove": "没有可删除的内容。"
   },
-
   "downed_section": {
     "create_button": "创建",
     "import_button": "导入",
@@ -448,12 +472,10 @@
     "depth_plus_aria": "增加扫描深度",
     "restore_button": "恢复"
   },
-
   "stack_row": {
     "no_containers": "未找到容器。",
     "containers_aria": "{{name}} 的容器"
   },
-
   "container_state": {
     "running": "运行中",
     "paused": "已暂停",
@@ -463,12 +485,10 @@
     "created": "已创建",
     "removing": "删除中"
   },
-
   "stats": {
     "cpu": "CPU",
     "mem": "内存"
   },
-
   "backup_modal": {
     "title": "备份 {{name}}",
     "base_name_label": "文件名",
@@ -482,7 +502,6 @@
     "success_body": "已保存到 {{path}}",
     "warning_partial": "部分文件因权限错误被跳过"
   },
-
   "restore_modal": {
     "title": "从备份恢复堆栈",
     "scan_dir_label": "搜索目录",
@@ -503,13 +522,11 @@
     "error_dest_exists": "目标路径 {{path}} 已存在 — 正在中止以防止覆盖",
     "error_unknown": "恢复失败（详情请查看浏览器控制台）"
   },
-
   "external_link_modal": {
     "aria_label": "外部链接警告",
     "title": "打开外部链接",
     "warning_title": "继续前请始终验证目标网站是否可信。"
   },
-
   "container_table": {
     "replica_count": "×{{count}}",
     "col_status": "状态",
@@ -517,7 +534,6 @@
     "col_image": "镜像",
     "col_uptime": "运行时间"
   },
-
   "scale_modal": {
     "title": "扩缩容服务 — {{name}}",
     "confirm_title": "确认扩缩容 — {{name}}",
@@ -534,5 +550,33 @@
     "port_conflict_title": "可能存在端口冲突",
     "port_conflict_body": "以下服务具有静态主机端口绑定。Docker 无法启动超过一个副本，因为主机端口只能由单个容器绑定：",
     "port_conflict_icon_title": "具有静态主机端口绑定"
+  },
+  "settings": {
+    "title": "设置",
+    "open_button": "设置",
+    "refresh_interval_label": "自动刷新间隔",
+    "refresh_interval_hint": "轮询 Docker 以获取堆栈状态的频率（200–5000 毫秒）。",
+    "log_line_limit_label": "日志行数限制",
+    "log_line_limit_hint": "每个会话在内存中保留的最大日志行数（100–20000）。",
+    "toasts_label": "通知",
+    "toasts_on": "已启用",
+    "toasts_off": "已禁用",
+    "confirm_down_label": "停止前确认",
+    "confirm_down_on": "显示确认对话框",
+    "confirm_down_off": "跳过确认",
+    "confirm_down_hint": "禁用时，停止将立即运行而不询问。",
+    "reset_defaults": "重置为默认值"
+  },
+  "toast": {
+    "start_success": "{{name}} 已启动",
+    "start_failed": "启动 {{name}} 失败",
+    "stop_success": "{{name}} 已停止",
+    "stop_failed": "停止 {{name}} 失败",
+    "restart_success": "{{name}} 已重启",
+    "restart_failed": "重启 {{name}} 失败",
+    "pause_success": "{{name}} 已暂停",
+    "pause_failed": "暂停 {{name}} 失败",
+    "unpause_success": "{{name}} 已恢复",
+    "unpause_failed": "恢复 {{name}} 失败"
   }
 }

@@ -15,9 +15,10 @@
     "fetch": "Obtener",
     "nothing_found": "No se encontró nada.",
     "unknown": "desconocido",
-    "continue": "Continuar"
+    "continue": "Continuar",
+    "copy": "Copiar",
+    "copied": "¡Copiado!"
   },
-
   "stacks": {
     "title": "Pilas de Compose",
     "aria_label": "Pilas de Compose",
@@ -30,9 +31,23 @@
     "status_partial": "parcial",
     "status_stopped": "detenido",
     "status_paused": "en pausa",
-    "status_unknown": "desconocido"
+    "status_unknown": "desconocido",
+    "empty_create": "Crear pila",
+    "empty_import": "Importar existente",
+    "no_results_title": "No hay pilas que coincidan",
+    "no_results_body": "Prueba un nombre diferente o elimina los filtros activos.",
+    "clear_filters": "Limpiar filtros",
+    "refreshing": "Actualizando pilas",
+    "search_placeholder": "Buscar pilas…",
+    "filter_tooltip_running": "Mostrar solo pilas en ejecución",
+    "filter_tooltip_partial": "Mostrar solo pilas parcialmente en ejecución",
+    "filter_tooltip_stopped": "Mostrar solo pilas detenidas",
+    "filter_tooltip_paused": "Mostrar solo pilas en pausa",
+    "select_stack": "Seleccionar {{name}}",
+    "select_all": "Seleccionar todo",
+    "bulk_selected": "{{count}} seleccionados",
+    "bulk_clear": "Limpiar selección"
   },
-
   "actions": {
     "up": "Iniciar",
     "up_title": "Iniciar pila o recrear contenedores modificados",
@@ -62,41 +77,38 @@
     "backup": "Copia de seguridad",
     "scale": "Escalar"
   },
-
   "health": {
     "passing": "Verificación de salud correcta",
     "failing": "Verificación de salud fallida",
     "starting": "Verificación de salud iniciando"
   },
-
   "ports": {
     "external_tooltip": "Expuesto en todas las interfaces — abre la información de la pila para ver todos los detalles",
     "localhost_tooltip": "Enlazado solo a localhost — abre la información de la pila para ver todos los detalles",
     "specific_tooltip": "Enlazado a una IP específica — abre la información de la pila para ver todos los detalles"
   },
-
   "footer": {
     "version": "Versión: {{version}}",
     "docker_version": "{{runtime}}: {{version}}",
     "compose_version": "{{runtime}} Compose: {{version}}",
     "rootless": "Sin root",
+    "rootless_help_title": "Modo sin root",
+    "rootless_help_body": "Docker o Podman está ejecutándose en modo sin root — los contenedores se ejecutan como tu usuario, no como root. Esto mejora la seguridad pero puede limitar algunas funciones como enlazar puertos privilegiados (<1024), acceder a rutas del sistema o usar ciertos controladores de red.",
     "help": "Ayuda",
     "feedback": "Comentarios / Reportar error"
   },
-
   "runtime": {
     "docker": "Docker",
     "podman": "Podman",
     "toggle_label": "Runtime de contenedor",
     "not_installed": "{{runtime}} no encontrado — instálalo para cambiar",
     "podman_confirm_title": "Cambiar a Podman",
-    "podman_confirm_body": "El soporte de Podman es experimental. Dependiendo de tu configuración, algunas características pueden no funcionar como se espera — incluyendo el descubrimiento de pilas, el streaming de registros y ciertos comandos de compose."
+    "podman_confirm_body": "El soporte de Podman es experimental. Dependiendo de tu configuración, algunas características pueden no funcionar como se espera — incluyendo el descubrimiento de pilas, el streaming de registros y ciertos comandos de compose.",
+    "podman_suggest_docker_missing": "Docker no se encontró en este sistema. Cambia a Podman para gestionar tus contenedores."
   },
-
   "error_boundary": {
     "load_stacks_error": "Error al cargar las pilas"
   },
-
   "down_modal": {
     "aria_label": "Confirmar detención",
     "title": "¿Eliminar \"{{name}}\"?",
@@ -108,7 +120,6 @@
     "shared_networks_title": "Redes compartidas detectadas",
     "shared_with": "también usada por"
   },
-
   "kill_modal": {
     "aria_label": "Confirmar terminación forzada",
     "title": "¿Terminar forzosamente \"{{name}}\"?",
@@ -117,7 +128,18 @@
     "body_suffix": ", terminándolos inmediatamente por la fuerza. A diferencia de Parar, los procesos no tienen oportunidad de limpiarse. Úsalo solo cuando Parar no responde.",
     "confirm_button": "Matar todos los contenedores"
   },
-
+  "stop_modal": {
+    "aria_label": "Confirm stop",
+    "title": "Stop \"{{name}}\"?",
+    "body": "This will stop all running containers in the stack. They will not be removed and can be started again.",
+    "confirm_button": "Stop"
+  },
+  "restart_modal": {
+    "aria_label": "Confirm restart",
+    "title": "Restart \"{{name}}\"?",
+    "body": "This will restart all running services. Services will briefly be unavailable.",
+    "confirm_button": "Restart"
+  },
   "delete_modal": {
     "aria_label": "Eliminar pila compose — {{name}}",
     "title": "Eliminar — {{name}}",
@@ -139,7 +161,6 @@
     "shared_networks_title": "Redes compartidas detectadas",
     "shared_with": "también usada por"
   },
-
   "create_modal": {
     "aria_label": "Crear nueva pila compose",
     "title": "Crear pila compose",
@@ -195,10 +216,10 @@
     "validation_extra_name_duplicate_primary": "No se puede usar el mismo nombre que el archivo compose principal",
     "validation_extra_name_duplicate": "El nombre del archivo debe ser único"
   },
-
   "yaml_modal": {
     "aria_label": "Archivo Compose — {{name}}",
     "title": "{{name}} — archivo compose",
+    "unsaved_changes": "Cambios sin guardar",
     "env_file_button": "Archivo env",
     "history_button": "Historial ({{count}})",
     "edit_button": "Editar",
@@ -243,7 +264,6 @@
     "import_file_none": "No se encontraron archivos YAML adicionales en este directorio.",
     "import_file_confirm_button": "Importar"
   },
-
   "env_modal": {
     "aria_label": "Archivo env — {{name}}",
     "title": "{{name}} — archivo env",
@@ -264,7 +284,6 @@
     "confirm_save_question": "¿Deseas guardar de todos modos?",
     "save_anyway_button": "Guardar de todos modos"
   },
-
   "logs_modal": {
     "aria_label": "Registros — {{name}}",
     "title": "Registros — {{name}}",
@@ -275,9 +294,19 @@
     "limit_notice": "mostrando las últimas {{count}} líneas",
     "waiting": "Esperando registros…",
     "service_all": "Todos los servicios",
-    "search_placeholder": "Buscar en registros…"
+    "search_placeholder": "Buscar en registros…",
+    "regex_tooltip": "Activar búsqueda por expresión regular",
+    "level_all": "Todo",
+    "level_error": "Error",
+    "level_warn": "Advertencia",
+    "level_info": "Info",
+    "download_tooltip": "Descargar registros",
+    "timestamps_tooltip": "Activar marcas de tiempo",
+    "scroll_top": "Ir al principio",
+    "scroll_bottom": "Ir al final",
+    "line_count": "{{count}} líneas",
+    "line_count_filtered": "{{shown}} / {{total}} líneas"
   },
-
   "run_modal": {
     "aria_label": "Ejecutar — {{name}}",
     "title": "Ejecutar — {{name}}",
@@ -292,7 +321,6 @@
     "complete": "✓ Comando completado",
     "failed": "✗ Comando fallido"
   },
-
   "exec_modal": {
     "aria_label": "Terminal — {{name}}",
     "title": "Terminal — {{name}}",
@@ -303,9 +331,11 @@
     "field_user": "Usuario (opcional)",
     "field_user_placeholder": "root",
     "open_shell_button": "Abrir terminal",
-    "disconnect_button": "Desconectar"
+    "disconnect_button": "Desconectar",
+    "font_size_label": "Tamaño de fuente",
+    "font_size_decrease": "Disminuir tamaño de fuente",
+    "font_size_increase": "Aumentar tamaño de fuente"
   },
-
   "events_modal": {
     "aria_label": "Eventos — {{name}}",
     "title": "Eventos — {{name}}",
@@ -320,7 +350,6 @@
     "col_service": "Servicio",
     "col_details": "Detalles"
   },
-
   "top_modal": {
     "aria_label": "Procesos — {{name}}",
     "title": "Procesos — {{name}}",
@@ -328,7 +357,6 @@
     "error_title": "No se pudieron cargar los procesos",
     "empty": "No se encontraron procesos en ejecución."
   },
-
   "pull_modal": {
     "aria_label": "Descargar — {{name}}",
     "title": "Descargar — {{name}}",
@@ -337,7 +365,6 @@
     "failed": "✗ Descarga fallida",
     "starting": "Iniciando descarga…"
   },
-
   "pull_confirm_modal": {
     "aria_label": "Confirmar descarga — {{name}}",
     "title": "Descargar imágenes más recientes — {{name}}",
@@ -349,7 +376,6 @@
     "unpinned_notice": "Las imágenes sin fijar siempre descargan lo que el registro considera \"más reciente\" y son las más propensas a cambiar de comportamiento entre descargas.",
     "pull_button": "Descargar"
   },
-
   "up_modal": {
     "aria_label": "Iniciar — {{name}}",
     "title": "Iniciar — {{name}}",
@@ -358,7 +384,6 @@
     "complete": "✓ Inicio completado",
     "failed": "✗ Inicio fallido"
   },
-
   "up_confirm_modal": {
     "aria_label": "Confirmar inicio — {{name}}",
     "title": "Iniciar — {{name}}",
@@ -373,7 +398,6 @@
     "profiles_hint": "Solo los servicios etiquetados con un perfil seleccionado se iniciarán.",
     "up_button": "Iniciar"
   },
-
   "info_modal": {
     "aria_label": "Información — {{name}}",
     "title": "{{name}} — información",
@@ -402,9 +426,10 @@
     "net_col_name": "Red",
     "net_col_shared": "Compartida con",
     "net_shared_icon_title": "Red compartida",
-    "profiles_label": "Perfiles"
+    "profiles_label": "Perfiles",
+    "copy_container_id": "Copiar ID de contenedor",
+    "copy_image_ref": "Copiar referencia de imagen"
   },
-
   "prune_modal": {
     "aria_label_select": "Limpiar recursos — {{name}}",
     "title_select": "Limpiar recursos — {{name}}",
@@ -428,7 +453,6 @@
     "prune_button": "Limpiar seleccionados",
     "nothing_to_remove": "Nada que eliminar."
   },
-
   "downed_section": {
     "create_button": "Crear",
     "import_button": "Importar",
@@ -448,12 +472,10 @@
     "depth_plus_aria": "Aumentar profundidad de escaneo",
     "restore_button": "Restaurar"
   },
-
   "stack_row": {
     "no_containers": "No se encontraron contenedores.",
     "containers_aria": "Contenedores de {{name}}"
   },
-
   "container_state": {
     "running": "en ejecución",
     "paused": "en pausa",
@@ -463,12 +485,10 @@
     "created": "creado",
     "removing": "eliminando"
   },
-
   "stats": {
     "cpu": "CPU",
     "mem": "Mem"
   },
-
   "backup_modal": {
     "title": "Copia de seguridad de {{name}}",
     "base_name_label": "Nombre del archivo",
@@ -482,7 +502,6 @@
     "success_body": "Guardada en {{path}}",
     "warning_partial": "Algunos archivos se omitieron debido a errores de permisos"
   },
-
   "restore_modal": {
     "title": "Restaurar pila desde copia de seguridad",
     "scan_dir_label": "Directorio de búsqueda",
@@ -503,13 +522,11 @@
     "error_dest_exists": "La ruta de destino {{path}} ya existe — abortando para evitar sobreescritura",
     "error_unknown": "La restauración falló (revisa la consola del navegador para más detalles)"
   },
-
   "external_link_modal": {
     "aria_label": "Advertencia de enlace externo",
     "title": "Abriendo enlace externo",
     "warning_title": "Verifica siempre que el sitio de destino sea de confianza antes de continuar."
   },
-
   "container_table": {
     "replica_count": "×{{count}}",
     "col_status": "Estado",
@@ -517,7 +534,6 @@
     "col_image": "Imagen",
     "col_uptime": "Tiempo activo"
   },
-
   "scale_modal": {
     "title": "Escalar servicios — {{name}}",
     "confirm_title": "Confirmar escalado — {{name}}",
@@ -534,5 +550,33 @@
     "port_conflict_title": "Probable conflicto de puertos",
     "port_conflict_body": "Los siguientes servicios tienen enlaces de puerto de host estáticos. Docker no podrá iniciar más de una réplica porque un puerto de host solo puede ser enlazado por un único contenedor:",
     "port_conflict_icon_title": "Tiene enlaces de puerto de host estáticos"
+  },
+  "settings": {
+    "title": "Configuración",
+    "open_button": "Configuración",
+    "refresh_interval_label": "Intervalo de actualización automática",
+    "refresh_interval_hint": "Con qué frecuencia se consulta Docker para el estado de la pila (200–5000 ms).",
+    "log_line_limit_label": "Límite de líneas de registro",
+    "log_line_limit_hint": "Número máximo de líneas de registro a mantener en memoria por sesión (100–20000).",
+    "toasts_label": "Notificaciones",
+    "toasts_on": "Activado",
+    "toasts_off": "Desactivado",
+    "confirm_down_label": "Confirmar antes de detener",
+    "confirm_down_on": "Mostrar diálogo de confirmación",
+    "confirm_down_off": "Omitir confirmación",
+    "confirm_down_hint": "Cuando está desactivado, 'Detener' se ejecuta inmediatamente sin preguntar.",
+    "reset_defaults": "Restablecer valores predeterminados"
+  },
+  "toast": {
+    "start_success": "{{name}} iniciado",
+    "start_failed": "Error al iniciar {{name}}",
+    "stop_success": "{{name}} detenido",
+    "stop_failed": "Error al detener {{name}}",
+    "restart_success": "{{name}} reiniciado",
+    "restart_failed": "Error al reiniciar {{name}}",
+    "pause_success": "{{name}} en pausa",
+    "pause_failed": "Error al pausar {{name}}",
+    "unpause_success": "{{name}} reanudado",
+    "unpause_failed": "Error al reanudar {{name}}"
   }
 }

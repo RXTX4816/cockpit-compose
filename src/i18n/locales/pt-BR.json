@@ -15,9 +15,10 @@
     "fetch": "Buscar",
     "nothing_found": "Nenhum resultado encontrado.",
     "unknown": "desconhecido",
-    "continue": "Continuar"
+    "continue": "Continuar",
+    "copy": "Copiar",
+    "copied": "Copiado!"
   },
-
   "stacks": {
     "title": "Pilhas Compose",
     "aria_label": "Pilhas Compose",
@@ -30,9 +31,23 @@
     "status_partial": "parcial",
     "status_stopped": "parado",
     "status_paused": "pausado",
-    "status_unknown": "desconhecido"
+    "status_unknown": "desconhecido",
+    "empty_create": "Criar pilha",
+    "empty_import": "Importar existente",
+    "no_results_title": "Nenhuma pilha encontrada",
+    "no_results_body": "Tente um nome diferente ou limpe os filtros ativos.",
+    "clear_filters": "Limpar filtros",
+    "refreshing": "Atualizando pilhas",
+    "search_placeholder": "Pesquisar pilhas…",
+    "filter_tooltip_running": "Mostrar apenas pilhas em execução",
+    "filter_tooltip_partial": "Mostrar apenas pilhas parcialmente em execução",
+    "filter_tooltip_stopped": "Mostrar apenas pilhas paradas",
+    "filter_tooltip_paused": "Mostrar apenas pilhas pausadas",
+    "select_stack": "Selecionar {{name}}",
+    "select_all": "Selecionar tudo",
+    "bulk_selected": "{{count}} selecionados",
+    "bulk_clear": "Limpar seleção"
   },
-
   "actions": {
     "up": "Iniciar",
     "up_title": "Iniciar pilha ou recriar contêineres alterados",
@@ -62,41 +77,38 @@
     "backup": "Backup",
     "scale": "Escalar"
   },
-
   "health": {
     "passing": "Verificação de saúde aprovada",
     "failing": "Verificação de saúde com falha",
     "starting": "Verificação de saúde iniciando"
   },
-
   "ports": {
     "external_tooltip": "Exposto em todas as interfaces — abra as informações da pilha para detalhes completos",
     "localhost_tooltip": "Vinculado apenas ao localhost — abra as informações da pilha para detalhes completos",
     "specific_tooltip": "Vinculado a um IP específico — abra as informações da pilha para detalhes completos"
   },
-
   "footer": {
     "version": "Versão: {{version}}",
     "docker_version": "{{runtime}}: {{version}}",
     "compose_version": "{{runtime}} Compose: {{version}}",
     "rootless": "Sem root",
+    "rootless_help_title": "Modo sem root",
+    "rootless_help_body": "O Docker ou Podman está sendo executado em modo sem root — os contêineres são executados como seu usuário, não como root. Isso melhora a segurança, mas pode limitar alguns recursos como vincular portas privilegiadas (<1024), acessar caminhos do sistema ou usar determinados drivers de rede.",
     "help": "Ajuda",
     "feedback": "Feedback / Reportar bug"
   },
-
   "runtime": {
     "docker": "Docker",
     "podman": "Podman",
     "toggle_label": "Runtime de contêiner",
     "not_installed": "{{runtime}} não encontrado — instale-o para alternar",
     "podman_confirm_title": "Alternar para Podman",
-    "podman_confirm_body": "O suporte ao Podman é experimental. Dependendo da sua configuração, alguns recursos podem não funcionar conforme esperado — incluindo descoberta de pilhas, streaming de logs e determinados comandos compose."
+    "podman_confirm_body": "O suporte ao Podman é experimental. Dependendo da sua configuração, alguns recursos podem não funcionar conforme esperado — incluindo descoberta de pilhas, streaming de logs e determinados comandos compose.",
+    "podman_suggest_docker_missing": "O Docker não foi encontrado neste sistema. Mude para o Podman para gerenciar seus contêineres."
   },
-
   "error_boundary": {
     "load_stacks_error": "Erro ao carregar as pilhas"
   },
-
   "down_modal": {
     "aria_label": "Confirmar parada",
     "title": "Remover \"{{name}}\"?",
@@ -108,7 +120,6 @@
     "shared_networks_title": "Redes compartilhadas detectadas",
     "shared_with": "também usado por"
   },
-
   "kill_modal": {
     "aria_label": "Confirmar encerramento forçado",
     "title": "Matar \"{{name}}\"?",
@@ -117,7 +128,18 @@
     "body_suffix": ", encerrando-os forçosamente de imediato. Ao contrário de Parar, os processos não têm chance de fazer limpeza. Use somente quando Parar não responder.",
     "confirm_button": "Matar todos os contêineres"
   },
-
+  "stop_modal": {
+    "aria_label": "Confirm stop",
+    "title": "Stop \"{{name}}\"?",
+    "body": "This will stop all running containers in the stack. They will not be removed and can be started again.",
+    "confirm_button": "Stop"
+  },
+  "restart_modal": {
+    "aria_label": "Confirm restart",
+    "title": "Restart \"{{name}}\"?",
+    "body": "This will restart all running services. Services will briefly be unavailable.",
+    "confirm_button": "Restart"
+  },
   "delete_modal": {
     "aria_label": "Excluir pilha compose — {{name}}",
     "title": "Excluir — {{name}}",
@@ -139,7 +161,6 @@
     "shared_networks_title": "Redes compartilhadas detectadas",
     "shared_with": "também usado por"
   },
-
   "create_modal": {
     "aria_label": "Criar nova pilha compose",
     "title": "Criar pilha compose",
@@ -195,7 +216,6 @@
     "validation_extra_name_duplicate_primary": "Não é possível usar o mesmo nome que o arquivo compose principal",
     "validation_extra_name_duplicate": "O nome do arquivo deve ser único"
   },
-
   "yaml_modal": {
     "aria_label": "Arquivo Compose — {{name}}",
     "title": "{{name}} — arquivo compose",
@@ -241,9 +261,9 @@
     "import_file_title": "Importar arquivo existente",
     "import_file_select_label": "Arquivos disponíveis",
     "import_file_none": "Nenhum arquivo YAML adicional encontrado neste diretório.",
-    "import_file_confirm_button": "Importar"
+    "import_file_confirm_button": "Importar",
+    "unsaved_changes": "Alterações não salvas"
   },
-
   "env_modal": {
     "aria_label": "Arquivo env — {{name}}",
     "title": "{{name}} — arquivo env",
@@ -264,7 +284,6 @@
     "confirm_save_question": "Deseja salvar mesmo assim?",
     "save_anyway_button": "Salvar mesmo assim"
   },
-
   "logs_modal": {
     "aria_label": "Logs — {{name}}",
     "title": "Logs — {{name}}",
@@ -275,9 +294,19 @@
     "limit_notice": "mostrando as últimas {{count}} linhas",
     "waiting": "Aguardando logs…",
     "service_all": "Todos os serviços",
-    "search_placeholder": "Pesquisar logs…"
+    "search_placeholder": "Pesquisar logs…",
+    "regex_tooltip": "Alternar pesquisa por regex",
+    "level_all": "Todos",
+    "level_error": "Erro",
+    "level_warn": "Aviso",
+    "level_info": "Info",
+    "download_tooltip": "Baixar logs",
+    "timestamps_tooltip": "Alternar timestamps",
+    "scroll_top": "Ir para o topo",
+    "scroll_bottom": "Ir para o final",
+    "line_count": "{{count}} linhas",
+    "line_count_filtered": "{{shown}} / {{total}} linhas"
   },
-
   "run_modal": {
     "aria_label": "Executar — {{name}}",
     "title": "Executar — {{name}}",
@@ -292,7 +321,6 @@
     "complete": "✓ Comando concluído",
     "failed": "✗ Comando falhou"
   },
-
   "exec_modal": {
     "aria_label": "Terminal — {{name}}",
     "title": "Terminal — {{name}}",
@@ -303,9 +331,11 @@
     "field_user": "Usuário (opcional)",
     "field_user_placeholder": "root",
     "open_shell_button": "Abrir terminal",
-    "disconnect_button": "Desconectar"
+    "disconnect_button": "Desconectar",
+    "font_size_label": "Tamanho da fonte",
+    "font_size_decrease": "Diminuir tamanho da fonte",
+    "font_size_increase": "Aumentar tamanho da fonte"
   },
-
   "events_modal": {
     "aria_label": "Eventos — {{name}}",
     "title": "Eventos — {{name}}",
@@ -320,7 +350,6 @@
     "col_service": "Serviço",
     "col_details": "Detalhes"
   },
-
   "top_modal": {
     "aria_label": "Processos — {{name}}",
     "title": "Processos — {{name}}",
@@ -328,7 +357,6 @@
     "error_title": "Não foi possível carregar processos",
     "empty": "Nenhum processo em execução encontrado."
   },
-
   "pull_modal": {
     "aria_label": "Baixar — {{name}}",
     "title": "Baixar — {{name}}",
@@ -337,7 +365,6 @@
     "failed": "✗ Download falhou",
     "starting": "Iniciando download…"
   },
-
   "pull_confirm_modal": {
     "aria_label": "Confirmar download — {{name}}",
     "title": "Baixar imagens mais recentes — {{name}}",
@@ -349,7 +376,6 @@
     "unpinned_notice": "Imagens não fixadas sempre baixam o que o registro considera \"mais recente\" e têm maior probabilidade de mudar de comportamento entre downloads.",
     "pull_button": "Baixar"
   },
-
   "up_modal": {
     "aria_label": "Iniciar — {{name}}",
     "title": "Iniciar — {{name}}",
@@ -358,7 +384,6 @@
     "complete": "✓ Início concluído",
     "failed": "✗ Início falhou"
   },
-
   "up_confirm_modal": {
     "aria_label": "Confirmar início — {{name}}",
     "title": "Iniciar — {{name}}",
@@ -373,7 +398,6 @@
     "profiles_hint": "Somente serviços marcados com um perfil selecionado serão iniciados.",
     "up_button": "Iniciar"
   },
-
   "info_modal": {
     "aria_label": "Informações — {{name}}",
     "title": "{{name}} — informações",
@@ -402,9 +426,10 @@
     "net_col_name": "Rede",
     "net_col_shared": "Compartilhado com",
     "net_shared_icon_title": "Rede compartilhada",
-    "profiles_label": "Perfis"
+    "profiles_label": "Perfis",
+    "copy_container_id": "Copiar ID do contêiner",
+    "copy_image_ref": "Copiar referência da imagem"
   },
-
   "prune_modal": {
     "aria_label_select": "Limpar recursos — {{name}}",
     "title_select": "Limpar recursos — {{name}}",
@@ -428,7 +453,6 @@
     "prune_button": "Limpar selecionados",
     "nothing_to_remove": "Nada a remover."
   },
-
   "downed_section": {
     "create_button": "Criar",
     "import_button": "Importar",
@@ -448,12 +472,10 @@
     "depth_plus_aria": "Aumentar profundidade de verificação",
     "restore_button": "Restaurar"
   },
-
   "stack_row": {
     "no_containers": "Nenhum contêiner encontrado.",
     "containers_aria": "Contêineres de {{name}}"
   },
-
   "container_state": {
     "running": "em execução",
     "paused": "pausado",
@@ -463,12 +485,10 @@
     "created": "criado",
     "removing": "removendo"
   },
-
   "stats": {
     "cpu": "CPU",
     "mem": "Mem"
   },
-
   "backup_modal": {
     "title": "Backup de {{name}}",
     "base_name_label": "Nome do arquivo",
@@ -482,7 +502,6 @@
     "success_body": "Salvo em {{path}}",
     "warning_partial": "Alguns arquivos foram ignorados devido a erros de permissão"
   },
-
   "restore_modal": {
     "title": "Restaurar pilha a partir de backup",
     "scan_dir_label": "Diretório de busca",
@@ -503,13 +522,11 @@
     "error_dest_exists": "O caminho de destino {{path}} já existe — abortando para evitar sobrescrita",
     "error_unknown": "A restauração falhou (verifique o console do navegador para detalhes)"
   },
-
   "external_link_modal": {
     "aria_label": "Aviso de link externo",
     "title": "Abrindo link externo",
     "warning_title": "Sempre verifique se o site de destino é confiável antes de continuar."
   },
-
   "container_table": {
     "replica_count": "×{{count}}",
     "col_status": "Status",
@@ -517,7 +534,6 @@
     "col_image": "Imagem",
     "col_uptime": "Tempo ativo"
   },
-
   "scale_modal": {
     "title": "Escalar serviços — {{name}}",
     "confirm_title": "Confirmar escalamento — {{name}}",
@@ -534,5 +550,33 @@
     "port_conflict_title": "Conflito de porta provável",
     "port_conflict_body": "Os seguintes serviços têm vinculações de porta do host estáticas. O Docker não poderá iniciar mais de uma réplica porque uma porta do host só pode ser vinculada por um único contêiner:",
     "port_conflict_icon_title": "Tem vinculações de porta do host estáticas"
+  },
+  "settings": {
+    "title": "Configurações",
+    "open_button": "Configurações",
+    "refresh_interval_label": "Intervalo de atualização automática",
+    "refresh_interval_hint": "Com que frequência consultar o Docker para o status da pilha (200–5000 ms).",
+    "log_line_limit_label": "Limite de linhas de log",
+    "log_line_limit_hint": "Número máximo de linhas de log a manter na memória por sessão (100–20000).",
+    "toasts_label": "Notificações",
+    "toasts_on": "Ativado",
+    "toasts_off": "Desativado",
+    "confirm_down_label": "Confirmar antes de parar",
+    "confirm_down_on": "Exibir diálogo de confirmação",
+    "confirm_down_off": "Ignorar confirmação",
+    "confirm_down_hint": "Quando desativado, 'Parar' é executado imediatamente sem perguntar.",
+    "reset_defaults": "Redefinir para padrões"
+  },
+  "toast": {
+    "start_success": "{{name}} iniciado",
+    "start_failed": "Falha ao iniciar {{name}}",
+    "stop_success": "{{name}} parado",
+    "stop_failed": "Falha ao parar {{name}}",
+    "restart_success": "{{name}} reiniciado",
+    "restart_failed": "Falha ao reiniciar {{name}}",
+    "pause_success": "{{name}} pausado",
+    "pause_failed": "Falha ao pausar {{name}}",
+    "unpause_success": "{{name}} retomado",
+    "unpause_failed": "Falha ao retomar {{name}}"
   }
 }

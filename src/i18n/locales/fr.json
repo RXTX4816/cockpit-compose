@@ -15,9 +15,10 @@
     "fetch": "Récupérer",
     "nothing_found": "Rien trouvé.",
     "unknown": "inconnu",
-    "continue": "Continuer"
+    "continue": "Continuer",
+    "copy": "Copier",
+    "copied": "Copié !"
   },
-
   "stacks": {
     "title": "Piles Compose",
     "aria_label": "Piles Compose",
@@ -30,9 +31,23 @@
     "status_partial": "partiel",
     "status_stopped": "arrêté",
     "status_paused": "en pause",
-    "status_unknown": "inconnu"
+    "status_unknown": "inconnu",
+    "empty_create": "Créer une pile",
+    "empty_import": "Importer l'existant",
+    "no_results_title": "Aucune pile ne correspond",
+    "no_results_body": "Essayez un nom différent ou supprimez les filtres actifs.",
+    "clear_filters": "Effacer les filtres",
+    "refreshing": "Actualisation des piles",
+    "search_placeholder": "Rechercher des piles…",
+    "filter_tooltip_running": "Afficher uniquement les piles en cours",
+    "filter_tooltip_partial": "Afficher uniquement les piles partiellement en cours",
+    "filter_tooltip_stopped": "Afficher uniquement les piles arrêtées",
+    "filter_tooltip_paused": "Afficher uniquement les piles en pause",
+    "select_stack": "Sélectionner {{name}}",
+    "select_all": "Tout sélectionner",
+    "bulk_selected": "{{count}} sélectionné(s)",
+    "bulk_clear": "Effacer la sélection"
   },
-
   "actions": {
     "up": "Démarrer",
     "up_title": "Démarrer la pile ou recréer les conteneurs modifiés",
@@ -62,41 +77,38 @@
     "backup": "Sauvegarder",
     "scale": "Mettre à l'échelle"
   },
-
   "health": {
     "passing": "Vérification de santé réussie",
     "failing": "Vérification de santé échouée",
     "starting": "Vérification de santé en cours"
   },
-
   "ports": {
     "external_tooltip": "Exposé sur toutes les interfaces — ouvrez les infos de la pile pour les détails complets",
     "localhost_tooltip": "Lié uniquement à localhost — ouvrez les infos de la pile pour les détails complets",
     "specific_tooltip": "Lié à une IP spécifique — ouvrez les infos de la pile pour les détails complets"
   },
-
   "footer": {
     "version": "Version : {{version}}",
     "docker_version": "{{runtime}} : {{version}}",
     "compose_version": "{{runtime}} Compose : {{version}}",
     "rootless": "Sans root",
+    "rootless_help_title": "Mode sans root",
+    "rootless_help_body": "Docker ou Podman fonctionne en mode sans root — les conteneurs s'exécutent en tant que votre utilisateur, pas en tant que root. Cela améliore la sécurité mais peut limiter certaines fonctionnalités telles que la liaison de ports privilégiés (<1024), l'accès aux chemins système ou l'utilisation de certains pilotes réseau.",
     "help": "Aide",
     "feedback": "Retour / Signaler un bug"
   },
-
   "runtime": {
     "docker": "Docker",
     "podman": "Podman",
     "toggle_label": "Environnement d'exécution de conteneur",
     "not_installed": "{{runtime}} introuvable — installez-le pour changer",
     "podman_confirm_title": "Basculer vers Podman",
-    "podman_confirm_body": "La prise en charge de Podman est expérimentale. Selon votre configuration, certaines fonctionnalités peuvent ne pas fonctionner comme prévu — notamment la découverte de piles, la diffusion de journaux et certaines commandes compose."
+    "podman_confirm_body": "La prise en charge de Podman est expérimentale. Selon votre configuration, certaines fonctionnalités peuvent ne pas fonctionner comme prévu — notamment la découverte de piles, la diffusion de journaux et certaines commandes compose.",
+    "podman_suggest_docker_missing": "Docker n'a pas été trouvé sur ce système. Basculez vers Podman pour gérer vos conteneurs."
   },
-
   "error_boundary": {
     "load_stacks_error": "Erreur lors du chargement des piles"
   },
-
   "down_modal": {
     "aria_label": "Confirmer l'arrêt",
     "title": "Supprimer \"{{name}}\" ?",
@@ -108,7 +120,6 @@
     "shared_networks_title": "Réseaux partagés détectés",
     "shared_with": "également utilisé par"
   },
-
   "kill_modal": {
     "aria_label": "Confirmer la terminaison forcée",
     "title": "Tuer \"{{name}}\" ?",
@@ -117,7 +128,18 @@
     "body_suffix": ", les terminant immédiatement de force. Contrairement à Stopper, les processus n'ont pas la possibilité de se nettoyer. Utilisez uniquement lorsque Stopper ne répond pas.",
     "confirm_button": "Tuer tous les conteneurs"
   },
-
+  "stop_modal": {
+    "aria_label": "Confirm stop",
+    "title": "Stop \"{{name}}\"?",
+    "body": "This will stop all running containers in the stack. They will not be removed and can be started again.",
+    "confirm_button": "Stop"
+  },
+  "restart_modal": {
+    "aria_label": "Confirm restart",
+    "title": "Restart \"{{name}}\"?",
+    "body": "This will restart all running services. Services will briefly be unavailable.",
+    "confirm_button": "Restart"
+  },
   "delete_modal": {
     "aria_label": "Supprimer la pile compose — {{name}}",
     "title": "Supprimer — {{name}}",
@@ -139,7 +161,6 @@
     "shared_networks_title": "Réseaux partagés détectés",
     "shared_with": "également utilisé par"
   },
-
   "create_modal": {
     "aria_label": "Créer une nouvelle pile compose",
     "title": "Créer une pile compose",
@@ -195,10 +216,10 @@
     "validation_extra_name_duplicate_primary": "Impossible d'utiliser le même nom que le fichier compose principal",
     "validation_extra_name_duplicate": "Le nom du fichier doit être unique"
   },
-
   "yaml_modal": {
     "aria_label": "Fichier Compose — {{name}}",
     "title": "{{name}} — fichier compose",
+    "unsaved_changes": "Modifications non enregistrées",
     "env_file_button": "Fichier env",
     "history_button": "Historique ({{count}})",
     "edit_button": "Modifier",
@@ -243,7 +264,6 @@
     "import_file_none": "Aucun fichier YAML supplémentaire trouvé dans ce répertoire.",
     "import_file_confirm_button": "Importer"
   },
-
   "env_modal": {
     "aria_label": "Fichier env — {{name}}",
     "title": "{{name}} — fichier env",
@@ -264,7 +284,6 @@
     "confirm_save_question": "Voulez-vous enregistrer quand même ?",
     "save_anyway_button": "Enregistrer quand même"
   },
-
   "logs_modal": {
     "aria_label": "Journaux — {{name}}",
     "title": "Journaux — {{name}}",
@@ -275,9 +294,19 @@
     "limit_notice": "affichage des {{count}} dernières lignes",
     "waiting": "En attente des journaux…",
     "service_all": "Tous les services",
-    "search_placeholder": "Rechercher dans les journaux…"
+    "search_placeholder": "Rechercher dans les journaux…",
+    "regex_tooltip": "Activer la recherche par expression régulière",
+    "level_all": "Tout",
+    "level_error": "Erreur",
+    "level_warn": "Avertissement",
+    "level_info": "Info",
+    "download_tooltip": "Télécharger les journaux",
+    "timestamps_tooltip": "Activer les horodatages",
+    "scroll_top": "Aller en haut",
+    "scroll_bottom": "Aller en bas",
+    "line_count": "{{count}} lignes",
+    "line_count_filtered": "{{shown}} / {{total}} lignes"
   },
-
   "run_modal": {
     "aria_label": "Exécuter — {{name}}",
     "title": "Exécuter — {{name}}",
@@ -292,7 +321,6 @@
     "complete": "✓ Commande terminée",
     "failed": "✗ Commande échouée"
   },
-
   "exec_modal": {
     "aria_label": "Terminal — {{name}}",
     "title": "Terminal — {{name}}",
@@ -303,9 +331,11 @@
     "field_user": "Utilisateur (optionnel)",
     "field_user_placeholder": "root",
     "open_shell_button": "Ouvrir le terminal",
-    "disconnect_button": "Déconnecter"
+    "disconnect_button": "Déconnecter",
+    "font_size_label": "Taille de police",
+    "font_size_decrease": "Diminuer la taille de police",
+    "font_size_increase": "Augmenter la taille de police"
   },
-
   "events_modal": {
     "aria_label": "Événements — {{name}}",
     "title": "Événements — {{name}}",
@@ -320,7 +350,6 @@
     "col_service": "Service",
     "col_details": "Détails"
   },
-
   "top_modal": {
     "aria_label": "Processus — {{name}}",
     "title": "Processus — {{name}}",
@@ -328,7 +357,6 @@
     "error_title": "Impossible de charger les processus",
     "empty": "Aucun processus en cours d'exécution trouvé."
   },
-
   "pull_modal": {
     "aria_label": "Télécharger — {{name}}",
     "title": "Télécharger — {{name}}",
@@ -337,7 +365,6 @@
     "failed": "✗ Échec du téléchargement",
     "starting": "Démarrage du téléchargement…"
   },
-
   "pull_confirm_modal": {
     "aria_label": "Confirmer le téléchargement — {{name}}",
     "title": "Télécharger les dernières images — {{name}}",
@@ -349,7 +376,6 @@
     "unpinned_notice": "Les images non épinglées téléchargent toujours ce que le registre considère comme \"la plus récente\" et sont les plus susceptibles de changer de comportement entre les téléchargements.",
     "pull_button": "Télécharger"
   },
-
   "up_modal": {
     "aria_label": "Démarrer — {{name}}",
     "title": "Démarrer — {{name}}",
@@ -358,7 +384,6 @@
     "complete": "✓ Démarrage terminé",
     "failed": "✗ Échec du démarrage"
   },
-
   "up_confirm_modal": {
     "aria_label": "Confirmer le démarrage — {{name}}",
     "title": "Démarrer — {{name}}",
@@ -373,7 +398,6 @@
     "profiles_hint": "Seuls les services étiquetés avec un profil sélectionné démarreront.",
     "up_button": "Démarrer"
   },
-
   "info_modal": {
     "aria_label": "Infos — {{name}}",
     "title": "{{name}} — infos",
@@ -402,9 +426,10 @@
     "net_col_name": "Réseau",
     "net_col_shared": "Partagé avec",
     "net_shared_icon_title": "Réseau partagé",
-    "profiles_label": "Profils"
+    "profiles_label": "Profils",
+    "copy_container_id": "Copier l'ID du conteneur",
+    "copy_image_ref": "Copier la référence de l'image"
   },
-
   "prune_modal": {
     "aria_label_select": "Nettoyer les ressources — {{name}}",
     "title_select": "Nettoyer les ressources — {{name}}",
@@ -428,7 +453,6 @@
     "prune_button": "Nettoyer la sélection",
     "nothing_to_remove": "Rien à supprimer."
   },
-
   "downed_section": {
     "create_button": "Créer",
     "import_button": "Importer",
@@ -448,12 +472,10 @@
     "depth_plus_aria": "Augmenter la profondeur de scan",
     "restore_button": "Restaurer"
   },
-
   "stack_row": {
     "no_containers": "Aucun conteneur trouvé.",
     "containers_aria": "Conteneurs {{name}}"
   },
-
   "container_state": {
     "running": "en cours",
     "paused": "en pause",
@@ -463,12 +485,10 @@
     "created": "créé",
     "removing": "suppression"
   },
-
   "stats": {
     "cpu": "CPU",
     "mem": "Mém"
   },
-
   "backup_modal": {
     "title": "Sauvegarder {{name}}",
     "base_name_label": "Nom de l'archive",
@@ -482,7 +502,6 @@
     "success_body": "Enregistrée dans {{path}}",
     "warning_partial": "Certains fichiers ont été ignorés en raison d'erreurs de permissions"
   },
-
   "restore_modal": {
     "title": "Restaurer la pile depuis une sauvegarde",
     "scan_dir_label": "Répertoire de recherche",
@@ -503,13 +522,11 @@
     "error_dest_exists": "Le chemin cible {{path}} existe déjà — abandon pour éviter l'écrasement",
     "error_unknown": "La restauration a échoué (vérifiez la console du navigateur pour les détails)"
   },
-
   "external_link_modal": {
     "aria_label": "Avertissement de lien externe",
     "title": "Ouverture d'un lien externe",
     "warning_title": "Vérifiez toujours que le site de destination est digne de confiance avant de continuer."
   },
-
   "container_table": {
     "replica_count": "×{{count}}",
     "col_status": "Statut",
@@ -517,7 +534,6 @@
     "col_image": "Image",
     "col_uptime": "Durée de fonctionnement"
   },
-
   "scale_modal": {
     "title": "Mettre à l'échelle les services — {{name}}",
     "confirm_title": "Confirmer la mise à l'échelle — {{name}}",
@@ -534,5 +550,33 @@
     "port_conflict_title": "Conflit de ports probable",
     "port_conflict_body": "Les services suivants ont des liaisons de port hôte statiques. Docker ne pourra pas démarrer plus d'une réplique car un port hôte ne peut être lié que par un seul conteneur :",
     "port_conflict_icon_title": "A des liaisons de port hôte statiques"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "open_button": "Paramètres",
+    "refresh_interval_label": "Intervalle de rafraîchissement automatique",
+    "refresh_interval_hint": "Fréquence d'interrogation de Docker pour l'état de la pile (200–5000 ms).",
+    "log_line_limit_label": "Limite de lignes de journal",
+    "log_line_limit_hint": "Nombre maximum de lignes de journal à conserver en mémoire par session (100–20000).",
+    "toasts_label": "Notifications",
+    "toasts_on": "Activé",
+    "toasts_off": "Désactivé",
+    "confirm_down_label": "Confirmer avant d'arrêter",
+    "confirm_down_on": "Afficher la boîte de dialogue de confirmation",
+    "confirm_down_off": "Ignorer la confirmation",
+    "confirm_down_hint": "Lorsque désactivé, 'Arrêter' s'exécute immédiatement sans demander.",
+    "reset_defaults": "Réinitialiser les valeurs par défaut"
+  },
+  "toast": {
+    "start_success": "{{name}} démarré",
+    "start_failed": "Échec du démarrage de {{name}}",
+    "stop_success": "{{name}} arrêté",
+    "stop_failed": "Échec de l'arrêt de {{name}}",
+    "restart_success": "{{name}} redémarré",
+    "restart_failed": "Échec du redémarrage de {{name}}",
+    "pause_success": "{{name}} mis en pause",
+    "pause_failed": "Échec de la mise en pause de {{name}}",
+    "unpause_success": "{{name}} repris",
+    "unpause_failed": "Échec de la reprise de {{name}}"
   }
 }

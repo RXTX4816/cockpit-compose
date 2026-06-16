@@ -15,9 +15,10 @@
     "fetch": "Отримати",
     "nothing_found": "Нічого не знайдено.",
     "unknown": "невідомо",
-    "continue": "Продовжити"
+    "continue": "Продовжити",
+    "copy": "Копіювати",
+    "copied": "Скопійовано!"
   },
-
   "stacks": {
     "title": "Стеки Compose",
     "aria_label": "Стеки Compose",
@@ -30,9 +31,23 @@
     "status_partial": "частково",
     "status_stopped": "зупинено",
     "status_paused": "на паузі",
-    "status_unknown": "невідомо"
+    "status_unknown": "невідомо",
+    "empty_create": "Створити стек",
+    "empty_import": "Імпортувати існуючий",
+    "no_results_title": "Стеки не знайдено",
+    "no_results_body": "Спробуйте інше ім'я або скиньте активні фільтри.",
+    "clear_filters": "Скинути фільтри",
+    "refreshing": "Оновлення стеків",
+    "search_placeholder": "Пошук стеків…",
+    "filter_tooltip_running": "Показувати тільки запущені стеки",
+    "filter_tooltip_partial": "Показувати тільки частково запущені стеки",
+    "filter_tooltip_stopped": "Показувати тільки зупинені стеки",
+    "filter_tooltip_paused": "Показувати тільки стеки на паузі",
+    "select_stack": "Вибрати {{name}}",
+    "select_all": "Вибрати все",
+    "bulk_selected": "Вибрано: {{count}}",
+    "bulk_clear": "Зняти вибір"
   },
-
   "actions": {
     "up": "Запустити",
     "up_title": "Запустити стек або відтворити змінені контейнери",
@@ -62,41 +77,38 @@
     "backup": "Резервна копія",
     "scale": "Масштабувати"
   },
-
   "health": {
     "passing": "Перевірка стану пройдена",
     "failing": "Перевірка стану не пройдена",
     "starting": "Запуск перевірки стану"
   },
-
   "ports": {
     "external_tooltip": "Доступно на всіх інтерфейсах — відкрийте інформацію про стек для деталей",
     "localhost_tooltip": "Прив'язано лише до localhost — відкрийте інформацію про стек для деталей",
     "specific_tooltip": "Прив'язано до конкретної IP — відкрийте інформацію про стек для деталей"
   },
-
   "footer": {
     "version": "Версія: {{version}}",
     "docker_version": "{{runtime}}: {{version}}",
     "compose_version": "{{runtime}} Compose: {{version}}",
     "rootless": "Без root",
+    "rootless_help_title": "Режим без root",
+    "rootless_help_body": "Docker або Podman працює в режимі без root — контейнери запускаються від імені вашого користувача, а не root. Це підвищує безпеку, але може обмежити деякі функції, такі як прив'язка привілейованих портів (<1024), доступ до системних шляхів або використання певних мережевих драйверів.",
     "help": "Допомога",
     "feedback": "Зворотний зв'язок / Повідомити про помилку"
   },
-
   "runtime": {
     "docker": "Docker",
     "podman": "Podman",
     "toggle_label": "Середовище виконання контейнерів",
     "not_installed": "{{runtime}} не знайдено — встановіть його для перемикання",
     "podman_confirm_title": "Перемкнутися на Podman",
-    "podman_confirm_body": "Підтримка Podman є експериментальною. Залежно від вашої конфігурації деякі функції можуть працювати неналежним чином — включаючи виявлення стеків, потокову передачу журналів та певні команди compose."
+    "podman_confirm_body": "Підтримка Podman є експериментальною. Залежно від вашої конфігурації деякі функції можуть працювати неналежним чином — включаючи виявлення стеків, потокову передачу журналів та певні команди compose.",
+    "podman_suggest_docker_missing": "Docker не знайдено в цій системі. Перейдіть на Podman для керування контейнерами."
   },
-
   "error_boundary": {
     "load_stacks_error": "Помилка завантаження стеків"
   },
-
   "down_modal": {
     "aria_label": "Підтвердження зупинки",
     "title": "Видалити «{{name}}»?",
@@ -108,7 +120,6 @@
     "shared_networks_title": "Виявлено спільні мережі",
     "shared_with": "також використовується"
   },
-
   "kill_modal": {
     "aria_label": "Підтвердження примусового завершення",
     "title": "Завершити «{{name}}»?",
@@ -117,7 +128,18 @@
     "body_suffix": ", негайно примусово завершуючи їх. На відміну від Стоп, процеси не мають можливості виконати очищення. Використовуйте лише коли Стоп не відповідає.",
     "confirm_button": "Завершити всі контейнери"
   },
-
+  "stop_modal": {
+    "aria_label": "Confirm stop",
+    "title": "Stop \"{{name}}\"?",
+    "body": "This will stop all running containers in the stack. They will not be removed and can be started again.",
+    "confirm_button": "Stop"
+  },
+  "restart_modal": {
+    "aria_label": "Confirm restart",
+    "title": "Restart \"{{name}}\"?",
+    "body": "This will restart all running services. Services will briefly be unavailable.",
+    "confirm_button": "Restart"
+  },
   "delete_modal": {
     "aria_label": "Видалення стеку compose — {{name}}",
     "title": "Видалення — {{name}}",
@@ -139,7 +161,6 @@
     "shared_networks_title": "Виявлено спільні мережі",
     "shared_with": "також використовується"
   },
-
   "create_modal": {
     "aria_label": "Створення нового стеку compose",
     "title": "Створення стеку compose",
@@ -195,10 +216,10 @@
     "validation_extra_name_duplicate_primary": "Не можна використовувати те саме ім'я, що й основний compose-файл",
     "validation_extra_name_duplicate": "Ім'я файлу повинно бути унікальним"
   },
-
   "yaml_modal": {
     "aria_label": "Файл Compose — {{name}}",
     "title": "{{name}} — compose-файл",
+    "unsaved_changes": "Незбережені зміни",
     "env_file_button": "Файл env",
     "history_button": "Історія ({{count}})",
     "edit_button": "Редагувати",
@@ -243,7 +264,6 @@
     "import_file_none": "У цьому каталозі не знайдено додаткових YAML-файлів.",
     "import_file_confirm_button": "Імпортувати"
   },
-
   "env_modal": {
     "aria_label": "Файл env — {{name}}",
     "title": "{{name}} — файл env",
@@ -264,7 +284,6 @@
     "confirm_save_question": "Бажаєте зберегти все одно?",
     "save_anyway_button": "Все одно зберегти"
   },
-
   "logs_modal": {
     "aria_label": "Журнали — {{name}}",
     "title": "Журнали — {{name}}",
@@ -275,9 +294,19 @@
     "limit_notice": "показано останні {{count}} рядків",
     "waiting": "Очікування журналів…",
     "service_all": "Всі сервіси",
-    "search_placeholder": "Пошук у журналах…"
+    "search_placeholder": "Пошук у журналах…",
+    "regex_tooltip": "Переключити пошук за регулярними виразами",
+    "level_all": "Усі",
+    "level_error": "Помилка",
+    "level_warn": "Попередження",
+    "level_info": "Інфо",
+    "download_tooltip": "Завантажити журнали",
+    "timestamps_tooltip": "Переключити часові мітки",
+    "scroll_top": "Перейти на початок",
+    "scroll_bottom": "Перейти в кінець",
+    "line_count": "{{count}} рядків",
+    "line_count_filtered": "{{shown}} / {{total}} рядків"
   },
-
   "run_modal": {
     "aria_label": "Запуск — {{name}}",
     "title": "Запуск — {{name}}",
@@ -292,7 +321,6 @@
     "complete": "✓ Команда виконана",
     "failed": "✗ Команда завершилася з помилкою"
   },
-
   "exec_modal": {
     "aria_label": "Термінал — {{name}}",
     "title": "Термінал — {{name}}",
@@ -303,9 +331,11 @@
     "field_user": "Користувач (необов'язково)",
     "field_user_placeholder": "root",
     "open_shell_button": "Відкрити термінал",
-    "disconnect_button": "Відключитися"
+    "disconnect_button": "Відключитися",
+    "font_size_label": "Розмір шрифту",
+    "font_size_decrease": "Зменшити шрифт",
+    "font_size_increase": "Збільшити шрифт"
   },
-
   "events_modal": {
     "aria_label": "Події — {{name}}",
     "title": "Події — {{name}}",
@@ -320,7 +350,6 @@
     "col_service": "Сервіс",
     "col_details": "Подробиці"
   },
-
   "top_modal": {
     "aria_label": "Процеси — {{name}}",
     "title": "Процеси — {{name}}",
@@ -328,7 +357,6 @@
     "error_title": "Не вдалося завантажити процеси",
     "empty": "Запущені процеси не знайдено."
   },
-
   "pull_modal": {
     "aria_label": "Завантаження — {{name}}",
     "title": "Завантаження — {{name}}",
@@ -337,7 +365,6 @@
     "failed": "✗ Завантаження не вдалося",
     "starting": "Початок завантаження…"
   },
-
   "pull_confirm_modal": {
     "aria_label": "Підтвердження завантаження — {{name}}",
     "title": "Завантажити найновіші образи — {{name}}",
@@ -349,7 +376,6 @@
     "unpinned_notice": "Образи без фіксації завжди завантажують те, що реєстр вважає «останнім», і з більшою ймовірністю змінять поведінку між завантаженнями.",
     "pull_button": "Завантажити"
   },
-
   "up_modal": {
     "aria_label": "Запуск — {{name}}",
     "title": "Запуск — {{name}}",
@@ -358,7 +384,6 @@
     "complete": "✓ Запуск завершено",
     "failed": "✗ Запуск не вдався"
   },
-
   "up_confirm_modal": {
     "aria_label": "Підтвердження запуску — {{name}}",
     "title": "Запуск — {{name}}",
@@ -373,7 +398,6 @@
     "profiles_hint": "Будуть запущені лише сервіси, позначені вибраним профілем.",
     "up_button": "Запустити"
   },
-
   "info_modal": {
     "aria_label": "Інформація — {{name}}",
     "title": "{{name}} — інформація",
@@ -402,9 +426,10 @@
     "net_col_name": "Мережа",
     "net_col_shared": "Спільна з",
     "net_shared_icon_title": "Спільна мережа",
-    "profiles_label": "Профілі"
+    "profiles_label": "Профілі",
+    "copy_container_id": "Копіювати ID контейнера",
+    "copy_image_ref": "Копіювати посилання на образ"
   },
-
   "prune_modal": {
     "aria_label_select": "Очищення ресурсів — {{name}}",
     "title_select": "Очищення ресурсів — {{name}}",
@@ -428,7 +453,6 @@
     "prune_button": "Очистити вибране",
     "nothing_to_remove": "Нічого видаляти."
   },
-
   "downed_section": {
     "create_button": "Створити",
     "import_button": "Імпорт",
@@ -448,12 +472,10 @@
     "depth_plus_aria": "Збільшити глибину сканування",
     "restore_button": "Відновити"
   },
-
   "stack_row": {
     "no_containers": "Контейнери не знайдено.",
     "containers_aria": "Контейнери {{name}}"
   },
-
   "container_state": {
     "running": "запущено",
     "paused": "на паузі",
@@ -463,12 +485,10 @@
     "created": "створено",
     "removing": "видалення"
   },
-
   "stats": {
     "cpu": "CPU",
     "mem": "Пам'ять"
   },
-
   "backup_modal": {
     "title": "Резервна копія {{name}}",
     "base_name_label": "Ім'я файлу",
@@ -482,7 +502,6 @@
     "success_body": "Збережено в {{path}}",
     "warning_partial": "Деякі файли були пропущені через помилки прав доступу"
   },
-
   "restore_modal": {
     "title": "Відновити стек із резервної копії",
     "scan_dir_label": "Каталог для пошуку",
@@ -503,13 +522,11 @@
     "error_dest_exists": "Цільовий шлях {{path}} вже існує — скасування для уникнення перезапису",
     "error_unknown": "Відновлення не вдалося (перевірте консоль браузера для деталей)"
   },
-
   "external_link_modal": {
     "aria_label": "Попередження про зовнішнє посилання",
     "title": "Відкриття зовнішнього посилання",
     "warning_title": "Завжди перевіряйте, що цільовий сайт заслуговує довіри, перш ніж продовжити."
   },
-
   "container_table": {
     "replica_count": "×{{count}}",
     "col_status": "Статус",
@@ -517,7 +534,6 @@
     "col_image": "Образ",
     "col_uptime": "Час роботи"
   },
-
   "scale_modal": {
     "title": "Масштабування сервісів — {{name}}",
     "confirm_title": "Підтвердження масштабування — {{name}}",
@@ -534,5 +550,33 @@
     "port_conflict_title": "Ймовірний конфлікт портів",
     "port_conflict_body": "Наступні сервіси мають статичні прив'язки портів хоста. Docker не зможе запустити більше однієї репліки, оскільки порт хоста може бути прив'язаний лише одним контейнером:",
     "port_conflict_icon_title": "Має статичні прив'язки портів хоста"
+  },
+  "settings": {
+    "title": "Налаштування",
+    "open_button": "Налаштування",
+    "refresh_interval_label": "Інтервал автооновлення",
+    "refresh_interval_hint": "Як часто опитувати Docker про стан стека (200–5000 мс).",
+    "log_line_limit_label": "Ліміт рядків журналу",
+    "log_line_limit_hint": "Максимальна кількість рядків журналу, що зберігаються в пам'яті за сесію (100–20000).",
+    "toasts_label": "Сповіщення",
+    "toasts_on": "Увімкнено",
+    "toasts_off": "Вимкнено",
+    "confirm_down_label": "Підтверджувати перед зупинкою",
+    "confirm_down_on": "Показувати діалог підтвердження",
+    "confirm_down_off": "Пропустити підтвердження",
+    "confirm_down_hint": "Якщо вимкнено, 'Зупинити' виконується негайно без запиту.",
+    "reset_defaults": "Скинути налаштування"
+  },
+  "toast": {
+    "start_success": "{{name}} запущено",
+    "start_failed": "Не вдалося запустити {{name}}",
+    "stop_success": "{{name}} зупинено",
+    "stop_failed": "Не вдалося зупинити {{name}}",
+    "restart_success": "{{name}} перезапущено",
+    "restart_failed": "Не вдалося перезапустити {{name}}",
+    "pause_success": "{{name}} на паузі",
+    "pause_failed": "Не вдалося поставити {{name}} на паузу",
+    "unpause_success": "{{name}} відновлено",
+    "unpause_failed": "Не вдалося відновити {{name}}"
   }
 }

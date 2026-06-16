@@ -4,3 +4,79 @@
   padding: 4rem;
 }
 
+/* Toolbar search + filter chips */
+.sv-toolbar .pf-v6-c-toolbar__content {
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.sv-search {
+  width: 220px;
+}
+
+.sv-status-badges {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.sv-filter-chip {
+  cursor: pointer;
+  user-select: none;
+  transition: opacity 140ms ease, box-shadow 140ms ease;
+  opacity: 0.65;
+}
+
+.sv-filter-chip:hover {
+  opacity: 0.85;
+}
+
+.sv-filter-chip--active {
+  opacity: 1;
+  box-shadow: 0 0 0 2px currentColor;
+}
+
+/* Bulk action bar */
+.sv-bulk-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.4rem 0.75rem;
+  margin-bottom: 0.5rem;
+  background: var(--pf-t--global--background--color--secondary--default);
+  border: 1px solid var(--pf-t--global--border--color--default);
+  border-radius: var(--pf-t--global--border--radius--200);
+  font-size: 0.875rem;
+}
+
+.sv-select-all-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.sv-select-all-checkbox {
+  width: 1rem;
+  height: 1rem;
+  cursor: pointer;
+  accent-color: var(--pf-t--global--color--brand--default);
+}
+
+.sv-bulk-count {
+  font-weight: 600;
+  color: var(--pf-t--global--text--color--regular);
+}
+
+.sv-bulk-hint {
+  color: var(--pf-t--global--text--color--subtle);
+}
+
+/* Subtle refresh indicator while polling with existing stacks */
+.sv-refresh-indicator {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0.25rem 0.5rem 0;
+  opacity: 0.5;
+}
+

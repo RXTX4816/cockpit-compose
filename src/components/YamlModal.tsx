@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Modal,
@@ -245,7 +245,30 @@ export function YamlModal({ stack, onClose, onFileAdded, onFileRemoved }: Props)
     onFileAdded?.(importFileSelected);
   };
 
-  const handleSave = async () => {
+  const performSave = useCallback(async () => {
+    const hasChanges = content !== editedContent;
+    if (!hasChanges) {
+      setEditing(false);
+      setConfirmSave(false);
+      return;
+    }
+    setSaving(true);
+    setError(null);
+    setConfirmSave(false);
+    try {
+      await saveSnapshot(configFile, content);
+      await saveComposeFile(configFile, editedContent);
+      setContent(editedContent);
+      setEditing(false);
+      await loadSnapshots();
+    } catch (ex: unknown) {
+      setError(ex instanceof Error ? ex.message : String(ex));
+    } finally {
+      setSaving(false);
+    }
+  }, [content, editedContent, configFile, loadSnapshots]);
+
+  const handleSave = useCallback(async () => {
     // Run validation synchronously now rather than relying on the async CodeMirror
     // linter state, which may not have fired yet if the user saves quickly after typing.
     const syncDiagnostics: Diagnostic[] = [];
@@ -270,36 +293,26 @@ export function YamlModal({ stack, onClose, onFileAdded, onFileRemoved }: Props)
     }
 
     await performSave();
-  };
-
-  const performSave = async () => {
-    const hasChanges = content !== editedContent;
-    if (!hasChanges) {
-      setEditing(false);
-      setConfirmSave(false);
-      return;
-    }
-    setSaving(true);
-    setError(null);
-    setConfirmSave(false);
-    try {
-      await saveSnapshot(configFile, content);
-      await saveComposeFile(configFile, editedContent);
-      setContent(editedContent);
-      setEditing(false);
-      await loadSnapshots();
-    } catch (ex: unknown) {
-      setError(ex instanceof Error ? ex.message : String(ex));
-    } finally {
-      setSaving(false);
-    }
-  };
+  }, [editedContent, performSave]);
 
   const handleCancel = () => {
     setEditedContent(content);
     setEditing(false);
     setShowDiff(false);
   };
+
+  // Ctrl+S to save while editing
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (editing && (e.ctrlKey || e.metaKey) && e.key === "s") {
+      e.preventDefault();
+      void handleSave();
+    }
+  }, [editing, handleSave]);
+
+  useEffect(() => {
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [handleKeyDown]);
 
   const errorCount = diagnostics.filter(d => d.severity === "error").length;
   const warningCount = diagnostics.filter(d => d.severity === "warning").length;
@@ -313,6 +326,7 @@ export function YamlModal({ stack, onClose, onFileAdded, onFileRemoved }: Props)
           <div className="ym-tab-bar" role="tablist">
             {configFiles.map((f, i) => {
               const label = f.slice(f.lastIndexOf("/") + 1);
+              const isDirty = i === activeIdx && editing && content !== editedContent;
               return (
                 <button
                   key={f}
@@ -322,6 +336,7 @@ export function YamlModal({ stack, onClose, onFileAdded, onFileRemoved }: Props)
                   aria-label={t("yaml_modal.file_tab_aria", { name: label })}
                   onClick={() => handleTabSwitch(i)}
                 >
+                  {isDirty && <span className="ym-tab-dirty" title={t("yaml_modal.unsaved_changes")} />}
                   {label}
                 </button>
               );

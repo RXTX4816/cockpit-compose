@@ -80,3 +80,31 @@
   border-radius: 4px;
   transition: background 120ms ease;
 }
+
+/* Health mini-dots */
+.sr-health-dots {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: 0.3rem;
+}
+
+.sr-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  cursor: default;
+}
+
+.sr-dot--healthy   { background: var(--pf-t--global--icon--color--status--success--default); }
+.sr-dot--unhealthy { background: var(--pf-t--global--icon--color--status--danger--default); }
+.sr-dot--starting  { background: var(--pf-t--global--icon--color--status--info--default); animation: sr-dot-pulse 1s ease-in-out infinite; }
+.sr-dot--running   { background: var(--pf-t--global--icon--color--status--success--default); opacity: 0.55; }
+.sr-dot--stopped   { background: var(--pf-t--global--border--color--default); }
+
+@keyframes sr-dot-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.35; }
+}

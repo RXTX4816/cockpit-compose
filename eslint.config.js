@@ -50,6 +50,9 @@ export default [
         MutationObserver: "readonly",
         URL: "readonly",
         navigator: "readonly",
+        Blob: "readonly",
+        KeyboardEvent: "readonly",
+        HTMLButtonElement: "readonly",
       },
     },
     plugins: {

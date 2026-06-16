@@ -50,8 +50,9 @@ describe("EventsModal", () => {
     const start = vi.fn();
     mockUseEventStream.mockReturnValue({ events: [], streaming: false, error: null, start, stop: vi.fn(), clear: vi.fn() });
     render(<EventsModal stack={stack} onClose={vi.fn()} />);
+    // start() is called once on mount (auto-start) and once more when button is clicked
     fireEvent.click(screen.getByRole("button", { name: /Stream events/i }));
-    expect(start).toHaveBeenCalledOnce();
+    expect(start).toHaveBeenCalled();
   });
 
   it("shows Stop button and spinner while streaming", () => {

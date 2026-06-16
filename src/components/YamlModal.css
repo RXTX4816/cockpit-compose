@@ -89,3 +89,20 @@
 .ym-delete-file-btn {
   color: var(--pf-t--global--icon--color--status--danger--default) !important;
 }
+
+/* Unsaved-changes dot on tab */
+.ym-tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.ym-tab-dirty {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--pf-t--global--color--brand--default);
+  flex-shrink: 0;
+}

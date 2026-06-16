@@ -15,9 +15,10 @@
     "fetch": "Ambil",
     "nothing_found": "Tidak ditemukan apa pun.",
     "unknown": "tidak diketahui",
-    "continue": "Lanjutkan"
+    "continue": "Lanjutkan",
+    "copy": "Salin",
+    "copied": "Tersalin!"
   },
-
   "stacks": {
     "title": "Tumpukan Compose",
     "aria_label": "Tumpukan Compose",
@@ -30,9 +31,23 @@
     "status_partial": "sebagian",
     "status_stopped": "berhenti",
     "status_paused": "dijeda",
-    "status_unknown": "tidak diketahui"
+    "status_unknown": "tidak diketahui",
+    "empty_create": "Buat tumpukan",
+    "empty_import": "Impor yang ada",
+    "no_results_title": "Tidak ada tumpukan yang cocok",
+    "no_results_body": "Coba nama yang berbeda atau hapus filter aktif.",
+    "clear_filters": "Hapus filter",
+    "refreshing": "Memuat ulang tumpukan",
+    "search_placeholder": "Cari tumpukan…",
+    "filter_tooltip_running": "Tampilkan hanya tumpukan yang berjalan",
+    "filter_tooltip_partial": "Tampilkan hanya tumpukan yang berjalan sebagian",
+    "filter_tooltip_stopped": "Tampilkan hanya tumpukan yang berhenti",
+    "filter_tooltip_paused": "Tampilkan hanya tumpukan yang dijeda",
+    "select_stack": "Pilih {{name}}",
+    "select_all": "Pilih semua",
+    "bulk_selected": "{{count}} dipilih",
+    "bulk_clear": "Hapus pilihan"
   },
-
   "actions": {
     "up": "Jalankan",
     "up_title": "Jalankan tumpukan atau buat ulang kontainer yang berubah",
@@ -62,41 +77,38 @@
     "backup": "Cadangkan",
     "scale": "Skalakan"
   },
-
   "health": {
     "passing": "Pemeriksaan kesehatan berhasil",
     "failing": "Pemeriksaan kesehatan gagal",
     "starting": "Pemeriksaan kesehatan dimulai"
   },
-
   "ports": {
     "external_tooltip": "Terbuka di semua antarmuka — buka info tumpukan untuk detail lengkap",
     "localhost_tooltip": "Terikat hanya ke localhost — buka info tumpukan untuk detail lengkap",
     "specific_tooltip": "Terikat ke IP tertentu — buka info tumpukan untuk detail lengkap"
   },
-
   "footer": {
     "version": "Versi: {{version}}",
     "docker_version": "{{runtime}}: {{version}}",
     "compose_version": "{{runtime}} Compose: {{version}}",
     "rootless": "Tanpa root",
+    "rootless_help_title": "Mode tanpa root",
+    "rootless_help_body": "Docker atau Podman berjalan dalam mode tanpa root — kontainer berjalan sebagai pengguna Anda, bukan root. Ini meningkatkan keamanan tetapi mungkin membatasi beberapa fitur seperti mengikat port istimewa (<1024), mengakses jalur sistem, atau menggunakan driver jaringan tertentu.",
     "help": "Bantuan",
     "feedback": "Masukan / Laporkan bug"
   },
-
   "runtime": {
     "docker": "Docker",
     "podman": "Podman",
     "toggle_label": "Runtime kontainer",
     "not_installed": "{{runtime}} tidak ditemukan — instal untuk beralih",
     "podman_confirm_title": "Beralih ke Podman",
-    "podman_confirm_body": "Dukungan Podman masih eksperimental. Tergantung pada pengaturan Anda, beberapa fitur mungkin tidak berfungsi seperti yang diharapkan — termasuk penemuan tumpukan, streaming log, dan perintah compose tertentu."
+    "podman_confirm_body": "Dukungan Podman masih eksperimental. Tergantung pada pengaturan Anda, beberapa fitur mungkin tidak berfungsi seperti yang diharapkan — termasuk penemuan tumpukan, streaming log, dan perintah compose tertentu.",
+    "podman_suggest_docker_missing": "Docker tidak ditemukan di sistem ini. Beralih ke Podman untuk mengelola kontainer Anda."
   },
-
   "error_boundary": {
     "load_stacks_error": "Kesalahan saat memuat tumpukan"
   },
-
   "down_modal": {
     "aria_label": "Konfirmasi penghentian",
     "title": "Hapus \"{{name}}\"?",
@@ -108,7 +120,6 @@
     "shared_networks_title": "Jaringan bersama terdeteksi",
     "shared_with": "juga digunakan oleh"
   },
-
   "kill_modal": {
     "aria_label": "Konfirmasi penghentian paksa",
     "title": "Paksa hentikan \"{{name}}\"?",
@@ -117,7 +128,18 @@
     "body_suffix": ", menghentikannya secara paksa dan segera. Tidak seperti Stop, proses tidak punya kesempatan untuk membersihkan. Gunakan hanya saat Stop tidak merespons.",
     "confirm_button": "Paksa hentikan semua kontainer"
   },
-
+  "stop_modal": {
+    "aria_label": "Confirm stop",
+    "title": "Stop \"{{name}}\"?",
+    "body": "This will stop all running containers in the stack. They will not be removed and can be started again.",
+    "confirm_button": "Stop"
+  },
+  "restart_modal": {
+    "aria_label": "Confirm restart",
+    "title": "Restart \"{{name}}\"?",
+    "body": "This will restart all running services. Services will briefly be unavailable.",
+    "confirm_button": "Restart"
+  },
   "delete_modal": {
     "aria_label": "Hapus tumpukan compose — {{name}}",
     "title": "Hapus — {{name}}",
@@ -139,7 +161,6 @@
     "shared_networks_title": "Jaringan bersama terdeteksi",
     "shared_with": "juga digunakan oleh"
   },
-
   "create_modal": {
     "aria_label": "Buat tumpukan compose baru",
     "title": "Buat tumpukan compose",
@@ -195,10 +216,10 @@
     "validation_extra_name_duplicate_primary": "Tidak dapat menggunakan nama yang sama dengan file compose utama",
     "validation_extra_name_duplicate": "Nama file harus unik"
   },
-
   "yaml_modal": {
     "aria_label": "File Compose — {{name}}",
     "title": "{{name}} — file compose",
+    "unsaved_changes": "Perubahan belum disimpan",
     "env_file_button": "File env",
     "history_button": "Riwayat ({{count}})",
     "edit_button": "Edit",
@@ -243,7 +264,6 @@
     "import_file_none": "Tidak ada file YAML tambahan yang ditemukan di direktori ini.",
     "import_file_confirm_button": "Impor"
   },
-
   "env_modal": {
     "aria_label": "File env — {{name}}",
     "title": "{{name}} — file env",
@@ -264,7 +284,6 @@
     "confirm_save_question": "Apakah Anda ingin menyimpan bagaimanapun?",
     "save_anyway_button": "Simpan Bagaimanapun"
   },
-
   "logs_modal": {
     "aria_label": "Log — {{name}}",
     "title": "Log — {{name}}",
@@ -275,9 +294,19 @@
     "limit_notice": "menampilkan {{count}} baris terakhir",
     "waiting": "Menunggu log…",
     "service_all": "Semua layanan",
-    "search_placeholder": "Cari log…"
+    "search_placeholder": "Cari log…",
+    "regex_tooltip": "Aktifkan pencarian regex",
+    "level_all": "Semua",
+    "level_error": "Error",
+    "level_warn": "Peringatan",
+    "level_info": "Info",
+    "download_tooltip": "Unduh log",
+    "timestamps_tooltip": "Aktifkan cap waktu",
+    "scroll_top": "Loncat ke atas",
+    "scroll_bottom": "Loncat ke bawah",
+    "line_count": "{{count}} baris",
+    "line_count_filtered": "{{shown}} / {{total}} baris"
   },
-
   "run_modal": {
     "aria_label": "Jalankan — {{name}}",
     "title": "Jalankan — {{name}}",
@@ -292,7 +321,6 @@
     "complete": "✓ Perintah selesai",
     "failed": "✗ Perintah gagal"
   },
-
   "exec_modal": {
     "aria_label": "Terminal — {{name}}",
     "title": "Terminal — {{name}}",
@@ -303,9 +331,11 @@
     "field_user": "Pengguna (opsional)",
     "field_user_placeholder": "root",
     "open_shell_button": "Buka terminal",
-    "disconnect_button": "Putuskan koneksi"
+    "disconnect_button": "Putuskan koneksi",
+    "font_size_label": "Ukuran font",
+    "font_size_decrease": "Kecilkan ukuran font",
+    "font_size_increase": "Perbesar ukuran font"
   },
-
   "events_modal": {
     "aria_label": "Peristiwa — {{name}}",
     "title": "Peristiwa — {{name}}",
@@ -320,7 +350,6 @@
     "col_service": "Layanan",
     "col_details": "Detail"
   },
-
   "top_modal": {
     "aria_label": "Proses — {{name}}",
     "title": "Proses — {{name}}",
@@ -328,7 +357,6 @@
     "error_title": "Tidak dapat memuat proses",
     "empty": "Tidak ada proses yang berjalan ditemukan."
   },
-
   "pull_modal": {
     "aria_label": "Tarik — {{name}}",
     "title": "Tarik — {{name}}",
@@ -337,7 +365,6 @@
     "failed": "✗ Penarikan gagal",
     "starting": "Memulai penarikan…"
   },
-
   "pull_confirm_modal": {
     "aria_label": "Konfirmasi penarikan — {{name}}",
     "title": "Tarik image terbaru — {{name}}",
@@ -349,7 +376,6 @@
     "unpinned_notice": "Image yang tidak dipatokkan selalu menarik apa yang dianggap registri sebagai \"terbaru\" dan paling mungkin mengubah perilaku antar penarikan.",
     "pull_button": "Tarik"
   },
-
   "up_modal": {
     "aria_label": "Jalankan — {{name}}",
     "title": "Jalankan — {{name}}",
@@ -358,7 +384,6 @@
     "complete": "✓ Berhasil dijalankan",
     "failed": "✗ Gagal dijalankan"
   },
-
   "up_confirm_modal": {
     "aria_label": "Konfirmasi jalankan — {{name}}",
     "title": "Jalankan — {{name}}",
@@ -373,7 +398,6 @@
     "profiles_hint": "Hanya layanan yang diberi tag dengan profil yang dipilih yang akan dimulai.",
     "up_button": "Jalankan"
   },
-
   "info_modal": {
     "aria_label": "Info — {{name}}",
     "title": "{{name}} — info",
@@ -402,9 +426,10 @@
     "net_col_name": "Jaringan",
     "net_col_shared": "Dibagikan dengan",
     "net_shared_icon_title": "Jaringan bersama",
-    "profiles_label": "Profil"
+    "profiles_label": "Profil",
+    "copy_container_id": "Salin ID kontainer",
+    "copy_image_ref": "Salin referensi image"
   },
-
   "prune_modal": {
     "aria_label_select": "Bersihkan sumber daya — {{name}}",
     "title_select": "Bersihkan sumber daya — {{name}}",
@@ -428,7 +453,6 @@
     "prune_button": "Bersihkan yang dipilih",
     "nothing_to_remove": "Tidak ada yang perlu dihapus."
   },
-
   "downed_section": {
     "create_button": "Buat",
     "import_button": "Impor",
@@ -448,12 +472,10 @@
     "depth_plus_aria": "Tambah kedalaman pemindaian",
     "restore_button": "Pulihkan"
   },
-
   "stack_row": {
     "no_containers": "Tidak ada kontainer ditemukan.",
     "containers_aria": "Kontainer {{name}}"
   },
-
   "container_state": {
     "running": "berjalan",
     "paused": "dijeda",
@@ -463,12 +485,10 @@
     "created": "dibuat",
     "removing": "menghapus"
   },
-
   "stats": {
     "cpu": "CPU",
     "mem": "Memori"
   },
-
   "backup_modal": {
     "title": "Cadangkan {{name}}",
     "base_name_label": "Nama arsip",
@@ -482,7 +502,6 @@
     "success_body": "Disimpan ke {{path}}",
     "warning_partial": "Beberapa file dilewati karena kesalahan izin"
   },
-
   "restore_modal": {
     "title": "Pulihkan tumpukan dari cadangan",
     "scan_dir_label": "Direktori pencarian",
@@ -503,13 +522,11 @@
     "error_dest_exists": "Jalur target {{path}} sudah ada — membatalkan untuk mencegah penimpaan",
     "error_unknown": "Pemulihan gagal (periksa konsol browser untuk detail)"
   },
-
   "external_link_modal": {
     "aria_label": "Peringatan tautan eksternal",
     "title": "Membuka tautan eksternal",
     "warning_title": "Selalu verifikasi bahwa situs tujuan terpercaya sebelum melanjutkan."
   },
-
   "container_table": {
     "replica_count": "×{{count}}",
     "col_status": "Status",
@@ -517,7 +534,6 @@
     "col_image": "Image",
     "col_uptime": "Waktu aktif"
   },
-
   "scale_modal": {
     "title": "Skalakan layanan — {{name}}",
     "confirm_title": "Konfirmasi penskalaan — {{name}}",
@@ -534,5 +550,33 @@
     "port_conflict_title": "Kemungkinan konflik port",
     "port_conflict_body": "Layanan berikut memiliki binding port host statis. Docker tidak akan dapat memulai lebih dari satu replika karena port host hanya dapat diikat oleh satu kontainer:",
     "port_conflict_icon_title": "Memiliki binding port host statis"
+  },
+  "settings": {
+    "title": "Pengaturan",
+    "open_button": "Pengaturan",
+    "refresh_interval_label": "Interval pembaruan otomatis",
+    "refresh_interval_hint": "Seberapa sering Docker di-poll untuk status tumpukan (200–5000 ms).",
+    "log_line_limit_label": "Batas baris log",
+    "log_line_limit_hint": "Jumlah maksimum baris log yang disimpan di memori per sesi (100–20000).",
+    "toasts_label": "Notifikasi",
+    "toasts_on": "Aktif",
+    "toasts_off": "Nonaktif",
+    "confirm_down_label": "Konfirmasi sebelum menghentikan",
+    "confirm_down_on": "Tampilkan dialog konfirmasi",
+    "confirm_down_off": "Lewati konfirmasi",
+    "confirm_down_hint": "Saat dinonaktifkan, 'Hentikan' berjalan segera tanpa bertanya.",
+    "reset_defaults": "Setel ulang ke default"
+  },
+  "toast": {
+    "start_success": "{{name}} dimulai",
+    "start_failed": "Gagal memulai {{name}}",
+    "stop_success": "{{name}} dihentikan",
+    "stop_failed": "Gagal menghentikan {{name}}",
+    "restart_success": "{{name}} dimulai ulang",
+    "restart_failed": "Gagal memulai ulang {{name}}",
+    "pause_success": "{{name}} dijeda",
+    "pause_failed": "Gagal menjeda {{name}}",
+    "unpause_success": "{{name}} dilanjutkan",
+    "unpause_failed": "Gagal melanjutkan {{name}}"
   }
 }

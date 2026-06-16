@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { PageSection, Label, Tooltip } from "@patternfly/react-core";
+import { HelpPopover } from "./HelpPopover";
 import { composeVersion, containerVersion, isRootlessMode, getDockerSocketPath, getPodmanSocketPath, type ComposeVersion, type Runtime } from "../api";
 // @ts-expect-error: ESM import assertion for JSON
 import pkg from "../../package.json" assert { type: "json" };
@@ -71,7 +72,14 @@ export function AppFooter({ runtime }: Props) {
             <Label isCompact color="blue">{t("footer.compose_version", { version: version.version, runtime: runtimeLabel })}</Label>
           )}
           {rootless && (
-            <Label isCompact color="green">{t("footer.rootless")}</Label>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: "0.2rem" }}>
+              <Label isCompact color="green">{t("footer.rootless")}</Label>
+              <HelpPopover
+                header={t("footer.rootless_help_title")}
+                body={t("footer.rootless_help_body")}
+                aria-label={t("footer.rootless_help_title")}
+              />
+            </span>
           )}
         </div>
         <div style={{ display: "flex", flexDirection: "row", gap: 16, justifyContent: "center" }}>
