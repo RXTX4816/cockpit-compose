@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Page, PageSection } from "@patternfly/react-core";
 import { AppFooter } from "./AppFooter";
@@ -12,9 +12,16 @@ export function App() {
   const [runtime, setRuntime] = useState<Runtime>(
     () => (localStorage.getItem("cockpit-compose:runtime") ?? "docker") as Runtime,
   );
+  const [dockerMissing, setDockerMissing] = useState(false);
+  const initialRuntime = useRef(runtime);
 
   useEffect(() => {
-    void detectDockerMode().then(() => detectComposeCommand()).then(() => setReady(true));
+    void detectDockerMode()
+      .then(() => detectComposeCommand())
+      .then(found => {
+        if (initialRuntime.current === "docker" && !found) setDockerMissing(true);
+        setReady(true);
+      });
   }, []);
 
   if (!ready) return null;
@@ -23,7 +30,7 @@ export function App() {
     <Page className="pf-m-no-sidebar">
       <PageSection hasBodyWrapper={false} isFilled>
         <ErrorBoundary fallbackTitle={t("error_boundary.load_stacks_error")}>
-          <StacksView onRuntimeChange={setRuntime} />
+          <StacksView onRuntimeChange={setRuntime} dockerMissing={dockerMissing} />
         </ErrorBoundary>
       </PageSection>
       <AppFooter runtime={runtime} />

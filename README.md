@@ -15,6 +15,7 @@ Docker Compose management for [Cockpit](https://cockpit-project.org) — start, 
 - Live log viewer per stack
 - Interactive shell into any running service
 - YAML editor with syntax validation and auto-snapshot before saving + .ENV editor
+- Podman compatibility mode (Experimental)
 
 ## Requirements
 
@@ -22,6 +23,8 @@ Docker Compose management for [Cockpit](https://cockpit-project.org) — start, 
 - Docker with the Compose plugin (`docker compose` v2+)
 
 ## Prerequisites
+
+You can use either Docker Compose, Podman Compose(Docker redirect) or pure podman-compose mode as your container engine. Be mindful that this plugin is primarly for Docker Compose. The pure podman-compose case (No docker installed) might lead to a degraded UIUX experience.
 
 Docker is not installed by default on most distros. Install it and make sure it is running and add your user to the docker group. Works with rootless docker by setting DOCKER_HOST env in OS.
 
