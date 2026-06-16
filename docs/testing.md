@@ -11,7 +11,7 @@ combination, test stack definitions, and a step-by-step scenario for every UI fe
 2. [Docker-Only Setup](#2-docker-only-setup)
 3. [Podman-Only Setup](#3-podman-only-setup)
 4. [Docker + Podman Side by Side](#4-docker--podman-side-by-side)
-5. [Test Stacks](#5-test-stacks)
+5. [Test Stacks](#5-test-stacks) — including [Prune Feature Test Stacks](#57-prune-feature-test-stacks)
 6. [Feature Scenarios](#6-feature-scenarios)
 7. [Runtime-Specific Scenarios](#7-runtime-specific-scenarios)
 8. [Known Issues & Workarounds](#8-known-issues--workarounds)
@@ -420,7 +420,116 @@ EOF
 
 Note: scaling `web` past 1 will fail (static port) — this is expected and tests the port conflict warning.
 
-### 5.7 Podman No-Network Stack (nftables workaround)
+### 5.7 Prune Feature Test Stacks
+
+These stacks are specifically named with a `_prunetest` suffix so they are easy to
+identify as prune-scenario test data. They are pre-staged by the VM script under
+`~/testcompose/` — create them manually if not using the VM harness.
+
+#### pinned-version\_prunetest — versioned image bump
+
+Used to test the *Images* section of Prune when an older image version is no longer in use.
+
+```bash
+mkdir -p ~/testcompose/pinned-version_prunetest && cat > ~/testcompose/pinned-version_prunetest/docker-compose.yml << 'EOF'
+services:
+  app:
+    image: traefik:v3.0
+    command: ["version"]
+    restart: "no"
+EOF
+```
+
+#### shared-image-a\_prunetest + shared-image-b\_prunetest — image shared across stacks
+
+Two independent stacks that both use `nginx:alpine`. Used to verify that Prune does NOT offer
+to remove an image when another stack is still using it.
+
+```bash
+mkdir -p ~/testcompose/shared-image-a_prunetest && cat > ~/testcompose/shared-image-a_prunetest/docker-compose.yml << 'EOF'
+services:
+  web:
+    image: nginx:alpine
+    ports:
+      - "8096:80"
+EOF
+mkdir -p ~/testcompose/shared-image-b_prunetest && cat > ~/testcompose/shared-image-b_prunetest/docker-compose.yml << 'EOF'
+services:
+  proxy:
+    image: nginx:alpine
+    ports:
+      - "8097:80"
+EOF
+```
+
+#### latest-tag\_prunetest — unpinned `:latest` tag
+
+Tests that images using a `:latest` tag are correctly detected as in-use when the stack is running.
+
+```bash
+mkdir -p ~/testcompose/latest-tag_prunetest && cat > ~/testcompose/latest-tag_prunetest/docker-compose.yml << 'EOF'
+services:
+  cache:
+    image: redis:latest
+    ports:
+      - "8098:6379"
+EOF
+```
+
+#### stable-tag\_prunetest — non-semver channel tag
+
+Tests that named-channel tags (`lts`, `stable`, `unstable`, etc.) are treated correctly —
+they should not appear as removable while the stack is running.
+
+```bash
+mkdir -p ~/testcompose/stable-tag_prunetest && cat > ~/testcompose/stable-tag_prunetest/docker-compose.yml << 'EOF'
+services:
+  app:
+    image: node:lts-alpine
+    command: node -e "setInterval(()=>{},1000)"
+    ports:
+      - "8099:3000"
+EOF
+```
+
+#### exited-containers\_prunetest — stopped containers
+
+A one-shot job with `restart: "no"` that exits immediately. Used to populate the *Containers*
+section of the Prune preview. Run the stack multiple times, or use **Run command** (without
+`--rm`) on any other stack to accumulate additional stopped containers.
+
+```bash
+mkdir -p ~/testcompose/exited-containers_prunetest && cat > ~/testcompose/exited-containers_prunetest/docker-compose.yml << 'EOF'
+services:
+  job:
+    image: busybox
+    command: sh -c "echo job-done"
+    restart: "no"
+EOF
+```
+
+#### named-volumes\_prunetest — dangling named volume
+
+Stack with a named volume. After `docker compose down` (without `--volumes`), the volume
+becomes dangling and should appear in the *Volumes* section of Prune.
+
+```bash
+mkdir -p ~/testcompose/named-volumes_prunetest && cat > ~/testcompose/named-volumes_prunetest/docker-compose.yml << 'EOF'
+services:
+  db:
+    image: postgres:alpine
+    environment:
+      POSTGRES_PASSWORD: secret
+    volumes:
+      - pgdata_prunetest:/var/lib/postgresql/data
+volumes:
+  pgdata_prunetest:
+EOF
+```
+
+---
+
+### 5.8 Podman No-Network Stack (nftables workaround)
 
 Use this if pasta is not yet installed and nftables fails:
 
@@ -434,7 +543,7 @@ services:
 EOF
 ```
 
-### 5.8 Stack with Env File
+### 5.9 Stack with Env File
 
 Tests env file editor.
 
@@ -693,7 +802,9 @@ Run each scenario with both Docker and Podman unless noted otherwise.
 
 ### 6.16 Prune Resources
 
-**Setup:** `volumes-test` stack. Down it first so there are stopped containers.
+#### 6.16.1 Basic prune flow
+
+**Setup:** `volumes-test` stack (§5.5). Down it first so there are stopped containers.
 
 **Steps:**
 1. Click ⋮ → **Prune** for `volumes-test`.
@@ -705,6 +816,69 @@ Run each scenario with both Docker and Podman unless noted otherwise.
 6. Stopped containers removed. `pgdata` volume preserved.
 7. Restart the stack: `docker compose -p volumes-test up -d`
 8. Re-open Prune → containers section is empty (all running, none stopped).
+
+#### 6.16.2 Pinned image version bump
+
+**Setup:** `pinned-version_prunetest` (§5.7). Pull the old image first so it is cached.
+
+**Steps:**
+1. Start the stack with `traefik:v3.0` — image is pulled and cached.
+2. Edit `docker-compose.yml` to change `traefik:v3.0` → `traefik:v3.1`.
+3. Up the stack again (`docker compose up -d`) — v3.1 is pulled; v3.0 remains on disk.
+4. Open Prune → Images section should list `traefik:v3.0` as removable.
+5. `traefik:v3.1` must **not** appear — it is currently in use.
+6. Confirm prune → old image removed.
+
+#### 6.16.3 Image shared across two stacks
+
+**Setup:** Both `shared-image-a_prunetest` and `shared-image-b_prunetest` (§5.7) running.
+
+**Steps:**
+1. Down `shared-image-a_prunetest` while `shared-image-b_prunetest` stays up.
+2. Open Prune for `shared-image-a_prunetest`.
+3. Click **Preview** → Images section must be **empty** (`nginx:alpine` must not appear
+   because stack-b still has a running container using it).
+4. Now down stack-b as well. Re-open Prune for stack-a → `nginx:alpine` now appears.
+
+#### 6.16.4 Unpinned `:latest` tag in use
+
+**Setup:** `latest-tag_prunetest` (§5.7) running.
+
+**Steps:**
+1. Open Prune → Images → Preview while the stack is running.
+2. `redis:latest` must **not** appear as removable.
+3. Down the stack. Re-open Prune → `redis:latest` may now appear (only if no other
+   container on the host uses it).
+
+#### 6.16.5 Non-semver channel tag (lts / stable / unstable)
+
+**Setup:** `stable-tag_prunetest` (§5.7) running.
+
+**Steps:**
+1. Open Prune → Images → Preview while the stack is running.
+2. `node:lts-alpine` must **not** appear as removable.
+3. Down the stack. Re-open Prune → it may appear if not used elsewhere.
+
+#### 6.16.6 Stopped / exited containers
+
+**Setup:** `exited-containers_prunetest` (§5.7). Up the stack — the `job` service exits
+immediately. Optionally run **Run command** (⋮ → Run command, uncheck --rm) on any stack
+two or three times to accumulate more stopped containers.
+
+**Steps:**
+1. Open Prune with **Containers** checked.
+2. Preview → stopped containers for the project are listed with name and exit status.
+3. Confirm → containers removed. Re-open Prune → Containers section is empty.
+
+#### 6.16.7 Dangling named volume
+
+**Setup:** `named-volumes_prunetest` (§5.7). Run `docker compose up -d` then `docker compose down`
+(**without** `--volumes`).
+
+**Steps:**
+1. Open Prune. Enable the **Volumes** checkbox (off by default — note the data-loss warning).
+2. Preview → `pgdata_prunetest` appears in the Volumes section.
+3. Confirm → volume removed. Verify: `docker volume ls | grep pgdata_prunetest` returns nothing.
 
 ---
 
