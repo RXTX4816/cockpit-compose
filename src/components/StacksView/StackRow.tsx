@@ -116,7 +116,7 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
   }, [clearContainers, expanded, loadContainers]);
 
   return (
-    <DataListItem isExpanded={expanded} aria-labelledby={`stack-${stack.Name}`}>
+    <DataListItem isExpanded={expanded} aria-labelledby={`stack-${stack.Name}`} data-status={status}>
       <DataListItemRow>
         <DataListToggle
           onClick={handleToggle}

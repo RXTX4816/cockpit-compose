@@ -29,6 +29,8 @@
 
 .sr-stack-name {
   font-weight: 600;
+  font-family: var(--pf-t--global--font--family--mono);
+  letter-spacing: 0.01em;
 }
 
 .sr-down-btn {
@@ -42,4 +44,39 @@
   border-left: 1px solid var(--pf-t--global--border--color--default);
   padding-left: 0.4rem;
   margin-left: 0.1rem;
+}
+
+/* Status accent left border */
+[data-status="running"] {
+  border-left: 3px solid var(--pf-t--global--icon--color--status--success--default) !important;
+}
+
+[data-status="partial"] {
+  border-left: 3px solid var(--pf-t--global--icon--color--status--warning--default) !important;
+}
+
+[data-status="paused"] {
+  border-left: 3px solid var(--pf-t--global--icon--color--status--info--default) !important;
+}
+
+[data-status="stopped"],
+[data-status="unknown"] {
+  border-left: 3px solid var(--pf-t--global--border--color--default) !important;
+}
+
+[data-status] {
+  box-sizing: border-box;
+  transition: background 150ms ease, border-left-color 150ms ease;
+}
+
+/* Row hover glow */
+[data-status]:hover {
+  background: rgba(255, 255, 255, 0.028);
+}
+
+/* Icon button hover circle */
+.sr-icon-group button:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-radius: 4px;
+  transition: background 120ms ease;
 }

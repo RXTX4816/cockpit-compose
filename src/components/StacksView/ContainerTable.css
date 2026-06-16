@@ -2,6 +2,8 @@
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  border-left: 2px solid var(--pf-t--global--border--color--default);
+  padding-left: 0.75rem;
 }
 
 .ct-header {
@@ -21,9 +23,18 @@
   grid-template-columns: 7rem 10rem 1fr auto;
   gap: 0.75rem;
   align-items: center;
-  padding: 0.35rem 0;
-  border-top: 1px solid var(--pf-t--global--border--color--default);
+  padding: 0.35rem 0.4rem;
+  border-radius: 4px;
   font-size: var(--pf-t--global--font--size--sm);
+  transition: background 120ms ease;
+}
+
+.ct-row:nth-child(even) {
+  background: rgba(255, 255, 255, 0.018);
+}
+
+.ct-row:hover {
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .ct-name {
@@ -38,6 +49,8 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-family: var(--pf-t--global--font--family--mono);
+  font-size: 0.7rem;
 }
 
 .ct-uptime {

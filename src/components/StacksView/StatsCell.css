@@ -21,3 +21,29 @@
   font-size: 0.75rem;
   color: var(--pf-t--global--text--color--subtle);
 }
+
+/* Port pill: translucent with colored border glow */
+.sc-port-pill {
+  background: transparent !important;
+  border: 1px solid currentColor !important;
+  opacity: 0.78;
+  transition: opacity 150ms ease, box-shadow 150ms ease;
+}
+
+.sc-port-pill:hover {
+  opacity: 1;
+  box-shadow: 0 0 7px currentColor;
+}
+
+/* CPU usage color coding */
+.sc-cpu--high {
+  color: var(--pf-t--global--icon--color--status--danger--default);
+}
+
+.sc-cpu--medium {
+  color: var(--pf-t--global--icon--color--status--warning--default);
+}
+
+.sc-cpu--low {
+  color: var(--pf-t--global--text--color--subtle);
+}
