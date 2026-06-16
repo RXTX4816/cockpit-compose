@@ -204,8 +204,29 @@ The UI language follows Cockpit's language setting.
 | Language | Code | Coverage |
 |---|---|---|
 | English | `en` | 100% (source) |
+| ar | `ar` | 100% |
+| cs | `cs` | 100% |
 | German | `de` | 100% |
+| Spanish | `es` | 100% |
+| fi | `fi` | 100% |
+| French | `fr` | 100% |
+| he | `he` | 100% |
+| id | `id` | 100% |
+| Italian | `it` | 100% |
+| Japanese | `ja` | 100% |
+| ka | `ka` | 100% |
+| Korean | `ko` | 100% |
+| Dutch | `nl` | 100% |
 | Polish | `pl` | 100% |
+| pt-BR | `pt-BR` | 100% |
+| ro | `ro` | 100% |
+| Russian | `ru` | 100% |
+| sk | `sk` | 100% |
+| sv | `sv` | 100% |
+| tr | `tr` | 100% |
+| uk | `uk` | 100% |
+| zh-CN | `zh-CN` | 100% |
+| zh-TW | `zh-TW` | 100% |
 <!-- i18n-coverage-end -->
 
 To add a new language, copy `src/i18n/locales/en.json`, translate the values, and register the file in `src/i18n/index.ts`.
