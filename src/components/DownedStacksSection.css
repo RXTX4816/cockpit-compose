@@ -187,16 +187,25 @@
 
 .dss-stack-name {
   font-weight: 600;
-  margin-right: 0.5rem;
+  font-family: var(--pf-t--global--font--family--mono);
+  letter-spacing: 0.01em;
 }
 
-.dss-status-label {
-  vertical-align: middle;
-}
-
-.dss-config-path {
+.dss-path-dir {
+  display: block;
+  font-family: var(--pf-t--global--font--family--mono);
   font-size: var(--pf-t--global--font--size--sm, 0.8125rem);
   color: var(--pf-t--global--text--color--subtle, #6a6e73);
+  word-break: break-all;
+}
+
+.dss-path-files {
+  display: block;
+  font-family: var(--pf-t--global--font--family--mono);
+  font-size: var(--pf-t--global--font--size--xs, 0.75rem);
+  color: var(--pf-t--global--text--color--subtle, #6a6e73);
+  opacity: 0.75;
+  margin-top: 2px;
   word-break: break-all;
 }
 
@@ -218,6 +227,23 @@
   border-left: 1px solid var(--pf-t--global--border--color--default);
   padding-left: 0.4rem;
   margin-left: 0.1rem;
+}
+
+.dss-icon-group button:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-radius: 4px;
+  transition: background 120ms ease;
+}
+
+/* Down status: left accent border + hover, matching StackRow conventions */
+[data-status="down"] {
+  border-left: 3px solid var(--pf-t--global--border--color--default) !important;
+  box-sizing: border-box;
+  transition: background 150ms ease, border-left-color 150ms ease;
+}
+
+[data-status="down"]:hover {
+  background: rgba(255, 255, 255, 0.028);
 }
 
 .dss-scan-warning {
