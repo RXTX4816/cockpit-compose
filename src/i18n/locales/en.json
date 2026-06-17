@@ -310,6 +310,8 @@
   "run_modal": {
     "aria_label": "Run — {{name}}",
     "title": "Run — {{name}}",
+    "warning_title": "Long-running services will block",
+    "warning_body": "compose run starts a fresh container for the selected service. If that service has no overriding command (e.g. a web server or database), the container will start the service and stay running — it will not exit on its own. You may need to cancel here and then force-stop the stack to recover.",
     "field_service": "Service",
     "field_service_placeholder": "service name",
     "field_command": "Command",
@@ -319,7 +321,9 @@
     "running": "Running command in {{name}}…",
     "initializing": "Starting…",
     "complete": "✓ Command complete",
-    "failed": "✗ Command failed"
+    "failed": "✗ Command failed",
+    "force_kill_button": "Force remove container",
+    "force_kill_tooltip": "Force-removes the stuck one-off container. Use when the service does not exit on its own."
   },
   "exec_modal": {
     "aria_label": "Shell — {{name}}",

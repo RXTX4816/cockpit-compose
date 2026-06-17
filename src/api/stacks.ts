@@ -164,7 +164,36 @@ export function pullStack(project: string, configFiles: string[], profiles: stri
   );
 }
 
+function pauseUnpausePodmanFallback(project: string, action: "pause" | "unpause", superuser?: "try"): CockpitProcess {
+  return makeFakeProcess(async () => {
+    let psRaw = "";
+    const psProc = cockpit.spawn(
+      cli("ps", "-a", "--filter", `label=com.docker.compose.project=${project}`, "--format", "json"),
+      { superuser, err: "message", ...dockerSpawnEnviron() },
+    );
+    psProc.stream((d: string) => { psRaw += d; });
+    await psProc;
+    interface PsEntry { Id: string; }
+    const containers = JSON.parse(psRaw) as PsEntry[];
+    if (!Array.isArray(containers) || containers.length === 0) return "";
+    const ids = containers.map(c => c.Id);
+    let out = "";
+    const proc = cockpit.spawn(cli(action, ...ids), { superuser, err: "message", ...dockerSpawnEnviron() });
+    proc.stream((d: string) => { out += d; });
+    try {
+      await proc;
+    } catch (e: unknown) {
+      if (String(e).includes("cgroup")) {
+        throw new Error("Pause is not supported on this system. Enable cgroup v2 delegation for rootless Podman (see /etc/systemd/system/user@.service.d/).");
+      }
+      throw e;
+    }
+    return out;
+  });
+}
+
 export function pauseStack(project: string, configFiles: string[], profiles: string[] = [], superuser?: "try"): CockpitProcess {
+  if (getIsPodman()) return pauseUnpausePodmanFallback(project, "pause", superuser);
   const profileFlags = profiles.flatMap(p => ["--profile", p]);
   return cockpit.spawn(
     compose(...profileFlags, "-p", project, ...fileFlags(configFiles), "pause"),
@@ -173,6 +202,7 @@ export function pauseStack(project: string, configFiles: string[], profiles: str
 }
 
 export function unpauseStack(project: string, configFiles: string[], profiles: string[] = [], superuser?: "try"): CockpitProcess {
+  if (getIsPodman()) return pauseUnpausePodmanFallback(project, "unpause", superuser);
   const profileFlags = profiles.flatMap(p => ["--profile", p]);
   return cockpit.spawn(
     compose(...profileFlags, "-p", project, ...fileFlags(configFiles), "unpause"),
@@ -315,7 +345,7 @@ export function streamEvents(project: string): CockpitProcess {
 }
 
 export function composeTop(project: string): CockpitProcess {
-  if (composeIsLimitedBackend()) return composeTopPodmanFallback(project);
+  if (getIsPodman()) return composeTopPodmanFallback(project);
   return cockpit.spawn(
     compose("-p", project, "top"),
     { err: "message", ...dockerSpawnEnviron() },
@@ -491,10 +521,89 @@ export function scaleStack(
   profiles: string[] = [],
   superuser?: "try",
 ): CockpitProcess {
+  if (composeIsLimitedBackend()) return scaleStackPodmanFallback(project, configFiles, scales, profiles, superuser);
   const profileFlags = profiles.flatMap(p => ["--profile", p]);
   const scaleFlags = Object.entries(scales).flatMap(([svc, n]) => ["--scale", `${svc}=${n}`]);
   return cockpit.spawn(
     compose(...profileFlags, "-p", project, ...fileFlags(configFiles), "up", "-d", ...scaleFlags),
+    { superuser, err: "message", ...dockerSpawnEnviron() },
+  );
+}
+
+// podman-compose up --scale handles scale-up but silently ignores scale-down (excess containers
+// remain running). After the up command, query each service and stop+rm any extras.
+function scaleStackPodmanFallback(
+  project: string,
+  configFiles: string[],
+  scales: Record<string, number>,
+  profiles: string[] = [],
+  superuser?: "try",
+): CockpitProcess {
+  return makeFakeProcess(async () => {
+    const profileFlags = profiles.flatMap(p => ["--profile", p]);
+    const scaleFlags = Object.entries(scales).flatMap(([svc, n]) => ["--scale", `${svc}=${n}`]);
+    let out = "";
+    const upProc = cockpit.spawn(
+      compose(...profileFlags, "-p", project, ...fileFlags(configFiles), "up", "-d", "--force-recreate", ...scaleFlags),
+      { superuser, err: "message", ...dockerSpawnEnviron() },
+    );
+    upProc.stream(d => { out += d; });
+    await upProc;
+
+    for (const [svc, targetCount] of Object.entries(scales)) {
+      let psRaw = "";
+      const psProc = cockpit.spawn(
+        cli("ps", "-a",
+          "--filter", `label=com.docker.compose.project=${project}`,
+          "--filter", `label=com.docker.compose.service=${svc}`,
+          "--format", "json"),
+        { err: "message", ...dockerSpawnEnviron() },
+      );
+      psProc.stream(d => { psRaw += d; });
+      await psProc;
+
+      interface PsEntry { Id: string; Names?: string[] }
+      const containers = JSON.parse(psRaw) as PsEntry[];
+      if (containers.length <= targetCount) continue;
+
+      // Sort by trailing numeric index in name (project_service_N) so we remove highest-index first
+      containers.sort((a, b) => {
+        const idx = (c: PsEntry) => { const m = (c.Names?.[0] ?? "").match(/_(\d+)$/); return m ? parseInt(m[1], 10) : 0; };
+        return idx(b) - idx(a);
+      });
+      const excess = containers.slice(0, containers.length - targetCount).map(c => c.Id);
+      await cockpit.spawn(cli("stop", ...excess), { superuser, err: "message", ...dockerSpawnEnviron() });
+      await cockpit.spawn(cli("rm", ...excess), { superuser, err: "message", ...dockerSpawnEnviron() });
+    }
+
+    return out;
+  });
+}
+
+// Force-removes any one-off containers (started by compose run) still running for a project.
+// Used when the one-off container is stuck — e.g. a service with no overriding command that
+// keeps running indefinitely. Queries by the com.docker.compose.oneoff=True label so it only
+// touches run containers, never the project's regular service containers.
+export async function forceRemoveOneoffContainers(project: string, superuser?: "try"): Promise<void> {
+  // docker-compose sets oneoff=True (capital); some podman-compose versions use true (lowercase).
+  // Query both and deduplicate so either casing is handled.
+  const ids = new Set<string>();
+  for (const val of ["True", "true"]) {
+    let raw = "";
+    const proc = cockpit.spawn(
+      cli("ps", "-a",
+        "--filter", `label=com.docker.compose.project=${project}`,
+        "--filter", `label=com.docker.compose.oneoff=${val}`,
+        "--format", "{{.ID}}"),
+      { err: "message", ...dockerSpawnEnviron() },
+    );
+    proc.stream(d => { raw += d; });
+    try { await proc; } catch { /* no containers matched this casing */ }
+    for (const id of raw.split("\n").map(l => l.trim()).filter(Boolean)) ids.add(id);
+  }
+  if (ids.size === 0) return;
+  await cockpit.spawn(
+    cli("rm", "-f", ...ids),
     { superuser, err: "message", ...dockerSpawnEnviron() },
   );
 }

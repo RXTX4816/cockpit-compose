@@ -19,6 +19,7 @@ import {
   getServicesFromCompose,
   composeRunStream,
   composeFileSuperuser,
+  forceRemoveOneoffContainers,
 } from "../api";
 import { stripAnsi, classifyLine, kindColor, type LineEntry } from "../lib/pullParser";
 import "./RunModal.css";
@@ -43,6 +44,8 @@ export function RunModal({ stack, onClose }: Props) {
   const [done, setDone] = useState(false);
   const [failed, setFailed] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [killing, setKilling] = useState(false);
+  const [killError, setKillError] = useState<string | null>(null);
 
   const procRef = useRef<CockpitProcess | null>(null);
   const bufRef = useRef("");
@@ -120,6 +123,14 @@ export function RunModal({ stack, onClose }: Props) {
       <ModalBody>
         {step === "config" && (
           <div className="rm-config-form">
+            <Alert
+              variant="warning"
+              isInline
+              title={t("run_modal.warning_title")}
+              style={{ marginBottom: "1rem" }}
+            >
+              {t("run_modal.warning_body")}
+            </Alert>
             <FormGroup label={t("run_modal.field_service")} fieldId="rm-service">
               {services.length > 0 ? (
                 <select
@@ -180,6 +191,9 @@ export function RunModal({ stack, onClose }: Props) {
             {done && failed && errorMsg && (
               <Alert variant="danger" isInline title={errorMsg} style={{ marginBottom: "0.75rem" }} />
             )}
+            {killError && (
+              <Alert variant="danger" isInline title={killError} style={{ marginBottom: "0.75rem" }} />
+            )}
 
             <div ref={logRef} className="rm-log-viewer">
               {lines.length === 0 ? (
@@ -211,7 +225,24 @@ export function RunModal({ stack, onClose }: Props) {
         )}
         {step === "running" && (
           !done ? (
-            <Button variant="secondary" onClick={handleClose}>{t("common.cancel")}</Button>
+            <>
+              <Button
+                variant="danger"
+                isLoading={killing}
+                isDisabled={killing}
+                title={t("run_modal.force_kill_tooltip")}
+                onClick={() => {
+                  setKillError(null);
+                  setKilling(true);
+                  forceRemoveOneoffContainers(stack.Name)
+                    .catch((ex: unknown) => setKillError(ex instanceof Error ? ex.message : String(ex)))
+                    .finally(() => setKilling(false));
+                }}
+              >
+                {t("run_modal.force_kill_button")}
+              </Button>
+              <Button variant="secondary" onClick={handleClose}>{t("common.cancel")}</Button>
+            </>
           ) : (
             <Button variant="primary" onClick={handleClose}>{t("common.close")}</Button>
           )

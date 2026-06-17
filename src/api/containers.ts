@@ -39,7 +39,12 @@ function listContainersPodmanFallback(project: string): CockpitProcess {
       );
       proc.stream((d: string) => { raw += d; });
       await proc;
-      const items = JSON.parse(raw) as PodmanPsJson[];
+      const allItems = JSON.parse(raw) as PodmanPsJson[];
+      // Exclude one-off run containers (compose run --rm); they carry
+      // com.docker.compose.oneoff=True and would inflate service replica counts.
+      const items = allItems.filter(
+        c => c.Labels?.["com.docker.compose.oneoff"]?.toLowerCase() !== "true",
+      );
       const out = JSON.stringify(items.map(c => ({
         ID: c.Id,
         Name: c.Names?.[0] ?? "",

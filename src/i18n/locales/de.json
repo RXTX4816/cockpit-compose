@@ -310,6 +310,8 @@
   "run_modal": {
     "aria_label": "Ausführen — {{name}}",
     "title": "Ausführen — {{name}}",
+    "warning_title": "Langlaufende Dienste blockieren",
+    "warning_body": "compose run startet einen frischen Container für den ausgewählten Dienst. Wenn dieser Dienst keinen überschreibenden Befehl hat (z.B. ein Webserver oder eine Datenbank), wird der Container den Dienst starten und weiterlaufen — er wird nicht von selbst beendet. Möglicherweise müssen Sie hier abbrechen und dann den Stack erzwingen stoppen, um ihn wiederherzustellen.",
     "field_service": "Dienst",
     "field_service_placeholder": "Dienstname",
     "field_command": "Befehl",
@@ -319,7 +321,9 @@
     "running": "Befehl wird in {{name}} ausgeführt…",
     "initializing": "Wird gestartet…",
     "complete": "✓ Befehl abgeschlossen",
-    "failed": "✗ Befehl fehlgeschlagen"
+    "failed": "✗ Befehl fehlgeschlagen",
+    "force_kill_button": "Container erzwingen entfernen",
+    "force_kill_tooltip": "Erzwingt das Entfernen des hängen gebliebenen One-Off-Containers. Verwenden, wenn der Dienst nicht von selbst beendet wird."
   },
   "exec_modal": {
     "aria_label": "Terminal — {{name}}",
