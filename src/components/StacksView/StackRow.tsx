@@ -13,10 +13,6 @@ import {
   DropdownList,
   DropdownItem,
   MenuToggle,
-  Modal,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
   Divider,
   Spinner,
   Tooltip,
@@ -54,6 +50,8 @@ import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import { StatusLabel } from "./StatusLabel";
 import { StatsCell } from "./StatsCell";
 import { ContainerTable } from "./ContainerTable";
+import { StopModal } from "../StopModal";
+import { RestartModal } from "../RestartModal";
 import "./StackRow.css";
 import { splitConfigFiles } from "../../lib/configFiles";
 
@@ -371,53 +369,19 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
     </DataListItem>
 
     {confirmStopOpen && (
-      <Modal
-        isOpen
-        variant="small"
+      <StopModal
+        stackName={stack.Name}
+        onConfirm={() => { setConfirmStopOpen(false); void doAction("stop", afterAction); }}
         onClose={() => setConfirmStopOpen(false)}
-        aria-label={t("stop_modal.aria_label")}
-      >
-        <ModalHeader title={t("stop_modal.title", { name: stack.Name })} />
-        <ModalBody>
-          <p>{t("stop_modal.body")}</p>
-        </ModalBody>
-        <ModalFooter>
-          <Button
-            variant="danger"
-            onClick={() => { setConfirmStopOpen(false); void doAction("stop", afterAction); }}
-          >
-            {t("stop_modal.confirm_button")}
-          </Button>
-          <Button variant="link" onClick={() => setConfirmStopOpen(false)}>
-            {t("common.cancel")}
-          </Button>
-        </ModalFooter>
-      </Modal>
+      />
     )}
 
     {confirmRestartOpen && (
-      <Modal
-        isOpen
-        variant="small"
+      <RestartModal
+        stackName={stack.Name}
+        onConfirm={() => { setConfirmRestartOpen(false); void doAction("restart", afterAction); }}
         onClose={() => setConfirmRestartOpen(false)}
-        aria-label={t("restart_modal.aria_label")}
-      >
-        <ModalHeader title={t("restart_modal.title", { name: stack.Name })} />
-        <ModalBody>
-          <p>{t("restart_modal.body")}</p>
-        </ModalBody>
-        <ModalFooter>
-          <Button
-            variant="warning"
-            onClick={() => { setConfirmRestartOpen(false); void doAction("restart", afterAction); }}
-          >
-            {t("restart_modal.confirm_button")}
-          </Button>
-          <Button variant="link" onClick={() => setConfirmRestartOpen(false)}>
-            {t("common.cancel")}
-          </Button>
-        </ModalFooter>
-      </Modal>
+      />
     )}
     </>
   );

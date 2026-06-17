@@ -39,7 +39,7 @@ vi.mock("@codemirror/theme-one-dark", () => ({
   oneDark: ["oneDark-extension"],
 }));
 
-vi.mock("./envLint", () => ({
+vi.mock("../lib/envLint", () => ({
   lintEnvContent: vi.fn().mockReturnValue([]),
 }));
 
