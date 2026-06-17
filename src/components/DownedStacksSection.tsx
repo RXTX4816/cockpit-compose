@@ -169,6 +169,7 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
               value={composeDir}
               onChange={handleDirChange}
               isDisabled={scanning}
+              onKeyDown={(e) => { if (e.key === "Enter" && composeDir.trim() && !scanning) scan(); }}
             />
             <div className="dss-stepper" aria-disabled={scanning}>
               <span className="dss-stepper-label">{t("downed_section.depth_label")}</span>
