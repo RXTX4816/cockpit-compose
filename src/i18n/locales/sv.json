@@ -64,7 +64,7 @@
     "logs": "Loggar",
     "logs_title": "Visa loggar",
     "edit_title": "Redigera compose-fil",
-    "info": "Info",
+    "info": "Information",
     "info_title": "Stackinfo",
     "events": "Händelser",
     "top": "Processer",
@@ -129,16 +129,16 @@
     "confirm_button": "Avsluta alla containers"
   },
   "stop_modal": {
-    "aria_label": "Confirm stop",
-    "title": "Stop \"{{name}}\"?",
-    "body": "This will stop all running containers in the stack. They will not be removed and can be started again.",
-    "confirm_button": "Stop"
+    "aria_label": "Bekräfta stopp",
+    "title": "Stoppa \"{{name}}\"?",
+    "body": "Det här stoppar alla körande containers i stacken. De tas inte bort och kan startas igen.",
+    "confirm_button": "Stoppa"
   },
   "restart_modal": {
-    "aria_label": "Confirm restart",
-    "title": "Restart \"{{name}}\"?",
-    "body": "This will restart all running services. Services will briefly be unavailable.",
-    "confirm_button": "Restart"
+    "aria_label": "Bekräfta omstart",
+    "title": "Starta om \"{{name}}\"?",
+    "body": "Det här startar om alla körande tjänster. Tjänsterna kommer kort att vara otillgängliga.",
+    "confirm_button": "Starta om"
   },
   "delete_modal": {
     "aria_label": "Ta bort compose-stack — {{name}}",
@@ -299,7 +299,7 @@
     "level_all": "Alla",
     "level_error": "Fel",
     "level_warn": "Varning",
-    "level_info": "Info",
+    "level_info": "Information",
     "download_tooltip": "Ladda ner loggar",
     "timestamps_tooltip": "Växla tidsstämplar",
     "scroll_top": "Hoppa till toppen",
@@ -319,7 +319,11 @@
     "running": "Kör kommando i {{name}}…",
     "initializing": "Initierar…",
     "complete": "✓ Kommando slutfört",
-    "failed": "✗ Kommando misslyckades"
+    "failed": "✗ Kommando misslyckades",
+    "warning_title": "Långvariga tjänster blockerar",
+    "warning_body": "compose run startar en ny container för den valda tjänsten. Om tjänsten inte har något överskridande kommando (t.ex. en webbserver eller databas) startar containern tjänsten och fortsätter köra — den avslutar inte sig själv. Du kan behöva avbryta här och sedan tvångsstoppa stacken för att återhämta dig.",
+    "force_kill_button": "Tvinga bort container",
+    "force_kill_tooltip": "Tvångstbort den fastnade engångscontainern. Använd när tjänsten inte avslutar sig själv."
   },
   "exec_modal": {
     "aria_label": "Terminal — {{name}}",
@@ -403,7 +407,7 @@
     "title": "{{name}} — info",
     "section_compose_file": "Compose-fil",
     "section_services": "Tjänster",
-    "section_images": "Images",
+    "section_images": "Avbilder",
     "section_volumes": "Volymer",
     "no_containers": "Inga containers hittades.",
     "no_images": "Inga images hittades.",
@@ -440,9 +444,9 @@
     "not_running_preview_body": "Resurser som verkar oanvända kan fortfarande behövas för att starta om stacken. Borttagna volymer kan inte återställas.",
     "destructive_title": "Destruktiv åtgärd — kan inte ångras",
     "destructive_body": "Rensning raderar Docker-resurser permanent. Volymer kan särskilt innehålla beständig data som inte kan återställas. Granska noggrant innan du fortsätter.",
-    "images_label": "Images",
+    "images_label": "Avbilder",
     "images_description": "Äldre versioner av images från den här stackens förråd som inte längre används av någon container.",
-    "containers_label": "Containers",
+    "containers_label": "Behållare",
     "containers_description": "Stoppade containers tillhörande den här stacken.",
     "volumes_label": "Volymer",
     "volumes_warning": "⚠ kan innehålla beständig data",
@@ -520,7 +524,13 @@
     "success_title": "Stack återställd",
     "error_src_missing": "Extraherad katalog hittades inte på {{path}}",
     "error_dest_exists": "Målsökvägen {{path}} finns redan — avbryter för att undvika överskrivning",
-    "error_unknown": "Återställning misslyckades (kontrollera webbläsarkonsolen för detaljer)"
+    "error_unknown": "Återställning misslyckades (kontrollera webbläsarkonsolen för detaljer)",
+    "delete_backup_confirm1_title": "Ta bort den här säkerhetskopian?",
+    "delete_backup_confirm1_body": "Är du säker på att du vill ta bort \"{{filename}}\"? Det här tar bort den från disken.",
+    "delete_backup_confirm2_title": "Den här åtgärden kan inte ångras",
+    "delete_backup_confirm2_body": "Det här raderar säkerhetskopian permanent från disken. Det går inte att återställa den.",
+    "delete_backup_button": "Ta bort säkerhetskopia",
+    "delete_backup_error": "Det gick inte att ta bort säkerhetskopian"
   },
   "external_link_modal": {
     "aria_label": "Varning om extern länk",
@@ -531,7 +541,7 @@
     "replica_count": "×{{count}}",
     "col_status": "Status",
     "col_service": "Tjänst",
-    "col_image": "Image",
+    "col_image": "Avbild",
     "col_uptime": "Drifttid"
   },
   "scale_modal": {

@@ -64,7 +64,7 @@
     "logs": "Protokolle",
     "logs_title": "Protokolle anzeigen",
     "edit_title": "Compose-Datei bearbeiten",
-    "info": "Info",
+    "info": "Information",
     "info_title": "Stack-Info",
     "events": "Ereignisse",
     "top": "Prozesse",
@@ -91,7 +91,7 @@
     "version": "Version: {{version}}",
     "docker_version": "{{runtime}}: {{version}}",
     "compose_version": "{{runtime}} Compose: {{version}}",
-    "rootless": "Rootless",
+    "rootless": "Rootlos",
     "rootless_help_title": "Rootless-Modus",
     "rootless_help_body": "Docker oder Podman läuft im Rootless-Modus — Container laufen als Ihr Benutzer, nicht als root. Dies verbessert die Sicherheit, kann aber einige Funktionen einschränken, wie das Binden privilegierter Ports (<1024), den Zugriff auf Systempfade oder die Verwendung bestimmter Netzwerktreiber.",
     "help": "Hilfe",
@@ -129,16 +129,16 @@
     "confirm_button": "Alle Container beenden"
   },
   "stop_modal": {
-    "aria_label": "Confirm stop",
-    "title": "Stop \"{{name}}\"?",
-    "body": "This will stop all running containers in the stack. They will not be removed and can be started again.",
-    "confirm_button": "Stop"
+    "aria_label": "Stoppen bestätigen",
+    "title": "\"{{name}}\" stoppen?",
+    "body": "Alle laufenden Container im Stack werden gestoppt. Sie werden nicht entfernt und können erneut gestartet werden.",
+    "confirm_button": "Stoppen"
   },
   "restart_modal": {
-    "aria_label": "Confirm restart",
-    "title": "Restart \"{{name}}\"?",
-    "body": "This will restart all running services. Services will briefly be unavailable.",
-    "confirm_button": "Restart"
+    "aria_label": "Neustart bestätigen",
+    "title": "\"{{name}}\" neu starten?",
+    "body": "Alle laufenden Dienste werden neu gestartet. Die Dienste sind kurzzeitig nicht verfügbar.",
+    "confirm_button": "Neu starten"
   },
   "delete_modal": {
     "aria_label": "Compose-Stack löschen — {{name}}",
@@ -226,7 +226,7 @@
     "lock_button": "Sperren",
     "show_diff_button": "Änderungen anzeigen",
     "hide_diff_button": "Änderungen ausblenden",
-    "snapshots_title": "Snapshots",
+    "snapshots_title": "Momentaufnahmen",
     "snapshot_show_diff": "Änderungen",
     "snapshot_hide_diff": "Ausblenden",
     "snapshot_restore": "Wiederherstellen",
@@ -299,7 +299,7 @@
     "level_all": "Alle",
     "level_error": "Fehler",
     "level_warn": "Warnung",
-    "level_info": "Info",
+    "level_info": "Information",
     "download_tooltip": "Protokolle herunterladen",
     "timestamps_tooltip": "Zeitstempel umschalten",
     "scroll_top": "Zum Anfang springen",
@@ -407,7 +407,7 @@
     "title": "{{name}} — Info",
     "section_compose_file": "Compose-Datei",
     "section_services": "Dienste",
-    "section_images": "Images",
+    "section_images": "Abbilder",
     "section_volumes": "Volumes",
     "no_containers": "Keine Container gefunden.",
     "no_images": "Keine Images gefunden.",
@@ -444,7 +444,7 @@
     "not_running_preview_body": "Scheinbar ungenutzte Ressourcen können noch zum Starten des Stacks benötigt werden. Hier entfernte Volumes können nicht wiederhergestellt werden.",
     "destructive_title": "Destruktive Aktion — kann nicht rückgängig gemacht werden",
     "destructive_body": "Bereinigen löscht Docker-Ressourcen dauerhaft. Volumes können persistente Daten enthalten, die nicht wiederhergestellt werden können. Vor dem Fortfahren sorgfältig prüfen.",
-    "images_label": "Images",
+    "images_label": "Abbilder",
     "images_description": "Ältere Image-Versionen der Repos dieses Stacks, die von keinem Container mehr verwendet werden.",
     "containers_label": "Container",
     "containers_description": "Gestoppte Container, die zu diesem Stack gehören.",
@@ -527,7 +527,7 @@
     "error_unknown": "Wiederherstellung fehlgeschlagen (Browserkonzole für Details prüfen)",
     "delete_backup_confirm1_title": "Wollen Sie die Sicherung entfernen?",
     "delete_backup_confirm1_body": "Sind Sie sich sicher? \"{{filename}}\" wird von der Festplatte entfernt.",
-    "delete_backup_confirm2_title": "This action is irreversible",
+    "delete_backup_confirm2_title": "Diese Aktion ist unwiderruflich",
     "delete_backup_confirm2_body": "Diese Aktion löscht die Sicherung dauerhaft. Es gibt keine Möglichkeit dies rückgängig zu machen oder die Datei wiederherzustellen.",
     "delete_backup_button": "Sicherung entfernen",
     "delete_backup_error": "Fehler beim entfernen der Sicherung"
@@ -541,7 +541,7 @@
     "replica_count": "×{{count}}",
     "col_status": "Status",
     "col_service": "Dienst",
-    "col_image": "Image",
+    "col_image": "Abbild",
     "col_uptime": "Laufzeit"
   },
   "scale_modal": {

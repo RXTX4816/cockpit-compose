@@ -24,6 +24,16 @@ The page is split into two sections:
 - **Running stacks** — stacks Docker currently knows about (running, partial, paused, or unknown)
 - **Stopped / offline stacks** — stacks found on disk but not running (see [Importing Stacks](Importing-Stacks))
 
+## Toolbar
+
+The toolbar sits above the stack list and contains three controls:
+
+| Element | Description |
+|---|---|
+| **Status filter chips** | Colored chips for Running, Partial, Stopped, and Paused. Click a chip to show only stacks in that state; click again to deactivate. A chip only appears when at least one stack has that status. Multiple chips can be active at once. |
+| **Search** | Live text filter by stack name. Matching is case-insensitive. Click **✕** to clear. |
+| **Runtime toggle** | Switch between **Docker** and **Podman** modes. The choice is saved in the browser and persists across sessions. See [Podman Compatibility](Podman-Compatibility). |
+
 ## Stack rows
 
 Each stack appears as a collapsible row. The row shows a summary when collapsed and expands to show individual containers.
@@ -55,7 +65,7 @@ Stats (CPU and memory) only display for stacks with at least one running contain
 | **Logs** | Open the logs viewer — see [Viewing Logs](Viewing-Logs) |
 | **Edit** | Open the YAML editor — see [Editing Configuration](Editing-Configuration) |
 | **Info** | Open the stack info panel — see [Stack Info](Stack-Info) |
-| **⋮ (more)** | Restart, Pause/Unpause, Events, Top, Shell, Run, Prune, Kill |
+| **⋮ (more)** | Restart, Pause/Unpause, Events, Top, Shell, Run, Scale, Prune, Kill, Backup, Restore |
 
 The **Up** button is highlighted (primary) when the stack is stopped. **Stop** and **Start** are secondary. **Down**, **Pull**, **Logs**, **Edit**, **Info**, and the more menu are plain style.
 
@@ -73,6 +83,20 @@ Click the **▶** toggle to expand a stack row. This shows a table of containers
 | Uptime | How long the container has been running, or its current state |
 
 If no containers are found (e.g., the stack was just downed), a "No containers found" message is shown.
+
+## Keyboard shortcuts
+
+When focus is on a stack row (click any row to focus it), single-key shortcuts trigger the most common actions:
+
+| Key | Action |
+|---|---|
+| `U` | Up (open the Up confirmation modal) |
+| `D` | Down (open the Down confirmation dialog) |
+| `L` | Logs (open the log viewer) |
+| `E` | Edit (open the YAML editor) |
+| `I` | Info (open the Stack Info modal) |
+
+Shortcuts are disabled while a modal is open or while the search box / any input has focus.
 
 ## Auto-refresh
 
@@ -94,8 +118,8 @@ At the bottom of the page you will find version and connection information follo
 | Badge | Description |
 |---|---|
 | **Version: x.y.z** | The installed version of Cockpit Compose |
-| **Docker: x.y.z** | The Docker client version on your server |
-| **Docker Compose: x.y.z** | The Docker Compose version on your server |
+| **Docker: x.y.z** | The Docker client version on your server (shows **Podman: x.y.z** in Podman mode) |
+| **Docker Compose: x.y.z** | The Compose plugin version (shows **Podman Compose: x.y.z** in Podman mode) |
 | **unix:///…/docker.sock** | The socket the plugin is communicating with |
 | **Rootless Docker** | Shown in green when a rootless Docker daemon is detected (see below) |
 

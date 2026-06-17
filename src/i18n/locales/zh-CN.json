@@ -129,16 +129,16 @@
     "confirm_button": "终止所有容器"
   },
   "stop_modal": {
-    "aria_label": "Confirm stop",
-    "title": "Stop \"{{name}}\"?",
-    "body": "This will stop all running containers in the stack. They will not be removed and can be started again.",
-    "confirm_button": "Stop"
+    "aria_label": "确认停止",
+    "title": "停止「{{name}}」？",
+    "body": "这将停止堆栈中所有正在运行的容器。容器不会被移除，且可以再次启动。",
+    "confirm_button": "停止"
   },
   "restart_modal": {
-    "aria_label": "Confirm restart",
-    "title": "Restart \"{{name}}\"?",
-    "body": "This will restart all running services. Services will briefly be unavailable.",
-    "confirm_button": "Restart"
+    "aria_label": "确认重启",
+    "title": "重启「{{name}}」？",
+    "body": "这将重启所有正在运行的服务。服务将短暂不可用。",
+    "confirm_button": "重启"
   },
   "delete_modal": {
     "aria_label": "删除 compose 堆栈 — {{name}}",
@@ -319,7 +319,11 @@
     "running": "正在 {{name}} 中执行命令…",
     "initializing": "初始化中…",
     "complete": "✓ 命令已完成",
-    "failed": "✗ 命令失败"
+    "failed": "✗ 命令失败",
+    "warning_title": "长时间运行的服务将会阻塞",
+    "warning_body": "compose run 会为所选服务启动一个新容器。如果该服务没有覆盖命令（例如 Web 服务器或数据库），容器将启动服务并持续运行 — 它不会自行退出。您可能需要在此取消，然后强制停止堆栈以恢复。",
+    "force_kill_button": "强制移除容器",
+    "force_kill_tooltip": "强制移除卡住的一次性容器。在服务不会自行退出时使用。"
   },
   "exec_modal": {
     "aria_label": "终端 — {{name}}",
@@ -520,7 +524,13 @@
     "success_title": "堆栈已恢复",
     "error_src_missing": "在 {{path}} 未找到已提取的目录",
     "error_dest_exists": "目标路径 {{path}} 已存在 — 正在中止以防止覆盖",
-    "error_unknown": "恢复失败（详情请查看浏览器控制台）"
+    "error_unknown": "恢复失败（详情请查看浏览器控制台）",
+    "delete_backup_confirm1_title": "删除此备份？",
+    "delete_backup_confirm1_body": "确定要删除「{{filename}}」吗？这将从磁盘中移除该文件。",
+    "delete_backup_confirm2_title": "此操作不可撤销",
+    "delete_backup_confirm2_body": "这将从磁盘永久删除备份文件，且无法恢复。",
+    "delete_backup_button": "删除备份",
+    "delete_backup_error": "删除备份失败"
   },
   "external_link_modal": {
     "aria_label": "外部链接警告",

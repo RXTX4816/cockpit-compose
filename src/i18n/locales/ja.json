@@ -129,16 +129,16 @@
     "confirm_button": "すべてのコンテナを強制終了"
   },
   "stop_modal": {
-    "aria_label": "Confirm stop",
-    "title": "Stop \"{{name}}\"?",
-    "body": "This will stop all running containers in the stack. They will not be removed and can be started again.",
-    "confirm_button": "Stop"
+    "aria_label": "停止の確認",
+    "title": "\"{{name}}\" を停止しますか？",
+    "body": "スタック内のすべての実行中コンテナを停止します。コンテナは削除されず、再起動することができます。",
+    "confirm_button": "停止"
   },
   "restart_modal": {
-    "aria_label": "Confirm restart",
-    "title": "Restart \"{{name}}\"?",
-    "body": "This will restart all running services. Services will briefly be unavailable.",
-    "confirm_button": "Restart"
+    "aria_label": "再起動の確認",
+    "title": "\"{{name}}\" を再起動しますか？",
+    "body": "実行中のすべてのサービスを再起動します。サービスは一時的に利用できなくなります。",
+    "confirm_button": "再起動"
   },
   "delete_modal": {
     "aria_label": "compose スタックを削除 — {{name}}",
@@ -319,7 +319,11 @@
     "running": "{{name}} でコマンドを実行中…",
     "initializing": "起動中…",
     "complete": "✓ コマンド完了",
-    "failed": "✗ コマンド失敗"
+    "failed": "✗ コマンド失敗",
+    "warning_title": "長時間実行のサービスはブロックします",
+    "warning_body": "compose run は選択したサービス用に新しいコンテナを起動します。そのサービスにオーバーライドコマンドがない場合（例: ウェブサーバーやデータベース）、コンテナはサービスを起動したまま実行し続け、自動的に終了しません。ここでキャンセルし、スタックを強制停止して復旧する必要がある場合があります。",
+    "force_kill_button": "コンテナを強制削除",
+    "force_kill_tooltip": "スタックした one-off コンテナを強制削除します。サービスが自動的に終了しない場合に使用してください。"
   },
   "exec_modal": {
     "aria_label": "シェル — {{name}}",
@@ -520,7 +524,13 @@
     "success_title": "スタックが復元されました",
     "error_src_missing": "展開されたディレクトリが {{path}} に見つかりません",
     "error_dest_exists": "ターゲットパス {{path}} はすでに存在します — 上書きを防ぐために中止します",
-    "error_unknown": "復元に失敗しました（詳細はブラウザのコンソールを確認してください）"
+    "error_unknown": "復元に失敗しました（詳細はブラウザのコンソールを確認してください）",
+    "delete_backup_confirm1_title": "このバックアップを削除しますか？",
+    "delete_backup_confirm1_body": "\"{{filename}}\" を削除してもよろしいですか？ディスクから削除されます。",
+    "delete_backup_confirm2_title": "この操作は元に戻せません",
+    "delete_backup_confirm2_body": "バックアップファイルがディスクから完全に削除されます。復元する方法はありません。",
+    "delete_backup_button": "バックアップを削除",
+    "delete_backup_error": "バックアップの削除に失敗しました"
   },
   "external_link_modal": {
     "aria_label": "外部リンクの警告",

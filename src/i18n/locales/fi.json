@@ -129,16 +129,16 @@
     "confirm_button": "Pakota kaikki kontit lopettamaan"
   },
   "stop_modal": {
-    "aria_label": "Confirm stop",
-    "title": "Stop \"{{name}}\"?",
-    "body": "This will stop all running containers in the stack. They will not be removed and can be started again.",
-    "confirm_button": "Stop"
+    "aria_label": "Vahvista pysäytys",
+    "title": "Pysäytetäänkö \"{{name}}\"?",
+    "body": "Tämä pysäyttää kaikki käynnissä olevat kontit pinossa. Niitä ei poisteta ja ne voidaan käynnistää uudelleen.",
+    "confirm_button": "Pysäytä"
   },
   "restart_modal": {
-    "aria_label": "Confirm restart",
-    "title": "Restart \"{{name}}\"?",
-    "body": "This will restart all running services. Services will briefly be unavailable.",
-    "confirm_button": "Restart"
+    "aria_label": "Vahvista uudelleenkäynnistys",
+    "title": "Käynnistetäänkö \"{{name}}\" uudelleen?",
+    "body": "Tämä käynnistää kaikki käynnissä olevat palvelut uudelleen. Palvelut ovat hetkellisesti poissa käytöstä.",
+    "confirm_button": "Käynnistä uudelleen"
   },
   "delete_modal": {
     "aria_label": "Poista compose-pino — {{name}}",
@@ -319,7 +319,11 @@
     "running": "Suoritetaan komentoa kohteessa {{name}}…",
     "initializing": "Käynnistetään…",
     "complete": "✓ Komento valmis",
-    "failed": "✗ Komento epäonnistui"
+    "failed": "✗ Komento epäonnistui",
+    "warning_title": "Pitkäkestoiset palvelut estävät suorituksen",
+    "warning_body": "compose run käynnistää uuden kontin valitulle palvelulle. Jos palvelulla ei ole ohittavaa komentoa (esim. verkkopalvelin tai tietokanta), kontti käynnistää palvelun ja jää käyntiin — se ei sulkeudu itsestään. Saatat joutua peruuttamaan täällä ja pakottamaan pinon pysäytyksen.",
+    "force_kill_button": "Pakota kontin poisto",
+    "force_kill_tooltip": "Pakottaa jumissa olevan kertakäyttökontin poiston. Käytä, kun palvelu ei sulkeudu itsestään."
   },
   "exec_modal": {
     "aria_label": "Komentorivi — {{name}}",
@@ -520,7 +524,13 @@
     "success_title": "Pino palautettu",
     "error_src_missing": "Purettua hakemistoa ei löydy kohteesta {{path}}",
     "error_dest_exists": "Kohdepolku {{path}} on jo olemassa — keskeytetään ylikirjoituksen estämiseksi",
-    "error_unknown": "Palautus epäonnistui (tarkista lisätiedot selaimen konsolista)"
+    "error_unknown": "Palautus epäonnistui (tarkista lisätiedot selaimen konsolista)",
+    "delete_backup_confirm1_title": "Poistetaanko tämä varmuuskopio?",
+    "delete_backup_confirm1_body": "Haluatko varmasti poistaa \"{{filename}}\"? Tämä poistaa sen levyltä.",
+    "delete_backup_confirm2_title": "Tätä toimintoa ei voi peruuttaa",
+    "delete_backup_confirm2_body": "Tämä poistaa varmuuskopiotiedoston pysyvästi levyltä. Sitä ei voi palauttaa.",
+    "delete_backup_button": "Poista varmuuskopio",
+    "delete_backup_error": "Varmuuskopion poistaminen epäonnistui"
   },
   "external_link_modal": {
     "aria_label": "Ulkoisen linkin varoitus",

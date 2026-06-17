@@ -129,16 +129,16 @@
     "confirm_button": "Tuer tous les conteneurs"
   },
   "stop_modal": {
-    "aria_label": "Confirm stop",
-    "title": "Stop \"{{name}}\"?",
-    "body": "This will stop all running containers in the stack. They will not be removed and can be started again.",
-    "confirm_button": "Stop"
+    "aria_label": "Confirmer l'arrêt",
+    "title": "Arrêter \"{{name}}\" ?",
+    "body": "Cela arrêtera tous les conteneurs en cours d'exécution dans la pile. Ils ne seront pas supprimés et pourront être redémarrés.",
+    "confirm_button": "Arrêter"
   },
   "restart_modal": {
-    "aria_label": "Confirm restart",
-    "title": "Restart \"{{name}}\"?",
-    "body": "This will restart all running services. Services will briefly be unavailable.",
-    "confirm_button": "Restart"
+    "aria_label": "Confirmer le redémarrage",
+    "title": "Redémarrer \"{{name}}\" ?",
+    "body": "Cela redémarrera tous les services en cours d'exécution. Les services seront brièvement indisponibles.",
+    "confirm_button": "Redémarrer"
   },
   "delete_modal": {
     "aria_label": "Supprimer la pile compose — {{name}}",
@@ -299,7 +299,7 @@
     "level_all": "Tout",
     "level_error": "Erreur",
     "level_warn": "Avertissement",
-    "level_info": "Info",
+    "level_info": "Information",
     "download_tooltip": "Télécharger les journaux",
     "timestamps_tooltip": "Activer les horodatages",
     "scroll_top": "Aller en haut",
@@ -319,7 +319,11 @@
     "running": "Exécution de la commande dans {{name}}…",
     "initializing": "Démarrage…",
     "complete": "✓ Commande terminée",
-    "failed": "✗ Commande échouée"
+    "failed": "✗ Commande échouée",
+    "warning_title": "Les services de longue durée bloqueront",
+    "warning_body": "compose run démarre un nouveau conteneur pour le service sélectionné. Si ce service n'a pas de commande de remplacement (par ex. un serveur web ou une base de données), le conteneur démarrera le service et restera actif — il ne se terminera pas de lui-même. Vous devrez peut-être annuler ici puis forcer l'arrêt de la pile pour récupérer.",
+    "force_kill_button": "Forcer la suppression du conteneur",
+    "force_kill_tooltip": "Force la suppression du conteneur ponctuel bloqué. À utiliser quand le service ne se termine pas de lui-même."
   },
   "exec_modal": {
     "aria_label": "Terminal — {{name}}",
@@ -520,7 +524,13 @@
     "success_title": "Pile restaurée",
     "error_src_missing": "Répertoire extrait introuvable dans {{path}}",
     "error_dest_exists": "Le chemin cible {{path}} existe déjà — abandon pour éviter l'écrasement",
-    "error_unknown": "La restauration a échoué (vérifiez la console du navigateur pour les détails)"
+    "error_unknown": "La restauration a échoué (vérifiez la console du navigateur pour les détails)",
+    "delete_backup_confirm1_title": "Supprimer cette sauvegarde ?",
+    "delete_backup_confirm1_body": "Êtes-vous sûr de vouloir supprimer \"{{filename}}\" ? Cela le supprimera du disque.",
+    "delete_backup_confirm2_title": "Cette action est irréversible",
+    "delete_backup_confirm2_body": "Cela supprimera définitivement le fichier de sauvegarde du disque. Il n'y a aucun moyen de le récupérer.",
+    "delete_backup_button": "Supprimer la sauvegarde",
+    "delete_backup_error": "Échec de la suppression de la sauvegarde"
   },
   "external_link_modal": {
     "aria_label": "Avertissement de lien externe",

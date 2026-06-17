@@ -6,7 +6,7 @@ Thanks for your interest in contributing! This guide will help you get started.
 
 ### Requirements
 
-- Node.js 20+
+- Node.js 22+
 - npm
 - Docker with Compose plugin (for manual testing)
 - Cockpit 300+ (for testing in the UI)

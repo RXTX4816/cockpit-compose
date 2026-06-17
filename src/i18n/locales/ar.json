@@ -129,16 +129,16 @@
     "confirm_button": "إنهاء قسري لجميع الحاويات"
   },
   "stop_modal": {
-    "aria_label": "Confirm stop",
-    "title": "Stop \"{{name}}\"?",
-    "body": "This will stop all running containers in the stack. They will not be removed and can be started again.",
-    "confirm_button": "Stop"
+    "aria_label": "تأكيد الإيقاف",
+    "title": "إيقاف \"{{name}}\"؟",
+    "body": "سيؤدي هذا إلى إيقاف جميع الحاويات الجارية في الحزمة. لن تُحذف ويمكن تشغيلها مجدداً.",
+    "confirm_button": "إيقاف"
   },
   "restart_modal": {
-    "aria_label": "Confirm restart",
-    "title": "Restart \"{{name}}\"?",
-    "body": "This will restart all running services. Services will briefly be unavailable.",
-    "confirm_button": "Restart"
+    "aria_label": "تأكيد إعادة التشغيل",
+    "title": "إعادة تشغيل \"{{name}}\"؟",
+    "body": "سيؤدي هذا إلى إعادة تشغيل جميع الخدمات الجارية. ستكون الخدمات غير متاحة لفترة وجيزة.",
+    "confirm_button": "إعادة التشغيل"
   },
   "delete_modal": {
     "aria_label": "حذف حزمة compose — {{name}}",
@@ -319,7 +319,11 @@
     "running": "جارٍ تنفيذ الأمر في {{name}}…",
     "initializing": "جارٍ البدء…",
     "complete": "✓ اكتمل الأمر",
-    "failed": "✗ فشل الأمر"
+    "failed": "✗ فشل الأمر",
+    "warning_title": "تحذير: الحاوية قد تظل عالقة",
+    "warning_body": "إذا لم تنتهي الخدمة تلقائياً بعد تنفيذ الأمر، فقد تظل الحاوية قيد التشغيل في الخلفية. في هذه الحالة، ستحتاج إلى إزالتها يدوياً من خلال معلومات الحزمة أو باستخدام زر \"إزالة قسري\" أدناه.",
+    "force_kill_button": "إزالة قسري للحاوية",
+    "force_kill_tooltip": "يزيل قسرياً الحاوية العالقة. استخدم هذا عندما لا تنهي الخدمة نفسها تلقائياً."
   },
   "exec_modal": {
     "aria_label": "الطرفية — {{name}}",
@@ -520,7 +524,13 @@
     "success_title": "تمت استعادة الحزمة",
     "error_src_missing": "المجلد المستخرج غير موجود في {{path}}",
     "error_dest_exists": "المسار الهدف {{path}} موجود بالفعل — إلغاء العملية لمنع الكتابة فوقه",
-    "error_unknown": "فشلت الاستعادة (تحقق من وحدة تحكم المتصفح للتفاصيل)"
+    "error_unknown": "فشلت الاستعادة (تحقق من وحدة تحكم المتصفح للتفاصيل)",
+    "delete_backup_confirm1_title": "تأكيد حذف النسخة الاحتياطية",
+    "delete_backup_confirm1_body": "هل أنت متأكد أنك تريد حذف النسخة الاحتياطية {{file}}؟",
+    "delete_backup_confirm2_title": "تأكيد الحذف النهائي",
+    "delete_backup_confirm2_body": "سيؤدي هذا إلى حذف {{file}} بشكل دائم من القرص. لا يمكن التراجع عن هذا الإجراء.",
+    "delete_backup_button": "حذف النسخة الاحتياطية",
+    "delete_backup_error": "فشل حذف النسخة الاحتياطية {{file}}"
   },
   "external_link_modal": {
     "aria_label": "تحذير رابط خارجي",

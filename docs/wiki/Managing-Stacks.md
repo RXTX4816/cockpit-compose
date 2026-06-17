@@ -109,6 +109,16 @@ Click **Kill all containers** (danger button) or **Cancel**.
 
 ---
 
+## Scale
+
+**What it does:** Adjusts the number of running replicas for one or more services (`docker compose up --scale`).
+
+**When to use it:** When you need multiple instances of a stateless service for load distribution or testing.
+
+Found in the **⋮ more** menu. Only available for running stacks. See [Scaling Services](Scaling-Services) for the full walkthrough.
+
+---
+
 ## Action errors
 
 If any action fails, a red error alert appears directly below the stack row with the error message from Docker. The alert disappears when you close it or trigger another action.

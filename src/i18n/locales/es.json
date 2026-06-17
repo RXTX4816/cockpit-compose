@@ -129,16 +129,16 @@
     "confirm_button": "Matar todos los contenedores"
   },
   "stop_modal": {
-    "aria_label": "Confirm stop",
-    "title": "Stop \"{{name}}\"?",
-    "body": "This will stop all running containers in the stack. They will not be removed and can be started again.",
-    "confirm_button": "Stop"
+    "aria_label": "Confirmar detención",
+    "title": "¿Detener \"{{name}}\"?",
+    "body": "Esto detendrá todos los contenedores en ejecución de la pila. No se eliminarán y podrán iniciarse de nuevo.",
+    "confirm_button": "Detener"
   },
   "restart_modal": {
-    "aria_label": "Confirm restart",
-    "title": "Restart \"{{name}}\"?",
-    "body": "This will restart all running services. Services will briefly be unavailable.",
-    "confirm_button": "Restart"
+    "aria_label": "Confirmar reinicio",
+    "title": "¿Reiniciar \"{{name}}\"?",
+    "body": "Esto reiniciará todos los servicios en ejecución. Los servicios no estarán disponibles brevemente.",
+    "confirm_button": "Reiniciar"
   },
   "delete_modal": {
     "aria_label": "Eliminar pila compose — {{name}}",
@@ -299,7 +299,7 @@
     "level_all": "Todo",
     "level_error": "Error",
     "level_warn": "Advertencia",
-    "level_info": "Info",
+    "level_info": "Información",
     "download_tooltip": "Descargar registros",
     "timestamps_tooltip": "Activar marcas de tiempo",
     "scroll_top": "Ir al principio",
@@ -319,7 +319,11 @@
     "running": "Ejecutando comando en {{name}}…",
     "initializing": "Iniciando…",
     "complete": "✓ Comando completado",
-    "failed": "✗ Comando fallido"
+    "failed": "✗ Comando fallido",
+    "warning_title": "Los servicios de larga duración bloquearán",
+    "warning_body": "compose run inicia un contenedor nuevo para el servicio seleccionado. Si ese servicio no tiene un comando de reemplazo (p. ej., un servidor web o una base de datos), el contenedor iniciará el servicio y permanecerá en ejecución — no terminará por sí solo. Es posible que necesites cancelar aquí y luego forzar la detención de la pila para recuperarla.",
+    "force_kill_button": "Forzar eliminación del contenedor",
+    "force_kill_tooltip": "Fuerza la eliminación del contenedor puntual bloqueado. Úsalo cuando el servicio no termina por sí solo."
   },
   "exec_modal": {
     "aria_label": "Terminal — {{name}}",
@@ -487,7 +491,7 @@
   },
   "stats": {
     "cpu": "CPU",
-    "mem": "Mem"
+    "mem": "Memoria"
   },
   "backup_modal": {
     "title": "Copia de seguridad de {{name}}",
@@ -520,7 +524,13 @@
     "success_title": "Pila restaurada",
     "error_src_missing": "Directorio extraído no encontrado en {{path}}",
     "error_dest_exists": "La ruta de destino {{path}} ya existe — abortando para evitar sobreescritura",
-    "error_unknown": "La restauración falló (revisa la consola del navegador para más detalles)"
+    "error_unknown": "La restauración falló (revisa la consola del navegador para más detalles)",
+    "delete_backup_confirm1_title": "¿Eliminar esta copia de seguridad?",
+    "delete_backup_confirm1_body": "¿Estás seguro de que deseas eliminar \"{{filename}}\"? Esto la eliminará del disco.",
+    "delete_backup_confirm2_title": "Esta acción es irreversible",
+    "delete_backup_confirm2_body": "Esto eliminará permanentemente el archivo de copia de seguridad del disco. No hay forma de recuperarlo.",
+    "delete_backup_button": "Eliminar copia de seguridad",
+    "delete_backup_error": "Error al eliminar la copia de seguridad"
   },
   "external_link_modal": {
     "aria_label": "Advertencia de enlace externo",

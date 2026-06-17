@@ -129,16 +129,16 @@
     "confirm_button": "모든 컨테이너 강제 종료"
   },
   "stop_modal": {
-    "aria_label": "Confirm stop",
-    "title": "Stop \"{{name}}\"?",
-    "body": "This will stop all running containers in the stack. They will not be removed and can be started again.",
-    "confirm_button": "Stop"
+    "aria_label": "정지 확인",
+    "title": "\"{{name}}\"을(를) 정지하시겠습니까?",
+    "body": "스택의 실행 중인 모든 컨테이너가 정지됩니다. 컨테이너는 제거되지 않으며 다시 시작할 수 있습니다.",
+    "confirm_button": "정지"
   },
   "restart_modal": {
-    "aria_label": "Confirm restart",
-    "title": "Restart \"{{name}}\"?",
-    "body": "This will restart all running services. Services will briefly be unavailable.",
-    "confirm_button": "Restart"
+    "aria_label": "재시작 확인",
+    "title": "\"{{name}}\"을(를) 재시작하시겠습니까?",
+    "body": "실행 중인 모든 서비스가 재시작됩니다. 서비스는 잠시 동안 사용할 수 없습니다.",
+    "confirm_button": "재시작"
   },
   "delete_modal": {
     "aria_label": "compose 스택 삭제 — {{name}}",
@@ -319,7 +319,11 @@
     "running": "{{name}}에서 명령 실행 중…",
     "initializing": "시작 중…",
     "complete": "✓ 명령 완료",
-    "failed": "✗ 명령 실패"
+    "failed": "✗ 명령 실패",
+    "warning_title": "장시간 실행되는 서비스는 차단됩니다",
+    "warning_body": "compose run은 선택한 서비스를 위해 새 컨테이너를 시작합니다. 해당 서비스에 재정의 명령이 없는 경우(예: 웹 서버 또는 데이터베이스), 컨테이너는 서비스를 시작하고 계속 실행됩니다 — 자체적으로 종료되지 않습니다. 복구하려면 여기서 취소한 다음 스택을 강제 정지해야 할 수 있습니다.",
+    "force_kill_button": "컨테이너 강제 제거",
+    "force_kill_tooltip": "멈춘 일회성 컨테이너를 강제로 제거합니다. 서비스가 자체적으로 종료되지 않을 때 사용하세요."
   },
   "exec_modal": {
     "aria_label": "셸 — {{name}}",
@@ -520,7 +524,13 @@
     "success_title": "스택이 복원되었습니다",
     "error_src_missing": "{{path}}에서 추출된 디렉터리를 찾을 수 없습니다",
     "error_dest_exists": "대상 경로 {{path}}이(가) 이미 존재합니다 — 덮어쓰기를 방지하기 위해 중단합니다",
-    "error_unknown": "복원에 실패했습니다 (자세한 내용은 브라우저 콘솔을 확인하세요)"
+    "error_unknown": "복원에 실패했습니다 (자세한 내용은 브라우저 콘솔을 확인하세요)",
+    "delete_backup_confirm1_title": "이 백업을 삭제하시겠습니까?",
+    "delete_backup_confirm1_body": "\"{{filename}}\"을(를) 삭제하시겠습니까? 이 파일이 디스크에서 제거됩니다.",
+    "delete_backup_confirm2_title": "이 작업은 되돌릴 수 없습니다",
+    "delete_backup_confirm2_body": "백업 파일이 디스크에서 영구적으로 삭제됩니다. 복구할 방법이 없습니다.",
+    "delete_backup_button": "백업 삭제",
+    "delete_backup_error": "백업 삭제에 실패했습니다"
   },
   "external_link_modal": {
     "aria_label": "외부 링크 경고",

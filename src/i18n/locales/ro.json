@@ -129,16 +129,16 @@
     "confirm_button": "Terminare toate containerele"
   },
   "stop_modal": {
-    "aria_label": "Confirm stop",
-    "title": "Stop \"{{name}}\"?",
-    "body": "This will stop all running containers in the stack. They will not be removed and can be started again.",
-    "confirm_button": "Stop"
+    "aria_label": "Confirmare oprire",
+    "title": "Oprire \"{{name}}\"?",
+    "body": "Aceasta va opri toate containerele în execuție din stivă. Nu vor fi eliminate și pot fi repornite.",
+    "confirm_button": "Oprire"
   },
   "restart_modal": {
-    "aria_label": "Confirm restart",
-    "title": "Restart \"{{name}}\"?",
-    "body": "This will restart all running services. Services will briefly be unavailable.",
-    "confirm_button": "Restart"
+    "aria_label": "Confirmare repornire",
+    "title": "Repornire \"{{name}}\"?",
+    "body": "Aceasta va reporni toate serviciile în execuție. Serviciile vor fi indisponibile pentru scurt timp.",
+    "confirm_button": "Repornire"
   },
   "delete_modal": {
     "aria_label": "Ștergere stivă compose — {{name}}",
@@ -299,7 +299,7 @@
     "level_all": "Toate",
     "level_error": "Eroare",
     "level_warn": "Avertisment",
-    "level_info": "Info",
+    "level_info": "Informație",
     "download_tooltip": "Descărcare jurnale",
     "timestamps_tooltip": "Comutare marcaje de timp",
     "scroll_top": "Salt la început",
@@ -319,7 +319,11 @@
     "running": "Se execută comanda în {{name}}…",
     "initializing": "Se inițializează…",
     "complete": "✓ Comandă finalizată",
-    "failed": "✗ Comandă eșuată"
+    "failed": "✗ Comandă eșuată",
+    "warning_title": "Serviciile de lungă durată vor bloca",
+    "warning_body": "compose run pornește un container nou pentru serviciul selectat. Dacă acel serviciu nu are o comandă de suprascris (de ex. un server web sau o bază de date), containerul va porni serviciul și va rămâne în execuție — nu se va opri singur. Poate fi necesar să anulați aici și apoi să forțați oprirea stivei pentru a recupera.",
+    "force_kill_button": "Forțare eliminare container",
+    "force_kill_tooltip": "Elimină forțat containerul blocat. Folosiți când serviciul nu se oprește singur."
   },
   "exec_modal": {
     "aria_label": "Terminal — {{name}}",
@@ -487,7 +491,7 @@
   },
   "stats": {
     "cpu": "CPU",
-    "mem": "Mem"
+    "mem": "Mem."
   },
   "backup_modal": {
     "title": "Copie de rezervă {{name}}",
@@ -520,7 +524,13 @@
     "success_title": "Stivă restaurată",
     "error_src_missing": "Director extras negăsit la {{path}}",
     "error_dest_exists": "Calea de destinație {{path}} există deja — se anulează pentru a evita suprascrierea",
-    "error_unknown": "Restaurarea a eșuat (verificați consola browserului pentru detalii)"
+    "error_unknown": "Restaurarea a eșuat (verificați consola browserului pentru detalii)",
+    "delete_backup_confirm1_title": "Ștergere această copie de rezervă?",
+    "delete_backup_confirm1_body": "Sigur doriți să ștergeți „{{filename}}\"? Aceasta o va elimina de pe disc.",
+    "delete_backup_confirm2_title": "Această acțiune este ireversibilă",
+    "delete_backup_confirm2_body": "Fișierul copiei de rezervă va fi șters permanent de pe disc. Nu există nicio modalitate de a-l recupera.",
+    "delete_backup_button": "Ștergere copie de rezervă",
+    "delete_backup_error": "Ștergere copie de rezervă eșuată"
   },
   "external_link_modal": {
     "aria_label": "Avertisment link extern",

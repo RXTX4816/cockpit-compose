@@ -8,7 +8,7 @@
         "compose": {
             "label": "Docker Compose",
             "path": "index.html",
-            "order": 77
+            "order": 121
         }
     },
     "content-security-policy": "script-src 'self' 'unsafe-inline' 'unsafe-eval'; script-src-elem 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' 'unsafe-hashes'; style-src-elem 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'"

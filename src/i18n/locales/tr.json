@@ -129,16 +129,16 @@
     "confirm_button": "Tüm konteynerleri sonlandır"
   },
   "stop_modal": {
-    "aria_label": "Confirm stop",
-    "title": "Stop \"{{name}}\"?",
-    "body": "This will stop all running containers in the stack. They will not be removed and can be started again.",
-    "confirm_button": "Stop"
+    "aria_label": "Durdurmayı onayla",
+    "title": "\"{{name}}\" durdurulsun mu?",
+    "body": "Bu işlem yığındaki tüm çalışan konteynerleri durduracak. Konteynerler kaldırılmaz ve tekrar başlatılabilir.",
+    "confirm_button": "Durdur"
   },
   "restart_modal": {
-    "aria_label": "Confirm restart",
-    "title": "Restart \"{{name}}\"?",
-    "body": "This will restart all running services. Services will briefly be unavailable.",
-    "confirm_button": "Restart"
+    "aria_label": "Yeniden başlatmayı onayla",
+    "title": "\"{{name}}\" yeniden başlatılsın mı?",
+    "body": "Bu işlem tüm çalışan hizmetleri yeniden başlatacak. Hizmetler kısa süreliğine kullanılamaz hale gelecek.",
+    "confirm_button": "Yeniden Başlat"
   },
   "delete_modal": {
     "aria_label": "Compose yığınını sil — {{name}}",
@@ -319,7 +319,11 @@
     "running": "{{name}} içinde komut çalıştırılıyor…",
     "initializing": "Başlatılıyor…",
     "complete": "✓ Komut tamamlandı",
-    "failed": "✗ Komut başarısız"
+    "failed": "✗ Komut başarısız",
+    "warning_title": "Uzun süre çalışan hizmetler bloke olacak",
+    "warning_body": "compose run, seçili hizmet için yeni bir konteyner başlatır. Bu hizmetin geçersiz kılma komutu yoksa (örn. bir web sunucusu veya veritabanı), konteyner hizmeti başlatıp çalışmaya devam edecek — kendiliğinden çıkmayacak. Kurtarmak için burada iptal edip ardından yığını zorla durdurmanız gerekebilir.",
+    "force_kill_button": "Konteyneri zorla kaldır",
+    "force_kill_tooltip": "Takılı kalmış tek seferlik konteyneri zorla kaldırır. Hizmet kendiliğinden çıkmadığında kullanın."
   },
   "exec_modal": {
     "aria_label": "Terminal — {{name}}",
@@ -520,7 +524,13 @@
     "success_title": "Yığın geri yüklendi",
     "error_src_missing": "Çıkarılan dizin {{path}} konumunda bulunamadı",
     "error_dest_exists": "Hedef yol {{path}} zaten var — üzerine yazmayı önlemek için iptal ediliyor",
-    "error_unknown": "Geri yükleme başarısız oldu (ayrıntılar için tarayıcı konsolunu kontrol edin)"
+    "error_unknown": "Geri yükleme başarısız oldu (ayrıntılar için tarayıcı konsolunu kontrol edin)",
+    "delete_backup_confirm1_title": "Bu yedek silinsin mi?",
+    "delete_backup_confirm1_body": "\"{{filename}}\" dosyasını silmek istediğinizden emin misiniz? Bu dosyayı diskten kaldıracak.",
+    "delete_backup_confirm2_title": "Bu işlem geri alınamaz",
+    "delete_backup_confirm2_body": "Bu işlem yedek dosyasını diskten kalıcı olarak silecek. Geri almanın yolu yoktur.",
+    "delete_backup_button": "Yedeği sil",
+    "delete_backup_error": "Yedek silinemedi"
   },
   "external_link_modal": {
     "aria_label": "Dış bağlantı uyarısı",

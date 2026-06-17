@@ -10,38 +10,35 @@ Docker Compose management for [Cockpit](https://cockpit-project.org) — start, 
 ## Features
 
 - Dashboard listing all stacks with live status and container stats (auto-refreshing)
-- Create new Compose Stacks or import existing ones - directly from the WebUI
-- Start, stop, restart, pause/unpause, pull, prune and kill stacks with one click
-- Live log viewer per stack
+- Search and filter stacks by name and status
+- Create new Compose Stacks or import existing ones directly from the WebUI
+- Start, stop, restart, pause/unpause, pull, prune, scale, and kill stacks with one click
+- Live log viewer per stack with per-service filtering and text search
 - Interactive shell into any running service
-- YAML editor with syntax validation and auto-snapshot before saving + .ENV editor
-- Podman compatibility mode (Experimental)
+- YAML editor with syntax validation, diff view, auto-snapshot + .ENV editor
+- Backup and restore stacks as `.bak.tar.gz` archives
+- Docker and Podman support
 
 ## Requirements
 
 - Cockpit 300+
-- Docker with the Compose plugin (`docker compose` v2+)
+- Docker with the Compose plugin (`docker compose` v2+), **or** Podman with `podman compose` (Can run both at once, also supports rootless)
 
 ## Prerequisites
 
-You can use either Docker Compose, Podman Compose(Docker redirect) or pure podman-compose mode as your container engine. Be mindful that this plugin is primarly for Docker Compose. The pure podman-compose case (No docker installed) might lead to a degraded UIUX experience.
-
-Docker is not installed by default on most distros. Install it and make sure it is running and add your user to the docker group. Works with rootless docker by setting DOCKER_HOST env in OS.
-
-```bash
-sudo usermod -aG docker $USER
-```
-```bash
-# Add this to your startup scripts (e.g. .zshrc) on your OS running cockpit and docker for rootless
-export DOCKER_HOST=unix:///run/user/$(id -u)/docker.sock
-```
-
-
-Cockpit comes pre-installed on Fedora and most RHEL-based systems. On other distros it might need to be installed and started:
+Cockpit comes pre-installed on Fedora and most RHEL-based systems. On other distros:
 
 ```bash
 sudo systemctl enable --now cockpit.socket
 ```
+
+Docker is not installed by default on most distros. Install it and add your user to the docker group:
+
+```bash
+sudo usermod -aG docker $USER
+```
+
+For rootless Docker or Podman, see [Podman Compatibility](docs/wiki/Podman-Compatibility.md) in the wiki.
 
 ## Installation
 
@@ -81,7 +78,7 @@ Then open Cockpit in your browser or hard-refresh the page — **Docker Compose*
 
 ## Development
 
-**Requirements:** Node.js 20+, npm
+**Requirements:** Node.js 22+, npm
 
 ```bash
 git clone https://github.com/RXTX4816/cockpit-compose.git
@@ -109,124 +106,27 @@ Open `http://localhost:9090` — **Docker Compose** appears in the sidebar autom
 | `npm run test` | Run tests |
 | `npm run test:coverage` | Coverage report |
 
-### Testing on Arch / Debian / Fedora
+### VM Testing
 
-`scripts/test-vm.sh` spins up QEMU cloud VMs across three distros × three runtime scenarios
-(`podman`, `docker`, `both`). Your `src/` folder is mounted live so `npm run watch` changes
-appear in the browser without restarting anything.
-
-This can be particularly useful when testing the new experimental podman feature, since that ensures a reproducible system.
+`scripts/test-vm.sh` spins up QEMU VMs across Arch, Debian, and Fedora with Docker, Podman, and both-runtime scenarios. Your `src/` folder is mounted live, so `npm run watch` changes appear in the browser immediately.
 
 ```bash
 sudo pacman -S qemu-full cloud-image-utils wget   # one-time
 npm run build
-npm run vm:init
-npm run vm:startall # Wait until cockpit is up (~2 min)
+npm run vm:init   # downloads base images and starts all 9 VMs (~2 min)
 # Open https://localhost:9093 — login: test / test
-# To rebuild (Clean the data and images of qemu, after change to test-vm.sh):
-npm run vm:rebuild
 ```
 
-> `wait` runs `cloud-init status --wait` inside the VM and only exits once all packages
-> are installed and cockpit.socket is active. Don't open the browser until it says ready.
-
-```bash
-./scripts/test-vm.sh status          # see all 9 VMs with ports and state
-./scripts/test-vm.sh start podman    # start podman scenario on all three distros
-./scripts/test-vm.sh clean debian    # wipe all three debian VMs (re-provisions on next start)
-```
-
-| VM | Cockpit | SSH |
-|---|---|---|
-| arch-podman | https://localhost:9090 | `ssh -p 2220 test@localhost` |
-| arch-docker | https://localhost:9091 | `ssh -p 2221 test@localhost` |
-| arch-both | https://localhost:9092 | `ssh -p 2222 test@localhost` |
-| debian-podman | https://localhost:9093 | `ssh -p 2223 test@localhost` |
-| debian-docker | https://localhost:9094 | `ssh -p 2224 test@localhost` |
-| debian-both | https://localhost:9095 | `ssh -p 2225 test@localhost` |
-| fedora-podman | https://localhost:9096 | `ssh -p 2226 test@localhost` |
-| fedora-docker | https://localhost:9097 | `ssh -p 2227 test@localhost` |
-| fedora-both | https://localhost:9098 | `ssh -p 2228 test@localhost` |
-
-**VMs are persistent** — the disk is an overlay on the base image and survives stop/start cycles.
-Only `clean` (wipes disk, re-provisions on next start) or `reset` (removes everything) destroy state.
-
-**Script commands:**
-
-| Command | What it does |
-|---|---|
-| `./scripts/test-vm.sh status` | Show which VMs are running and their ports |
-| `./scripts/test-vm.sh start [arch\|debian\|fedora\|all]` | Start VM(s) in background |
-| `./scripts/test-vm.sh wait [arch\|debian\|fedora]` | Block until cloud-init fully finishes |
-| `./scripts/test-vm.sh stop [arch\|debian\|fedora\|all]` | Stop VM(s) |
-| `./scripts/test-vm.sh ssh [arch\|debian\|fedora]` | Open SSH session |
-| `./scripts/test-vm.sh logs [arch\|debian\|fedora]` | Tail serial console |
-| `./scripts/test-vm.sh clean [arch\|debian\|fedora]` | Wipe disk and re-provision on next start |
-
-**Useful commands inside the VM** (after `./scripts/test-vm.sh ssh debian`):
-
-```bash
-# Check podman and socket
-sudo systemctl status podman.socket
-sudo podman ps -a
-
-# Check cockpit
-sudo systemctl status cockpit.socket
-
-# Check what compose binary was picked up
-podman compose version        # if docker-compose is installed (external provider)
-podman-compose version        # standalone Python implementation
-
-# Verify the plugin is mounted from your host
-ls /usr/share/cockpit/cockpit-compose/
-
-# Start a test stack (podman-compose)
-mkdir -p ~/test && cat > ~/test/docker-compose.yml << 'EOF'
-services:
-  app:
-    image: busybox
-    command: sh -c "while true; do echo hello; sleep 2; done"
-EOF
-cd ~/test && podman-compose up -d
-
-# Check cloud-init logs if something went wrong
-sudo cloud-init status --long
-sudo journalctl -u cloud-init --no-pager -n 50
-```
-
-See [docs/wiki/VM-Testing.md](docs/wiki/VM-Testing.md) for all commands and troubleshooting.
+See [docs/wiki/VM-Testing.md](docs/wiki/VM-Testing.md) for all VM ports, commands, and troubleshooting.
 
 ## Translations
 
 The UI language follows Cockpit's language setting.
 
 <!-- i18n-coverage-start -->
-| Language | Code | Coverage |
-|---|---|---|
-| English | `en` | 100% (source) |
-| ar | `ar` | 98% |
-| cs | `cs` | 98% |
-| German | `de` | 100% |
-| Spanish | `es` | 98% |
-| fi | `fi` | 98% |
-| French | `fr` | 98% |
-| he | `he` | 98% |
-| id | `id` | 98% |
-| Italian | `it` | 98% |
-| Japanese | `ja` | 98% |
-| ka | `ka` | 98% |
-| Korean | `ko` | 98% |
-| Dutch | `nl` | 98% |
-| Polish | `pl` | 99% |
-| pt-BR | `pt-BR` | 98% |
-| ro | `ro` | 98% |
-| Russian | `ru` | 98% |
-| sk | `sk` | 98% |
-| sv | `sv` | 98% |
-| tr | `tr` | 98% |
-| uk | `uk` | 98% |
-| zh-CN | `zh-CN` | 98% |
-| zh-TW | `zh-TW` | 98% |
+| Coverage | Languages |
+|---|---|
+| 100% | English (`en`) — source, `ar`, `cs`, `de`, `es`, `fi`, `fr`, `he`, `id`, `it`, `ja`, `ka`, `ko`, `nl`, `pl`, `pt-BR`, `ro`, `ru`, `sk`, `sv`, `tr`, `uk`, `zh-CN`, `zh-TW` |
 <!-- i18n-coverage-end -->
 
 To add a new language, copy `src/i18n/locales/en.json`, translate the values, and register the file in `src/i18n/index.ts`.
