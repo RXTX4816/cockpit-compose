@@ -105,6 +105,7 @@ describe("RunModal", () => {
     async function clickRun(onClose = vi.fn(), runOutput = "", runError?: string) {
       mockSpawn
         .mockReturnValueOnce(mockProcess(composeYaml))
+        .mockReturnValueOnce(mockProcess("")) // snapshotProjectContainerIds
         .mockImplementationOnce(() => mockProcess(runOutput, runError));
       render(<RunModal stack={stack} onClose={onClose} />);
       await waitFor(() => screen.getByRole("option", { name: "web" }));
@@ -159,6 +160,7 @@ describe("RunModal", () => {
     async function triggerRun(rm: boolean) {
       mockSpawn
         .mockReturnValueOnce(mockProcess(composeYaml))
+        .mockReturnValueOnce(mockProcess("")) // snapshotProjectContainerIds
         .mockReturnValueOnce(mockProcess(""));
       render(<RunModal stack={stack} onClose={vi.fn()} />);
       await waitFor(() => screen.getByRole("option", { name: "web" }));
@@ -175,7 +177,7 @@ describe("RunModal", () => {
 
     it("spawns docker compose run with --rm when checkbox is checked", async () => {
       await triggerRun(true);
-      const args = mockSpawn.mock.calls[1][0] as string[];
+      const args = mockSpawn.mock.calls[2][0] as string[];
       expect(args).toContain("run");
       expect(args).toContain("--rm");
       expect(args).toContain("web");
@@ -185,14 +187,14 @@ describe("RunModal", () => {
 
     it("omits --rm when checkbox is unchecked", async () => {
       await triggerRun(false);
-      const args = mockSpawn.mock.calls[1][0] as string[];
+      const args = mockSpawn.mock.calls[2][0] as string[];
       expect(args).toContain("run");
       expect(args).not.toContain("--rm");
     });
 
     it("passes project, config file, and merges stderr into stdout", async () => {
       await triggerRun(true);
-      const [args, opts] = mockSpawn.mock.calls[1] as [string[], Record<string, unknown>];
+      const [args, opts] = mockSpawn.mock.calls[2] as [string[], Record<string, unknown>];
       expect(args).toContain("-p");
       expect(args).toContain("myapp");
       expect(args).toContain("-f");

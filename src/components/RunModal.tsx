@@ -19,6 +19,7 @@ import {
   getServicesFromCompose,
   composeRunStream,
   composeFileSuperuser,
+  snapshotProjectContainerIds,
   forceRemoveOneoffContainers,
 } from "../api";
 import { stripAnsi, classifyLine, kindColor, type LineEntry } from "../lib/pullParser";
@@ -48,6 +49,8 @@ export function RunModal({ stack, onClose }: Props) {
   const [killError, setKillError] = useState<string | null>(null);
 
   const procRef = useRef<CockpitProcess | null>(null);
+  const preRunIdsRef = useRef<Set<string>>(new Set());
+  const killedByUserRef = useRef(false);
   const bufRef = useRef("");
   const logRef = useRef<HTMLDivElement>(null);
 
@@ -75,12 +78,14 @@ export function RunModal({ stack, onClose }: Props) {
 
     setStep("running");
     const files = splitConfigFiles(stack.ConfigFiles);
-    const su = await composeFileSuperuser(files);
+    const [su, preRunIds] = await Promise.all([
+      composeFileSuperuser(files),
+      snapshotProjectContainerIds(stack.Name),
+    ]);
+    preRunIdsRef.current = preRunIds;
 
     const proc = composeRunStream(
-      stack.Name, files, service,
-      cmd.split(/\s+/).filter(Boolean),
-      removeContainer, su,
+      stack.Name, files, service, cmd.split(/\s+/).filter(Boolean), removeContainer, su,
     );
     procRef.current = proc;
 
@@ -100,8 +105,10 @@ export function RunModal({ stack, onClose }: Props) {
       .then(() => { setDone(true); setFailed(false); procRef.current = null; })
       .catch((ex: unknown) => {
         setDone(true);
-        setFailed(true);
-        setErrorMsg(ex instanceof Error ? ex.message : String(ex));
+        if (!killedByUserRef.current) {
+          setFailed(true);
+          setErrorMsg(ex instanceof Error ? ex.message : String(ex));
+        }
         procRef.current = null;
       });
   }, [selectedService, command, removeContainer, stack.Name, stack.ConfigFiles]);
@@ -234,8 +241,12 @@ export function RunModal({ stack, onClose }: Props) {
                 onClick={() => {
                   setKillError(null);
                   setKilling(true);
-                  forceRemoveOneoffContainers(stack.Name)
-                    .catch((ex: unknown) => setKillError(ex instanceof Error ? ex.message : String(ex)))
+                  killedByUserRef.current = true;
+                  forceRemoveOneoffContainers(stack.Name, preRunIdsRef.current)
+                    .catch((ex: unknown) => {
+                      killedByUserRef.current = false;
+                      setKillError(ex instanceof Error ? ex.message : String(ex));
+                    })
                     .finally(() => setKilling(false));
                 }}
               >

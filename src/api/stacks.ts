@@ -210,12 +210,32 @@ export function unpauseStack(project: string, configFiles: string[], profiles: s
   );
 }
 
+// Kills the stack and force-removes every container carrying the project label,
+// including one-off run containers that compose kill ignores.
 export function killStack(project: string, configFiles: string[], profiles: string[] = [], superuser?: "try"): CockpitProcess {
-  const profileFlags = profiles.flatMap(p => ["--profile", p]);
-  return cockpit.spawn(
-    compose(...profileFlags, "-p", project, ...fileFlags(configFiles), "kill"),
-    { superuser, err: "message", ...dockerSpawnEnviron() },
-  );
+  return makeFakeProcess(async () => {
+    const profileFlags = profiles.flatMap(p => ["--profile", p]);
+    // Best-effort compose kill — may not know about one-off containers; ignore errors.
+    try {
+      await cockpit.spawn(
+        compose(...profileFlags, "-p", project, ...fileFlags(configFiles), "kill"),
+        { superuser, err: "message", ...dockerSpawnEnviron() },
+      );
+    } catch { /* compose kill failing (e.g. no running services) is not fatal */ }
+
+    // Force-remove every container still carrying the project label.
+    let raw = "";
+    const psProc = cockpit.spawn(
+      cli("ps", "-a", "--filter", `label=com.docker.compose.project=${project}`, "--format", "{{.ID}}"),
+      { superuser, err: "message", ...dockerSpawnEnviron() },
+    );
+    psProc.stream(d => { raw += d; });
+    await psProc;
+    const ids = raw.split("\n").map(l => l.trim()).filter(Boolean);
+    if (ids.length === 0) return "";
+    await cockpit.spawn(cli("rm", "-f", ...ids), { superuser, err: "message", ...dockerSpawnEnviron() });
+    return "";
+  });
 }
 
 // ── podman-compose fallbacks ─────────────────────────────────────────────────
@@ -584,28 +604,38 @@ function scaleStackPodmanFallback(
 // Used when the one-off container is stuck — e.g. a service with no overriding command that
 // keeps running indefinitely. Queries by the com.docker.compose.oneoff=True label so it only
 // touches run containers, never the project's regular service containers.
-export async function forceRemoveOneoffContainers(project: string, superuser?: "try"): Promise<void> {
-  // docker-compose sets oneoff=True (capital); some podman-compose versions use true (lowercase).
-  // Query both and deduplicate so either casing is handled.
-  const ids = new Set<string>();
-  for (const val of ["True", "true"]) {
-    let raw = "";
-    const proc = cockpit.spawn(
-      cli("ps", "-a",
-        "--filter", `label=com.docker.compose.project=${project}`,
-        "--filter", `label=com.docker.compose.oneoff=${val}`,
-        "--format", "{{.ID}}"),
-      { err: "message", ...dockerSpawnEnviron() },
-    );
-    proc.stream(d => { raw += d; });
-    try { await proc; } catch { /* no containers matched this casing */ }
-    for (const id of raw.split("\n").map(l => l.trim()).filter(Boolean)) ids.add(id);
-  }
-  if (ids.size === 0) return;
-  await cockpit.spawn(
-    cli("rm", "-f", ...ids),
-    { superuser, err: "message", ...dockerSpawnEnviron() },
+// Snapshot all container IDs currently running for a project.
+// Call this before compose run starts; pass the result to forceRemoveOneoffContainers
+// so it can diff and only remove the containers that appeared after the run began.
+export async function snapshotProjectContainerIds(project: string): Promise<Set<string>> {
+  let raw = "";
+  const proc = cockpit.spawn(
+    cli("ps", "-a", "--filter", `label=com.docker.compose.project=${project}`, "--format", "{{.ID}}"),
+    { err: "message", ...dockerSpawnEnviron() },
   );
+  proc.stream(d => { raw += d; });
+  try { await proc; } catch { return new Set(); }
+  return new Set(raw.split("\n").map(l => l.trim()).filter(Boolean));
+}
+
+// Force-removes containers that appeared AFTER the pre-run snapshot was taken.
+// This is backend-agnostic: it doesn't rely on the com.docker.compose.oneoff label
+// (which docker-compose sets but podman-compose omits) or any naming convention.
+export async function forceRemoveOneoffContainers(
+  project: string,
+  preRunIds: Set<string>,
+  superuser?: "try",
+): Promise<void> {
+  let raw = "";
+  const proc = cockpit.spawn(
+    cli("ps", "-a", "--filter", `label=com.docker.compose.project=${project}`, "--format", "{{.ID}}"),
+    { err: "message", ...dockerSpawnEnviron() },
+  );
+  proc.stream(d => { raw += d; });
+  await proc;
+  const ids = raw.split("\n").map(l => l.trim()).filter(id => id && !preRunIds.has(id));
+  if (ids.length === 0) return;
+  await cockpit.spawn(cli("rm", "-f", ...ids), { superuser, err: "message", ...dockerSpawnEnviron() });
 }
 
 export function composeRunStream(
