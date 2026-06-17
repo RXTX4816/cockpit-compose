@@ -520,7 +520,13 @@
     "success_title": "Stack restored",
     "error_src_missing": "Extracted directory not found at {{path}}",
     "error_dest_exists": "Target path {{path}} already exists — aborting to prevent overwrite",
-    "error_unknown": "Restore failed (check browser console for details)"
+    "error_unknown": "Restore failed (check browser console for details)",
+    "delete_backup_confirm1_title": "Delete this backup?",
+    "delete_backup_confirm1_body": "Are you sure you want to delete \"{{filename}}\"? This will remove it from disk.",
+    "delete_backup_confirm2_title": "This action is irreversible",
+    "delete_backup_confirm2_body": "This will permanently delete the backup file from disk. There is no way to recover it.",
+    "delete_backup_button": "Delete backup",
+    "delete_backup_error": "Failed to delete backup"
   },
   "external_link_modal": {
     "aria_label": "External link warning",

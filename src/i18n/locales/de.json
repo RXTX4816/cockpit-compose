@@ -520,7 +520,13 @@
     "success_title": "Stack wiederhergestellt",
     "error_src_missing": "Entpacktes Verzeichnis nicht gefunden unter {{path}}",
     "error_dest_exists": "Zielpfad {{path}} existiert bereits – Abbruch zum Schutz vor Überschreiben",
-    "error_unknown": "Wiederherstellung fehlgeschlagen (Browserkonzole für Details prüfen)"
+    "error_unknown": "Wiederherstellung fehlgeschlagen (Browserkonzole für Details prüfen)",
+    "delete_backup_confirm1_title": "Wollen Sie die Sicherung entfernen?",
+    "delete_backup_confirm1_body": "Sind Sie sich sicher? \"{{filename}}\" wird von der Festplatte entfernt.",
+    "delete_backup_confirm2_title": "This action is irreversible",
+    "delete_backup_confirm2_body": "Diese Aktion löscht die Sicherung dauerhaft. Es gibt keine Möglichkeit dies rückgängig zu machen oder die Datei wiederherzustellen.",
+    "delete_backup_button": "Sicherung entfernen",
+    "delete_backup_error": "Fehler beim entfernen der Sicherung"
   },
   "external_link_modal": {
     "aria_label": "Warnung: Externer Link",

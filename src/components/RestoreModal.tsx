@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { HistoryIcon, SyncAltIcon } from "@patternfly/react-icons";
+import { HistoryIcon, SyncAltIcon, TrashIcon } from "@patternfly/react-icons";
 import { useTranslation } from "react-i18next";
 import {
   Modal,
@@ -23,6 +23,7 @@ import {
   listArchiveContents,
   readFileFromArchive,
   extractArchive,
+  removeFile,
 } from "../api/files";
 import { type DownedStack } from "../hooks/useDownedStacksScan";
 
@@ -101,6 +102,11 @@ export function RestoreModal({ existingStacks, defaultScanDir, onClose, onRestor
   const [restoring, setRestoring] = useState(false);
   const [restoreError, setRestoreError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+
+  const [deletePending, setDeletePending] = useState<string | null>(null);
+  const [deleteConfirming, setDeleteConfirming] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const configSectionRef = useRef<HTMLDivElement>(null);
   const prevTargetPathRef = useRef<string | null>(null);
@@ -314,7 +320,72 @@ export function RestoreModal({ existingStacks, defaultScanDir, onClose, onRestor
     }
   }
 
+  async function handleDeleteConfirmed() {
+    if (!deleteConfirming) return;
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      await removeFile(deleteConfirming);
+      if (selectedArchive === deleteConfirming) setSelectedArchive(null);
+      setDeleteConfirming(null);
+      await runScan(scanDir);
+    } catch (e: unknown) {
+      setDeleteError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setDeleting(false);
+    }
+  }
+
+  function renderDeleteModals() {
+    return (
+      <>
+        {deletePending && (
+          <Modal isOpen onClose={() => setDeletePending(null)} variant="small" aria-label={t("restore_modal.delete_backup_confirm1_title")}>
+            <ModalHeader title={t("restore_modal.delete_backup_confirm1_title")} />
+            <ModalBody>
+              <p>{t("restore_modal.delete_backup_confirm1_body", { filename: deletePending.split("/").pop() })}</p>
+            </ModalBody>
+            <ModalFooter>
+              <Button variant="danger" onClick={() => { setDeleteConfirming(deletePending); setDeletePending(null); }}>
+                {t("common.delete")}
+              </Button>
+              <Button variant="link" onClick={() => setDeletePending(null)}>{t("common.cancel")}</Button>
+            </ModalFooter>
+          </Modal>
+        )}
+        {deleteConfirming && (
+          <Modal isOpen onClose={() => { setDeleteConfirming(null); setDeleteError(null); }} variant="small" aria-label={t("restore_modal.delete_backup_confirm2_title")}>
+            <ModalHeader title={t("restore_modal.delete_backup_confirm2_title")} />
+            <ModalBody>
+              <Alert variant="danger" isInline title={t("restore_modal.delete_backup_confirm2_body")} />
+              {deleteError && (
+                <Alert variant="danger" isInline title={t("restore_modal.delete_backup_error")} style={{ marginTop: "0.5rem" }}>
+                  {deleteError}
+                </Alert>
+              )}
+            </ModalBody>
+            <ModalFooter>
+              <Button
+                variant="danger"
+                icon={<TrashIcon />}
+                isLoading={deleting}
+                isDisabled={deleting}
+                onClick={() => void handleDeleteConfirmed()}
+              >
+                {t("common.delete")}
+              </Button>
+              <Button variant="link" onClick={() => { setDeleteConfirming(null); setDeleteError(null); }} isDisabled={deleting}>
+                {t("common.cancel")}
+              </Button>
+            </ModalFooter>
+          </Modal>
+        )}
+      </>
+    );
+  }
+
   return (
+    <>
     <Modal isOpen onClose={onClose} variant="medium" aria-label={t("restore_modal.title")}>
       <ModalHeader title={t("restore_modal.title")} />
       <ModalBody>
@@ -371,16 +442,25 @@ export function RestoreModal({ existingStacks, defaultScanDir, onClose, onRestor
                 {archives.map(path => {
                   const filename = path.split("/").pop() ?? path;
                   return (
-                    <Radio
-                      key={path}
-                      id={`rm-archive-${path}`}
-                      name="rm-archive"
-                      label={<code>{filename}</code>}
-                      value={path}
-                      isChecked={selectedArchive === path}
-                      onChange={() => { setSelectedArchive(path); setManualOpen(false); }}
-                      isDisabled={restoring}
-                    />
+                    <div key={path} style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}>
+                      <Radio
+                        id={`rm-archive-${path}`}
+                        name="rm-archive"
+                        label={<code>{filename}</code>}
+                        value={path}
+                        isChecked={selectedArchive === path}
+                        onChange={() => { setSelectedArchive(path); setManualOpen(false); }}
+                        isDisabled={restoring || deleting}
+                        style={{ flex: 1 }}
+                      />
+                      <Button
+                        variant="plain"
+                        icon={<TrashIcon />}
+                        aria-label={t("restore_modal.delete_backup_button")}
+                        isDisabled={restoring || deleting}
+                        onClick={() => setDeletePending(path)}
+                      />
+                    </div>
                   );
                 })}
               </div>
@@ -522,5 +602,7 @@ export function RestoreModal({ existingStacks, defaultScanDir, onClose, onRestor
         )}
       </ModalFooter>
     </Modal>
+    {renderDeleteModals()}
+    </>
   );
 }
