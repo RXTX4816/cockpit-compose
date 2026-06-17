@@ -1,6 +1,11 @@
-import { useState, useCallback, useMemo, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { useSharedNetworks } from "../../hooks/useSharedNetworks";
 import { useTranslation } from "react-i18next";
+import { useModalState } from "../../hooks/useModalState";
+import { useStackFilters } from "../../hooks/useStackFilters";
+import { useExpandedStacks } from "../../hooks/useExpandedStacks";
+import { useKeyboardShortcuts } from "../../hooks/useKeyboardShortcuts";
+import { useOperationCounter } from "../../hooks/useOperationCounter";
 import {
   Toolbar,
   ToolbarContent,
@@ -22,7 +27,7 @@ import {
   Tooltip,
   Spinner,
 } from "@patternfly/react-core";
-import { type ComposeStack, type Runtime, parseStackStatus } from "../../api";
+import { type ComposeStack, type Runtime } from "../../api";
 import { TimesCircleIcon, BanIcon, PlusCircleIcon, FolderOpenIcon } from "@patternfly/react-icons";
 import { type DownedStack } from "../../hooks/useDownedStacksScan";
 import { useComposeStacks } from "../../hooks/useComposeStacks";
@@ -50,24 +55,12 @@ import { StackSkeleton } from "./StackSkeleton";
 import "./StacksView.css";
 import { splitConfigFiles } from "../../lib/configFiles";
 
-const STATUS_FILTER_OPTIONS = ["running", "partial", "stopped", "paused"] as const;
-type StatusFilter = (typeof STATUS_FILTER_OPTIONS)[number];
-
-const EXPANDED_KEY = "cockpit-compose:expanded";
-
-function loadExpandedFromStorage(): Set<string> {
-  try {
-    const raw = localStorage.getItem(EXPANDED_KEY);
-    if (raw) return new Set(JSON.parse(raw) as string[]);
-  } catch { /* ignore */ }
-  return new Set();
-}
-
-function saveExpandedToStorage(expanded: Set<string>) {
-  try {
-    localStorage.setItem(EXPANDED_KEY, JSON.stringify([...expanded]));
-  } catch { /* ignore */ }
-}
+const filterColorMap: Record<string, "green" | "orange" | "grey" | "blue"> = {
+  running: "green",
+  partial: "orange",
+  stopped: "grey",
+  paused: "blue",
+};
 
 interface Props {
   onRuntimeChange?: (runtime: Runtime) => void;
@@ -77,32 +70,21 @@ interface Props {
 export function StacksView({ onRuntimeChange, dockerMissing }: Props) {
   const { t } = useTranslation();
   const { stacks, loading, error, refresh, reset } = useComposeStacks();
-  const [expanded, setExpanded] = useState<Set<string>>(loadExpandedFromStorage);
   const [manuallyDownedStacks, setManuallyDownedStacks] = useState<DownedStack[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [activeFilters, setActiveFilters] = useState<Set<StatusFilter>>(new Set());
-
-  const [logsTarget, setLogsTarget] = useState<ComposeStack | null>(null);
-  const [yamlTarget, setYamlTarget] = useState<ComposeStack | null>(null);
-  const [infoTarget, setInfoTarget] = useState<ComposeStack | null>(null);
-  const [upConfirmTarget, setUpConfirmTarget] = useState<ComposeStack | null>(null);
-  const [upTarget, setUpTarget] = useState<ComposeStack | null>(null);
-  const [upTargetProfiles, setUpTargetProfiles] = useState<string[]>([]);
-  const [pullConfirmTarget, setPullConfirmTarget] = useState<ComposeStack | null>(null);
-  const [pullTarget, setPullTarget] = useState<ComposeStack | null>(null);
-  const [eventsTarget, setEventsTarget] = useState<ComposeStack | null>(null);
-  const [topTarget, setTopTarget] = useState<ComposeStack | null>(null);
-  const [execTarget, setExecTarget] = useState<ComposeStack | null>(null);
-  const [runTarget, setRunTarget] = useState<ComposeStack | null>(null);
-  const [pruneTarget, setPruneTarget] = useState<ComposeStack | null>(null);
-  const [backupTarget, setBackupTarget] = useState<ComposeStack | null>(null);
-  const [scaleTarget, setScaleTarget] = useState<ComposeStack | null>(null);
-  const [activeOps, setActiveOps] = useState(0);
   const [runtimeSwitchKey, setRuntimeSwitchKey] = useState(0);
 
+  // Extracted hooks
+  const modals = useModalState();
+  const { expanded, toggleExpanded } = useExpandedStacks();
+  const { activeOps, increment, decrement } = useOperationCounter();
+  const {
+    searchTerm, setSearchTerm, activeFilters, toggleFilter,
+    filteredStacks: displayedStacks, statusCounts, STATUS_FILTER_OPTIONS, clearFilters,
+  } = useStackFilters(stacks);
+
   const onActingChange = useCallback((delta: 1 | -1) => {
-    setActiveOps(n => Math.max(0, n + delta));
-  }, []);
+    if (delta > 0) increment(); else decrement();
+  }, [increment, decrement]);
 
   const handleDownComplete = useCallback((stack: ComposeStack) => {
     setManuallyDownedStacks(prev =>
@@ -125,95 +107,39 @@ export function StacksView({ onRuntimeChange, dockerMissing }: Props) {
   const { sharedNetworks: downSharedNetworks, loading: downNetworksLoading } =
     useSharedNetworks(downTarget?.Name ?? "", downTarget !== null);
 
-  const toggle = useCallback((name: string) => {
-    setExpanded(prev => {
-      const next = new Set(prev);
-      if (next.has(name)) next.delete(name);
-      else next.add(name);
-      saveExpandedToStorage(next);
-      return next;
-    });
-  }, []);
-
   useAutoRefresh(refresh, error ? 2000 : 500, activeOps > 0);
 
-  // Status counts for badges
-  const statusCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
-    for (const s of stacks) {
-      const st = parseStackStatus(s.Status);
-      counts[st] = (counts[st] ?? 0) + 1;
-    }
-    return counts;
-  }, [stacks]);
-
-  // Filter + search stacks
-  const displayedStacks = useMemo(() => {
-    let result = stacks;
-    if (activeFilters.size > 0) {
-      result = result.filter(s => activeFilters.has(parseStackStatus(s.Status) as StatusFilter));
-    }
-    if (searchTerm.trim()) {
-      const lower = searchTerm.toLowerCase();
-      result = result.filter(s => s.Name.toLowerCase().includes(lower));
-    }
-    return result;
-  }, [stacks, activeFilters, searchTerm]);
-
-  // Remove filters whose stack count has dropped to zero (e.g. "partial" → "running" transition)
-  useEffect(() => {
-    setActiveFilters(prev => {
-      const cleaned = new Set([...prev].filter(f => (statusCounts[f] ?? 0) > 0));
-      return cleaned.size === prev.size ? prev : cleaned;
-    });
-  }, [statusCounts]);
-
-  const toggleFilter = useCallback((filter: StatusFilter) => {
-    setActiveFilters(prev => {
-      const next = new Set(prev);
-      if (next.has(filter)) next.delete(filter);
-      else next.add(filter);
-      return next;
-    });
-  }, []);
-
-  // Keyboard shortcuts: U=up, D=down, L=logs, E=edit, I=info — on the row currently focused
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      // Skip if user is typing in an input/textarea/select
-      const tag = (document.activeElement as HTMLElement)?.tagName;
-      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || (document.activeElement as HTMLElement)?.isContentEditable) return;
-      // Skip if a modal is open
-      if (document.querySelector(".pf-v6-c-modal-box")) return;
-
-      const key = e.key.toLowerCase();
-      if (!["u", "d", "l", "e", "i"].includes(key)) return;
-
-      // Find the stack row that contains the focused element
-      const row = (document.activeElement as HTMLElement)?.closest("[data-stack-name]") as HTMLElement | null;
-      const name = row?.dataset.stackName;
-      if (!name) return;
-
-      const stack = stacks.find(s => s.Name === name);
-      if (!stack) return;
-
-      e.preventDefault();
-      if (key === "u") setUpConfirmTarget(stack);
-      else if (key === "d") openDown(stack);
-      else if (key === "l") setLogsTarget(stack);
-      else if (key === "e") setYamlTarget(stack);
-      else if (key === "i") setInfoTarget(stack);
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [stacks, openDown]);
-
-  const filterColorMap: Record<StatusFilter, "green" | "orange" | "grey" | "blue"> = {
-    running: "green",
-    partial: "orange",
-    stopped: "grey",
-    paused: "blue",
-  };
+  // Keyboard shortcuts: U=up, D=down, L=logs, E=edit, I=info
+  useKeyboardShortcuts(
+    {
+      u: () => {
+        const row = (document.activeElement as HTMLElement)?.closest("[data-stack-name]") as HTMLElement | null;
+        const stack = stacks.find(s => s.Name === row?.dataset.stackName);
+        if (stack) modals.open("upConfirm", stack);
+      },
+      d: () => {
+        const row = (document.activeElement as HTMLElement)?.closest("[data-stack-name]") as HTMLElement | null;
+        const stack = stacks.find(s => s.Name === row?.dataset.stackName);
+        if (stack) openDown(stack);
+      },
+      l: () => {
+        const row = (document.activeElement as HTMLElement)?.closest("[data-stack-name]") as HTMLElement | null;
+        const stack = stacks.find(s => s.Name === row?.dataset.stackName);
+        if (stack) modals.open("logs", stack);
+      },
+      e: () => {
+        const row = (document.activeElement as HTMLElement)?.closest("[data-stack-name]") as HTMLElement | null;
+        const stack = stacks.find(s => s.Name === row?.dataset.stackName);
+        if (stack) modals.open("yaml", stack);
+      },
+      i: () => {
+        const row = (document.activeElement as HTMLElement)?.closest("[data-stack-name]") as HTMLElement | null;
+        const stack = stacks.find(s => s.Name === row?.dataset.stackName);
+        if (stack) modals.open("info", stack);
+      },
+    },
+    [stacks, openDown, modals.open],
+  );
 
   return (
     <>
@@ -286,7 +212,6 @@ export function StacksView({ onRuntimeChange, dockerMissing }: Props) {
                 variant="primary"
                 icon={<PlusCircleIcon />}
                 onClick={() => {
-                  // Scroll down to trigger the DownedStacksSection create button
                   document.querySelector<HTMLButtonElement>(".dss-import-bar button")?.click();
                 }}
               >
@@ -310,7 +235,7 @@ export function StacksView({ onRuntimeChange, dockerMissing }: Props) {
           <EmptyStateBody>{t("stacks.no_results_body")}</EmptyStateBody>
           <EmptyStateFooter>
             <EmptyStateActions>
-              <Button variant="link" onClick={() => { setSearchTerm(""); setActiveFilters(new Set()); }}>
+              <Button variant="link" onClick={clearFilters}>
                 {t("stacks.clear_filters")}
               </Button>
             </EmptyStateActions>
@@ -323,21 +248,21 @@ export function StacksView({ onRuntimeChange, dockerMissing }: Props) {
               key={stack.Name}
               stack={stack}
               expanded={expanded.has(stack.Name)}
-              onToggle={() => toggle(stack.Name)}
-              onLogs={() => setLogsTarget(stack)}
-              onYaml={() => setYamlTarget(stack)}
-              onInfo={() => setInfoTarget(stack)}
+              onToggle={() => toggleExpanded(stack.Name)}
+              onLogs={() => modals.open("logs", stack)}
+              onYaml={() => modals.open("yaml", stack)}
+              onInfo={() => modals.open("info", stack)}
               onDown={() => openDown(stack)}
               onKill={() => openKill(stack)}
-              onUp={() => setUpConfirmTarget(stack)}
-              onPull={() => setPullConfirmTarget(stack)}
-              onEvents={() => setEventsTarget(stack)}
-              onTop={() => setTopTarget(stack)}
-              onExec={() => setExecTarget(stack)}
-              onRun={() => setRunTarget(stack)}
-              onPrune={() => setPruneTarget(stack)}
-              onBackup={() => setBackupTarget(stack)}
-              onScale={() => setScaleTarget(stack)}
+              onUp={() => modals.open("upConfirm", stack)}
+              onPull={() => modals.open("pullConfirm", stack)}
+              onEvents={() => modals.open("events", stack)}
+              onTop={() => modals.open("top", stack)}
+              onExec={() => modals.open("exec", stack)}
+              onRun={() => modals.open("run", stack)}
+              onPrune={() => modals.open("prune", stack)}
+              onBackup={() => modals.open("backup", stack)}
+              onScale={() => modals.open("scale", stack)}
               onActingChange={onActingChange}
             />
           ))}
@@ -358,65 +283,63 @@ export function StacksView({ onRuntimeChange, dockerMissing }: Props) {
         onUpComplete={handleUpComplete}
       />
 
-      {logsTarget && <LogsModal stack={logsTarget} onClose={() => setLogsTarget(null)} />}
-      {yamlTarget && (
+      {modals.state.logs && <LogsModal stack={modals.state.logs} onClose={() => modals.close("logs")} />}
+      {modals.state.yaml && (
         <YamlModal
-          stack={yamlTarget}
-          onClose={() => setYamlTarget(null)}
+          stack={modals.state.yaml}
+          onClose={() => modals.close("yaml")}
           onFileAdded={(newPath) => {
-            setYamlTarget(prev => prev ? { ...prev, ConfigFiles: [prev.ConfigFiles, newPath].join(",") } : null);
+            const prev = modals.state.yaml;
+            if (prev) modals.open("yaml", { ...prev, ConfigFiles: [prev.ConfigFiles, newPath].join(",") });
           }}
           onFileRemoved={(removedPath) => {
-            setYamlTarget(prev => prev
-              ? { ...prev, ConfigFiles: prev.ConfigFiles.split(",").map(f => f.trim()).filter(f => f !== removedPath).join(",") }
-              : null
-            );
+            const prev = modals.state.yaml;
+            if (prev) modals.open("yaml", { ...prev, ConfigFiles: prev.ConfigFiles.split(",").map(f => f.trim()).filter(f => f !== removedPath).join(",") });
           }}
         />
       )}
-      {infoTarget && <StackInfoModal stack={infoTarget} onClose={() => setInfoTarget(null)} />}
-      {upConfirmTarget && (
+      {modals.state.info && <StackInfoModal stack={modals.state.info} onClose={() => modals.close("info")} />}
+      {modals.state.upConfirm && (
         <UpConfirmModal
-          stack={upConfirmTarget}
+          stack={modals.state.upConfirm}
           onConfirm={(profiles) => {
-            setUpTargetProfiles(profiles);
-            setUpTarget(upConfirmTarget);
-            setUpConfirmTarget(null);
+            modals.dispatch({ type: "setProfiles", profiles });
+            modals.transition("upConfirm", "up");
           }}
-          onClose={() => { setUpConfirmTarget(null); }}
+          onClose={() => modals.close("upConfirm")}
         />
       )}
-      {upTarget && (
+      {modals.state.up && (
         <UpModal
-          stack={upTarget}
-          profiles={upTargetProfiles}
-          onClose={() => { setUpTarget(null); void refresh(); }}
+          stack={modals.state.up}
+          profiles={modals.state.upProfiles}
+          onClose={() => { modals.close("up"); void refresh(); }}
         />
       )}
-      {pullConfirmTarget && (
+      {modals.state.pullConfirm && (
         <PullConfirmModal
-          stack={pullConfirmTarget}
-          onConfirm={() => { setPullTarget(pullConfirmTarget); setPullConfirmTarget(null); }}
-          onClose={() => setPullConfirmTarget(null)}
+          stack={modals.state.pullConfirm}
+          onConfirm={() => modals.transition("pullConfirm", "pull")}
+          onClose={() => modals.close("pullConfirm")}
         />
       )}
-      {pullTarget && <PullModal stack={pullTarget} onClose={() => setPullTarget(null)} />}
-      {eventsTarget && <EventsModal stack={eventsTarget} onClose={() => setEventsTarget(null)} />}
-      {topTarget && <TopModal stack={topTarget} onClose={() => setTopTarget(null)} />}
-      {execTarget && <ExecModal stack={execTarget} onClose={() => setExecTarget(null)} />}
-      {runTarget && <RunModal stack={runTarget} onClose={() => setRunTarget(null)} />}
-      {pruneTarget && (
+      {modals.state.pull && <PullModal stack={modals.state.pull} onClose={() => modals.close("pull")} />}
+      {modals.state.events && <EventsModal stack={modals.state.events} onClose={() => modals.close("events")} />}
+      {modals.state.top && <TopModal stack={modals.state.top} onClose={() => modals.close("top")} />}
+      {modals.state.exec && <ExecModal stack={modals.state.exec} onClose={() => modals.close("exec")} />}
+      {modals.state.run && <RunModal stack={modals.state.run} onClose={() => modals.close("run")} />}
+      {modals.state.prune && (
         <PruneModal
-          stack={pruneTarget}
-          onClose={() => setPruneTarget(null)}
+          stack={modals.state.prune}
+          onClose={() => modals.close("prune")}
           onSuccess={refresh}
         />
       )}
-      {backupTarget && (
-        <BackupModal stack={backupTarget} onClose={() => setBackupTarget(null)} />
+      {modals.state.backup && (
+        <BackupModal stack={modals.state.backup} onClose={() => modals.close("backup")} />
       )}
-      {scaleTarget && (
-        <ScaleModal stack={scaleTarget} onClose={() => setScaleTarget(null)} onSuccess={refresh} />
+      {modals.state.scale && (
+        <ScaleModal stack={modals.state.scale} onClose={() => modals.close("scale")} onSuccess={refresh} />
       )}
 
       {downTarget && (

@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { useAsyncAction } from "../hooks/useAsyncAction";
 import { BroomIcon } from "@patternfly/react-icons";
 import { useTranslation } from "react-i18next";
 import {
@@ -132,8 +133,6 @@ export function PruneModal({ stack, onClose, onSuccess }: Props) {
   const [preview, setPreview] = useState<Preview | null>(null);
   const [loadingPreview, setLoadingPreview] = useState(false);
   const [previewError, setPreviewError] = useState<string | null>(null);
-  const [pruning, setPruning] = useState(false);
-  const [pruneError, setPruneError] = useState<string | null>(null);
 
   const nothingSelected = !selection.images && !selection.containers && !selection.volumes && !selection.networks;
 
@@ -172,25 +171,19 @@ export function PruneModal({ stack, onClose, onSuccess }: Props) {
     }
   }, [stack.Name, selection]);
 
-  const executePrune = useCallback(async () => {
-    setPruning(true);
-    setPruneError(null);
-    try {
-      const tasks: Promise<unknown>[] = [];
-      if (selection.images && preview && preview.imageIds.length > 0)
-        tasks.push(removeImages(preview.imageIds));
-      if (selection.containers) tasks.push(pruneContainers(stack.Name));
-      if (selection.volumes) tasks.push(pruneVolumes(stack.Name));
-      if (selection.networks) tasks.push(pruneNetworks(stack.Name));
-      await Promise.all(tasks);
-      onSuccess();
-      onClose();
-    } catch (ex: unknown) {
-      setPruneError(ex instanceof Error ? ex.message : String(ex));
-    } finally {
-      setPruning(false);
-    }
+  const pruneAction = useCallback(async () => {
+    const tasks: Promise<unknown>[] = [];
+    if (selection.images && preview && preview.imageIds.length > 0)
+      tasks.push(removeImages(preview.imageIds));
+    if (selection.containers) tasks.push(pruneContainers(stack.Name));
+    if (selection.volumes) tasks.push(pruneVolumes(stack.Name));
+    if (selection.networks) tasks.push(pruneNetworks(stack.Name));
+    await Promise.all(tasks);
+    onSuccess();
+    onClose();
   }, [stack.Name, selection, preview, onSuccess, onClose]);
+
+  const { execute: executePrune, loading: pruning, error: pruneError } = useAsyncAction(pruneAction);
 
   const toggle = (key: keyof Selection) =>
     setSelection(s => ({ ...s, [key]: !s[key] }));

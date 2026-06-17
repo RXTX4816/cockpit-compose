@@ -3,7 +3,7 @@ import { EditorView, basicSetup } from "codemirror";
 import { EditorState, type Extension } from "@codemirror/state";
 import { linter } from "@codemirror/lint";
 import { oneDark } from "@codemirror/theme-one-dark";
-import { lintEnvContent } from "./envLint";
+import { lintEnvContent } from "../lib/envLint";
 import "./YamlEditor.css";
 
 interface EnvEditorProps {

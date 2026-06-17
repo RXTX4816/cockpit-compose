@@ -4,7 +4,7 @@ function fileFlags(configFiles: string[]): string[] {
   return configFiles.flatMap(f => ["-f", f]);
 }
 
-interface PodmanPsContainer {
+export interface PodmanPsContainer {
   State: string;
   Labels: Record<string, string>;
 }
@@ -33,7 +33,7 @@ export function groupPodmanContainers(containers: PodmanPsContainer[]): { Name: 
   });
 }
 
-function listPodmanStacks(): CockpitProcess {
+export function listPodmanStacks(): CockpitProcess {
   const streamCallbacks: ((d: string) => void)[] = [];
   let resolveP!: (v: string) => void;
   let rejectP!: (e: unknown) => void;
@@ -164,7 +164,7 @@ export function pullStack(project: string, configFiles: string[], profiles: stri
   );
 }
 
-function pauseUnpausePodmanFallback(project: string, action: "pause" | "unpause", superuser?: "try"): CockpitProcess {
+export function pauseUnpausePodmanFallback(project: string, action: "pause" | "unpause", superuser?: "try"): CockpitProcess {
   return makeFakeProcess(async () => {
     let psRaw = "";
     const psProc = cockpit.spawn(
@@ -261,7 +261,7 @@ interface PodmanVolumeJson {
   Mountpoint: string;
 }
 
-function makeFakeProcess(work: () => Promise<string>): CockpitProcess {
+export function makeFakeProcess(work: () => Promise<string>): CockpitProcess {
   const callbacks: ((d: string) => void)[] = [];
   let res!: (v: string) => void, rej!: (e: unknown) => void;
   const p = new Promise<string>((r, e) => { res = r; rej = e; });
@@ -372,7 +372,7 @@ export function composeTop(project: string): CockpitProcess {
   );
 }
 
-function composeTopPodmanFallback(project: string): CockpitProcess {
+export function composeTopPodmanFallback(project: string): CockpitProcess {
   return makeFakeProcess(async () => {
     let psRaw = "";
     const psProc = cockpit.spawn(
