@@ -161,6 +161,14 @@ export function StacksView({ onRuntimeChange, dockerMissing }: Props) {
     return result;
   }, [stacks, activeFilters, searchTerm]);
 
+  // Remove filters whose stack count has dropped to zero (e.g. "partial" → "running" transition)
+  useEffect(() => {
+    setActiveFilters(prev => {
+      const cleaned = new Set([...prev].filter(f => (statusCounts[f] ?? 0) > 0));
+      return cleaned.size === prev.size ? prev : cleaned;
+    });
+  }, [statusCounts]);
+
   const toggleFilter = useCallback((filter: StatusFilter) => {
     setActiveFilters(prev => {
       const next = new Set(prev);
