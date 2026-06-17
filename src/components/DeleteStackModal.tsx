@@ -14,6 +14,7 @@ import {
 import { removeFile, removeDirectory } from "../api";
 import { type DownedStack } from "../hooks/useDownedStacksScan";
 import { useSharedNetworks } from "../hooks/useSharedNetworks";
+import { useAsyncAction } from "../hooks/useAsyncAction";
 
 interface Props {
   stack: DownedStack;
@@ -25,8 +26,6 @@ export function DeleteStackModal({ stack, onClose, onDeleted }: Props) {
   const { t } = useTranslation();
   const [deleteFolder, setDeleteFolder] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
-  const [deleting, setDeleting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const { sharedNetworks, loading: loadingNetworks } = useSharedNetworks(stack.name, true);
   const sharedOnes = sharedNetworks.filter(n => n.sharedWith.length > 0);
@@ -38,27 +37,17 @@ export function DeleteStackModal({ stack, onClose, onDeleted }: Props) {
       ? t("delete_modal.target_file", { file: stack.configFiles[0] })
       : t("delete_modal.target_files", { count: stack.configFiles.length });
 
-  const handleDelete = async () => {
-    setDeleting(true);
-    setError(null);
-    try {
-      if (deleteFolder) {
-        await removeDirectory(folderPath);
-      } else {
-        for (const f of stack.configFiles) {
-          await removeFile(f);
-        }
+  const { execute: handleDelete, loading: deleting, error } = useAsyncAction(async () => {
+    if (deleteFolder) {
+      await removeDirectory(folderPath);
+    } else {
+      for (const f of stack.configFiles) {
+        await removeFile(f);
       }
-      onDeleted();
-      onClose();
-    } catch (ex: unknown) {
-      const msg = ex instanceof Error ? ex.message : String(ex);
-      setError(msg || t("delete_modal.error_default"));
-      setConfirmed(false);
-    } finally {
-      setDeleting(false);
     }
-  };
+    onDeleted();
+    onClose();
+  });
 
   return (
     <>

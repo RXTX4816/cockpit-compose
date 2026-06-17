@@ -1,7 +1,16 @@
-import { useState, useCallback, useMemo, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { useSharedNetworks } from "../../hooks/useSharedNetworks";
 import { useTranslation } from "react-i18next";
+import { useModalState } from "../../hooks/useModalState";
+import { useStackFilters } from "../../hooks/useStackFilters";
+import { useExpandedStacks } from "../../hooks/useExpandedStacks";
+import { useKeyboardShortcuts } from "../../hooks/useKeyboardShortcuts";
+import { useOperationCounter } from "../../hooks/useOperationCounter";
 import {
+  Toolbar,
+  ToolbarContent,
+  ToolbarItem,
+  Title,
   Button,
   EmptyState,
   EmptyStateBody,
@@ -9,16 +18,22 @@ import {
   EmptyStateFooter,
   DataList,
   Alert,
+  Modal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  SearchInput,
+  Label,
+  Tooltip,
   Spinner,
 } from "@patternfly/react-core";
-import { type ComposeStack, type Runtime, parseStackStatus } from "../../api";
-import { PlusCircleIcon, FolderOpenIcon } from "@patternfly/react-icons";
+import { type ComposeStack, type Runtime } from "../../api";
+import { TimesCircleIcon, BanIcon, PlusCircleIcon, FolderOpenIcon } from "@patternfly/react-icons";
 import { type DownedStack } from "../../hooks/useDownedStacksScan";
 import { useComposeStacks } from "../../hooks/useComposeStacks";
 import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import { useDownStack } from "../../hooks/useDownStack";
 import { useKillStack } from "../../hooks/useKillStack";
-import { useModalTargets } from "../../hooks/useModalTargets";
 import { LogsModal } from "../LogsModal";
 import { YamlModal } from "../YamlModal";
 import { StackInfoModal } from "../StackInfoModal";
@@ -33,30 +48,19 @@ import { RunModal } from "../RunModal";
 import { PruneModal } from "../PruneModal";
 import { BackupModal } from "../BackupModal";
 import { ScaleModal } from "../ScaleModal";
-import { DownModal } from "../DownModal";
-import { KillModal } from "../KillModal";
 import { DownedStacksSection } from "../DownedStacksSection";
 import { StackRow } from "./StackRow";
+import { RuntimeToggle } from "../RuntimeToggle";
 import { StackSkeleton } from "./StackSkeleton";
-import { StacksToolbar, type StatusFilter } from "./StacksToolbar";
 import "./StacksView.css";
 import { splitConfigFiles } from "../../lib/configFiles";
 
-const EXPANDED_KEY = "cockpit-compose:expanded";
-
-function loadExpandedFromStorage(): Set<string> {
-  try {
-    const raw = localStorage.getItem(EXPANDED_KEY);
-    if (raw) return new Set(JSON.parse(raw) as string[]);
-  } catch { /* ignore */ }
-  return new Set();
-}
-
-function saveExpandedToStorage(expanded: Set<string>) {
-  try {
-    localStorage.setItem(EXPANDED_KEY, JSON.stringify([...expanded]));
-  } catch { /* ignore */ }
-}
+const filterColorMap: Record<string, "green" | "orange" | "grey" | "blue"> = {
+  running: "green",
+  partial: "orange",
+  stopped: "grey",
+  paused: "blue",
+};
 
 interface Props {
   onRuntimeChange?: (runtime: Runtime) => void;
@@ -66,18 +70,21 @@ interface Props {
 export function StacksView({ onRuntimeChange, dockerMissing }: Props) {
   const { t } = useTranslation();
   const { stacks, loading, error, refresh, reset } = useComposeStacks();
-  const [expanded, setExpanded] = useState<Set<string>>(loadExpandedFromStorage);
   const [manuallyDownedStacks, setManuallyDownedStacks] = useState<DownedStack[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [activeFilters, setActiveFilters] = useState<Set<StatusFilter>>(new Set());
-  const [activeOps, setActiveOps] = useState(0);
   const [runtimeSwitchKey, setRuntimeSwitchKey] = useState(0);
 
-  const modals = useModalTargets();
+  // Extracted hooks
+  const modals = useModalState();
+  const { expanded, toggleExpanded } = useExpandedStacks();
+  const { activeOps, increment, decrement } = useOperationCounter();
+  const {
+    searchTerm, setSearchTerm, activeFilters, toggleFilter,
+    filteredStacks: displayedStacks, statusCounts, STATUS_FILTER_OPTIONS, clearFilters,
+  } = useStackFilters(stacks);
 
   const onActingChange = useCallback((delta: 1 | -1) => {
-    setActiveOps(n => Math.max(0, n + delta));
-  }, []);
+    if (delta > 0) increment(); else decrement();
+  }, [increment, decrement]);
 
   const handleDownComplete = useCallback((stack: ComposeStack) => {
     setManuallyDownedStacks(prev =>
@@ -100,97 +107,85 @@ export function StacksView({ onRuntimeChange, dockerMissing }: Props) {
   const { sharedNetworks: downSharedNetworks, loading: downNetworksLoading } =
     useSharedNetworks(downTarget?.Name ?? "", downTarget !== null);
 
-  const toggle = useCallback((name: string) => {
-    setExpanded(prev => {
-      const next = new Set(prev);
-      if (next.has(name)) next.delete(name);
-      else next.add(name);
-      saveExpandedToStorage(next);
-      return next;
-    });
-  }, []);
-
   useAutoRefresh(refresh, error ? 2000 : 500, activeOps > 0);
 
-  const statusCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
-    for (const s of stacks) {
-      const st = parseStackStatus(s.Status);
-      counts[st] = (counts[st] ?? 0) + 1;
-    }
-    return counts;
-  }, [stacks]);
-
-  const displayedStacks = useMemo(() => {
-    let result = stacks;
-    if (activeFilters.size > 0) {
-      result = result.filter(s => activeFilters.has(parseStackStatus(s.Status) as StatusFilter));
-    }
-    if (searchTerm.trim()) {
-      const lower = searchTerm.toLowerCase();
-      result = result.filter(s => s.Name.toLowerCase().includes(lower));
-    }
-    return result;
-  }, [stacks, activeFilters, searchTerm]);
-
-  // Remove filters whose stack count has dropped to zero
-  useEffect(() => {
-    setActiveFilters(prev => {
-      const cleaned = new Set([...prev].filter(f => (statusCounts[f] ?? 0) > 0));
-      return cleaned.size === prev.size ? prev : cleaned;
-    });
-  }, [statusCounts]);
-
-  const toggleFilter = useCallback((filter: StatusFilter) => {
-    setActiveFilters(prev => {
-      const next = new Set(prev);
-      if (next.has(filter)) next.delete(filter);
-      else next.add(filter);
-      return next;
-    });
-  }, []);
-
-  // Keyboard shortcuts: U=up, D=down, L=logs, E=edit, I=info — on focused row
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      const tag = (document.activeElement as HTMLElement)?.tagName;
-      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || (document.activeElement as HTMLElement)?.isContentEditable) return;
-      if (document.querySelector(".pf-v6-c-modal-box")) return;
-
-      const key = e.key.toLowerCase();
-      if (!["u", "d", "l", "e", "i"].includes(key)) return;
-
-      const row = (document.activeElement as HTMLElement)?.closest("[data-stack-name]") as HTMLElement | null;
-      const name = row?.dataset.stackName;
-      if (!name) return;
-
-      const stack = stacks.find(s => s.Name === name);
-      if (!stack) return;
-
-      e.preventDefault();
-      if (key === "u") modals.setUpConfirmTarget(stack);
-      else if (key === "d") openDown(stack);
-      else if (key === "l") modals.setLogsTarget(stack);
-      else if (key === "e") modals.setYamlTarget(stack);
-      else if (key === "i") modals.setInfoTarget(stack);
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [stacks, openDown, modals]);
+  // Keyboard shortcuts: U=up, D=down, L=logs, E=edit, I=info
+  useKeyboardShortcuts(
+    {
+      u: () => {
+        const row = (document.activeElement as HTMLElement)?.closest("[data-stack-name]") as HTMLElement | null;
+        const stack = stacks.find(s => s.Name === row?.dataset.stackName);
+        if (stack) modals.open("upConfirm", stack);
+      },
+      d: () => {
+        const row = (document.activeElement as HTMLElement)?.closest("[data-stack-name]") as HTMLElement | null;
+        const stack = stacks.find(s => s.Name === row?.dataset.stackName);
+        if (stack) openDown(stack);
+      },
+      l: () => {
+        const row = (document.activeElement as HTMLElement)?.closest("[data-stack-name]") as HTMLElement | null;
+        const stack = stacks.find(s => s.Name === row?.dataset.stackName);
+        if (stack) modals.open("logs", stack);
+      },
+      e: () => {
+        const row = (document.activeElement as HTMLElement)?.closest("[data-stack-name]") as HTMLElement | null;
+        const stack = stacks.find(s => s.Name === row?.dataset.stackName);
+        if (stack) modals.open("yaml", stack);
+      },
+      i: () => {
+        const row = (document.activeElement as HTMLElement)?.closest("[data-stack-name]") as HTMLElement | null;
+        const stack = stacks.find(s => s.Name === row?.dataset.stackName);
+        if (stack) modals.open("info", stack);
+      },
+    },
+    [stacks, openDown, modals.open],
+  );
 
   return (
     <>
-      <StacksToolbar
-        stacks={stacks}
-        statusCounts={statusCounts}
-        activeFilters={activeFilters}
-        searchTerm={searchTerm}
-        onFilterToggle={toggleFilter}
-        onSearchChange={setSearchTerm}
-        onRuntimeChange={onRuntimeChange}
-        onReset={() => { setRuntimeSwitchKey(k => k + 1); reset(); }}
-        dockerMissing={dockerMissing}
-      />
+      <Toolbar className="sv-toolbar">
+        <ToolbarContent>
+          <ToolbarItem>
+            <Title headingLevel="h2">{t("stacks.title")}</Title>
+          </ToolbarItem>
+
+          {stacks.length > 0 && (
+            <ToolbarItem>
+              <div className="sv-status-badges">
+                {STATUS_FILTER_OPTIONS.filter(f => (statusCounts[f] ?? 0) > 0).map(f => (
+                  <Tooltip key={f} content={t(`stacks.filter_tooltip_${f}`)}>
+                    <Label
+                      isCompact
+                      color={filterColorMap[f]}
+                      className={`sv-filter-chip${activeFilters.has(f) ? " sv-filter-chip--active" : ""}`}
+                      onClick={() => toggleFilter(f)}
+                    >
+                      {statusCounts[f]} {t(`stacks.status_${f}`)}
+                    </Label>
+                  </Tooltip>
+                ))}
+              </div>
+            </ToolbarItem>
+          )}
+
+          {stacks.length > 0 && (
+            <ToolbarItem>
+              <SearchInput
+                className="sv-search"
+                value={searchTerm}
+                onChange={(_e, v) => setSearchTerm(v)}
+                onClear={() => setSearchTerm("")}
+                placeholder={t("stacks.search_placeholder")}
+                aria-label={t("stacks.search_placeholder")}
+              />
+            </ToolbarItem>
+          )}
+
+          <ToolbarItem align={{ default: "alignEnd" }}>
+            <RuntimeToggle onRuntimeChange={(r) => { setRuntimeSwitchKey(k => k + 1); reset(); onRuntimeChange?.(r); }} suggestPodman={dockerMissing} />
+          </ToolbarItem>
+        </ToolbarContent>
+      </Toolbar>
 
       {error && (
         <Alert
@@ -240,7 +235,7 @@ export function StacksView({ onRuntimeChange, dockerMissing }: Props) {
           <EmptyStateBody>{t("stacks.no_results_body")}</EmptyStateBody>
           <EmptyStateFooter>
             <EmptyStateActions>
-              <Button variant="link" onClick={() => { setSearchTerm(""); setActiveFilters(new Set()); }}>
+              <Button variant="link" onClick={clearFilters}>
                 {t("stacks.clear_filters")}
               </Button>
             </EmptyStateActions>
@@ -253,21 +248,21 @@ export function StacksView({ onRuntimeChange, dockerMissing }: Props) {
               key={stack.Name}
               stack={stack}
               expanded={expanded.has(stack.Name)}
-              onToggle={() => toggle(stack.Name)}
-              onLogs={() => modals.setLogsTarget(stack)}
-              onYaml={() => modals.setYamlTarget(stack)}
-              onInfo={() => modals.setInfoTarget(stack)}
+              onToggle={() => toggleExpanded(stack.Name)}
+              onLogs={() => modals.open("logs", stack)}
+              onYaml={() => modals.open("yaml", stack)}
+              onInfo={() => modals.open("info", stack)}
               onDown={() => openDown(stack)}
               onKill={() => openKill(stack)}
-              onUp={() => modals.setUpConfirmTarget(stack)}
-              onPull={() => modals.setPullConfirmTarget(stack)}
-              onEvents={() => modals.setEventsTarget(stack)}
-              onTop={() => modals.setTopTarget(stack)}
-              onExec={() => modals.setExecTarget(stack)}
-              onRun={() => modals.setRunTarget(stack)}
-              onPrune={() => modals.setPruneTarget(stack)}
-              onBackup={() => modals.setBackupTarget(stack)}
-              onScale={() => modals.setScaleTarget(stack)}
+              onUp={() => modals.open("upConfirm", stack)}
+              onPull={() => modals.open("pullConfirm", stack)}
+              onEvents={() => modals.open("events", stack)}
+              onTop={() => modals.open("top", stack)}
+              onExec={() => modals.open("exec", stack)}
+              onRun={() => modals.open("run", stack)}
+              onPrune={() => modals.open("prune", stack)}
+              onBackup={() => modals.open("backup", stack)}
+              onScale={() => modals.open("scale", stack)}
               onActingChange={onActingChange}
             />
           ))}
@@ -288,87 +283,138 @@ export function StacksView({ onRuntimeChange, dockerMissing }: Props) {
         onUpComplete={handleUpComplete}
       />
 
-      {modals.logsTarget && <LogsModal stack={modals.logsTarget} onClose={() => modals.setLogsTarget(null)} />}
-      {modals.yamlTarget && (
+      {modals.state.logs && <LogsModal stack={modals.state.logs} onClose={() => modals.close("logs")} />}
+      {modals.state.yaml && (
         <YamlModal
-          stack={modals.yamlTarget}
-          onClose={() => modals.setYamlTarget(null)}
+          stack={modals.state.yaml}
+          onClose={() => modals.close("yaml")}
           onFileAdded={(newPath) => {
-            modals.setYamlTarget(prev => prev ? { ...prev, ConfigFiles: [prev.ConfigFiles, newPath].join(",") } : null);
+            const prev = modals.state.yaml;
+            if (prev) modals.open("yaml", { ...prev, ConfigFiles: [prev.ConfigFiles, newPath].join(",") });
           }}
           onFileRemoved={(removedPath) => {
-            modals.setYamlTarget(prev => prev
-              ? { ...prev, ConfigFiles: prev.ConfigFiles.split(",").map(f => f.trim()).filter(f => f !== removedPath).join(",") }
-              : null
-            );
+            const prev = modals.state.yaml;
+            if (prev) modals.open("yaml", { ...prev, ConfigFiles: prev.ConfigFiles.split(",").map(f => f.trim()).filter(f => f !== removedPath).join(",") });
           }}
         />
       )}
-      {modals.infoTarget && <StackInfoModal stack={modals.infoTarget} onClose={() => modals.setInfoTarget(null)} />}
-      {modals.upConfirmTarget && (
+      {modals.state.info && <StackInfoModal stack={modals.state.info} onClose={() => modals.close("info")} />}
+      {modals.state.upConfirm && (
         <UpConfirmModal
-          stack={modals.upConfirmTarget}
+          stack={modals.state.upConfirm}
           onConfirm={(profiles) => {
-            modals.setUpTargetProfiles(profiles);
-            modals.setUpTarget(modals.upConfirmTarget);
-            modals.setUpConfirmTarget(null);
+            modals.dispatch({ type: "setProfiles", profiles });
+            modals.transition("upConfirm", "up");
           }}
-          onClose={() => modals.setUpConfirmTarget(null)}
+          onClose={() => modals.close("upConfirm")}
         />
       )}
-      {modals.upTarget && (
+      {modals.state.up && (
         <UpModal
-          stack={modals.upTarget}
-          profiles={modals.upTargetProfiles}
-          onClose={() => { modals.setUpTarget(null); void refresh(); }}
+          stack={modals.state.up}
+          profiles={modals.state.upProfiles}
+          onClose={() => { modals.close("up"); void refresh(); }}
         />
       )}
-      {modals.pullConfirmTarget && (
+      {modals.state.pullConfirm && (
         <PullConfirmModal
-          stack={modals.pullConfirmTarget}
-          onConfirm={() => { modals.setPullTarget(modals.pullConfirmTarget); modals.setPullConfirmTarget(null); }}
-          onClose={() => modals.setPullConfirmTarget(null)}
+          stack={modals.state.pullConfirm}
+          onConfirm={() => modals.transition("pullConfirm", "pull")}
+          onClose={() => modals.close("pullConfirm")}
         />
       )}
-      {modals.pullTarget && <PullModal stack={modals.pullTarget} onClose={() => modals.setPullTarget(null)} />}
-      {modals.eventsTarget && <EventsModal stack={modals.eventsTarget} onClose={() => modals.setEventsTarget(null)} />}
-      {modals.topTarget && <TopModal stack={modals.topTarget} onClose={() => modals.setTopTarget(null)} />}
-      {modals.execTarget && <ExecModal stack={modals.execTarget} onClose={() => modals.setExecTarget(null)} />}
-      {modals.runTarget && <RunModal stack={modals.runTarget} onClose={() => modals.setRunTarget(null)} />}
-      {modals.pruneTarget && (
+      {modals.state.pull && <PullModal stack={modals.state.pull} onClose={() => modals.close("pull")} />}
+      {modals.state.events && <EventsModal stack={modals.state.events} onClose={() => modals.close("events")} />}
+      {modals.state.top && <TopModal stack={modals.state.top} onClose={() => modals.close("top")} />}
+      {modals.state.exec && <ExecModal stack={modals.state.exec} onClose={() => modals.close("exec")} />}
+      {modals.state.run && <RunModal stack={modals.state.run} onClose={() => modals.close("run")} />}
+      {modals.state.prune && (
         <PruneModal
-          stack={modals.pruneTarget}
-          onClose={() => modals.setPruneTarget(null)}
+          stack={modals.state.prune}
+          onClose={() => modals.close("prune")}
           onSuccess={refresh}
         />
       )}
-      {modals.backupTarget && (
-        <BackupModal stack={modals.backupTarget} onClose={() => modals.setBackupTarget(null)} />
+      {modals.state.backup && (
+        <BackupModal stack={modals.state.backup} onClose={() => modals.close("backup")} />
       )}
-      {modals.scaleTarget && (
-        <ScaleModal stack={modals.scaleTarget} onClose={() => modals.setScaleTarget(null)} onSuccess={refresh} />
+      {modals.state.scale && (
+        <ScaleModal stack={modals.state.scale} onClose={() => modals.close("scale")} onSuccess={refresh} />
       )}
 
       {downTarget && (
-        <DownModal
-          target={downTarget}
-          downing={downing}
-          error={downError}
-          sharedNetworks={downSharedNetworks}
-          networksLoading={downNetworksLoading}
-          onConfirm={() => void performDown()}
-          onClose={closeDown}
-        />
+        <Modal
+          isOpen
+          variant="small"
+          onClose={() => { if (!downing) closeDown(); }}
+          aria-label={t("down_modal.aria_label")}
+        >
+          <ModalHeader title={t("down_modal.title", { name: downTarget.Name })} />
+          <ModalBody>
+            <p>
+              {t("down_modal.body_prefix")} <code>docker compose down</code>{" "}
+              {t("down_modal.body_suffix")} <strong>{downTarget.Name}</strong>{t("down_modal.body_suffix2")}
+            </p>
+            {downNetworksLoading && (
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "1rem", color: "var(--pf-t--global--text--color--subtle)", fontSize: "0.875rem" }}>
+                <Spinner size="sm" />
+                {t("down_modal.checking_networks")}
+              </div>
+            )}
+            {!downNetworksLoading && downSharedNetworks.filter(n => n.sharedWith.length > 0).length > 0 && (
+              <Alert variant="warning" isInline title={t("down_modal.shared_networks_title")} style={{ marginTop: "1rem" }}>
+                <ul style={{ margin: "0.25rem 0 0 1.25rem", padding: 0 }}>
+                  {downSharedNetworks.filter(n => n.sharedWith.length > 0).map(n => (
+                    <li key={n.name}>
+                      <code>{n.name}</code>
+                      {" — "}{t("down_modal.shared_with")}{" "}
+                      <strong>{n.sharedWith.join(", ")}</strong>
+                    </li>
+                  ))}
+                </ul>
+              </Alert>
+            )}
+            {downError && (
+              <Alert variant="danger" isInline title={downError} style={{ marginTop: "1rem" }} />
+            )}
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="danger" icon={<TimesCircleIcon />} onClick={() => void performDown()} isLoading={downing}>
+              {t("down_modal.confirm_button")}
+            </Button>
+            <Button variant="link" onClick={closeDown} isDisabled={downing}>
+              {t("common.cancel")}
+            </Button>
+          </ModalFooter>
+        </Modal>
       )}
 
       {killTarget && (
-        <KillModal
-          target={killTarget}
-          killing={killing}
-          error={killError}
-          onConfirm={() => void performKill()}
-          onClose={closeKill}
-        />
+        <Modal
+          isOpen
+          variant="small"
+          onClose={() => { if (!killing) closeKill(); }}
+          aria-label={t("kill_modal.aria_label")}
+        >
+          <ModalHeader title={t("kill_modal.title", { name: killTarget.Name })} />
+          <ModalBody>
+            <p>
+              {t("kill_modal.body_prefix")} <code>docker compose kill</code>{" "}
+              {t("kill_modal.body_sigkill")} <strong>{killTarget.Name}</strong>{t("kill_modal.body_suffix")}
+            </p>
+            {killError && (
+              <Alert variant="danger" isInline title={killError} style={{ marginTop: "1rem" }} />
+            )}
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="danger" icon={<BanIcon />} onClick={() => void performKill()} isLoading={killing}>
+              {t("kill_modal.confirm_button")}
+            </Button>
+            <Button variant="link" onClick={closeKill} isDisabled={killing}>
+              {t("common.cancel")}
+            </Button>
+          </ModalFooter>
+        </Modal>
       )}
     </>
   );

@@ -23,7 +23,8 @@ import { DeleteStackModal } from "./DeleteStackModal";
 import { RestoreModal } from "./RestoreModal";
 import { BackupModal } from "./BackupModal";
 import "./DownedStacksSection.css";
-import { splitConfigFiles } from "../lib/configFiles";
+import { inferComposeRoot } from "../lib/composeDiscovery";
+export { inferComposeRoot } from "../lib/composeDiscovery";
 
 interface Props {
   stacks: ComposeStack[];
@@ -31,21 +32,6 @@ interface Props {
   onRefresh: () => void;
   onUpComplete: (name: string) => void;
 }
-
-export function inferComposeRoot(stacks: ComposeStack[]): string {
-  if (stacks.length === 0) return "";
-  const tally = new Map<string, number>();
-  for (const stack of stacks) {
-    const configFile = splitConfigFiles(stack.ConfigFiles)[0] ?? "";
-    const stackDir = configFile.slice(0, configFile.lastIndexOf("/"));
-    const parent = stackDir.slice(0, stackDir.lastIndexOf("/"));
-    if (parent) tally.set(parent, (tally.get(parent) ?? 0) + 1);
-  }
-  if (tally.size === 0) return "";
-  const best = [...tally.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
-  return best[0][0];
-}
-
 
 function toSyntheticStack(d: DownedStack): ComposeStack {
   return { Name: d.name, Status: "", ConfigFiles: d.configFiles.join(",") };

@@ -13,16 +13,20 @@ import {
   DropdownList,
   DropdownItem,
   MenuToggle,
+  Modal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
   Divider,
   Spinner,
   Tooltip,
 } from "@patternfly/react-core";
 import {
   type ComposeStack,
-  type ComposeContainer,
   parseStackStatus,
   parseServiceCount,
 } from "../../api";
+import { effectiveStatus, stackHealthSummary } from "../../lib/stackStatus";
 import {
   CheckCircleIcon,
   ExclamationTriangleIcon,
@@ -50,24 +54,8 @@ import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import { StatusLabel } from "./StatusLabel";
 import { StatsCell } from "./StatsCell";
 import { ContainerTable } from "./ContainerTable";
-import { StopModal } from "../StopModal";
-import { RestartModal } from "../RestartModal";
 import "./StackRow.css";
 import { splitConfigFiles } from "../../lib/configFiles";
-
-function effectiveStatus(base: ReturnType<typeof parseStackStatus>, containers: ComposeContainer[]): ReturnType<typeof parseStackStatus> {
-  if (base !== "partial" || containers.length === 0) return base;
-  const exited = containers.filter(c => c.State === "exited");
-  if (exited.length === 0) return base;
-  return exited.every(c => /exited \(0\)/i.test(c.Status)) ? "running" : base;
-}
-
-function stackHealthSummary(containers: ComposeContainer[]): "healthy" | "unhealthy" | null {
-  const withHealth = containers.filter(c => c.Health);
-  if (withHealth.length === 0) return null;
-  if (withHealth.some(c => c.Health!.toLowerCase() !== "healthy")) return "unhealthy";
-  return "healthy";
-}
 
 interface StackRowProps {
   stack: ComposeStack;
@@ -369,19 +357,53 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
     </DataListItem>
 
     {confirmStopOpen && (
-      <StopModal
-        stackName={stack.Name}
-        onConfirm={() => { setConfirmStopOpen(false); void doAction("stop", afterAction); }}
+      <Modal
+        isOpen
+        variant="small"
         onClose={() => setConfirmStopOpen(false)}
-      />
+        aria-label={t("stop_modal.aria_label")}
+      >
+        <ModalHeader title={t("stop_modal.title", { name: stack.Name })} />
+        <ModalBody>
+          <p>{t("stop_modal.body")}</p>
+        </ModalBody>
+        <ModalFooter>
+          <Button
+            variant="danger"
+            onClick={() => { setConfirmStopOpen(false); void doAction("stop", afterAction); }}
+          >
+            {t("stop_modal.confirm_button")}
+          </Button>
+          <Button variant="link" onClick={() => setConfirmStopOpen(false)}>
+            {t("common.cancel")}
+          </Button>
+        </ModalFooter>
+      </Modal>
     )}
 
     {confirmRestartOpen && (
-      <RestartModal
-        stackName={stack.Name}
-        onConfirm={() => { setConfirmRestartOpen(false); void doAction("restart", afterAction); }}
+      <Modal
+        isOpen
+        variant="small"
         onClose={() => setConfirmRestartOpen(false)}
-      />
+        aria-label={t("restart_modal.aria_label")}
+      >
+        <ModalHeader title={t("restart_modal.title", { name: stack.Name })} />
+        <ModalBody>
+          <p>{t("restart_modal.body")}</p>
+        </ModalBody>
+        <ModalFooter>
+          <Button
+            variant="warning"
+            onClick={() => { setConfirmRestartOpen(false); void doAction("restart", afterAction); }}
+          >
+            {t("restart_modal.confirm_button")}
+          </Button>
+          <Button variant="link" onClick={() => setConfirmRestartOpen(false)}>
+            {t("common.cancel")}
+          </Button>
+        </ModalFooter>
+      </Modal>
     )}
     </>
   );

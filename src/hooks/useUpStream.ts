@@ -1,55 +1,15 @@
-import { useState, useEffect, useRef, useCallback } from "react";
 import { upStackStream, composeFileSuperuser, isRootlessMode } from "../api";
-import { stripAnsi, classifyLine, type LineEntry } from "../lib/pullParser";
+import { useAsyncStream } from "./useAsyncStream";
 
 export function useUpStream(stackName: string, configFiles: string[], profiles: string[] = []) {
-  const [lines, setLines] = useState<LineEntry[]>([]);
-  const [done, setDone] = useState(false);
-  const [failed, setFailed] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
-  const bufRef = useRef("");
-  const procRef = useRef<CockpitProcess | null>(null);
-
   const configFilesKey = configFiles.join(",");
-  useEffect(() => {
-    let cancelled = false;
-    (isRootlessMode() ? Promise.resolve<"try" | undefined>(undefined) : composeFileSuperuser(configFiles)).then(su => {
-      if (cancelled) return;
-      const proc = upStackStream(stackName, configFiles, profiles, su);
-      procRef.current = proc;
 
-      proc.stream(data => {
-        const clean = stripAnsi(data);
-        bufRef.current += clean;
-        const parts = bufRef.current.split("\n");
-        bufRef.current = parts.pop() ?? "";
-        const newLines: LineEntry[] = parts
-          .map(line => line.split("\r").pop() ?? "")
-          .filter(line => line.trim() !== "")
-          .map(text => ({ text, kind: classifyLine(text) }));
-        if (newLines.length > 0) {
-          setLines(prev => [...prev, ...newLines]);
-        }
-      });
-
-      proc
-        .then(() => { setDone(true); setFailed(false); procRef.current = null; })
-        .catch((ex: unknown) => {
-          setDone(true);
-          setFailed(true);
-          setErrorMsg(ex instanceof Error ? ex.message : String(ex));
-          procRef.current = null;
-        });
-    });
-
-    return () => { cancelled = true; procRef.current?.close(); };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stackName, configFilesKey]);
-
-  const cancel = useCallback(() => {
-    procRef.current?.close();
-    procRef.current = null;
-  }, []);
-
-  return { lines, done, failed, errorMsg, cancel };
+  return useAsyncStream(
+    launch => (
+      isRootlessMode()
+        ? Promise.resolve<"try" | undefined>(undefined)
+        : composeFileSuperuser(configFiles)
+    ).then(su => { launch(upStackStream(stackName, configFiles, profiles, su)); }),
+    [stackName, configFilesKey],
+  );
 }
