@@ -22,7 +22,14 @@ export function AppFooter({ runtime }: Props) {
     proc.stream(d => { raw += d; });
     proc
       .then(() => {
-        try { setVersion(JSON.parse(raw) as ComposeVersion); } catch { /* ignore */ }
+        try {
+          setVersion(JSON.parse(raw) as ComposeVersion);
+        } catch {
+          // podman-compose outputs plain text e.g. "podman-compose version 1.2.0"
+          // followed by podman's own version — match only the podman-compose line.
+          const match = raw.match(/podman-compose[^:\n]*[:\s]+(\d[\d.]*)/i);
+          if (match) setVersion({ version: match[1] });
+        }
       })
       .catch(() => { /* best-effort */ });
   }, [runtime]);

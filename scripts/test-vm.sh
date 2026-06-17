@@ -729,6 +729,30 @@ YAML
   - printf '[network]\ndefault_rootless_network_cmd = "pasta"\n' > /home/test/.config/containers/containers.conf
   - chown -R test:test /home/test/.config
 YAML
+    # Debian bookworm ships podman-compose 1.0.3 which predates pause/unpause and version --format json.
+    # Upgrade via pip so the installed version matches what Fedora/Arch ship from their repos.
+    if [[ "$distro" == "debian" ]]; then
+      cat >> "$outfile" <<YAML
+  - apt-get install -y python3-pip dbus-user-session
+  - pip3 install --break-system-packages --upgrade podman-compose
+  - ln -sf /usr/local/bin/podman-compose /usr/bin/podman-compose
+  # Podman 4.3.1 (bookworm) with cgroup_manager=systemd routes StartTransientUnit to the
+  # system D-Bus, which creates the scope under user.slice; crun then can't create a
+  # sub-cgroup there because the test user doesn't own that path.  Switch to cgroupfs so
+  # crun manages the cgroup hierarchy directly inside the user's delegated subtree.
+  - printf '[engine]\ncgroup_manager = "cgroupfs"\n\n[network]\ndefault_rootless_network_cmd = "pasta"\n' > /home/test/.config/containers/containers.conf
+YAML
+    fi
+    # Fedora: SELinux denies mprotect() inside containers (RELRO hardening in glibc/musl images).
+    # Disable SELinux labeling for containers via containers.conf; setsebool is a belt-and-suspenders
+    # fallback in case label=false is insufficient on some policy versions.
+    if [[ "$distro" == "fedora" ]]; then
+      cat >> "$outfile" <<YAML
+  - printf '[containers]\nlabel = false\n\n[network]\ndefault_rootless_network_cmd = "pasta"\n' > /root/.config/containers/containers.conf
+  - printf '[containers]\nlabel = false\n\n[network]\ndefault_rootless_network_cmd = "pasta"\n' > /home/test/.config/containers/containers.conf
+  - setsebool -P container_execmem 1 || true
+YAML
+    fi
   fi
 
   # Docker setup — varies by distro

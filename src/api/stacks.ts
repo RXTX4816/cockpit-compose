@@ -118,10 +118,19 @@ export function streamLogs(project: string, configFiles: string[], service?: str
   const serviceArgs = service
     ? [service]
     : (limited && allServices?.length ? allServices : []);
+  const base = dockerSpawnEnviron();
+  // podman-compose is a Python script; when its stdout is piped (not a TTY) Python
+  // block-buffers output at 8 KB. Small containers like gotify never fill that buffer,
+  // so log lines never reach the UI. PYTHONUNBUFFERED=1 disables the buffer.
+  // We set it whenever using Podman because `podman compose` may delegate to the
+  // Python tool and the env var propagates through to the subprocess.
+  const environ = getIsPodman()
+    ? [...(base.environ ?? []), "PYTHONUNBUFFERED=1"]
+    : base.environ;
   return cockpit.spawn(
     compose("-p", project, ...fileFlags(configFiles), "logs", "--follow", "--tail", "200", ...tsFlag, ...serviceArgs),
     // err:"out" captures stderr too (external provider warnings, podman-compose output)
-    { err: "out", ...dockerSpawnEnviron() },
+    { err: "out", ...(environ ? { environ } : {}) },
   );
 }
 
@@ -343,10 +352,12 @@ function composeTopPodmanFallback(project: string): CockpitProcess {
 }
 
 export function composeVersion(): CockpitProcess {
-  return cockpit.spawn(
-    compose("version", "--format", "json"),
-    { err: "message", ...dockerSpawnEnviron() },
-  );
+  // podman-compose (limited backend) doesn't accept --format json on its version subcommand;
+  // omit the flag and let the caller extract the version from plain text.
+  const args = composeIsLimitedBackend()
+    ? compose("version")
+    : compose("version", "--format", "json");
+  return cockpit.spawn(args, { err: "message", ...dockerSpawnEnviron() });
 }
 
 export function containerVersion(): CockpitProcess {
