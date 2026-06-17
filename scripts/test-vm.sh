@@ -724,6 +724,10 @@ YAML
   - systemctl enable --now podman.socket
   - systemctl --global enable podman.socket || true
   - loginctl enable-linger test
+  # Delegate full cgroup subtree to user sessions so crun can freeze containers (needed for pause/unpause).
+  - mkdir -p /etc/systemd/system/user@.service.d
+  - printf '[Service]\nDelegate=yes\n' > /etc/systemd/system/user@.service.d/delegate.conf
+  - systemctl daemon-reload
   - mkdir -p /root/.config/containers /home/test/.config/containers
   - printf '[network]\ndefault_rootless_network_cmd = "pasta"\n' > /root/.config/containers/containers.conf
   - printf '[network]\ndefault_rootless_network_cmd = "pasta"\n' > /home/test/.config/containers/containers.conf
@@ -737,10 +741,11 @@ YAML
   - pip3 install --break-system-packages --upgrade podman-compose
   - ln -sf /usr/local/bin/podman-compose /usr/bin/podman-compose
   # Podman 4.3.1 (bookworm) with cgroup_manager=systemd routes StartTransientUnit to the
-  # system D-Bus, which creates the scope under user.slice; crun then can't create a
-  # sub-cgroup there because the test user doesn't own that path.  Switch to cgroupfs so
-  # crun manages the cgroup hierarchy directly inside the user's delegated subtree.
-  - printf '[engine]\ncgroup_manager = "cgroupfs"\n\n[network]\ndefault_rootless_network_cmd = "pasta"\n' > /home/test/.config/containers/containers.conf
+  # system D-Bus, which creates the scope under a session slice that lacks Delegate=yes;
+  # crun can't create sub-cgroups there (needed for pause/unpause). Use cgroupfs manager
+  # to bypass D-Bus and pin cgroup_parent to user@1000.service which has Delegate=yes
+  # (set in delegate.conf above), so crun can write cgroup.freeze for the container.
+  - printf '[engine]\ncgroup_manager = "cgroupfs"\n\n[containers]\ncgroup_parent = "user.slice/user-1000.slice/user@1000.service/app.slice"\n\n[network]\ndefault_rootless_network_cmd = "pasta"\n' > /home/test/.config/containers/containers.conf
 YAML
     fi
     # Fedora: SELinux denies mprotect() inside containers (RELRO hardening in glibc/musl images).
@@ -797,6 +802,18 @@ YAML
 YAML
         ;;
     esac
+  fi
+
+  # Explicitly start the user's systemd instance so user-level services (podman.socket, D-Bus) are
+  # active immediately after first boot rather than waiting for the first interactive login.
+  # Also explicitly start podman.socket in the user session: --global enable marks it for autostart
+  # but doesn't create the socket file. In the "both" scenario docker-compose acts as the podman
+  # compose external provider and needs /run/user/UID/podman/podman.sock to exist immediately.
+  if [[ "$scenario" == "podman" || "$scenario" == "both" ]]; then
+    cat >> "$outfile" <<YAML
+  - systemctl start "user@\$(id -u test).service" || true
+  - su - test -c 'systemctl --user start podman.socket' || true
+YAML
   fi
 
   # ── footer ───────────────────────────────────────────────────────────────────

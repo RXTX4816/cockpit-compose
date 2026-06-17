@@ -43,6 +43,7 @@ interface ServiceInfo {
 interface Props {
   stack: ComposeStack;
   onClose: () => void;
+  onSuccess?: () => void;
 }
 
 async function loadServiceInfo(
@@ -78,7 +79,7 @@ async function loadServiceInfo(
   return info;
 }
 
-export function ScaleModal({ stack, onClose }: Props) {
+export function ScaleModal({ stack, onClose, onSuccess }: Props) {
   const { t } = useTranslation();
   const configFiles = splitConfigFiles(stack.ConfigFiles);
 
@@ -121,6 +122,7 @@ export function ScaleModal({ stack, onClose }: Props) {
       ]);
       await scaleStack(stack.Name, configFiles, counts, profiles, su);
       onClose();
+      onSuccess?.();
     } catch (ex: unknown) {
       setApplyError(ex instanceof Error ? ex.message : String(ex));
       setScaling(false);

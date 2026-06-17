@@ -204,29 +204,29 @@ The UI language follows Cockpit's language setting.
 | Language | Code | Coverage |
 |---|---|---|
 | English | `en` | 100% (source) |
-| ar | `ar` | 99% |
-| cs | `cs` | 99% |
+| ar | `ar` | 98% |
+| cs | `cs` | 98% |
 | German | `de` | 100% |
-| Spanish | `es` | 99% |
-| fi | `fi` | 99% |
-| French | `fr` | 99% |
-| he | `he` | 99% |
-| id | `id` | 99% |
-| Italian | `it` | 99% |
-| Japanese | `ja` | 99% |
-| ka | `ka` | 99% |
-| Korean | `ko` | 99% |
-| Dutch | `nl` | 99% |
-| Polish | `pl` | 100% |
-| pt-BR | `pt-BR` | 99% |
-| ro | `ro` | 99% |
-| Russian | `ru` | 99% |
-| sk | `sk` | 99% |
-| sv | `sv` | 99% |
-| tr | `tr` | 99% |
-| uk | `uk` | 99% |
-| zh-CN | `zh-CN` | 99% |
-| zh-TW | `zh-TW` | 99% |
+| Spanish | `es` | 98% |
+| fi | `fi` | 98% |
+| French | `fr` | 98% |
+| he | `he` | 98% |
+| id | `id` | 98% |
+| Italian | `it` | 98% |
+| Japanese | `ja` | 98% |
+| ka | `ka` | 98% |
+| Korean | `ko` | 98% |
+| Dutch | `nl` | 98% |
+| Polish | `pl` | 99% |
+| pt-BR | `pt-BR` | 98% |
+| ro | `ro` | 98% |
+| Russian | `ru` | 98% |
+| sk | `sk` | 98% |
+| sv | `sv` | 98% |
+| tr | `tr` | 98% |
+| uk | `uk` | 98% |
+| zh-CN | `zh-CN` | 98% |
+| zh-TW | `zh-TW` | 98% |
 <!-- i18n-coverage-end -->
 
 To add a new language, copy `src/i18n/locales/en.json`, translate the values, and register the file in `src/i18n/index.ts`.

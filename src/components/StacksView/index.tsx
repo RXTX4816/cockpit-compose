@@ -416,7 +416,7 @@ export function StacksView({ onRuntimeChange, dockerMissing }: Props) {
         <BackupModal stack={backupTarget} onClose={() => setBackupTarget(null)} />
       )}
       {scaleTarget && (
-        <ScaleModal stack={scaleTarget} onClose={() => setScaleTarget(null)} />
+        <ScaleModal stack={scaleTarget} onClose={() => setScaleTarget(null)} onSuccess={refresh} />
       )}
 
       {downTarget && (
