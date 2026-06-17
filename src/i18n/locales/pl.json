@@ -530,7 +530,13 @@
     "success_title": "Stos przywrócony",
     "error_src_missing": "Nie znaleziono wypakowanego katalogu w {{path}}",
     "error_dest_exists": "Ścieżka docelowa {{path}} już istnieje – przerwano, aby uniknąć nadpisania",
-    "error_unknown": "Przywracanie nie powiodło się (sprawdź konsolę przeglądarki)"
+    "error_unknown": "Przywracanie nie powiodło się (sprawdź konsolę przeglądarki)",
+    "delete_backup_confirm1_title": "Potwierdź usunięcie kopii zapasowej",
+    "delete_backup_confirm1_body": "Czy na pewno chcesz usunąć kopię zapasową \"{{filename}}\"? Spowoduje to jej usunięcie z dysku.",
+    "delete_backup_confirm2_title": "Tej akcji nie można cofnąć",
+    "delete_backup_confirm2_body": "Usunięta kopia zapasowa nie może zostać przywrócona. Upewnij się, że masz inną kopię zapasową, jeśli potrzebujesz tej zawartości.",
+    "delete_backup_button": "Usuń kopię zapasową",
+    "delete_backup_error": "Nie udało się usunąć kopii zapasowej"
   },
   "external_link_modal": {
     "aria_label": "Ostrzeżenie: zewnętrzny link",
