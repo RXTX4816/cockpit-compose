@@ -258,7 +258,7 @@ describe("detectPodmanSocket() via detectComposeCommand()", () => {
     await detectComposeCommand();
     expect(getPodmanSocketPath()).toBe("unix:///run/user/1000/podman/podman.sock");
     expect(isRootlessMode()).toBe(true);
-    expect(dockerSpawnEnviron()).toEqual({ environ: ["DOCKER_HOST=unix:///run/user/1000/podman/podman.sock"] });
+    expect(dockerSpawnEnviron()).toEqual({ environ: ["DOCKER_HOST=unix:///run/user/1000/podman/podman.sock", "XDG_RUNTIME_DIR=/run/user/1000"] });
   });
 
   it("sets system podman socket when only system socket exists", async () => {
@@ -347,7 +347,7 @@ describe("dockerSpawnEnviron() runtime awareness", () => {
     const { setRuntime, detectComposeCommand, dockerSpawnEnviron } = await import("./cockpit");
     setRuntime("podman");
     await detectComposeCommand();
-    expect(dockerSpawnEnviron()).toEqual({ environ: ["DOCKER_HOST=unix:///run/user/1000/podman/podman.sock"] });
+    expect(dockerSpawnEnviron()).toEqual({ environ: ["DOCKER_HOST=unix:///run/user/1000/podman/podman.sock", "XDG_RUNTIME_DIR=/run/user/1000"] });
   });
 
   it("returns {} when no socket is configured for the active runtime", async () => {

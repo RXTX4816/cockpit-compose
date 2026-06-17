@@ -67,7 +67,14 @@ async function detectPodmanSocket(): Promise<void> {
     if (await isSocket(userSocket)) {
       podmanRootless = true;
       podmanSocketPath = `unix://${userSocket}`;
-      podmanEnviron = [`DOCKER_HOST=${podmanSocketPath}`];
+      // XDG_RUNTIME_DIR must be set so libpod connects to the user D-Bus socket
+      // (/run/user/<uid>/bus) instead of the system bus.  Without it, Podman's
+      // systemd cgroup manager calls StartTransientUnit on the system bus, which
+      // requires polkit auth that Cockpit's non-interactive bridge doesn't have.
+      podmanEnviron = [
+        `DOCKER_HOST=${podmanSocketPath}`,
+        `XDG_RUNTIME_DIR=/run/user/${user.id}`,
+      ];
       return;
     }
   } catch { /* cockpit.user() unavailable or user socket check failed */ }
