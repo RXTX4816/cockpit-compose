@@ -66,7 +66,7 @@
     "logs": "Logi",
     "logs_title": "Wyświetl logi",
     "edit_title": "Edytuj plik Compose",
-    "info": "Info",
+    "info": "Informacje",
     "info_title": "Informacje o stosie",
     "events": "Zdarzenia",
     "top": "Procesy",
@@ -93,7 +93,7 @@
     "version": "Wersja: {{version}}",
     "docker_version": "{{runtime}}: {{version}}",
     "compose_version": "{{runtime}} Compose: {{version}}",
-    "rootless": "Rootless",
+    "rootless": "Bez roota",
     "rootless_help_title": "Tryb rootless",
     "rootless_help_body": "Docker lub Podman działa w trybie rootless — kontenery działają jako Twój użytkownik, nie jako root. Poprawia to bezpieczeństwo, ale może ograniczać niektóre funkcje, takie jak wiązanie uprzywilejowanych portów (<1024), dostęp do ścieżek systemowych lub korzystanie z określonych sterowników sieciowych.",
     "help": "Pomoc",
@@ -131,16 +131,16 @@
     "confirm_button": "Zakończ wszystkie kontenery"
   },
   "stop_modal": {
-    "aria_label": "Confirm stop",
-    "title": "Stop \"{{name}}\"?",
-    "body": "This will stop all running containers in the stack. They will not be removed and can be started again.",
-    "confirm_button": "Stop"
+    "aria_label": "Potwierdź zatrzymanie",
+    "title": "Zatrzymać \"{{name}}\"?",
+    "body": "Spowoduje to zatrzymanie wszystkich uruchomionych kontenerów w stosie. Nie zostaną usunięte i będzie można je ponownie uruchomić.",
+    "confirm_button": "Zatrzymaj"
   },
   "restart_modal": {
-    "aria_label": "Confirm restart",
-    "title": "Restart \"{{name}}\"?",
-    "body": "This will restart all running services. Services will briefly be unavailable.",
-    "confirm_button": "Restart"
+    "aria_label": "Potwierdź ponowne uruchomienie",
+    "title": "Uruchomić ponownie \"{{name}}\"?",
+    "body": "Spowoduje to ponowne uruchomienie wszystkich działających usług. Usługi będą przez chwilę niedostępne.",
+    "confirm_button": "Uruchom ponownie"
   },
   "delete_modal": {
     "aria_label": "Usuń stos Compose — {{name}}",
@@ -311,7 +311,7 @@
     "level_all": "Wszystkie",
     "level_error": "Błąd",
     "level_warn": "Ostrzeżenie",
-    "level_info": "Info",
+    "level_info": "Informacje",
     "download_tooltip": "Pobierz dzienniki",
     "timestamps_tooltip": "Przełącz znaczniki czasu",
     "scroll_top": "Przejdź na górę",
@@ -333,7 +333,11 @@
     "running": "Wykonywanie polecenia w {{name}}…",
     "initializing": "Uruchamianie…",
     "complete": "✓ Polecenie zakończone",
-    "failed": "✗ Polecenie nie powiodło się"
+    "failed": "✗ Polecenie nie powiodło się",
+    "warning_title": "Długotrwałe usługi będą blokować",
+    "warning_body": "compose run uruchamia nowy kontener dla wybranej usługi. Jeśli ta usługa nie ma zastępczego polecenia (np. serwer WWW lub baza danych), kontener uruchomi usługę i będzie działać dalej — nie zakończy się samodzielnie. Może być konieczne anulowanie tutaj i wymuszenie zatrzymania stosu w celu odzyskania.",
+    "force_kill_button": "Wymuś usunięcie kontenera",
+    "force_kill_tooltip": "Wymusza usunięcie zablokowanego jednorazowego kontenera. Użyj, gdy usługa nie kończy się samodzielnie."
   },
   "exec_modal": {
     "aria_label": "Terminal — {{name}}",
@@ -413,8 +417,8 @@
     "up_button": "Uruchom"
   },
   "info_modal": {
-    "aria_label": "Info — {{name}}",
-    "title": "{{name}} — info",
+    "aria_label": "Informacje — {{name}}",
+    "title": "{{name}} — informacje",
     "section_compose_file": "Plik Compose",
     "section_services": "Usługi",
     "section_images": "Obrazy",
@@ -495,7 +499,7 @@
     "paused": "wstrzymany",
     "exited": "zakończony",
     "restarting": "uruchamia się ponownie",
-    "dead": "crashed",
+    "dead": "martwy",
     "created": "utworzony",
     "removing": "usuwany"
   },
@@ -549,7 +553,7 @@
   },
   "container_table": {
     "replica_count": "×{{count}}",
-    "col_status": "Status",
+    "col_status": "Stan",
     "col_service": "Usługa",
     "col_image": "Obraz",
     "col_uptime": "Czas pracy"

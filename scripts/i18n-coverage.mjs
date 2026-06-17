@@ -44,19 +44,31 @@ if (!locales.en) {
 const enKeys = new Set(leafKeys(locales.en));
 const total = enKeys.size;
 
-const rows = Object.entries(locales)
+const entries = Object.entries(locales)
   .sort(([a], [b]) => (a === "en" ? -1 : b === "en" ? 1 : a.localeCompare(b)))
   .map(([code, data]) => {
     const keys = new Set(leafKeys(data));
     const covered = [...enKeys].filter(k => keys.has(k)).length;
-    const pct = code === "en" ? "100% (source)" : `${Math.min(100, Math.round((covered / total) * 100))}%`;
+    const pct = Math.min(100, Math.round((covered / total) * 100));
     const name = LANGUAGE_NAMES[code] ?? code;
-    return `| ${name} | \`${code}\` | ${pct} |`;
+    const label = code === "en" ? `${name} (\`${code}\`) — source` : `\`${code}\``;
+    return { pct, label };
   });
 
+const groups = new Map();
+for (const e of entries) {
+  const key = `${e.pct}%`;
+  if (!groups.has(key)) groups.set(key, []);
+  groups.get(key).push(e.label);
+}
+
+const rows = [...groups.entries()]
+  .sort(([a], [b]) => parseInt(b) - parseInt(a))
+  .map(([pct, langs]) => `| ${pct} | ${langs.join(", ")} |`);
+
 const table = [
-  "| Language | Code | Coverage |",
-  "|---|---|---|",
+  "| Coverage | Languages |",
+  "|---|---|",
   ...rows,
 ].join("\n");
 

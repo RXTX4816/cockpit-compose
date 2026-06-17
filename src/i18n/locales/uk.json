@@ -129,16 +129,16 @@
     "confirm_button": "Завершити всі контейнери"
   },
   "stop_modal": {
-    "aria_label": "Confirm stop",
-    "title": "Stop \"{{name}}\"?",
-    "body": "This will stop all running containers in the stack. They will not be removed and can be started again.",
-    "confirm_button": "Stop"
+    "aria_label": "Підтвердження зупинки",
+    "title": "Зупинити «{{name}}»?",
+    "body": "Це зупинить усі запущені контейнери стеку. Вони не будуть видалені і можуть бути запущені знову.",
+    "confirm_button": "Зупинити"
   },
   "restart_modal": {
-    "aria_label": "Confirm restart",
-    "title": "Restart \"{{name}}\"?",
-    "body": "This will restart all running services. Services will briefly be unavailable.",
-    "confirm_button": "Restart"
+    "aria_label": "Підтвердження перезапуску",
+    "title": "Перезапустити «{{name}}»?",
+    "body": "Це перезапустить усі запущені сервіси. Сервіси будуть короткочасно недоступні.",
+    "confirm_button": "Перезапустити"
   },
   "delete_modal": {
     "aria_label": "Видалення стеку compose — {{name}}",
@@ -319,7 +319,11 @@
     "running": "Виконання команди в {{name}}…",
     "initializing": "Ініціалізація…",
     "complete": "✓ Команда виконана",
-    "failed": "✗ Команда завершилася з помилкою"
+    "failed": "✗ Команда завершилася з помилкою",
+    "warning_title": "Тривалі сервіси будуть блокувати виконання",
+    "warning_body": "compose run запускає новий контейнер для вибраного сервісу. Якщо цей сервіс не має замінної команди (наприклад, вебсервер або база даних), контейнер запустить сервіс і продовжить працювати — він не завершиться сам по собі. Можливо, вам доведеться скасувати тут, а потім примусово зупинити стек для відновлення.",
+    "force_kill_button": "Примусово видалити контейнер",
+    "force_kill_tooltip": "Примусово видаляє застряглий одноразовий контейнер. Використовуйте, якщо сервіс не завершується сам по собі."
   },
   "exec_modal": {
     "aria_label": "Термінал — {{name}}",
@@ -520,7 +524,13 @@
     "success_title": "Стек відновлено",
     "error_src_missing": "Розпакований каталог не знайдено за шляхом {{path}}",
     "error_dest_exists": "Цільовий шлях {{path}} вже існує — скасування для уникнення перезапису",
-    "error_unknown": "Відновлення не вдалося (перевірте консоль браузера для деталей)"
+    "error_unknown": "Відновлення не вдалося (перевірте консоль браузера для деталей)",
+    "delete_backup_confirm1_title": "Видалити цю резервну копію?",
+    "delete_backup_confirm1_body": "Ви впевнені, що хочете видалити «{{filename}}»? Це видалить файл з диска.",
+    "delete_backup_confirm2_title": "Цю дію не можна скасувати",
+    "delete_backup_confirm2_body": "Це безповоротно видалить файл резервної копії з диска. Відновити його неможливо.",
+    "delete_backup_button": "Видалити резервну копію",
+    "delete_backup_error": "Помилка видалення резервної копії"
   },
   "external_link_modal": {
     "aria_label": "Попередження про зовнішнє посилання",

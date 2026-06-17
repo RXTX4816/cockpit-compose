@@ -129,16 +129,16 @@
     "confirm_button": "Ukončiť všetky kontajnery"
   },
   "stop_modal": {
-    "aria_label": "Confirm stop",
-    "title": "Stop \"{{name}}\"?",
-    "body": "This will stop all running containers in the stack. They will not be removed and can be started again.",
-    "confirm_button": "Stop"
+    "aria_label": "Potvrdiť zastavenie",
+    "title": "Zastaviť \"{{name}}\"?",
+    "body": "Toto zastaví všetky bežiace kontajnery v zásobníku. Nebudú odstránené a môžu byť znova spustené.",
+    "confirm_button": "Zastaviť"
   },
   "restart_modal": {
-    "aria_label": "Confirm restart",
-    "title": "Restart \"{{name}}\"?",
-    "body": "This will restart all running services. Services will briefly be unavailable.",
-    "confirm_button": "Restart"
+    "aria_label": "Potvrdiť reštart",
+    "title": "Reštartovať \"{{name}}\"?",
+    "body": "Toto reštartuje všetky bežiace služby. Služby budú krátko nedostupné.",
+    "confirm_button": "Reštartovať"
   },
   "delete_modal": {
     "aria_label": "Odstrániť compose zásobník — {{name}}",
@@ -319,7 +319,11 @@
     "running": "Spúšťam príkaz v {{name}}…",
     "initializing": "Inicializujem…",
     "complete": "✓ Príkaz dokončený",
-    "failed": "✗ Príkaz zlyhal"
+    "failed": "✗ Príkaz zlyhal",
+    "warning_title": "Dlhodobé služby budú blokovať",
+    "warning_body": "compose run spustí nový kontajner pre vybranú službu. Ak táto služba nemá prepisujúci príkaz (napr. webový server alebo databáza), kontajner spustí službu a zostane bežať — sám od seba sa neukončí. Možno bude potrebné zrušiť tu a potom zásobník vynútene zastaviť.",
+    "force_kill_button": "Vynútene odstrániť kontajner",
+    "force_kill_tooltip": "Vynútene odstráni uviaznutý jednorazový kontajner. Použite, keď sa služba sama neukončí."
   },
   "exec_modal": {
     "aria_label": "Terminál — {{name}}",
@@ -414,7 +418,7 @@
     "volume_error_title": "Nepodarilo sa načítať zväzky",
     "img_col_service": "Služba",
     "img_col_repo": "Repozitár",
-    "img_col_tag": "Tag",
+    "img_col_tag": "Štítok",
     "img_col_size": "Veľkosť",
     "img_col_created": "Vytvorený",
     "vol_col_name": "Názov",
@@ -520,7 +524,13 @@
     "success_title": "Zásobník obnovený",
     "error_src_missing": "Extrahovaný adresár sa nenašiel v {{path}}",
     "error_dest_exists": "Cieľová cesta {{path}} už existuje — zrušujem, aby nedošlo k prepísaniu",
-    "error_unknown": "Obnovenie zlyhalo (skontrolujte konzolu prehliadača pre podrobnosti)"
+    "error_unknown": "Obnovenie zlyhalo (skontrolujte konzolu prehliadača pre podrobnosti)",
+    "delete_backup_confirm1_title": "Odstrániť túto zálohu?",
+    "delete_backup_confirm1_body": "Ste si istí, že chcete odstrániť \"{{filename}}\"? Toto ju odstráni z disku.",
+    "delete_backup_confirm2_title": "Táto akcia je nezvratná",
+    "delete_backup_confirm2_body": "Toto natrvalo odstráni záložný súbor z disku. Nie je možné ho obnoviť.",
+    "delete_backup_button": "Odstrániť zálohu",
+    "delete_backup_error": "Odstránenie zálohy zlyhalo"
   },
   "external_link_modal": {
     "aria_label": "Upozornenie na externý odkaz",

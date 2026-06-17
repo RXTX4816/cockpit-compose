@@ -129,16 +129,16 @@
     "confirm_button": "Ukončit všechny kontejnery"
   },
   "stop_modal": {
-    "aria_label": "Confirm stop",
-    "title": "Stop \"{{name}}\"?",
-    "body": "This will stop all running containers in the stack. They will not be removed and can be started again.",
-    "confirm_button": "Stop"
+    "aria_label": "Potvrdit zastavení",
+    "title": "Zastavit \"{{name}}\"?",
+    "body": "Tím se zastaví všechny běžící kontejnery v zásobníku. Nebudou odebrány a lze je znovu spustit.",
+    "confirm_button": "Zastavit"
   },
   "restart_modal": {
-    "aria_label": "Confirm restart",
-    "title": "Restart \"{{name}}\"?",
-    "body": "This will restart all running services. Services will briefly be unavailable.",
-    "confirm_button": "Restart"
+    "aria_label": "Potvrdit restartování",
+    "title": "Restartovat \"{{name}}\"?",
+    "body": "Tím se restartují všechny běžící služby. Služby budou krátce nedostupné.",
+    "confirm_button": "Restartovat"
   },
   "delete_modal": {
     "aria_label": "Smazat compose zásobník — {{name}}",
@@ -319,7 +319,11 @@
     "running": "Spouštím příkaz v {{name}}…",
     "initializing": "Spouštím…",
     "complete": "✓ Příkaz dokončen",
-    "failed": "✗ Příkaz selhal"
+    "failed": "✗ Příkaz selhal",
+    "warning_title": "Varování: compose run spouští nový kontejner",
+    "warning_body": "compose run vytvoří a spustí nový kontejner pro zadanou službu. Tento kontejner není spravován jako součást zásobníku a nebude mít stejné chování jako běžné kontejnery služby. Pokud příkaz nezahrnuje dlouhotrvající process, kontejner se po dokončení příkazu okamžitě zastaví, ale zůstane v systému jako \"stuck\" kontejner, dokud jej ručně neodstraníte nebo nezvolíte možnost odebrat kontejner po spuštění (--rm). Pokud příkaz zahrnuje dlouhotrvající process, bude pokračovat v běhu i po zavření tohoto dialogu, ale nebude spravován jako součást zásobníku.",
+    "force_kill_button": "Násilně ukončit stuck kontejner",
+    "force_kill_tooltip": "Toto odešle SIGKILL kontejneru, což je nejrychlejší způsob, jak jej odstranit. Použijte pouze pokud běžné odstranění selže, protože tento kontejner může být stále užitečný pro ladění selhávajícího příkazu run."
   },
   "exec_modal": {
     "aria_label": "Terminál — {{name}}",
@@ -520,7 +524,13 @@
     "success_title": "Zásobník obnoven",
     "error_src_missing": "Extrahovaný adresář nebyl nalezen v {{path}}",
     "error_dest_exists": "Cílová cesta {{path}} již existuje — přerušuji, abych zabránil přepsání",
-    "error_unknown": "Obnovení selhalo (podrobnosti zkontrolujte v konzoli prohlížeče)"
+    "error_unknown": "Obnovení selhalo (podrobnosti zkontrolujte v konzoli prohlížeče)",
+    "delete_backup_confirm1_title": "Smazat tuto zálohu?",
+    "delete_backup_confirm1_body": "Opravdu chcete smazat \"{{filename}}\"? Tím ji odstraníte z disku.",
+    "delete_backup_confirm2_title": "Tato akce je nevratná",
+    "delete_backup_confirm2_body": "Tím trvale smažete soubor zálohy z disku. Neexistuje způsob, jak jej obnovit.",
+    "delete_backup_button": "Smazat zálohu",
+    "delete_backup_error": "Smazání zálohy selhalo"
   },
   "external_link_modal": {
     "aria_label": "Varování o externím odkazu",

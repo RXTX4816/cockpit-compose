@@ -126,6 +126,17 @@ On success a green **Stack restored** alert appears and the modal's footer switc
 
 ---
 
+## Deleting a backup
+
+In the **Restore** modal, each archive in the list has a **Delete** button. Clicking it opens a two-step confirmation:
+
+1. **First prompt** — confirms you want to delete the named file.
+2. **Second prompt** — a final confirmation before the file is permanently removed from disk.
+
+After deletion, the archive disappears from the list. This only removes the `.bak.tar.gz` file — no stack data is affected.
+
+---
+
 ## Notes
 
 - Backups do **not** include Docker volumes. Only the files in the stack directory (compose files, env files, and optionally subdirectories) are archived. Export volumes separately if you need a full data backup.

@@ -64,8 +64,8 @@
     "logs": "Log",
     "logs_title": "Visualizza log",
     "edit_title": "Modifica file compose",
-    "info": "Info",
-    "info_title": "Info sullo stack",
+    "info": "Informazioni",
+    "info_title": "Informazioni sullo stack",
     "events": "Eventi",
     "top": "Processi",
     "shell": "Terminale",
@@ -74,7 +74,7 @@
     "more_actions_for": "Altre azioni per {{name}}",
     "find_best_match": "Trova la corrispondenza migliore",
     "find_best_match_title": "Rileva la radice compose dagli stack attivi",
-    "backup": "Backup",
+    "backup": "Esegui backup",
     "scale": "Scala"
   },
   "health": {
@@ -129,16 +129,16 @@
     "confirm_button": "Termina forzatamente tutti i container"
   },
   "stop_modal": {
-    "aria_label": "Confirm stop",
-    "title": "Stop \"{{name}}\"?",
-    "body": "This will stop all running containers in the stack. They will not be removed and can be started again.",
-    "confirm_button": "Stop"
+    "aria_label": "Conferma stop",
+    "title": "Fermare \"{{name}}\"?",
+    "body": "Questo fermerà tutti i container in esecuzione nello stack. Non verranno rimossi e potranno essere riavviati.",
+    "confirm_button": "Ferma"
   },
   "restart_modal": {
-    "aria_label": "Confirm restart",
-    "title": "Restart \"{{name}}\"?",
-    "body": "This will restart all running services. Services will briefly be unavailable.",
-    "confirm_button": "Restart"
+    "aria_label": "Conferma riavvio",
+    "title": "Riavviare \"{{name}}\"?",
+    "body": "Questo riavvierà tutti i servizi in esecuzione. I servizi saranno brevemente non disponibili.",
+    "confirm_button": "Riavvia"
   },
   "delete_modal": {
     "aria_label": "Elimina stack compose — {{name}}",
@@ -299,7 +299,7 @@
     "level_all": "Tutti",
     "level_error": "Errore",
     "level_warn": "Avviso",
-    "level_info": "Info",
+    "level_info": "Informazioni",
     "download_tooltip": "Scarica log",
     "timestamps_tooltip": "Attiva timestamp",
     "scroll_top": "Vai all'inizio",
@@ -319,7 +319,11 @@
     "running": "Esecuzione del comando in {{name}}…",
     "initializing": "Avvio in corso…",
     "complete": "✓ Comando completato",
-    "failed": "✗ Comando non riuscito"
+    "failed": "✗ Comando non riuscito",
+    "warning_title": "I servizi a lunga esecuzione bloccheranno",
+    "warning_body": "compose run avvia un nuovo container per il servizio selezionato. Se quel servizio non ha un comando di override (ad esempio un server web o un database), il container avvierà il servizio e rimarrà in esecuzione — non si chiuderà da solo. Potrebbe essere necessario annullare qui e poi forzare lo stop dello stack per ripristinare.",
+    "force_kill_button": "Rimuovi forzatamente il container",
+    "force_kill_tooltip": "Rimuove forzatamente il container one-off bloccato. Usare quando il servizio non si chiude da solo."
   },
   "exec_modal": {
     "aria_label": "Terminale — {{name}}",
@@ -399,8 +403,8 @@
     "up_button": "Avvia"
   },
   "info_modal": {
-    "aria_label": "Info — {{name}}",
-    "title": "{{name}} — info",
+    "aria_label": "Informazioni — {{name}}",
+    "title": "{{name}} — informazioni",
     "section_compose_file": "File Compose",
     "section_services": "Servizi",
     "section_images": "Immagini",
@@ -487,7 +491,7 @@
   },
   "stats": {
     "cpu": "CPU",
-    "mem": "Mem"
+    "mem": "Memoria"
   },
   "backup_modal": {
     "title": "Backup {{name}}",
@@ -520,7 +524,13 @@
     "success_title": "Stack ripristinato",
     "error_src_missing": "Directory estratta non trovata in {{path}}",
     "error_dest_exists": "Il percorso di destinazione {{path}} esiste già — interruzione per evitare la sovrascrittura",
-    "error_unknown": "Ripristino non riuscito (controlla la console del browser per i dettagli)"
+    "error_unknown": "Ripristino non riuscito (controlla la console del browser per i dettagli)",
+    "delete_backup_confirm1_title": "Eliminare questo backup?",
+    "delete_backup_confirm1_body": "Sei sicuro di voler eliminare \"{{filename}}\"? Verrà rimosso dal disco.",
+    "delete_backup_confirm2_title": "Questa azione è irreversibile",
+    "delete_backup_confirm2_body": "Il file di backup verrà eliminato definitivamente dal disco. Non è possibile recuperarlo.",
+    "delete_backup_button": "Elimina backup",
+    "delete_backup_error": "Eliminazione del backup non riuscita"
   },
   "external_link_modal": {
     "aria_label": "Avviso link esterno",

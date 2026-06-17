@@ -5,7 +5,7 @@
     "save": "Simpan",
     "delete": "Hapus",
     "create": "Buat",
-    "edit": "Edit",
+    "edit": "Ubah",
     "back": "Kembali",
     "retry": "Coba lagi",
     "refresh": "Muat ulang",
@@ -53,7 +53,7 @@
     "up_title": "Jalankan tumpukan atau buat ulang kontainer yang berubah",
     "down": "Hentikan",
     "down_title": "Hentikan (hapus kontainer)",
-    "stop": "Stop",
+    "stop": "Hentikan",
     "start": "Mulai",
     "restart": "Mulai ulang",
     "pause": "Jeda",
@@ -64,7 +64,7 @@
     "logs": "Log",
     "logs_title": "Lihat log",
     "edit_title": "Edit file compose",
-    "info": "Info",
+    "info": "Informasi",
     "info_title": "Info tumpukan",
     "events": "Peristiwa",
     "top": "Proses",
@@ -129,16 +129,16 @@
     "confirm_button": "Paksa hentikan semua kontainer"
   },
   "stop_modal": {
-    "aria_label": "Confirm stop",
-    "title": "Stop \"{{name}}\"?",
-    "body": "This will stop all running containers in the stack. They will not be removed and can be started again.",
-    "confirm_button": "Stop"
+    "aria_label": "Konfirmasi penghentian",
+    "title": "Hentikan \"{{name}}\"?",
+    "body": "Ini akan menghentikan semua kontainer yang berjalan di tumpukan. Kontainer tidak akan dihapus dan dapat dijalankan kembali.",
+    "confirm_button": "Hentikan"
   },
   "restart_modal": {
-    "aria_label": "Confirm restart",
-    "title": "Restart \"{{name}}\"?",
-    "body": "This will restart all running services. Services will briefly be unavailable.",
-    "confirm_button": "Restart"
+    "aria_label": "Konfirmasi mulai ulang",
+    "title": "Mulai ulang \"{{name}}\"?",
+    "body": "Ini akan memulai ulang semua layanan yang berjalan. Layanan akan sebentar tidak tersedia.",
+    "confirm_button": "Mulai ulang"
   },
   "delete_modal": {
     "aria_label": "Hapus tumpukan compose — {{name}}",
@@ -222,7 +222,7 @@
     "unsaved_changes": "Perubahan belum disimpan",
     "env_file_button": "File env",
     "history_button": "Riwayat ({{count}})",
-    "edit_button": "Edit",
+    "edit_button": "Ubah",
     "lock_button": "Kunci",
     "show_diff_button": "Tampilkan perubahan",
     "hide_diff_button": "Sembunyikan perubahan",
@@ -299,7 +299,7 @@
     "level_all": "Semua",
     "level_error": "Error",
     "level_warn": "Peringatan",
-    "level_info": "Info",
+    "level_info": "Informasi",
     "download_tooltip": "Unduh log",
     "timestamps_tooltip": "Aktifkan cap waktu",
     "scroll_top": "Loncat ke atas",
@@ -319,7 +319,11 @@
     "running": "Menjalankan perintah di {{name}}…",
     "initializing": "Memulai…",
     "complete": "✓ Perintah selesai",
-    "failed": "✗ Perintah gagal"
+    "failed": "✗ Perintah gagal",
+    "warning_title": "Layanan yang berjalan lama akan memblokir",
+    "warning_body": "compose run memulai kontainer baru untuk layanan yang dipilih. Jika layanan tersebut tidak memiliki perintah pengganti (misalnya web server atau database), kontainer akan memulai layanan dan tetap berjalan — tidak akan keluar sendiri. Anda mungkin perlu membatalkan di sini lalu menghentikan paksa tumpukan untuk memulihkan.",
+    "force_kill_button": "Paksa hapus kontainer",
+    "force_kill_tooltip": "Menghapus paksa kontainer satu kali yang terjebak. Gunakan saat layanan tidak keluar sendiri."
   },
   "exec_modal": {
     "aria_label": "Terminal — {{name}}",
@@ -340,7 +344,7 @@
     "aria_label": "Peristiwa — {{name}}",
     "title": "Peristiwa — {{name}}",
     "stream_button": "Streaming peristiwa",
-    "stop_button": "Stop",
+    "stop_button": "Hentikan",
     "clear_button": "Bersihkan",
     "stream_prompt": "Tekan \"Streaming peristiwa\" untuk mulai memantau.",
     "error_title": "Kesalahan streaming peristiwa",
@@ -399,8 +403,8 @@
     "up_button": "Jalankan"
   },
   "info_modal": {
-    "aria_label": "Info — {{name}}",
-    "title": "{{name}} — info",
+    "aria_label": "Informasi — {{name}}",
+    "title": "{{name}} — informasi",
     "section_compose_file": "File Compose",
     "section_services": "Layanan",
     "section_images": "Image",
@@ -520,7 +524,13 @@
     "success_title": "Tumpukan dipulihkan",
     "error_src_missing": "Direktori yang diekstrak tidak ditemukan di {{path}}",
     "error_dest_exists": "Jalur target {{path}} sudah ada — membatalkan untuk mencegah penimpaan",
-    "error_unknown": "Pemulihan gagal (periksa konsol browser untuk detail)"
+    "error_unknown": "Pemulihan gagal (periksa konsol browser untuk detail)",
+    "delete_backup_confirm1_title": "Hapus cadangan ini?",
+    "delete_backup_confirm1_body": "Apakah Anda yakin ingin menghapus \"{{filename}}\"? Ini akan menghapusnya dari disk.",
+    "delete_backup_confirm2_title": "Tindakan ini tidak dapat dibatalkan",
+    "delete_backup_confirm2_body": "Ini akan menghapus file cadangan secara permanen dari disk. Tidak ada cara untuk memulihkannya.",
+    "delete_backup_button": "Hapus cadangan",
+    "delete_backup_error": "Gagal menghapus cadangan"
   },
   "external_link_modal": {
     "aria_label": "Peringatan tautan eksternal",

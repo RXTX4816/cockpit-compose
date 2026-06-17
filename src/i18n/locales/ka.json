@@ -59,7 +59,7 @@
     "pause": "პაუზა",
     "unpause": "გაგრძელება",
     "kill": "იძულებით შეჩერება",
-    "pull": "Pull",
+    "pull": "Pull-ი",
     "pull_title": "უახლესი სურათების pull-ი",
     "logs": "ლოგები",
     "logs_title": "ლოგების ნახვა",
@@ -129,16 +129,16 @@
     "confirm_button": "ყველა კონტეინერის იძულებით შეჩერება"
   },
   "stop_modal": {
-    "aria_label": "Confirm stop",
-    "title": "Stop \"{{name}}\"?",
-    "body": "This will stop all running containers in the stack. They will not be removed and can be started again.",
-    "confirm_button": "Stop"
+    "aria_label": "შეჩერების დადასტურება",
+    "title": "\"{{name}}\" შეჩერდება?",
+    "body": "ეს შეაჩერებს სტეკის ყველა გაშვებულ კონტეინერს. ისინი არ წაიშლება და შეიძლება ხელახლა გაეშვას.",
+    "confirm_button": "შეჩერება"
   },
   "restart_modal": {
-    "aria_label": "Confirm restart",
-    "title": "Restart \"{{name}}\"?",
-    "body": "This will restart all running services. Services will briefly be unavailable.",
-    "confirm_button": "Restart"
+    "aria_label": "გადატვირთვის დადასტურება",
+    "title": "\"{{name}}\" გადაიტვირთება?",
+    "body": "ეს გადატვირთავს ყველა გაშვებულ სერვისს. სერვისები მოკლე დროით მიუწვდომელი იქნება.",
+    "confirm_button": "გადატვირთვა"
   },
   "delete_modal": {
     "aria_label": "compose სტეკის წაშლა — {{name}}",
@@ -319,7 +319,11 @@
     "running": "ბრძანება სრულდება {{name}}-ში…",
     "initializing": "იწყება…",
     "complete": "✓ ბრძანება შესრულდა",
-    "failed": "✗ ბრძანება ვერ შესრულდა"
+    "failed": "✗ ბრძანება ვერ შესრულდა",
+    "warning_title": "გრძელვადიანი სერვისები დაბლოკავს",
+    "warning_body": "compose run იწყებს ახალ კონტეინერს შერჩეული სერვისისთვის. თუ ამ სერვისს არ აქვს გადამფარავი ბრძანება (მაგ. ვებ სერვერი ან მონაცემთა ბაზა), კონტეინერი გაეშვება და გაგრძელდება — იგი თავისით არ გამოვა. შეიძლება დაგჭირდეთ აქ გაუქმება და შემდეგ სტეკის იძულებით შეჩერება აღდგენისთვის.",
+    "force_kill_button": "კონტეინერის იძულებითი წაშლა",
+    "force_kill_tooltip": "იძულებით წაშლის გაჭედილ ერთჯერად კონტეინერს. გამოიყენეთ, როდესაც სერვისი თავისით არ გამოდის."
   },
   "exec_modal": {
     "aria_label": "ტერმინალი — {{name}}",
@@ -358,8 +362,8 @@
     "empty": "გაშვებული პროცესები ვერ მოიძებნა."
   },
   "pull_modal": {
-    "aria_label": "Pull — {{name}}",
-    "title": "Pull — {{name}}",
+    "aria_label": "Pull-ი — {{name}}",
+    "title": "Pull-ი — {{name}}",
     "pulling": "{{name}}-ისთვის სურათების pull-ი…",
     "complete": "✓ Pull დასრულდა",
     "failed": "✗ Pull ვერ მოხერხდა",
@@ -374,7 +378,7 @@
     "images_title": "განახლებული სურათები:",
     "unpinned_label": "⚠ არ არის ფიქსირებული",
     "unpinned_notice": "ფიქსირებული სურათები ყოველთვის იღებენ იმას, რასაც რეესტრი უახლესად თვლის და pull-ებს შორის ქცევის შეცვლის ყველაზე მეტი შანსი აქვთ.",
-    "pull_button": "Pull"
+    "pull_button": "Pull-ი"
   },
   "up_modal": {
     "aria_label": "გაშვება — {{name}}",
@@ -520,7 +524,13 @@
     "success_title": "სტეკი აღდგა",
     "error_src_missing": "გამოყვანილი დირექტორია ვერ მოიძებნა {{path}}-ში",
     "error_dest_exists": "სამიზნე გზა {{path}} უკვე არსებობს — გადაწერის თავიდან ასაცილებლად შეჩერდა",
-    "error_unknown": "აღდგენა ვერ მოხერხდა (დეტალებისთვის შეამოწმეთ ბრაუზერის კონსოლი)"
+    "error_unknown": "აღდგენა ვერ მოხერხდა (დეტალებისთვის შეამოწმეთ ბრაუზერის კონსოლი)",
+    "delete_backup_confirm1_title": "ეს სარეზერვო ასლი წაიშლება?",
+    "delete_backup_confirm1_body": "დარწმუნებული ხართ, რომ გსურთ \"{{filename}}\" წაშლა? ეს წაშლის მას დისკიდან.",
+    "delete_backup_confirm2_title": "ეს მოქმედება შეუქცევადია",
+    "delete_backup_confirm2_body": "ეს სამუდამოდ წაშლის სარეზერვო ასლის ფაილს დისკიდან. მისი აღდგენა შეუძლებელია.",
+    "delete_backup_button": "სარეზერვო ასლის წაშლა",
+    "delete_backup_error": "სარეზერვო ასლის წაშლა ვერ მოხერხდა"
   },
   "external_link_modal": {
     "aria_label": "გარე ბმულის გაფრთხილება",

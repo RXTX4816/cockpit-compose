@@ -129,16 +129,16 @@
     "confirm_button": "Завершить все контейнеры"
   },
   "stop_modal": {
-    "aria_label": "Confirm stop",
-    "title": "Stop \"{{name}}\"?",
-    "body": "This will stop all running containers in the stack. They will not be removed and can be started again.",
-    "confirm_button": "Stop"
+    "aria_label": "Подтверждение остановки",
+    "title": "Остановить «{{name}}»?",
+    "body": "Это остановит все запущенные контейнеры стека. Они не будут удалены и могут быть запущены снова.",
+    "confirm_button": "Остановить"
   },
   "restart_modal": {
-    "aria_label": "Confirm restart",
-    "title": "Restart \"{{name}}\"?",
-    "body": "This will restart all running services. Services will briefly be unavailable.",
-    "confirm_button": "Restart"
+    "aria_label": "Подтверждение перезапуска",
+    "title": "Перезапустить «{{name}}»?",
+    "body": "Это перезапустит все запущенные сервисы. Сервисы будут кратковременно недоступны.",
+    "confirm_button": "Перезапустить"
   },
   "delete_modal": {
     "aria_label": "Удаление стека compose — {{name}}",
@@ -319,7 +319,11 @@
     "running": "Выполнение команды в {{name}}…",
     "initializing": "Инициализация…",
     "complete": "✓ Команда выполнена",
-    "failed": "✗ Команда завершилась с ошибкой"
+    "failed": "✗ Команда завершилась с ошибкой",
+    "warning_title": "Длительные сервисы будут блокировать выполнение",
+    "warning_body": "compose run запускает новый контейнер для выбранного сервиса. Если у этого сервиса нет переопределяющей команды (например, веб-сервер или база данных), контейнер запустит сервис и продолжит работу — он не завершится сам по себе. Возможно, вам придётся отменить здесь, а затем принудительно остановить стек для восстановления.",
+    "force_kill_button": "Принудительно удалить контейнер",
+    "force_kill_tooltip": "Принудительно удаляет застрявший одноразовый контейнер. Используйте, если сервис не завершается сам по себе."
   },
   "exec_modal": {
     "aria_label": "Терминал — {{name}}",
@@ -520,7 +524,13 @@
     "success_title": "Стек восстановлен",
     "error_src_missing": "Распакованный каталог не найден по пути {{path}}",
     "error_dest_exists": "Путь назначения {{path}} уже существует — отмена во избежание перезаписи",
-    "error_unknown": "Восстановление не удалось (проверьте консоль браузера для подробностей)"
+    "error_unknown": "Восстановление не удалось (проверьте консоль браузера для подробностей)",
+    "delete_backup_confirm1_title": "Удалить эту резервную копию?",
+    "delete_backup_confirm1_body": "Вы уверены, что хотите удалить «{{filename}}»? Это удалит файл с диска.",
+    "delete_backup_confirm2_title": "Это действие необратимо",
+    "delete_backup_confirm2_body": "Это безвозвратно удалит файл резервной копии с диска. Восстановить его невозможно.",
+    "delete_backup_button": "Удалить резервную копию",
+    "delete_backup_error": "Не удалось удалить резервную копию"
   },
   "external_link_modal": {
     "aria_label": "Предупреждение о внешней ссылке",

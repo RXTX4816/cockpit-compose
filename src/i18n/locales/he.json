@@ -129,16 +129,16 @@
     "confirm_button": "סיים כפוי את כל המכולות"
   },
   "stop_modal": {
-    "aria_label": "Confirm stop",
-    "title": "Stop \"{{name}}\"?",
-    "body": "This will stop all running containers in the stack. They will not be removed and can be started again.",
-    "confirm_button": "Stop"
+    "aria_label": "אישור עצירה",
+    "title": "לעצור את \"{{name}}\"?",
+    "body": "פעולה זו תעצור את כל המכולות הפעילות בערימה. הן לא יוסרו וניתן יהיה להפעילן מחדש.",
+    "confirm_button": "עצור"
   },
   "restart_modal": {
-    "aria_label": "Confirm restart",
-    "title": "Restart \"{{name}}\"?",
-    "body": "This will restart all running services. Services will briefly be unavailable.",
-    "confirm_button": "Restart"
+    "aria_label": "אישור הפעלה מחדש",
+    "title": "להפעיל מחדש את \"{{name}}\"?",
+    "body": "פעולה זו תפעיל מחדש את כל השירותים הפועלים. השירותים יהיו לא זמינים לזמן קצר.",
+    "confirm_button": "הפעל מחדש"
   },
   "delete_modal": {
     "aria_label": "מחק ערימת compose — {{name}}",
@@ -319,7 +319,11 @@
     "running": "מריץ פקודה ב-{{name}}…",
     "initializing": "מפעיל…",
     "complete": "✓ הפקודה הושלמה",
-    "failed": "✗ הפקודה נכשלה"
+    "failed": "✗ הפקודה נכשלה",
+    "warning_title": "שירותים ממושכים יחסמו",
+    "warning_body": "הפקודה compose run מפעילה מכולה חדשה עבור השירות הנבחר. אם לשירות אין פקודה עוקפת (למשל שרת אינטרנט או מסד נתונים), המכולה תפעיל את השירות ותישאר פועלת — היא לא תצא מעצמה. ייתכן שתצטרך לבטל כאן ואז לכבות את הערימה בכפייה כדי להתאושש.",
+    "force_kill_button": "הסר מכולה בכפייה",
+    "force_kill_tooltip": "מסיר בכפייה את המכולה החד-פעמית התקועה. השתמש כאשר השירות לא יוצא מעצמו."
   },
   "exec_modal": {
     "aria_label": "מסוף — {{name}}",
@@ -520,7 +524,13 @@
     "success_title": "הערימה שוחזרה",
     "error_src_missing": "תיקייה שחולצה לא נמצאה ב-{{path}}",
     "error_dest_exists": "נתיב היעד {{path}} כבר קיים — מבטל כדי למנוע החלפה",
-    "error_unknown": "השחזור נכשל (בדוק את קונסולת הדפדפן לפרטים)"
+    "error_unknown": "השחזור נכשל (בדוק את קונסולת הדפדפן לפרטים)",
+    "delete_backup_confirm1_title": "למחוק גיבוי זה?",
+    "delete_backup_confirm1_body": "האם אתה בטוח שברצונך למחוק את \"{{filename}}\"? פעולה זו תסיר אותו מהדיסק.",
+    "delete_backup_confirm2_title": "פעולה זו אינה הפיכה",
+    "delete_backup_confirm2_body": "פעולה זו תמחק לצמיתות את קובץ הגיבוי מהדיסק. אין דרך לשחזר אותו.",
+    "delete_backup_button": "מחק גיבוי",
+    "delete_backup_error": "מחיקת הגיבוי נכשלה"
   },
   "external_link_modal": {
     "aria_label": "אזהרת קישור חיצוני",

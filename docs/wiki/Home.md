@@ -5,7 +5,9 @@ Cockpit Compose is a web-based UI for managing [Docker Compose](https://docs.doc
 ## What you can do
 
 - See all your Compose stacks at a glance with live CPU and memory usage
+- Search and filter stacks by name and status
 - Start, stop, restart, pause, or forcefully kill stacks with one click
+- Scale individual services to run multiple replicas
 - Edit compose files in a built-in editor with schema validation, diff view, and snapshots
 - Manage multiple compose files per stack (base + overrides)
 - Stream real-time logs with per-service filtering and text search
@@ -16,6 +18,7 @@ Cockpit Compose is a web-based UI for managing [Docker Compose](https://docs.doc
 - Create new stacks from a Git URL, a template, or from scratch
 - Import and manage stacks that are stopped or stored on disk
 - Back up a stack to a `.bak.tar.gz` archive and restore it later
+- Switch between Docker and Podman runtimes with one click
 - Works with rootless Docker automatically — no configuration needed
 
 ## Pages
@@ -33,9 +36,12 @@ Cockpit Compose is a web-based UI for managing [Docker Compose](https://docs.doc
 | [Shell Access](Shell-Access) | Interactive terminal inside a service container |
 | [Running Commands](Running-Commands) | Run one-off commands with docker compose run |
 | [Prune Resources](Prune-Resources) | Remove unused images, containers, volumes, and networks |
+| [Scaling Services](Scaling-Services) | Adjust replica counts for individual services |
 | [Creating Stacks](Creating-Stacks) | Create a new stack from Git, a template, or manually |
 | [Importing Stacks](Importing-Stacks) | Scan a directory to find and manage offline stacks |
 | [Backup and Restore](Backup-and-Restore) | Archive a stack to a `.bak.tar.gz` file and restore it |
+| [Podman Compatibility](Podman-Compatibility) | Use the plugin with Podman instead of Docker |
+| [Troubleshooting](Troubleshooting) | Fixes for common installation and runtime problems |
 
 ## Interface conventions
 
@@ -56,4 +62,5 @@ Cockpit Compose is a web-based UI for managing [Docker Compose](https://docs.doc
 ## Getting help
 
 - Click **Help** in the footer to open this wiki.
+- Check [Troubleshooting](Troubleshooting) for common installation and runtime problems.
 - Click **Feedback / Report bug** in the footer to open a GitHub issue.

@@ -129,16 +129,16 @@
     "confirm_button": "終止所有容器"
   },
   "stop_modal": {
-    "aria_label": "Confirm stop",
-    "title": "Stop \"{{name}}\"?",
-    "body": "This will stop all running containers in the stack. They will not be removed and can be started again.",
-    "confirm_button": "Stop"
+    "aria_label": "確認停止",
+    "title": "停止「{{name}}」？",
+    "body": "這將停止堆疊中所有正在執行的容器。容器不會被移除，且可以再次啟動。",
+    "confirm_button": "停止"
   },
   "restart_modal": {
-    "aria_label": "Confirm restart",
-    "title": "Restart \"{{name}}\"?",
-    "body": "This will restart all running services. Services will briefly be unavailable.",
-    "confirm_button": "Restart"
+    "aria_label": "確認重新啟動",
+    "title": "重新啟動「{{name}}」？",
+    "body": "這將重新啟動所有正在執行的服務。服務將短暫無法使用。",
+    "confirm_button": "重新啟動"
   },
   "delete_modal": {
     "aria_label": "刪除 compose 堆疊 — {{name}}",
@@ -319,7 +319,11 @@
     "running": "正在 {{name}} 中執行命令…",
     "initializing": "初始化中…",
     "complete": "✓ 命令已完成",
-    "failed": "✗ 命令失敗"
+    "failed": "✗ 命令失敗",
+    "warning_title": "長時間執行的服務將會封鎖",
+    "warning_body": "compose run 會為所選服務啟動一個新容器。如果該服務沒有覆寫的命令（例如 Web 伺服器或資料庫），容器將啟動服務並持續執行 — 它不會自行退出。您可能需要在此取消，然後強制停止堆疊以恢復。",
+    "force_kill_button": "強制移除容器",
+    "force_kill_tooltip": "強制移除卡住的一次性容器。在服務不會自行退出時使用。"
   },
   "exec_modal": {
     "aria_label": "終端機 — {{name}}",
@@ -520,7 +524,13 @@
     "success_title": "堆疊已還原",
     "error_src_missing": "在 {{path}} 找不到已解壓縮的目錄",
     "error_dest_exists": "目標路徑 {{path}} 已存在 — 正在中止以防止覆寫",
-    "error_unknown": "還原失敗（詳情請查看瀏覽器主控台）"
+    "error_unknown": "還原失敗（詳情請查看瀏覽器主控台）",
+    "delete_backup_confirm1_title": "刪除此備份？",
+    "delete_backup_confirm1_body": "確定要刪除「{{filename}}」嗎？這將從磁碟中移除該檔案。",
+    "delete_backup_confirm2_title": "此操作無法復原",
+    "delete_backup_confirm2_body": "這將從磁碟永久刪除備份檔案，且無法恢復。",
+    "delete_backup_button": "刪除備份",
+    "delete_backup_error": "刪除備份失敗"
   },
   "external_link_modal": {
     "aria_label": "外部連結警告",

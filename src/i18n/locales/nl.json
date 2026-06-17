@@ -64,7 +64,7 @@
     "logs": "Logboeken",
     "logs_title": "Logboeken bekijken",
     "edit_title": "Compose-bestand bewerken",
-    "info": "Info",
+    "info": "Informatie",
     "info_title": "Stack-info",
     "events": "Gebeurtenissen",
     "top": "Processen",
@@ -91,10 +91,10 @@
     "version": "Versie: {{version}}",
     "docker_version": "{{runtime}}: {{version}}",
     "compose_version": "{{runtime}} Compose: {{version}}",
-    "rootless": "Rootless",
+    "rootless": "Rootloos",
     "rootless_help_title": "Rootless-modus",
     "rootless_help_body": "Docker of Podman wordt uitgevoerd in rootless-modus — containers draaien als uw gebruiker, niet als root. Dit verbetert de beveiliging, maar kan sommige functies beperken zoals het binden van geprivilegieerde poorten (<1024), toegang tot systeempaden of het gebruik van bepaalde netwerkstuurprogramma's.",
-    "help": "Help",
+    "help": "Hulp",
     "feedback": "Feedback / Bug melden"
   },
   "runtime": {
@@ -129,16 +129,16 @@
     "confirm_button": "Alle containers geforceerd stoppen"
   },
   "stop_modal": {
-    "aria_label": "Confirm stop",
-    "title": "Stop \"{{name}}\"?",
-    "body": "This will stop all running containers in the stack. They will not be removed and can be started again.",
-    "confirm_button": "Stop"
+    "aria_label": "Stoppen bevestigen",
+    "title": "\"{{name}}\" stoppen?",
+    "body": "Dit stopt alle actieve containers in de stack. Ze worden niet verwijderd en kunnen opnieuw worden gestart.",
+    "confirm_button": "Stoppen"
   },
   "restart_modal": {
-    "aria_label": "Confirm restart",
-    "title": "Restart \"{{name}}\"?",
-    "body": "This will restart all running services. Services will briefly be unavailable.",
-    "confirm_button": "Restart"
+    "aria_label": "Opnieuw starten bevestigen",
+    "title": "\"{{name}}\" opnieuw starten?",
+    "body": "Dit start alle actieve services opnieuw. Services zijn kort niet beschikbaar.",
+    "confirm_button": "Opnieuw starten"
   },
   "delete_modal": {
     "aria_label": "Compose-stack verwijderen — {{name}}",
@@ -225,7 +225,7 @@
     "lock_button": "Vergrendelen",
     "show_diff_button": "Wijzigingen tonen",
     "hide_diff_button": "Wijzigingen verbergen",
-    "snapshots_title": "Snapshots",
+    "snapshots_title": "Momentopnamen",
     "snapshot_show_diff": "Wijzigingen",
     "snapshot_hide_diff": "Verbergen",
     "snapshot_restore": "Herstellen",
@@ -299,7 +299,7 @@
     "level_all": "Alle",
     "level_error": "Fout",
     "level_warn": "Waarschuwing",
-    "level_info": "Info",
+    "level_info": "Informatie",
     "download_tooltip": "Logboeken downloaden",
     "timestamps_tooltip": "Tijdstempels in-/uitschakelen",
     "scroll_top": "Naar boven springen",
@@ -310,7 +310,7 @@
   "run_modal": {
     "aria_label": "Uitvoeren — {{name}}",
     "title": "Uitvoeren — {{name}}",
-    "field_service": "Service",
+    "field_service": "Dienst",
     "field_service_placeholder": "servicenaam",
     "field_command": "Opdracht",
     "field_command_placeholder": "echo hello",
@@ -319,12 +319,16 @@
     "running": "Opdracht uitvoeren in {{name}}…",
     "initializing": "Starten…",
     "complete": "✓ Opdracht voltooid",
-    "failed": "✗ Opdracht mislukt"
+    "failed": "✗ Opdracht mislukt",
+    "warning_title": "Langlopende services zullen blokkeren",
+    "warning_body": "compose run start een nieuwe container voor de geselecteerde service. Als die service geen overschrijvend commando heeft (bijv. een webserver of database), start de container de service en blijft actief — deze sluit niet vanzelf. Mogelijk moet u hier annuleren en vervolgens de stack geforceerd stoppen om te herstellen.",
+    "force_kill_button": "Container geforceerd verwijderen",
+    "force_kill_tooltip": "Verwijdert geforceerd de vastgelopen eenmalige container. Gebruik dit wanneer de service niet vanzelf sluit."
   },
   "exec_modal": {
     "aria_label": "Terminal — {{name}}",
     "title": "Terminal — {{name}}",
-    "field_service": "Service",
+    "field_service": "Dienst",
     "field_service_placeholder": "servicenaam",
     "field_command": "Opdracht",
     "field_command_placeholder": "/bin/sh",
@@ -345,10 +349,10 @@
     "stream_prompt": "Druk op \"Gebeurtenissen streamen\" om te beginnen met bewaken.",
     "error_title": "Fout bij het streamen van gebeurtenissen",
     "col_time": "Tijd",
-    "col_type": "Type",
+    "col_type": "Soort",
     "col_action": "Actie",
-    "col_service": "Service",
-    "col_details": "Details"
+    "col_service": "Dienst",
+    "col_details": "Bijzonderheden"
   },
   "top_modal": {
     "aria_label": "Processen — {{name}}",
@@ -399,11 +403,11 @@
     "up_button": "Starten"
   },
   "info_modal": {
-    "aria_label": "Info — {{name}}",
-    "title": "{{name}} — info",
+    "aria_label": "Informatie — {{name}}",
+    "title": "{{name}} — informatie",
     "section_compose_file": "Compose-bestand",
-    "section_services": "Services",
-    "section_images": "Images",
+    "section_services": "Diensten",
+    "section_images": "Afbeeldingen",
     "section_volumes": "Volumes",
     "no_containers": "Geen containers gevonden.",
     "no_images": "Geen images gevonden.",
@@ -412,13 +416,13 @@
     "container_error_title": "Container-info kan niet worden geladen",
     "image_error_title": "Images kunnen niet worden geladen",
     "volume_error_title": "Volumes kunnen niet worden geladen",
-    "img_col_service": "Service",
-    "img_col_repo": "Repository",
-    "img_col_tag": "Tag",
+    "img_col_service": "Dienst",
+    "img_col_repo": "Opslagplaats",
+    "img_col_tag": "Label",
     "img_col_size": "Grootte",
     "img_col_created": "Aangemaakt",
     "vol_col_name": "Naam",
-    "vol_col_driver": "Driver",
+    "vol_col_driver": "Stuurprogramma",
     "vol_col_mountpoint": "Koppelpunt",
     "section_networks": "Netwerken",
     "no_networks": "Geen netwerken gevonden.",
@@ -440,7 +444,7 @@
     "not_running_preview_body": "Bronnen die ongebruikt lijken, kunnen nog steeds nodig zijn om de stack opnieuw te starten. Verwijderde volumes kunnen niet worden hersteld.",
     "destructive_title": "Destructieve actie — kan niet ongedaan worden gemaakt",
     "destructive_body": "Opruimen verwijdert Docker-bronnen permanent. Volumes kunnen met name permanente gegevens bevatten die niet kunnen worden hersteld. Controleer zorgvuldig voordat u doorgaat.",
-    "images_label": "Images",
+    "images_label": "Afbeeldingen",
     "images_description": "Oudere imageversies van de repos van deze stack die niet meer worden gebruikt door een container.",
     "containers_label": "Containers",
     "containers_description": "Gestopte containers die bij deze stack horen.",
@@ -487,7 +491,7 @@
   },
   "stats": {
     "cpu": "CPU",
-    "mem": "Mem"
+    "mem": "Geh"
   },
   "backup_modal": {
     "title": "Back-up {{name}}",
@@ -520,7 +524,13 @@
     "success_title": "Stack hersteld",
     "error_src_missing": "Uitgepakte map niet gevonden in {{path}}",
     "error_dest_exists": "Doelpad {{path}} bestaat al — afgebroken om overschrijven te voorkomen",
-    "error_unknown": "Herstellen mislukt (controleer de browserconsole voor details)"
+    "error_unknown": "Herstellen mislukt (controleer de browserconsole voor details)",
+    "delete_backup_confirm1_title": "Deze back-up verwijderen?",
+    "delete_backup_confirm1_body": "Weet u zeker dat u \"{{filename}}\" wilt verwijderen? Dit verwijdert het van de schijf.",
+    "delete_backup_confirm2_title": "Deze actie is onomkeerbaar",
+    "delete_backup_confirm2_body": "Dit verwijdert het back-upbestand permanent van de schijf. Er is geen manier om het te herstellen.",
+    "delete_backup_button": "Back-up verwijderen",
+    "delete_backup_error": "Verwijderen van back-up mislukt"
   },
   "external_link_modal": {
     "aria_label": "Waarschuwing externe koppeling",
@@ -529,9 +539,9 @@
   },
   "container_table": {
     "replica_count": "×{{count}}",
-    "col_status": "Status",
-    "col_service": "Service",
-    "col_image": "Image",
+    "col_status": "Toestand",
+    "col_service": "Dienst",
+    "col_image": "Afbeelding",
     "col_uptime": "Uptime"
   },
   "scale_modal": {

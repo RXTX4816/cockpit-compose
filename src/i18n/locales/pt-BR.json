@@ -74,7 +74,7 @@
     "more_actions_for": "Mais ações para {{name}}",
     "find_best_match": "Encontrar melhor correspondência",
     "find_best_match_title": "Inferir raiz do compose a partir de pilhas ativas",
-    "backup": "Backup",
+    "backup": "Fazer backup",
     "scale": "Escalar"
   },
   "health": {
@@ -129,16 +129,16 @@
     "confirm_button": "Matar todos os contêineres"
   },
   "stop_modal": {
-    "aria_label": "Confirm stop",
-    "title": "Stop \"{{name}}\"?",
-    "body": "This will stop all running containers in the stack. They will not be removed and can be started again.",
-    "confirm_button": "Stop"
+    "aria_label": "Confirmar parada",
+    "title": "Parar \"{{name}}\"?",
+    "body": "Isso irá parar todos os contêineres em execução na pilha. Eles não serão removidos e poderão ser iniciados novamente.",
+    "confirm_button": "Parar"
   },
   "restart_modal": {
-    "aria_label": "Confirm restart",
-    "title": "Restart \"{{name}}\"?",
-    "body": "This will restart all running services. Services will briefly be unavailable.",
-    "confirm_button": "Restart"
+    "aria_label": "Confirmar reinicialização",
+    "title": "Reiniciar \"{{name}}\"?",
+    "body": "Isso irá reiniciar todos os serviços em execução. Os serviços ficarão brevemente indisponíveis.",
+    "confirm_button": "Reiniciar"
   },
   "delete_modal": {
     "aria_label": "Excluir pilha compose — {{name}}",
@@ -225,7 +225,7 @@
     "lock_button": "Bloquear",
     "show_diff_button": "Mostrar alterações",
     "hide_diff_button": "Ocultar alterações",
-    "snapshots_title": "Snapshots",
+    "snapshots_title": "Instantâneos",
     "snapshot_show_diff": "Alterações",
     "snapshot_hide_diff": "Ocultar",
     "snapshot_restore": "Restaurar",
@@ -299,7 +299,7 @@
     "level_all": "Todos",
     "level_error": "Erro",
     "level_warn": "Aviso",
-    "level_info": "Info",
+    "level_info": "Informações",
     "download_tooltip": "Baixar logs",
     "timestamps_tooltip": "Alternar timestamps",
     "scroll_top": "Ir para o topo",
@@ -319,7 +319,11 @@
     "running": "Executando comando em {{name}}…",
     "initializing": "Iniciando…",
     "complete": "✓ Comando concluído",
-    "failed": "✗ Comando falhou"
+    "failed": "✗ Comando falhou",
+    "warning_title": "Serviços de longa duração irão bloquear",
+    "warning_body": "compose run inicia um novo contêiner para o serviço selecionado. Se esse serviço não tiver um comando substituto (p. ex. um servidor web ou banco de dados), o contêiner iniciará o serviço e continuará em execução — não encerrará por conta própria. Talvez seja necessário cancelar aqui e depois forçar a parada da pilha para recuperar.",
+    "force_kill_button": "Forçar remoção do contêiner",
+    "force_kill_tooltip": "Remove forçosamente o contêiner travado. Use quando o serviço não encerrar por conta própria."
   },
   "exec_modal": {
     "aria_label": "Terminal — {{name}}",
@@ -487,7 +491,7 @@
   },
   "stats": {
     "cpu": "CPU",
-    "mem": "Mem"
+    "mem": "Memória"
   },
   "backup_modal": {
     "title": "Backup de {{name}}",
@@ -520,7 +524,13 @@
     "success_title": "Pilha restaurada",
     "error_src_missing": "Diretório extraído não encontrado em {{path}}",
     "error_dest_exists": "O caminho de destino {{path}} já existe — abortando para evitar sobrescrita",
-    "error_unknown": "A restauração falhou (verifique o console do navegador para detalhes)"
+    "error_unknown": "A restauração falhou (verifique o console do navegador para detalhes)",
+    "delete_backup_confirm1_title": "Excluir este backup?",
+    "delete_backup_confirm1_body": "Tem certeza que deseja excluir \"{{filename}}\"? Isso o removerá do disco.",
+    "delete_backup_confirm2_title": "Esta ação é irreversível",
+    "delete_backup_confirm2_body": "Isso excluirá permanentemente o arquivo de backup do disco. Não há como recuperá-lo.",
+    "delete_backup_button": "Excluir backup",
+    "delete_backup_error": "Falha ao excluir backup"
   },
   "external_link_modal": {
     "aria_label": "Aviso de link externo",
@@ -529,7 +539,7 @@
   },
   "container_table": {
     "replica_count": "×{{count}}",
-    "col_status": "Status",
+    "col_status": "Estado",
     "col_service": "Serviço",
     "col_image": "Imagem",
     "col_uptime": "Tempo ativo"

@@ -77,12 +77,11 @@ Choose a pre-built compose file template as your starting point.
 ┌──────────────────────────────────────────────────────┐
 │  Create stack — myapp                          [✕]   │
 ├──────────────────────────────────────────────────────┤
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐           │
-│  │ Nginx    │  │ Postgres │  │ Wordpress│           │
-│  │ Reverse  │  │ + Adminer│  │ + MySQL  │           │
-│  │ Proxy    │  │          │  │          │           │
-│  └──────────┘  └──────────┘  └──────────┘           │
-│  ...                                                 │
+│  ┌───────────────┐  ┌───────────────┐               │
+│  │ Minimal       │  │ Small         │  ...           │
+│  │ Single svc,   │  │ (app + db)    │               │
+│  │ port, restart │  │ Two services  │               │
+│  └───────────────┘  └───────────────┘               │
 │                                                      │
 │  [YAML editor — selected template content]           │
 ├──────────────────────────────────────────────────────┤
@@ -90,8 +89,19 @@ Choose a pre-built compose file template as your starting point.
 └──────────────────────────────────────────────────────┘
 ```
 
+Available templates:
+
+| Template | Description |
+|---|---|
+| **Minimal** | Single service with a port mapping and restart policy |
+| **Small (app + db)** | Two services sharing a named network |
+| **Volumes** | Named volume, bind mount, and tmpfs examples |
+| **Networking** | Custom bridge network with aliases and an internal backend network |
+| **Healthcheck & deps** | `healthcheck`, `depends_on` with condition, and `restart: on-failure` |
+| **Full example** | Networks, volumes, healthcheck, env_file, multiple services |
+
 1. Click on a template card. The template's compose file content loads into the editor.
-2. Review and modify the content as needed — change image tags, port numbers, environment variables, etc.
+2. Review and modify the content — change image names, port numbers, environment variables, etc. All templates use placeholder image names (`my-app:latest`, `my-db:latest`) that must be replaced.
 3. Click **Create** to write the file to disk.
 
 ---
