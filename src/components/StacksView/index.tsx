@@ -47,7 +47,6 @@ import { DownedStacksSection } from "../DownedStacksSection";
 import { StackRow } from "./StackRow";
 import { RuntimeToggle } from "../RuntimeToggle";
 import { StackSkeleton } from "./StackSkeleton";
-import { SettingsButton } from "../SettingsDrawer";
 import "./StacksView.css";
 import { splitConfigFiles } from "../../lib/configFiles";
 
@@ -258,7 +257,6 @@ export function StacksView({ onRuntimeChange, dockerMissing }: Props) {
 
           <ToolbarItem align={{ default: "alignEnd" }}>
             <RuntimeToggle onRuntimeChange={(r) => { setRuntimeSwitchKey(k => k + 1); reset(); onRuntimeChange?.(r); }} suggestPodman={dockerMissing} />
-            <SettingsButton />
           </ToolbarItem>
         </ToolbarContent>
       </Toolbar>
