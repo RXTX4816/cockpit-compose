@@ -51,9 +51,11 @@ import { ScaleModal } from "../ScaleModal";
 import { DownedStacksSection } from "../DownedStacksSection";
 import { StackRow } from "./StackRow";
 import { RuntimeToggle } from "../RuntimeToggle";
+import { LayoutSelector } from "../LayoutSelector";
 import { StackSkeleton } from "./StackSkeleton";
 import "./StacksView.css";
 import { splitConfigFiles } from "../../lib/configFiles";
+import { type Layout } from "../../lib/layout";
 
 const filterColorMap: Record<string, "green" | "orange" | "grey" | "blue"> = {
   running: "green",
@@ -65,9 +67,11 @@ const filterColorMap: Record<string, "green" | "orange" | "grey" | "blue"> = {
 interface Props {
   onRuntimeChange?: (runtime: Runtime) => void;
   dockerMissing?: boolean;
+  layout?: Layout;
+  onLayoutChange?: (layout: Layout) => void;
 }
 
-export function StacksView({ onRuntimeChange, dockerMissing }: Props) {
+export function StacksView({ onRuntimeChange, dockerMissing, layout = "poweruser", onLayoutChange = () => {} }: Props) {
   const { t } = useTranslation();
   const { stacks, loading, error, refresh, reset } = useComposeStacks();
   const [manuallyDownedStacks, setManuallyDownedStacks] = useState<DownedStack[]>([]);
@@ -182,7 +186,10 @@ export function StacksView({ onRuntimeChange, dockerMissing }: Props) {
           )}
 
           <ToolbarItem align={{ default: "alignEnd" }}>
-            <RuntimeToggle onRuntimeChange={(r) => { setRuntimeSwitchKey(k => k + 1); reset(); onRuntimeChange?.(r); }} suggestPodman={dockerMissing} />
+            <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+              <LayoutSelector layout={layout} onLayoutChange={onLayoutChange} />
+              <RuntimeToggle onRuntimeChange={(r) => { setRuntimeSwitchKey(k => k + 1); reset(); onRuntimeChange?.(r); }} suggestPodman={dockerMissing} />
+            </div>
           </ToolbarItem>
         </ToolbarContent>
       </Toolbar>

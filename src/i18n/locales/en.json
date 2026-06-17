@@ -106,6 +106,17 @@
     "podman_confirm_body": "Podman support is experimental. Depending on your setup, some features may not work as expected — including stack discovery, log streaming, and certain compose commands.",
     "podman_suggest_docker_missing": "Docker was not found on this system. Switch to Podman to manage your containers."
   },
+  "layout": {
+    "toggle_label": "Display layout",
+    "minimal": "Minimal",
+    "minimal_tooltip": "Compact mode: hide footer, reduce padding, icon-focused",
+    "poweruser": "PowerUser",
+    "poweruser_tooltip": "Default layout with full chrome and controls",
+    "pretty": "Pretty",
+    "pretty_tooltip": "Spacious layout with soft shadows and rich typography",
+    "unix": "Unix",
+    "unix_tooltip": "Terminal-inspired with monospace font and box-drawing"
+  },
   "error_boundary": {
     "load_stacks_error": "Error loading stacks"
   },
