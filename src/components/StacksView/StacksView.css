@@ -12,6 +12,13 @@
 
 .sv-search {
   width: 220px;
+  opacity: 0.45;
+  transition: opacity 0.2s ease;
+}
+
+.sv-search:hover,
+.sv-search:focus-within {
+  opacity: 1;
 }
 
 .sv-status-badges {
