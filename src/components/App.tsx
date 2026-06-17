@@ -5,7 +5,6 @@ import { AppFooter } from "./AppFooter";
 import { StacksView } from "./StacksView";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { ToastProvider } from "./ToastProvider";
-import { SettingsProvider } from "./SettingsDrawer";
 import { detectComposeCommand, detectDockerMode, type Runtime } from "../api";
 
 export function App() {
@@ -30,16 +29,14 @@ export function App() {
 
   return (
     <ToastProvider>
-      <SettingsProvider>
-        <Page className="pf-m-no-sidebar">
-          <PageSection hasBodyWrapper={false} isFilled>
-            <ErrorBoundary fallbackTitle={t("error_boundary.load_stacks_error")}>
-              <StacksView onRuntimeChange={setRuntime} dockerMissing={dockerMissing} />
-            </ErrorBoundary>
-          </PageSection>
-          <AppFooter runtime={runtime} />
-        </Page>
-      </SettingsProvider>
+      <Page className="pf-m-no-sidebar">
+        <PageSection hasBodyWrapper={false} isFilled>
+          <ErrorBoundary fallbackTitle={t("error_boundary.load_stacks_error")}>
+            <StacksView onRuntimeChange={setRuntime} dockerMissing={dockerMissing} />
+          </ErrorBoundary>
+        </PageSection>
+        <AppFooter runtime={runtime} />
+      </Page>
     </ToastProvider>
   );
 }
