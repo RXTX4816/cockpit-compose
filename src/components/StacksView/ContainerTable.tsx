@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Badge, Button, Label } from "@patternfly/react-core";
-import { CheckCircleIcon, ExclamationTriangleIcon, ExternalLinkAltIcon, InProgressIcon } from "@patternfly/react-icons";
+import { Badge, Button, Label, Spinner, Tooltip } from "@patternfly/react-core";
+import { CheckCircleIcon, ExclamationTriangleIcon, InProgressIcon, BanIcon, PlayIcon, RedoAltIcon, ListAltIcon } from "@patternfly/react-icons";
 import type { ComposeContainer } from "../../api";
 import { getImageChangelogUrl } from "../../lib/imageUrl";
 import { ExternalLinkModal } from "../ExternalLinkModal";
@@ -19,7 +19,21 @@ function HealthIcon({ health }: { health: string }) {
   return null;
 }
 
-export function ContainerTable({ containers }: { containers: ComposeContainer[] }) {
+export interface ServiceActions {
+  actingService: string | null;
+  onStart: (service: string) => void;
+  onStop: (service: string) => void;
+  onRestart: (service: string) => void;
+  onLogs: (service: string) => void;
+}
+
+export function ContainerTable({
+  containers,
+  actions,
+}: {
+  containers: ComposeContainer[];
+  actions?: ServiceActions;
+}) {
   const { t } = useTranslation();
   const [pendingUrl, setPendingUrl] = useState<string | null>(null);
 
@@ -38,6 +52,7 @@ export function ContainerTable({ containers }: { containers: ComposeContainer[] 
           <span>{t("container_table.col_service")}</span>
           <span>{t("container_table.col_image")}</span>
           <span>{t("container_table.col_uptime")}</span>
+          {actions && <span />}
         </div>
         {groups.map(({ name, instances }) => {
           const runningCount = instances.filter(c => c.State?.toLowerCase() === "running").length;
@@ -47,10 +62,12 @@ export function ContainerTable({ containers }: { containers: ComposeContainer[] 
           const rep = instances[0];
           const imageUrl = rep ? getImageChangelogUrl(rep.Image) : null;
           const repState = rep?.State;
+          const isRunning = runningCount > 0;
+          const isActing = actions?.actingService === name;
 
           return (
             <div key={name} className="ct-row">
-              <Label color={runningCount > 0 ? "green" : "grey"} isCompact>
+              <Label color={isRunning ? "green" : "grey"} isCompact>
                 {repState
                   ? t(`container_state.${repState.toLowerCase()}`, { defaultValue: repState })
                   : t("common.unknown")}
@@ -60,8 +77,6 @@ export function ContainerTable({ containers }: { containers: ComposeContainer[] 
                   ? (
                     <Button variant="link" isInline onClick={() => setPendingUrl(imageUrl)}>
                       {name}
-                      {" "}
-                      <ExternalLinkAltIcon />
                     </Button>
                   )
                   : name}
@@ -76,6 +91,41 @@ export function ContainerTable({ containers }: { containers: ComposeContainer[] 
               </span>
               <span className="ct-image">{rep?.Image}</span>
               <span className="ct-uptime">{rep?.Status}</span>
+              {actions && (
+                <span className="ct-actions">
+                  {isActing
+                    ? <Spinner size="sm" />
+                    : (
+                      <>
+                        {isRunning
+                          ? (
+                            <Tooltip content={t("service_actions.stop")}>
+                              <Button variant="plain" size="sm" aria-label={t("service_actions.stop")} onClick={() => actions.onStop(name)}>
+                                <BanIcon />
+                              </Button>
+                            </Tooltip>
+                          )
+                          : (
+                            <Tooltip content={t("service_actions.start")}>
+                              <Button variant="plain" size="sm" aria-label={t("service_actions.start")} onClick={() => actions.onStart(name)}>
+                                <PlayIcon />
+                              </Button>
+                            </Tooltip>
+                          )}
+                        <Tooltip content={t("service_actions.restart")}>
+                          <Button variant="plain" size="sm" aria-label={t("service_actions.restart")} onClick={() => actions.onRestart(name)}>
+                            <RedoAltIcon />
+                          </Button>
+                        </Tooltip>
+                        <Tooltip content={t("service_actions.logs")}>
+                          <Button variant="plain" size="sm" aria-label={t("service_actions.logs")} onClick={() => actions.onLogs(name)}>
+                            <ListAltIcon />
+                          </Button>
+                        </Tooltip>
+                      </>
+                    )}
+                </span>
+              )}
             </div>
           );
         })}

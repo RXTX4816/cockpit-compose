@@ -30,19 +30,20 @@ export function useStackContainers(stackName: string, configFiles: string[], sta
   const cachedServiceNamesRef = useRef<string[]>([]);
   const prevStatusRef = useRef<StackStatus>("unknown");
   const hasDataRef = useRef(false);
+  const hasContainersRef = useRef(false);
 
-  // Clear stale container state when the stack's status changes
+  // Mark containers stale when status changes so next load re-fetches,
+  // but keep existing containers visible to avoid a flash of empty content.
   useEffect(() => {
     if (prevStatusRef.current !== status) {
       prevStatusRef.current = status;
       hasDataRef.current = false;
-      setContainers([]);
     }
   }, [status]);
 
   const configFilesKey = configFiles.join(",");
   const load = useCallback(async () => {
-    if (!hasDataRef.current) setLoading(true);
+    if (!hasDataRef.current && !hasContainersRef.current) setLoading(true);
     try {
       let raw = "";
       const proc = listContainers(stackName);
@@ -54,23 +55,28 @@ export function useStackContainers(stackName: string, configFiles: string[], sta
       cachedServiceNamesRef.current = serviceNames;
 
       hasDataRef.current = true;
-      setContainers(serviceNames.flatMap(name => {
+      const next = serviceNames.flatMap(name => {
         const cs = running.filter(r => r.Service === name);
         return cs.length > 0 ? cs : [{ ID: "", Name: name, Image: "", State: "down", Status: "down", Ports: "", Service: name }];
-      }));
+      });
+      hasContainersRef.current = next.length > 0;
+      setContainers(next);
     } catch {
       try {
         const serviceNames = await readServiceNames(configFiles);
         cachedServiceNamesRef.current = serviceNames;
-        setContainers(serviceNames.map(name => ({
+        const fallback = serviceNames.map(name => ({
           ID: "", Name: name, Image: "", State: "down", Status: "down", Ports: "", Service: name,
-        })));
+        }));
+        hasContainersRef.current = fallback.length > 0;
+        setContainers(fallback);
       } catch {
         const cached = cachedServiceNamesRef.current;
-        setContainers(cached.length > 0
+        const last = cached.length > 0
           ? cached.map(name => ({ ID: "", Name: name, Image: "", State: "down", Status: "down", Ports: "", Service: name }))
-          : []
-        );
+          : [];
+        hasContainersRef.current = last.length > 0;
+        setContainers(last);
       }
     } finally {
       setLoading(false);
@@ -78,7 +84,7 @@ export function useStackContainers(stackName: string, configFiles: string[], sta
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stackName, configFilesKey]);
 
-  const clear = useCallback(() => { hasDataRef.current = false; setContainers([]); }, []);
+  const clear = useCallback(() => { hasDataRef.current = false; hasContainersRef.current = false; setContainers([]); }, []);
 
   return { containers, loading, load, clear };
 }

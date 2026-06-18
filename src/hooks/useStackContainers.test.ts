@@ -96,7 +96,7 @@ describe("useStackContainers", () => {
     expect(result.current.containers).toEqual([]);
   });
 
-  it("clears containers when status changes", async () => {
+  it("keeps containers visible when status changes (avoids flash of empty content)", async () => {
     mockSpawn
       .mockImplementationOnce(lazy(runningContainersJson))
       .mockImplementationOnce(lazy(composeYaml));
@@ -110,7 +110,8 @@ describe("useStackContainers", () => {
 
     status = "stopped";
     rerender();
-    expect(result.current.containers).toEqual([]);
+    // Containers stay visible until the next load completes — no flash of empty content.
+    expect(result.current.containers).toHaveLength(2);
   });
 
   it("does not clear containers when status re-renders with same value", async () => {

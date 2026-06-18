@@ -1,6 +1,7 @@
-import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, it, expect, vi } from "vitest";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { ContainerTable } from "./ContainerTable";
+import type { ServiceActions } from "./ContainerTable";
 import type { ComposeContainer } from "../../api";
 
 const runningContainer: ComposeContainer = {
@@ -86,3 +87,74 @@ describe("ContainerTable", () => {
     expect(container.querySelector(".ct-list")).toBeInTheDocument();
   });
 });
+
+function makeActions(overrides: Partial<ServiceActions> = {}): ServiceActions {
+  return {
+    actingService: null,
+    onStart: vi.fn(),
+    onStop: vi.fn(),
+    onRestart: vi.fn(),
+    onLogs: vi.fn(),
+    ...overrides,
+  };
+}
+
+describe("ContainerTable with actions", () => {
+  it("renders Stop button for running service", () => {
+    render(<ContainerTable containers={[runningContainer]} actions={makeActions()} />);
+    expect(screen.getByLabelText("Stop service")).toBeInTheDocument();
+  });
+
+  it("renders Start button for stopped service", () => {
+    render(<ContainerTable containers={[stoppedContainer]} actions={makeActions()} />);
+    expect(screen.getByLabelText("Start service")).toBeInTheDocument();
+  });
+
+  it("renders Restart and Logs buttons for every service", () => {
+    render(<ContainerTable containers={[runningContainer]} actions={makeActions()} />);
+    expect(screen.getByLabelText("Restart service")).toBeInTheDocument();
+    expect(screen.getByLabelText("Service logs")).toBeInTheDocument();
+  });
+
+  it("calls onStop with service name when Stop is clicked", () => {
+    const actions = makeActions();
+    render(<ContainerTable containers={[runningContainer]} actions={actions} />);
+    fireEvent.click(screen.getByLabelText("Stop service"));
+    expect(actions.onStop).toHaveBeenCalledWith("web");
+  });
+
+  it("calls onStart with service name when Start is clicked", () => {
+    const actions = makeActions();
+    render(<ContainerTable containers={[stoppedContainer]} actions={actions} />);
+    fireEvent.click(screen.getByLabelText("Start service"));
+    expect(actions.onStart).toHaveBeenCalledWith("db");
+  });
+
+  it("calls onRestart with service name when Restart is clicked", () => {
+    const actions = makeActions();
+    render(<ContainerTable containers={[runningContainer]} actions={actions} />);
+    fireEvent.click(screen.getByLabelText("Restart service"));
+    expect(actions.onRestart).toHaveBeenCalledWith("web");
+  });
+
+  it("calls onLogs with service name when Logs is clicked", () => {
+    const actions = makeActions();
+    render(<ContainerTable containers={[runningContainer]} actions={actions} />);
+    fireEvent.click(screen.getByLabelText("Service logs"));
+    expect(actions.onLogs).toHaveBeenCalledWith("web");
+  });
+
+  it("shows spinner and hides buttons for the acting service", () => {
+    const actions = makeActions({ actingService: "web" });
+    render(<ContainerTable containers={[runningContainer]} actions={actions} />);
+    expect(screen.queryByLabelText("Stop service")).toBeNull();
+    expect(document.querySelector(".pf-v6-c-spinner")).toBeInTheDocument();
+  });
+
+  it("does not render action buttons when actions prop is omitted", () => {
+    render(<ContainerTable containers={[runningContainer]} />);
+    expect(screen.queryByLabelText("Stop service")).toBeNull();
+    expect(screen.queryByLabelText("Start service")).toBeNull();
+  });
+});
+

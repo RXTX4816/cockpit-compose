@@ -49,11 +49,13 @@ import {
   BanIcon,
 } from "@patternfly/react-icons";
 import { useStackActions } from "../../hooks/useStackActions";
+import { useServiceActions } from "../../hooks/useServiceActions";
 import { useStackContainers } from "../../hooks/useStackContainers";
 import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import { StatusLabel } from "./StatusLabel";
 import { StatsCell } from "./StatsCell";
 import { ContainerTable } from "./ContainerTable";
+import { LogsModal } from "../LogsModal";
 import "./StackRow.css";
 import { splitConfigFiles } from "../../lib/configFiles";
 
@@ -89,6 +91,8 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
   const configFiles = splitConfigFiles(stack.ConfigFiles);
 
   const { acting, actionError, doAction } = useStackActions(stack.Name, configFiles, onActingChange);
+  const { actingService, doServiceAction } = useServiceActions(stack, onActingChange);
+  const [logsService, setLogsService] = useState<string | null>(null);
   const { containers, loading: loadingContainers, load: loadContainers, clear: clearContainers } = useStackContainers(stack.Name, configFiles, baseStatus);
 
   const status = effectiveStatus(baseStatus, containers);
@@ -350,7 +354,19 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
           ) : containers.length === 0 ? (
             <span className="sr-no-containers">{t("stack_row.no_containers")}</span>
           ) : (
-            <ContainerTable containers={containers} />
+            <ContainerTable
+              containers={containers}
+              actions={{
+                actingService,
+                onStart: s => { void doServiceAction("start", s, loadContainers); },
+                onStop: s => { void doServiceAction("stop", s, loadContainers); },
+                onRestart: s => { void doServiceAction("restart", s, loadContainers); },
+                onLogs: s => setLogsService(s),
+              }}
+            />
+          )}
+          {logsService && (
+            <LogsModal stack={stack} initialService={logsService} onClose={() => setLogsService(null)} />
           )}
         </div>
       </DataListContent>

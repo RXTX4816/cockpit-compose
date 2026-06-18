@@ -30,10 +30,12 @@ import {
   RedoAltIcon,
 } from "@patternfly/react-icons";
 import { useStackActions } from "../../hooks/useStackActions";
+import { useServiceActions } from "../../hooks/useServiceActions";
 import { useStackContainers } from "../../hooks/useStackContainers";
 import { useContainerStats } from "../../hooks/useContainerStats";
 import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import { ContainerTable } from "./ContainerTable";
+import { LogsModal } from "../LogsModal";
 import { splitConfigFiles } from "../../lib/configFiles";
 import "./UnixRow.css";
 
@@ -80,6 +82,8 @@ export function UnixRow({
   const configFiles = splitConfigFiles(stack.ConfigFiles);
 
   const { acting, doAction } = useStackActions(stack.Name, configFiles, onActingChange);
+  const { actingService, doServiceAction } = useServiceActions(stack, onActingChange);
+  const [logsService, setLogsService] = useState<string | null>(null);
   const { containers, loading: loadingContainers, load: loadContainers, clear: clearContainers } =
     useStackContainers(stack.Name, configFiles, baseStatus);
   const { ports, stats } = useContainerStats(stack.Name, baseStatus);
@@ -223,11 +227,23 @@ export function UnixRow({
               <span className="ur-expanded-empty">{t("stack_row.no_containers")}</span>
             ) : (
               <div className="ur-expanded-table">
-                <ContainerTable containers={containers} />
+                <ContainerTable
+                  containers={containers}
+                  actions={{
+                    actingService,
+                    onStart: s => { void doServiceAction("start", s, loadContainers); },
+                    onStop: s => { void doServiceAction("stop", s, loadContainers); },
+                    onRestart: s => { void doServiceAction("restart", s, loadContainers); },
+                    onLogs: s => setLogsService(s),
+                  }}
+                />
               </div>
             )}
           </div>
         </div>
+      )}
+      {logsService && (
+        <LogsModal stack={stack} initialService={logsService} onClose={() => setLogsService(null)} />
       )}
 
       {confirmStopOpen && (
