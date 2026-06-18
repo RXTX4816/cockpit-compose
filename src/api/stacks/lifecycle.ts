@@ -17,6 +17,22 @@ export function stopStack(project: string, configFiles: string[], profiles: stri
   );
 }
 
+export function startService(project: string, configFiles: string[], serviceName: string, profiles: string[] = [], superuser?: "try"): CockpitProcess {
+  const profileFlags = profiles.flatMap(p => ["--profile", p]);
+  return cockpit.spawn(
+    compose(...profileFlags, "-p", project, ...fileFlags(configFiles), "up", "-d", serviceName),
+    { superuser, err: "message", ...dockerSpawnEnviron() },
+  );
+}
+
+export function stopService(project: string, configFiles: string[], serviceName: string, profiles: string[] = [], superuser?: "try"): CockpitProcess {
+  const profileFlags = profiles.flatMap(p => ["--profile", p]);
+  return cockpit.spawn(
+    compose(...profileFlags, "-p", project, ...fileFlags(configFiles), "stop", serviceName),
+    { superuser, err: "message", ...dockerSpawnEnviron() },
+  );
+}
+
 export function restartStack(project: string, configFiles: string[], profiles: string[] = [], services: string[] = [], superuser?: "try"): CockpitProcess {
   const profileFlags = profiles.flatMap(p => ["--profile", p]);
   return cockpit.spawn(

@@ -581,7 +581,19 @@
     "pause_success": "{{name}} paused",
     "pause_failed": "Failed to pause {{name}}",
     "unpause_success": "{{name}} unpaused",
-    "unpause_failed": "Failed to unpause {{name}}"
+    "unpause_failed": "Failed to unpause {{name}}",
+    "service_start_success": "Service {{name}} started",
+    "service_start_failed": "Failed to start service {{name}}",
+    "service_stop_success": "Service {{name}} stopped",
+    "service_stop_failed": "Failed to stop service {{name}}",
+    "service_restart_success": "Service {{name}} restarted",
+    "service_restart_failed": "Failed to restart service {{name}}"
+  },
+  "service_actions": {
+    "start": "Start service",
+    "stop": "Stop service",
+    "restart": "Restart service",
+    "logs": "Service logs"
   },
   "scale_modal": {
     "title": "Scale services — {{name}}",

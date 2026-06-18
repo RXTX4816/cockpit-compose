@@ -102,11 +102,12 @@ type LevelFilter = "all" | "error" | "warn" | "info";
 interface Props {
   stack: ComposeStack;
   onClose: () => void;
+  initialService?: string;
 }
 
-export function LogsModal({ stack, onClose }: Props) {
+export function LogsModal({ stack, onClose, initialService }: Props) {
   const { t } = useTranslation();
-  const [selectedService, setSelectedService] = useState("");
+  const [selectedService, setSelectedService] = useState(initialService ?? "");
   const [searchTerm, setSearchTerm] = useState("");
   const [isRegex, setIsRegex] = useState(false);
   const [levelFilter, setLevelFilter] = useState<LevelFilter>("all");

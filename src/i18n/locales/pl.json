@@ -601,6 +601,18 @@
     "pause_success": "{{name}} wstrzymany",
     "pause_failed": "Wstrzymanie {{name}} nie powiodło się",
     "unpause_success": "{{name}} wznowiony",
-    "unpause_failed": "Wznowienie {{name}} nie powiodło się"
+    "unpause_failed": "Wznowienie {{name}} nie powiodło się",
+    "service_start_success": "Usługa {{name}} uruchomiona",
+    "service_start_failed": "Uruchomienie usługi {{name}} nie powiodło się",
+    "service_stop_success": "Usługa {{name}} zatrzymana",
+    "service_stop_failed": "Zatrzymanie usługi {{name}} nie powiodło się",
+    "service_restart_success": "Usługa {{name}} uruchomiona ponownie",
+    "service_restart_failed": "Ponowne uruchomienie usługi {{name}} nie powiodło się"
+  },
+  "service_actions": {
+    "start": "Uruchom usługę",
+    "stop": "Zatrzymaj usługę",
+    "restart": "Uruchom ponownie usługę",
+    "logs": "Logi usługi"
   }
 }

@@ -587,6 +587,18 @@
     "pause_success": "{{name}} pausiert",
     "pause_failed": "{{name}} konnte nicht pausiert werden",
     "unpause_success": "{{name}} fortgesetzt",
-    "unpause_failed": "{{name}} konnte nicht fortgesetzt werden"
+    "unpause_failed": "{{name}} konnte nicht fortgesetzt werden",
+    "service_start_success": "Dienst {{name}} gestartet",
+    "service_start_failed": "Dienst {{name}} konnte nicht gestartet werden",
+    "service_stop_success": "Dienst {{name}} gestoppt",
+    "service_stop_failed": "Dienst {{name}} konnte nicht gestoppt werden",
+    "service_restart_success": "Dienst {{name}} neu gestartet",
+    "service_restart_failed": "Dienst {{name}} konnte nicht neu gestartet werden"
+  },
+  "service_actions": {
+    "start": "Dienst starten",
+    "stop": "Dienst stoppen",
+    "restart": "Dienst neu starten",
+    "logs": "Dienst-Logs"
   }
 }

@@ -37,9 +37,11 @@ import {
   BanIcon,
 } from "@patternfly/react-icons";
 import { useStackActions } from "../../hooks/useStackActions";
+import { useServiceActions } from "../../hooks/useServiceActions";
 import { useStackContainers } from "../../hooks/useStackContainers";
 import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import { ContainerTable } from "./ContainerTable";
+import { LogsModal } from "../LogsModal";
 import { splitConfigFiles } from "../../lib/configFiles";
 import "./MinimalCard.css";
 
@@ -87,6 +89,8 @@ export function MinimalCard({
   const configFiles = splitConfigFiles(stack.ConfigFiles);
 
   const { acting, doAction } = useStackActions(stack.Name, configFiles, onActingChange);
+  const { actingService, doServiceAction } = useServiceActions(stack, onActingChange);
+  const [logsService, setLogsService] = useState<string | null>(null);
   const { containers, loading: loadingContainers, load: loadContainers, clear: clearContainers } =
     useStackContainers(stack.Name, configFiles, baseStatus);
   const status = effectiveStatus(baseStatus, containers);
@@ -271,10 +275,22 @@ export function MinimalCard({
           ) : (
             <>
               <div className="mc-bubble-title">{stack.Name}</div>
-              <ContainerTable containers={containers} />
+              <ContainerTable
+                containers={containers}
+                actions={{
+                  actingService,
+                  onStart: s => { void doServiceAction("start", s, loadContainers); },
+                  onStop: s => { void doServiceAction("stop", s, loadContainers); },
+                  onRestart: s => { void doServiceAction("restart", s, loadContainers); },
+                  onLogs: s => setLogsService(s),
+                }}
+              />
             </>
           )}
         </div>
+      )}
+      {logsService && (
+        <LogsModal stack={stack} initialService={logsService} onClose={() => setLogsService(null)} />
       )}
     </>
   );
