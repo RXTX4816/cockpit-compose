@@ -6,8 +6,11 @@ import { mockProcess } from "../test/helpers";
 
 vi.mock("../api", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../api")>();
-  return { ...actual, readAllProfiles: vi.fn().mockResolvedValue([]) };
+  return { ...actual, readAllProfiles: vi.fn().mockResolvedValue([]), isRootlessMode: vi.fn().mockReturnValue(false) };
 });
+
+import { isRootlessMode } from "../api";
+const mockIsRootlessMode = vi.mocked(isRootlessMode);
 
 const mockUser = vi.fn().mockResolvedValue({ id: 1000, name: "user", home: "/home/user" });
 
@@ -113,6 +116,15 @@ describe("usePullStream", () => {
     const { result } = renderHook(() => usePullStream("myapp", ["/path/compose.yml"]));
     await waitFor(() => expect(result.current.done).toBe(true));
     expect(result.current.lines).toHaveLength(0);
+  });
+
+  it("skips composeFileSuperuser when in rootless mode", async () => {
+    mockIsRootlessMode.mockReturnValue(true);
+    mockSpawn.mockImplementation(() => mockProcess("Pull output\n"));
+    const { result } = renderHook(() => usePullStream("myapp", ["/path/compose.yml"]));
+    await waitFor(() => expect(result.current.done).toBe(true));
+    expect(mockSpawn).toHaveBeenCalledTimes(1); // only the actual pull, no stat calls
+    mockIsRootlessMode.mockReturnValue(false);
   });
 
   it("uses String(ex) when rejection is not an Error instance", async () => {

@@ -39,12 +39,16 @@ function highlightSearch(message: string, term: string, isRegex: boolean): React
     let last = 0;
     let m: RegExpExecArray | null;
     while ((m = re.exec(message)) !== null) {
-      if (m.index > last) parts.push(highlightMessage(message.slice(last, m.index)));
+      if (m.index > last) {
+        parts.push(<span key={`text-${last}`}>{highlightMessage(message.slice(last, m.index))}</span>);
+      }
       parts.push(<mark key={m.index} className="lm-search-match">{m[0]}</mark>);
       last = m.index + m[0].length;
       if (m[0].length === 0) { re.lastIndex++; }
     }
-    if (last < message.length) parts.push(highlightMessage(message.slice(last)));
+    if (last < message.length) {
+      parts.push(<span key={`tail-${last}`}>{highlightMessage(message.slice(last))}</span>);
+    }
     return parts.length > 0 ? parts : highlightMessage(message);
   } catch {
     return highlightMessage(message);

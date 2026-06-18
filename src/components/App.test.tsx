@@ -38,4 +38,32 @@ describe("App", () => {
     render(<App />);
     await waitFor(() => expect(screen.getByText("StacksView rendered")).toBeInTheDocument());
   });
+
+  it("still renders when compose command is not found", async () => {
+    mockDetect.mockResolvedValue(false);
+    render(<App />);
+    await waitFor(() => expect(screen.getByText("StacksView rendered")).toBeInTheDocument());
+  });
+
+  it("updates layout when a valid storage event is received", async () => {
+    mockDetect.mockResolvedValue(true);
+    render(<App />);
+    await waitFor(() => expect(screen.getByText("StacksView rendered")).toBeInTheDocument());
+    act(() => {
+      window.dispatchEvent(new StorageEvent("storage", { key: "cockpit-compose:layout", newValue: "minimal" }));
+    });
+    // layout changed — data-layout attribute should update
+    await waitFor(() => expect(document.querySelector("[data-layout='minimal']")).toBeInTheDocument());
+  });
+
+  it("ignores storage events for other keys", async () => {
+    mockDetect.mockResolvedValue(true);
+    render(<App />);
+    await waitFor(() => expect(screen.getByText("StacksView rendered")).toBeInTheDocument());
+    act(() => {
+      window.dispatchEvent(new StorageEvent("storage", { key: "some-other-key", newValue: "minimal" }));
+    });
+    // layout should remain default, not throw
+    expect(screen.getByText("StacksView rendered")).toBeInTheDocument();
+  });
 });

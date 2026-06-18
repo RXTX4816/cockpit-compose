@@ -90,6 +90,24 @@ describe("RunModal", () => {
       await act(async () => {});
       expect(mockSpawn.mock.calls[0][0]).toContain("/a.yml");
     });
+
+    it("changing service selection updates the selected service", async () => {
+      mockSpawn.mockReturnValue(mockProcess(composeYaml));
+      render(<RunModal stack={stack} onClose={vi.fn()} />);
+      await waitFor(() => screen.getByRole("option", { name: "db" }));
+      fireEvent.change(screen.getByRole("combobox"), { target: { value: "db" } });
+      const select = screen.getByRole("combobox") as HTMLSelectElement;
+      expect(select.value).toBe("db");
+    });
+
+    it("shows text input for service when no services found in compose file", async () => {
+      mockSpawn.mockReturnValue(mockProcess("services: {}"));
+      render(<RunModal stack={stack} onClose={vi.fn()} />);
+      await waitFor(() => expect(screen.getByRole("textbox", { name: /service/i })).toBeInTheDocument());
+      fireEvent.change(screen.getByRole("textbox", { name: /service/i }), { target: { value: "myservice" } });
+      const input = screen.getByRole("textbox", { name: /service/i }) as HTMLInputElement;
+      expect(input.value).toBe("myservice");
+    });
   });
 
   describe("running step", () => {

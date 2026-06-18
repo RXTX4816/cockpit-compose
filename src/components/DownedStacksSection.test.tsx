@@ -515,3 +515,76 @@ describe("DownedStacksSection — RestoreModal", () => {
     expect(screen.queryByTestId("restore-modal")).not.toBeInTheDocument();
   });
 });
+
+describe("DownedStacksSection — layout variants", () => {
+  const downedStack = { name: "my-app", configFiles: ["/etc/compose/my-app/compose.yml"] };
+
+  it("renders stacks in minimal layout", () => {
+    mockUseScan.mockReturnValue(defaultScanResult({ downedStacks: [downedStack], hasScanned: true }));
+    render(<DownedStacksSection {...defaultProps} layout="minimal" />);
+    expect(screen.getByText("my-app")).toBeInTheDocument();
+  });
+
+  it("triggers up confirm modal from minimal layout card click", () => {
+    mockUseScan.mockReturnValue(defaultScanResult({ downedStacks: [downedStack], hasScanned: true }));
+    render(<DownedStacksSection {...defaultProps} layout="minimal" />);
+    fireEvent.click(screen.getByRole("button", { name: /start stack/i }));
+    expect(screen.getByTestId("up-confirm-modal")).toBeInTheDocument();
+  });
+
+  it("renders stacks in pretty layout", () => {
+    mockUseScan.mockReturnValue(defaultScanResult({ downedStacks: [downedStack], hasScanned: true }));
+    render(<DownedStacksSection {...defaultProps} layout="pretty" />);
+    expect(screen.getByText("my-app")).toBeInTheDocument();
+  });
+
+  it("triggers up confirm modal from pretty layout up button", () => {
+    mockUseScan.mockReturnValue(defaultScanResult({ downedStacks: [downedStack], hasScanned: true }));
+    render(<DownedStacksSection {...defaultProps} layout="pretty" />);
+    const upBtn = document.querySelector(".dss-pretty-up") as HTMLElement;
+    expect(upBtn).toBeTruthy();
+    fireEvent.click(upBtn);
+    expect(screen.getByTestId("up-confirm-modal")).toBeInTheDocument();
+  });
+
+  it("opens yaml modal from pretty layout edit button", () => {
+    mockUseScan.mockReturnValue(defaultScanResult({ downedStacks: [downedStack], hasScanned: true }));
+    render(<DownedStacksSection {...defaultProps} layout="pretty" />);
+    fireEvent.click(screen.getByRole("button", { name: /edit compose/i }));
+    expect(screen.getByTestId("yaml-modal")).toBeInTheDocument();
+  });
+
+  it("opens delete modal from pretty layout delete button", () => {
+    mockUseScan.mockReturnValue(defaultScanResult({ downedStacks: [downedStack], hasScanned: true }));
+    render(<DownedStacksSection {...defaultProps} layout="pretty" />);
+    fireEvent.click(screen.getByRole("button", { name: /delete/i }));
+    expect(screen.getByTestId("delete-modal")).toBeInTheDocument();
+  });
+
+  it("renders stacks in unix layout", () => {
+    mockUseScan.mockReturnValue(defaultScanResult({ downedStacks: [downedStack], hasScanned: true }));
+    render(<DownedStacksSection {...defaultProps} layout="unix" />);
+    expect(screen.getByText("my-app")).toBeInTheDocument();
+  });
+
+  it("triggers up confirm modal from unix layout [up] button", () => {
+    mockUseScan.mockReturnValue(defaultScanResult({ downedStacks: [downedStack], hasScanned: true }));
+    render(<DownedStacksSection {...defaultProps} layout="unix" />);
+    fireEvent.click(screen.getByText("[up]"));
+    expect(screen.getByTestId("up-confirm-modal")).toBeInTheDocument();
+  });
+
+  it("opens yaml modal from unix layout [ed] button", () => {
+    mockUseScan.mockReturnValue(defaultScanResult({ downedStacks: [downedStack], hasScanned: true }));
+    render(<DownedStacksSection {...defaultProps} layout="unix" />);
+    fireEvent.click(screen.getByText("[ed]"));
+    expect(screen.getByTestId("yaml-modal")).toBeInTheDocument();
+  });
+
+  it("opens delete modal from unix layout [del] button", () => {
+    mockUseScan.mockReturnValue(defaultScanResult({ downedStacks: [downedStack], hasScanned: true }));
+    render(<DownedStacksSection {...defaultProps} layout="unix" />);
+    fireEvent.click(screen.getByText("[del]"));
+    expect(screen.getByTestId("delete-modal")).toBeInTheDocument();
+  });
+});

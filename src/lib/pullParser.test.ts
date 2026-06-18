@@ -50,6 +50,20 @@ describe("classifyLine", () => {
 });
 
 describe("kindColor", () => {
+  it("classifies Podman 'Copying blob' as success", () => {
+    expect(classifyLine("Copying blob abc123")).toBe("success");
+    expect(classifyLine("Copying config sha256:abc")).toBe("success");
+    expect(classifyLine("Copying manifest for docker.io/library/nginx")).toBe("success");
+  });
+
+  it("classifies Podman 'Writing manifest' as success", () => {
+    expect(classifyLine("Writing manifest to image destination")).toBe("success");
+  });
+
+  it("classifies Podman 'Storing signatures' as success", () => {
+    expect(classifyLine("Storing signatures")).toBe("success");
+  });
+
   it("has entries for all kinds", () => {
     expect(kindColor.info).toBeDefined();
     expect(kindColor.error).toBeDefined();

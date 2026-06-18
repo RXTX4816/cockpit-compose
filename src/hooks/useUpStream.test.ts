@@ -4,6 +4,14 @@ import { useUpStream } from "./useUpStream";
 import { mockSpawn } from "../test/setup";
 import { mockProcess } from "../test/helpers";
 
+vi.mock("../api", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../api")>();
+  return { ...actual, isRootlessMode: vi.fn().mockReturnValue(false) };
+});
+
+import { isRootlessMode } from "../api";
+const mockIsRootlessMode = vi.mocked(isRootlessMode);
+
 const mockUser = vi.fn().mockResolvedValue({ id: 1000, name: "user", home: "/home/user" });
 
 beforeEach(() => {
@@ -110,6 +118,15 @@ describe("useUpStream", () => {
     const { result } = renderHook(() => useUpStream("myapp", ["/path/compose.yml"]));
     await waitFor(() => expect(result.current.done).toBe(true));
     expect(result.current.lines).toHaveLength(0);
+  });
+
+  it("skips composeFileSuperuser when in rootless mode", async () => {
+    mockIsRootlessMode.mockReturnValue(true);
+    mockSpawn.mockImplementation(() => mockProcess("Up output\n"));
+    const { result } = renderHook(() => useUpStream("myapp", ["/path/compose.yml"]));
+    await waitFor(() => expect(result.current.done).toBe(true));
+    expect(mockSpawn).toHaveBeenCalledTimes(1);
+    mockIsRootlessMode.mockReturnValue(false);
   });
 
   it("uses String(ex) when rejection is not an Error instance", async () => {
