@@ -312,6 +312,7 @@
     "level_warn": "Warn",
     "level_info": "Info",
     "download_tooltip": "Download logs",
+    "download_saved": "Logs saved to {{path}} (Firefox cannot download files directly from this interface)",
     "timestamps_tooltip": "Toggle timestamps",
     "scroll_top": "Jump to top",
     "scroll_bottom": "Jump to bottom",
