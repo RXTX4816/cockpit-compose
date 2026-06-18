@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, type ReactNode } from "react";
-import { Button, ToggleGroup, ToggleGroupItem, Tooltip } from "@patternfly/react-core";
+import { Button, ToggleGroup, ToggleGroupItem } from "@patternfly/react-core";
+import { Tooltip } from "./Tooltip";
 import { ThIcon, ListAltIcon, MagicIcon, TerminalIcon, SlidersHIcon } from "@patternfly/react-icons";
 import { type Layout, LAYOUT_KEY } from "../lib/layout";
 import "./LayoutSelector.css";

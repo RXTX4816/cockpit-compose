@@ -7,9 +7,9 @@ import {
   Spinner,
   Alert,
   Label,
-  Tooltip,
   Button,
 } from "@patternfly/react-core";
+import { Tooltip } from "./Tooltip";
 import { CopyIcon } from "@patternfly/react-icons";
 import { CheckCircleIcon, ExclamationTriangleIcon, GlobeIcon, InProgressIcon, LaptopIcon, NetworkIcon } from "@patternfly/react-icons";
 import {

@@ -6,8 +6,8 @@ import {
   Title,
   SearchInput,
   Label,
-  Tooltip,
 } from "@patternfly/react-core";
+import { Tooltip } from "../Tooltip";
 import { type ComposeStack, type Runtime } from "../../api";
 import { RuntimeToggle } from "../RuntimeToggle";
 

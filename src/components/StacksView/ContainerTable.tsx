@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Badge, Button, Label, Spinner, Tooltip } from "@patternfly/react-core";
+import { Badge, Button, Label, Spinner } from "@patternfly/react-core";
+import { Tooltip } from "../Tooltip";
 import { CheckCircleIcon, ExclamationTriangleIcon, InProgressIcon, BanIcon, PlayIcon, RedoAltIcon, ListAltIcon } from "@patternfly/react-icons";
 import type { ComposeContainer } from "../../api";
 import { getImageChangelogUrl } from "../../lib/imageUrl";
