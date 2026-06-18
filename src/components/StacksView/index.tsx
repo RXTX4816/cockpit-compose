@@ -24,9 +24,9 @@ import {
   ModalFooter,
   SearchInput,
   Label,
-  Tooltip,
   Spinner,
 } from "@patternfly/react-core";
+import { Tooltip } from "../Tooltip";
 import { type ComposeStack, type Runtime } from "../../api";
 import { TimesCircleIcon, BanIcon, PlusCircleIcon, FolderOpenIcon, SearchIcon } from "@patternfly/react-icons";
 import { type DownedStack } from "../../hooks/useDownedStacksScan";

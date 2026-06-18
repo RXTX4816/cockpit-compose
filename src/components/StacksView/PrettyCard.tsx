@@ -12,8 +12,8 @@ import {
   ModalBody,
   ModalFooter,
   Spinner,
-  Tooltip,
 } from "@patternfly/react-core";
+import { Tooltip } from "../Tooltip";
 import { type ComposeStack, parseStackStatus, parseServiceCount, formatBytes, getPortUrl, parseShortUptime } from "../../api";
 import { effectiveStatus, stackHealthSummary } from "../../lib/stackStatus";
 import {

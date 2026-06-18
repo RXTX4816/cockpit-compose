@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { PageSection, Label, Tooltip } from "@patternfly/react-core";
+import { PageSection, Label } from "@patternfly/react-core";
+import { Tooltip } from "./Tooltip";
 import { HelpPopover } from "./HelpPopover";
 import { composeVersion, containerVersion, isRootlessMode, getDockerSocketPath, getPodmanSocketPath, type ComposeVersion, type Runtime } from "../api";
 // @ts-expect-error: ESM import assertion for JSON

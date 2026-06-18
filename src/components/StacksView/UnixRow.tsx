@@ -11,9 +11,9 @@ import {
   DropdownItem,
   MenuToggle,
   Divider,
-  Tooltip,
   Spinner,
 } from "@patternfly/react-core";
+import { Tooltip } from "../Tooltip";
 import { type ComposeStack, parseStackStatus, parseServiceCount, formatBytes, getPortUrl } from "../../api";
 import { effectiveStatus } from "../../lib/stackStatus";
 import {

@@ -11,9 +11,9 @@ import {
   ToolbarGroup,
   Spinner,
   SearchInput,
-  Tooltip,
   Label,
 } from "@patternfly/react-core";
+import { Tooltip } from "./Tooltip";
 import {
   SyncAltIcon, PlayIcon, PauseIcon, TimesIcon, DownloadIcon,
   AngleDoubleUpIcon, AngleDoubleDownIcon, ClockIcon,

@@ -10,8 +10,8 @@ import {
   Alert,
   Spinner,
   TextInput,
-  Tooltip,
 } from "@patternfly/react-core";
+import { Tooltip } from "./Tooltip";
 import { PlusCircleIcon, FolderOpenIcon, AngleUpIcon, HistoryIcon, PencilAltIcon, ArchiveIcon, TrashIcon } from "@patternfly/react-icons";
 import { type ComposeStack } from "../api";
 import { type DownedStack, useDownedStacksScan } from "../hooks/useDownedStacksScan";
