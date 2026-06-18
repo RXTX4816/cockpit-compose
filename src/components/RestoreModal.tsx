@@ -154,7 +154,7 @@ export function RestoreModal({ existingStacks, defaultScanDir, onClose, onRestor
         s => s.Name.toLowerCase() === composeName.toLowerCase(),
       );
       setNameConflict(conflict);
-      if (conflict) setNewName(composeName + "-restored");
+      setNewName(conflict ? composeName + "-restored" : composeName);
 
       // Check the FINAL destination path (after any rename), not the raw extraction dir.
       // This avoids falsely warning when the extraction dir exists but the rename dest doesn't.
@@ -183,7 +183,7 @@ export function RestoreModal({ existingStacks, defaultScanDir, onClose, onRestor
   // to avoid wiping the user's confirmation due to React scheduling the effect after the click.
   useEffect(() => {
     if (!detectedRootDir || !detectedName) return;
-    const fn = nameConflict ? (newName.trim() || detectedRootDir) : detectedName;
+    const fn = newName.trim() || detectedRootDir;
     const targetPath = `${targetDir.replace(/\/$/, "")}/${fn}`;
     if (targetPath !== prevTargetPathRef.current) {
       prevTargetPathRef.current = targetPath;
@@ -204,13 +204,13 @@ export function RestoreModal({ existingStacks, defaultScanDir, onClose, onRestor
     }
   }, [validating]);
 
-  const finalName = (nameConflict ? newName : detectedName) ?? "";
+  const finalName = newName;
   const renameNeeded = detectedRootDir !== null && finalName !== detectedRootDir;
   const finalTargetPath = `${targetDir.replace(/\/$/, "")}/${renameNeeded ? finalName : detectedRootDir}`;
 
-  const newNameError = nameConflict && !newName.trim()
+  const newNameError = !newName.trim()
     ? t("create_modal.validation_name_required")
-    : nameConflict && newName.includes("/")
+    : newName.includes("/")
       ? t("create_modal.validation_name_slashes")
       : null;
 
@@ -225,7 +225,7 @@ export function RestoreModal({ existingStacks, defaultScanDir, onClose, onRestor
     if (!effectiveArchive || !detectedRootDir) return;
     setRestoring(true);
     setRestoreError(null);
-    const parent = targetDir.replace(/\/$/, "");
+    const parent = targetDir === "/" ? "/" : targetDir.replace(/\/$/, "");
     const extractedPath = `${parent}/${detectedRootDir}`;
     const renamedPath = `${parent}/${finalName}`;
     try {
@@ -245,12 +245,15 @@ export function RestoreModal({ existingStacks, defaultScanDir, onClose, onRestor
           if (await checkPathExists(renamedPath)) {
             throw new Error(t("restore_modal.error_dest_exists", { path: renamedPath }));
           }
-          await cockpit.spawn(["mv", "--", tmpSrc, renamedPath], { err: "message" });
+          const renamedParent = renamedPath.slice(0, renamedPath.lastIndexOf("/"));
+          await cockpit.spawn(["mkdir", "-p", "--", renamedParent], { superuser: "try", err: "message" });
+          await cockpit.spawn(["mv", "--", tmpSrc, renamedPath], { superuser: "try", err: "message" });
         } finally {
           await cockpit.spawn(["rm", "-rf", "--", tmpDir], { err: "message" }).catch(() => {});
         }
       } else {
-        await extractArchive(effectiveArchive, parent);
+        await cockpit.spawn(["mkdir", "-p", "--", parent], { superuser: "try", err: "message" });
+        await extractArchive(effectiveArchive, parent, "try");
       }
 
       const finalDir = renameNeeded ? renamedPath : extractedPath;
@@ -488,29 +491,28 @@ export function RestoreModal({ existingStacks, defaultScanDir, onClose, onRestor
                     </FormGroup>
 
                     {nameConflict && (
-                      <>
-                        <Alert
-                          variant="warning"
-                          isInline
-                          title={t("restore_modal.name_conflict_warning", { name: detectedName })}
-                          style={{ marginBottom: "0.5rem" }}
-                        />
-                        <FormGroup label={t("restore_modal.new_name_label")} fieldId="rm-new-name">
-                          <TextInput
-                            id="rm-new-name"
-                            value={newName}
-                            onChange={(_e, v) => setNewName(v)}
-                            validated={newName && newNameError ? "error" : "default"}
-                            isDisabled={restoring}
-                          />
-                          {newName && newNameError && (
-                            <div style={{ color: "var(--pf-t--global--color--status--danger--default)", fontSize: "0.875rem", marginTop: "0.25rem" }}>
-                              {newNameError}
-                            </div>
-                          )}
-                        </FormGroup>
-                      </>
+                      <Alert
+                        variant="warning"
+                        isInline
+                        title={t("restore_modal.name_conflict_warning", { name: detectedName })}
+                        style={{ marginBottom: "0.5rem" }}
+                      />
                     )}
+
+                    <FormGroup label={t("restore_modal.new_name_label")} fieldId="rm-new-name">
+                      <TextInput
+                        id="rm-new-name"
+                        value={newName}
+                        onChange={(_e, v) => setNewName(v)}
+                        validated={newNameError ? "error" : "default"}
+                        isDisabled={restoring}
+                      />
+                      {newNameError && (
+                        <div style={{ color: "var(--pf-t--global--color--status--danger--default)", fontSize: "0.875rem", marginTop: "0.25rem" }}>
+                          {newNameError}
+                        </div>
+                      )}
+                    </FormGroup>
 
                     <FormGroup label={t("restore_modal.target_dir_label")} fieldId="rm-target-dir">
                       <TextInput

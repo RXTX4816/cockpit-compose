@@ -521,7 +521,7 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
       {restoreOpen && (
         <RestoreModal
           existingStacks={stacks}
-          defaultScanDir={inferComposeRoot(stacks)}
+          defaultScanDir={inferComposeRoot([...stacks, ...manuallyDownedStacks.map(toSyntheticStack)])}
           onClose={() => setRestoreOpen(false)}
           onRestored={d => { addStack(d); setRestoreOpen(false); }}
         />
