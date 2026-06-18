@@ -56,8 +56,8 @@ vi.mock("./BackupModal", () => ({
   ),
 }));
 vi.mock("./RestoreModal", () => ({
-  RestoreModal: ({ onClose, onRestored }: { onClose: () => void; onRestored: (d: { name: string; configFiles: string[] }) => void }) => (
-    <div data-testid="restore-modal">
+  RestoreModal: ({ onClose, onRestored, defaultScanDir }: { onClose: () => void; onRestored: (d: { name: string; configFiles: string[] }) => void; defaultScanDir?: string }) => (
+    <div data-testid="restore-modal" data-scandir={defaultScanDir}>
       <button onClick={onClose}>CloseRestore</button>
       <button onClick={() => onRestored({ name: "restored-stack", configFiles: ["/etc/compose/restored-stack/docker-compose.yml"] })}>SimulateRestore</button>
     </div>
@@ -513,6 +513,14 @@ describe("DownedStacksSection — RestoreModal", () => {
     fireEvent.click(screen.getByRole("button", { name: "SimulateRestore" }));
     expect(addStack).toHaveBeenCalledWith(expect.objectContaining({ name: "restored-stack" }));
     expect(screen.queryByTestId("restore-modal")).not.toBeInTheDocument();
+  });
+
+  it("passes downed-stack directory as defaultScanDir when stacks=[]", () => {
+    const manuallyDownedStacks = [{ name: "myapp", configFiles: ["/etc/docker/compose/myapp/docker-compose.yml"] }];
+    mockUseScan.mockReturnValue(defaultScanResult({ hasScanned: true }));
+    render(<DownedStacksSection {...defaultProps} stacks={[]} manuallyDownedStacks={manuallyDownedStacks} />);
+    fireEvent.click(screen.getByRole("button", { name: /restore/i }));
+    expect(screen.getByTestId("restore-modal")).toHaveAttribute("data-scandir", "/etc/docker/compose");
   });
 });
 

@@ -132,7 +132,7 @@ describe("RestoreModal — validation phase", () => {
     await waitFor(() => screen.getByText(/myapp-2026-06-12/));
     fireEvent.click(screen.getByRole("radio"));
     await waitFor(() =>
-      expect(screen.getByDisplayValue("myapp")).toBeInTheDocument()
+      expect(screen.getAllByDisplayValue("myapp").length).toBeGreaterThan(0)
     );
   });
 
@@ -170,7 +170,7 @@ describe("RestoreModal — validation phase", () => {
     await waitFor(() => screen.getByText(/myapp-2026-06-12/));
     fireEvent.click(screen.getByRole("radio"));
     await waitFor(() =>
-      expect(screen.getByDisplayValue("myapp-custom")).toBeInTheDocument()
+      expect(screen.getAllByDisplayValue("myapp-custom").length).toBeGreaterThan(0)
     );
   });
 
@@ -444,7 +444,7 @@ describe("RestoreModal — validation edge cases", () => {
     );
     await waitFor(() => screen.getByText(/myapp-2026-06-12/));
     fireEvent.click(screen.getByRole("radio"));
-    await waitFor(() => expect(screen.getByDisplayValue("myapp")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getAllByDisplayValue("myapp").length).toBeGreaterThan(0));
     expect(mockReadFileFromArchive).not.toHaveBeenCalled();
   });
 
@@ -460,7 +460,7 @@ describe("RestoreModal — validation edge cases", () => {
     );
     await waitFor(() => screen.getByText(/myapp-2026-06-12/));
     fireEvent.click(screen.getByRole("radio"));
-    await waitFor(() => expect(screen.getByDisplayValue("myapp")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getAllByDisplayValue("myapp").length).toBeGreaterThan(0));
     expect(mockReadFileFromArchive).toHaveBeenCalled();
   });
 
