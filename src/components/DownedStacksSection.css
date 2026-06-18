@@ -488,8 +488,8 @@
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
-  background: linear-gradient(135deg, #00b894, #00cec9);
-  color: #fff;
+  background: var(--pf-t--global--color--brand--default, #0066cc);
+  color: var(--pf-t--global--text--color--on-brand--default, #fff);
   border: none;
   border-radius: 100px;
   padding: 0.3rem 0.7rem;
@@ -500,7 +500,7 @@
 }
 
 .dss-pretty-up:hover {
-  filter: brightness(1.08);
+  background: var(--pf-t--global--color--brand--hover, #004a99);
 }
 
 .dss-pretty-icons {

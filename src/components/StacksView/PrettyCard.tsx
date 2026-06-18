@@ -14,7 +14,7 @@ import {
   Spinner,
   Tooltip,
 } from "@patternfly/react-core";
-import { type ComposeStack, parseStackStatus, parseServiceCount, formatBytes, getPortUrl } from "../../api";
+import { type ComposeStack, parseStackStatus, parseServiceCount, formatBytes, getPortUrl, parseShortUptime } from "../../api";
 import { effectiveStatus, stackHealthSummary } from "../../lib/stackStatus";
 import {
   CheckCircleIcon,
@@ -39,10 +39,12 @@ import {
   AngleUpIcon,
 } from "@patternfly/react-icons";
 import { useStackActions } from "../../hooks/useStackActions";
+import { useServiceActions } from "../../hooks/useServiceActions";
 import { useStackContainers } from "../../hooks/useStackContainers";
 import { useContainerStats } from "../../hooks/useContainerStats";
 import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import { splitConfigFiles } from "../../lib/configFiles";
+import { LogsModal } from "../LogsModal";
 import "./PrettyCard.css";
 
 interface PrettyCardProps {
@@ -90,12 +92,14 @@ export function PrettyCard({
   const [menuOpen, setMenuOpen] = useState(false);
   const [confirmStopOpen, setConfirmStopOpen] = useState(false);
   const [confirmRestartOpen, setConfirmRestartOpen] = useState(false);
+  const [logsService, setLogsService] = useState<string | null>(null);
 
   const baseStatus = parseStackStatus(stack.Status);
   const count = parseServiceCount(stack.Status);
   const configFiles = splitConfigFiles(stack.ConfigFiles);
 
   const { acting, doAction } = useStackActions(stack.Name, configFiles, onActingChange);
+  const { actingService, doServiceAction } = useServiceActions(stack, onActingChange);
   const { containers, loading: loadingContainers, load: loadContainers, clear: clearContainers } =
     useStackContainers(stack.Name, configFiles, baseStatus);
   const { ports, stats } = useContainerStats(stack.Name, baseStatus);
@@ -304,12 +308,63 @@ export function PrettyCard({
                   const rep = group[0];
                   const isRunning = rep?.State?.toLowerCase() === "running";
                   const uptime = rep?.Status ?? "—";
-                  const shortUptime = uptime.length > 18 ? uptime.slice(0, 18) + "…" : uptime;
+                  const isSvcActing = actingService === svc;
                   return (
                     <div key={svc} className="pc-container-row">
                       <span className={`pc-container-dot${isRunning ? " pc-container-dot--up" : ""}`} />
                       <span className="pc-container-name">{svc}{group.length > 1 ? ` ×${group.length}` : ""}</span>
-                      <span className="pc-container-uptime" title={uptime}>{shortUptime}</span>
+                      <span className="pc-container-actions">
+                        {isSvcActing ? (
+                          <Spinner size="sm" />
+                        ) : (
+                          <>
+                            {isRunning ? (
+                              <Tooltip content={t("service_actions.stop")}>
+                                <button
+                                  className="pc-svc-btn"
+                                  aria-label={t("service_actions.stop")}
+                                  onClick={() => void doServiceAction("stop", svc, loadContainers)}
+                                  disabled={acting}
+                                >
+                                  <BanIcon />
+                                </button>
+                              </Tooltip>
+                            ) : (
+                              <Tooltip content={t("service_actions.start")}>
+                                <button
+                                  className="pc-svc-btn"
+                                  aria-label={t("service_actions.start")}
+                                  onClick={() => void doServiceAction("start", svc, loadContainers)}
+                                  disabled={acting}
+                                >
+                                  <PlayIcon />
+                                </button>
+                              </Tooltip>
+                            )}
+                            <Tooltip content={t("service_actions.restart")}>
+                              <button
+                                className="pc-svc-btn"
+                                aria-label={t("service_actions.restart")}
+                                onClick={() => void doServiceAction("restart", svc, loadContainers)}
+                                disabled={acting}
+                              >
+                                <RedoAltIcon />
+                              </button>
+                            </Tooltip>
+                            <Tooltip content={t("service_actions.logs")}>
+                              <button
+                                className="pc-svc-btn"
+                                aria-label={t("service_actions.logs")}
+                                onClick={() => setLogsService(svc)}
+                                disabled={acting}
+                              >
+                                <ListAltIcon />
+                              </button>
+                            </Tooltip>
+                          </>
+                        )}
+                      </span>
+                      <span className="pc-container-uptime" title={uptime}>{parseShortUptime(uptime)}</span>
                     </div>
                   );
                 })}
@@ -339,6 +394,10 @@ export function PrettyCard({
             <Button variant="link" onClick={() => setConfirmRestartOpen(false)}>{t("common.cancel")}</Button>
           </ModalFooter>
         </Modal>
+      )}
+
+      {logsService && (
+        <LogsModal stack={stack} initialService={logsService} onClose={() => setLogsService(null)} />
       )}
     </>
   );
