@@ -132,6 +132,15 @@ export function hasServicesKey(content: string): boolean {
   }
 }
 
+export function parseShortUptime(status: string): string {
+  const unitMap: Record<string, string> = {
+    second: "s", minute: "m", hour: "h", day: "d", week: "w", month: "mo", year: "y",
+  };
+  const m = status.match(/(\d+)\s*(second|minute|hour|day|week|month|year)s?/i);
+  if (m) return `${m[1]}${unitMap[m[2].toLowerCase()]}`;
+  return status;
+}
+
 export function getComposeProjectNameFromEnv(envContent: string): string | null {
   for (const line of envContent.split("\n")) {
     const trimmed = line.trim();
