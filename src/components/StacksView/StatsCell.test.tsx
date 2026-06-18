@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { StatsCell } from "./StatsCell";
 
 vi.mock("../../hooks/useContainerStats", () => ({
@@ -60,5 +60,35 @@ describe("StatsCell", () => {
     render(<StatsCell stackName="myapp" status="partial" />);
     expect(screen.getByText("8080→80")).toBeInTheDocument();
     expect(screen.getByText(/CPU 0.2%/i)).toBeInTheDocument();
+  });
+
+  it("applies high CPU class when cpu > 80", () => {
+    mockUseContainerStats.mockReturnValue({
+      ports: [],
+      stats: { cpu: 85.5, mem: 52428800 },
+    });
+    render(<StatsCell stackName="myapp" status="running" />);
+    expect(document.querySelector(".sc-cpu--high")).toBeInTheDocument();
+  });
+
+  it("applies medium CPU class when cpu > 50 and <= 80", () => {
+    mockUseContainerStats.mockReturnValue({
+      ports: [],
+      stats: { cpu: 60.0, mem: 52428800 },
+    });
+    render(<StatsCell stackName="myapp" status="running" />);
+    expect(document.querySelector(".sc-cpu--medium")).toBeInTheDocument();
+  });
+
+  it("opens URL when clicking an external port label", () => {
+    const openSpy = vi.spyOn(window, "open").mockImplementation(() => null);
+    mockUseContainerStats.mockReturnValue({
+      ports: [{ label: "8080→80", fullLabel: "0.0.0.0:8080 → 80/tcp", bindAddress: "0.0.0.0", hostPort: "8080", containerPort: "80", protocol: "tcp", bindType: "external" as const }],
+      stats: null,
+    });
+    render(<StatsCell stackName="myapp" status="running" />);
+    fireEvent.click(screen.getByText("8080→80"));
+    expect(openSpy).toHaveBeenCalledWith(expect.stringContaining("8080"), "_blank", "noopener,noreferrer");
+    openSpy.mockRestore();
   });
 });

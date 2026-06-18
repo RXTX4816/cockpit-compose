@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { act, render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor, fireEvent } from "@testing-library/react";
 import { StackInfoModal } from "./StackInfoModal";
 import { mockSpawn } from "../test/setup";
 import { mockProcess } from "../test/helpers";
@@ -227,5 +227,17 @@ services:
     render(<StackInfoModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => expect(screen.queryByRole("progressbar")).toBeNull());
     expect(screen.getAllByText("—").length).toBeGreaterThan(0);
+  });
+
+  it("copy button invokes clipboard.writeText and shows copied state", async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, "clipboard", { value: { writeText }, writable: true, configurable: true });
+    mockSpawnSequence(mockProcess(containers), mockProcess(images), mockProcess(volumes), mockProcess(""));
+    render(<StackInfoModal stack={stack} onClose={vi.fn()} />);
+    await waitFor(() => expect(screen.queryByRole("progressbar")).toBeNull());
+    const copyBtn = screen.getAllByRole("button").find(b => b.getAttribute("aria-label")?.toLowerCase().includes("copy container"));
+    expect(copyBtn).toBeDefined();
+    fireEvent.click(copyBtn!);
+    await waitFor(() => expect(writeText).toHaveBeenCalled());
   });
 });

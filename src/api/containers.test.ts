@@ -60,6 +60,17 @@ describe("listContainers [podman-compose limited backend]", () => {
   });
 });
 
+describe("listContainers [podman error handling]", () => {
+  it("rejects when podman ps throws in limited backend mode", async () => {
+    const { listContainers: lc } = await import("./containers");
+    const cockpitMod = await import("./cockpit");
+    cockpitMod.setRuntime("podman");
+    vi.spyOn(cockpitMod, "composeIsLimitedBackend").mockReturnValue(true);
+    mockSpawn.mockImplementation(() => mockProcess("", "connection refused"));
+    await expect(lc("myapp")).rejects.toThrow();
+  });
+});
+
 describe("getContainerStats", () => {
   it("spawns docker stats --no-stream with the given container IDs", () => {
     mockSpawn.mockReturnValue(mockProcess(""));

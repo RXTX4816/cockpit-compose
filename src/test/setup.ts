@@ -29,6 +29,30 @@ await import("../i18n");
 const mockSpawn = vi.fn();
 vi.stubGlobal("cockpit", { spawn: mockSpawn });
 
+vi.stubGlobal("requestAnimationFrame", (callback: (timestamp: number) => void) => {
+  callback(0);
+  return 0;
+});
+vi.stubGlobal("cancelAnimationFrame", () => {});
+
+const consoleError = console.error.bind(console);
+vi.spyOn(console, "error").mockImplementation((...args: unknown[]) => {
+  const message = args.map(String).join(" ");
+  if (message.includes("not wrapped in act(...)") || message.includes("Not implemented: navigation to another Document")) {
+    return;
+  }
+  consoleError(...args);
+});
+
+const consoleWarn = console.warn.bind(console);
+vi.spyOn(console, "warn").mockImplementation((...args: unknown[]) => {
+  const message = args.map(String).join(" ");
+  if (message.includes("not wrapped in act(...)") || message.includes("Not implemented: navigation to another Document")) {
+    return;
+  }
+  consoleWarn(...args);
+});
+
 export { mockSpawn };
 
 // jsdom doesn't implement HTMLCanvasElement.getContext; stub it to silence the warning

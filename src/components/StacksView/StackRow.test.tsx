@@ -175,6 +175,40 @@ describe("StackRow", () => {
     expect(doAction).toHaveBeenCalledWith("start", expect.any(Function));
   });
 
+  it("closes stop confirm modal when Cancel is clicked", () => {
+    render(<StackRow {...defaultProps} />);
+    fireEvent.click(screen.getByRole("button", { name: /^Stop$/i }));
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: /^Cancel$/i }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("closes stop confirm modal when X button is clicked", () => {
+    render(<StackRow {...defaultProps} />);
+    fireEvent.click(screen.getByRole("button", { name: /^Stop$/i }));
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: /close/i }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("closes restart confirm modal when Cancel is clicked", async () => {
+    render(<StackRow {...defaultProps} />);
+    fireEvent.click(screen.getByRole("button", { name: /^Restart$/i }));
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: /^Cancel$/i }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    await act(async () => {});
+  });
+
+  it("closes restart confirm modal when X button is clicked", async () => {
+    render(<StackRow {...defaultProps} />);
+    fireEvent.click(screen.getByRole("button", { name: /^Restart$/i }));
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: /close/i }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    await act(async () => {});
+  });
+
   it("calls onInfo when Info button clicked", () => {
     const onInfo = vi.fn();
     render(<StackRow {...defaultProps} onInfo={onInfo} />);

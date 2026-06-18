@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
 import { useEventStream, EVENTS_MAX } from "./useEventStream";
 import { mockSpawn } from "../test/setup";
@@ -121,5 +121,27 @@ describe("useEventStream", () => {
     act(() => { result.current.start(); });
     await waitFor(() => expect(result.current.streaming).toBe(false));
     expect(result.current.events).toHaveLength(0);
+  });
+
+  it("normalizes Podman-style capitalized event keys", async () => {
+    const podmanEvent = JSON.stringify({ Time: "2024-01-01T00:00:00Z", Type: "container", Action: "start", Actor: { ID: "abc", Attributes: { service: "web" } } });
+    mockSpawn.mockReturnValue(mockProcess(`${podmanEvent}\n`));
+    const { result } = renderHook(() => useEventStream("myapp"));
+    act(() => { result.current.start(); });
+    await waitFor(() => expect(result.current.events).toHaveLength(1));
+    expect(result.current.events[0].action).toBe("start");
+    expect(result.current.events[0].type).toBe("container");
+  });
+
+  it("uses String(ex) when rejection is not an Error instance", async () => {
+    mockSpawn.mockReturnValue(
+      Object.assign(
+        new Promise<string>((_, reject) => queueMicrotask(() => reject("plain string error"))),
+        { stream: vi.fn().mockReturnThis(), close: vi.fn(), input: vi.fn() },
+      ) as CockpitProcess,
+    );
+    const { result } = renderHook(() => useEventStream("myapp"));
+    act(() => { result.current.start(); });
+    await waitFor(() => expect(result.current.error).toBe("plain string error"));
   });
 });

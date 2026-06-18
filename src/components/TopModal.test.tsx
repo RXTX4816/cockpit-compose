@@ -64,6 +64,17 @@ describe("TopModal", () => {
     await waitFor(() => expect(screen.getByText(/Could not load processes/i)).toBeInTheDocument());
   });
 
+  it("shows error when rejection is not an Error instance", async () => {
+    mockSpawn.mockReturnValue(
+      Object.assign(
+        new Promise<string>((_, reject) => queueMicrotask(() => reject("plain string error"))),
+        { stream: vi.fn().mockReturnThis(), close: vi.fn(), input: vi.fn() },
+      ) as CockpitProcess,
+    );
+    render(<TopModal stack={stack} onClose={vi.fn()} />);
+    await waitFor(() => expect(screen.getByText(/Could not load processes/i)).toBeInTheDocument());
+  });
+
   it("refresh button triggers reload", async () => {
     mockSpawn.mockReturnValue(mockProcess(topOutput));
     render(<TopModal stack={stack} onClose={vi.fn()} />);
@@ -96,6 +107,11 @@ describe("parseTopOutput", () => {
     // A single line block can't have both a header and at least one data row
     const singleLineBlock = "just one line\n";
     expect(parseTopOutput(singleLineBlock)).toEqual([]);
+  });
+
+  it("skips single-line blocks (less than 2 lines)", () => {
+    // A block with only one line cannot have both a service name and a header
+    expect(parseTopOutput("only one line\n")).toEqual([]);
   });
 
   it("skips blocks where no header line is found", () => {

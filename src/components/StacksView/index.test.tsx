@@ -126,6 +126,22 @@ vi.mock("../RuntimeToggle", () => ({
   ),
 }));
 
+vi.mock("./MinimalCard", () => ({
+  MinimalCard: ({ stack }: { stack: ComposeStack }) => (
+    <div data-testid={`minimal-card-${stack.Name}`}>{stack.Name}</div>
+  ),
+}));
+vi.mock("./PrettyCard", () => ({
+  PrettyCard: ({ stack }: { stack: ComposeStack }) => (
+    <div data-testid={`pretty-card-${stack.Name}`}>{stack.Name}</div>
+  ),
+}));
+vi.mock("./UnixRow", () => ({
+  UnixRow: ({ stack }: { stack: ComposeStack }) => (
+    <div data-testid={`unix-row-${stack.Name}`}>{stack.Name}</div>
+  ),
+}));
+
 import { useComposeStacks } from "../../hooks/useComposeStacks";
 import { useDownStack } from "../../hooks/useDownStack";
 import { useKillStack } from "../../hooks/useKillStack";
@@ -496,6 +512,55 @@ describe("StacksView — onRuntimeChange prop", () => {
   it("works without onRuntimeChange prop (optional)", () => {
     render(<StacksView />);
     expect(() => fireEvent.click(screen.getByTestId("runtime-toggle"))).not.toThrow();
+  });
+});
+
+describe("StacksView — layout variants", () => {
+  beforeEach(() => {
+    mockUseComposeStacks.mockReturnValue({ stacks: [stack], loading: false, error: null, refresh: vi.fn(), reset: vi.fn() });
+  });
+
+  it("renders MinimalCard for layout=minimal", () => {
+    render(<StacksView layout="minimal" />);
+    expect(screen.getByTestId("minimal-card-myapp")).toBeInTheDocument();
+  });
+
+  it("renders PrettyCard for layout=pretty", () => {
+    render(<StacksView layout="pretty" />);
+    expect(screen.getByTestId("pretty-card-myapp")).toBeInTheDocument();
+  });
+
+  it("renders UnixRow for layout=unix", () => {
+    render(<StacksView layout="unix" />);
+    expect(screen.getByTestId("unix-row-myapp")).toBeInTheDocument();
+  });
+});
+
+describe("StacksView — search", () => {
+  beforeEach(() => {
+    mockUseComposeStacks.mockReturnValue({ stacks: [stack], loading: false, error: null, refresh: vi.fn(), reset: vi.fn() });
+  });
+
+  it("opens search input when search button is clicked", () => {
+    render(<StacksView />);
+    fireEvent.click(screen.getByRole("button", { name: /search stacks/i }));
+    expect(screen.getByPlaceholderText(/search stacks/i)).toBeInTheDocument();
+  });
+
+  it("shows no results empty state when search term does not match any stack", () => {
+    render(<StacksView />);
+    fireEvent.click(screen.getByRole("button", { name: /search stacks/i }));
+    const input = screen.getByPlaceholderText(/search stacks/i);
+    fireEvent.change(input, { target: { value: "nonexistentstack" } });
+    expect(screen.getByText(/no stacks match/i)).toBeInTheDocument();
+  });
+
+  it("clears search and closes search bar on Escape key", () => {
+    render(<StacksView />);
+    fireEvent.click(screen.getByRole("button", { name: /search stacks/i }));
+    const input = screen.getByPlaceholderText(/search stacks/i);
+    fireEvent.keyDown(input, { key: "Escape" });
+    expect(screen.queryByPlaceholderText(/search stacks/i)).not.toBeInTheDocument();
   });
 });
 

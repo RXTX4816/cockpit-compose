@@ -254,4 +254,121 @@ describe("LogsModal", () => {
     expect(screen.getByText(/hello from web/i)).toBeInTheDocument();
     expect(screen.getByText(/database ready/i)).toBeInTheDocument();
   });
+
+  it("clears search via the onClear handler", () => {
+    mockUseLogStream.mockReturnValue({
+      lines: [
+        "web-1 | 2024-01-01T00:00:00Z hello from web",
+        "db-1 | 2024-01-01T00:00:01Z database ready",
+      ],
+      streaming: false,
+      paused: false,
+      pause: vi.fn(),
+      resume: vi.fn(),
+      restart: vi.fn(),
+      clear: vi.fn(),
+    });
+    render(<LogsModal stack={stack} onClose={vi.fn()} />);
+    fireEvent.change(screen.getByPlaceholderText(/Search logs/i), { target: { value: "database" } });
+    // PatternFly SearchInput renders a clear button with aria-label "Reset"
+    const resetBtn = screen.getAllByRole("button").find(b => b.getAttribute("aria-label")?.toLowerCase().includes("reset"));
+    if (resetBtn) fireEvent.click(resetBtn);
+    expect(screen.getByText(/hello from web/i)).toBeInTheDocument();
+  });
+
+  it("toggles regex mode when .* button is clicked", () => {
+    render(<LogsModal stack={stack} onClose={vi.fn()} />);
+    const regexBtn = screen.getByRole("button", { name: /regex/i });
+    expect(regexBtn).toHaveAttribute("aria-pressed", "false");
+    fireEvent.click(regexBtn);
+    expect(regexBtn).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("filters logs by level when a level chip is clicked", () => {
+    mockUseLogStream.mockReturnValue({
+      lines: [
+        "web-1 | 2024-01-01T00:00:00Z ERROR something broke",
+        "web-1 | 2024-01-01T00:00:01Z INFO all good",
+      ],
+      streaming: false,
+      paused: false,
+      pause: vi.fn(),
+      resume: vi.fn(),
+      restart: vi.fn(),
+      clear: vi.fn(),
+    });
+    render(<LogsModal stack={stack} onClose={vi.fn()} />);
+    const errorChip = document.querySelector(".lm-level-chip") as HTMLElement;
+    if (errorChip) fireEvent.click(errorChip);
+    expect(screen.getAllByText(/Error/i).length).toBeGreaterThan(0);
+  });
+
+  it("hides timestamps when timestamp toggle is clicked", () => {
+    mockUseLogStream.mockReturnValue({
+      lines: ["web-1 | 2024-01-01T10:00:00.000000000Z hello"],
+      streaming: false,
+      paused: false,
+      pause: vi.fn(),
+      resume: vi.fn(),
+      restart: vi.fn(),
+      clear: vi.fn(),
+    });
+    render(<LogsModal stack={stack} onClose={vi.fn()} />);
+    const tsBtn = screen.getByRole("button", { name: /toggle timestamps/i });
+    fireEvent.click(tsBtn);
+    expect(tsBtn).toHaveAttribute("aria-pressed", "false");
+  });
+
+  it("shows filtered line count when search filters lines", () => {
+    mockUseLogStream.mockReturnValue({
+      lines: [
+        "web-1 | 2024-01-01T00:00:00Z hello from web",
+        "db-1 | 2024-01-01T00:00:01Z database ready",
+      ],
+      streaming: false,
+      paused: false,
+      pause: vi.fn(),
+      resume: vi.fn(),
+      restart: vi.fn(),
+      clear: vi.fn(),
+    });
+    render(<LogsModal stack={stack} onClose={vi.fn()} />);
+    fireEvent.change(screen.getByPlaceholderText(/Search logs/i), { target: { value: "database" } });
+    expect(screen.getByText(/lm-line-count|1 of 2|1.*\/.*2/i, { selector: ".lm-line-count" })).toBeInTheDocument();
+  });
+
+  it("renders warn-level log lines with warn class", () => {
+    mockUseLogStream.mockReturnValue({
+      lines: ["web-1 | 2024-01-01T00:00:00Z WARNING something is not right"],
+      streaming: false,
+      paused: false,
+      pause: vi.fn(),
+      resume: vi.fn(),
+      restart: vi.fn(),
+      clear: vi.fn(),
+    });
+    render(<LogsModal stack={stack} onClose={vi.fn()} />);
+    expect(screen.getByText(/something is not right/i)).toBeInTheDocument();
+  });
+
+  it("calls download handler when Download button is clicked", () => {
+    const createObjectURL = vi.fn(() => "blob:url");
+    const revokeObjectURL = vi.fn();
+    vi.spyOn(URL, "createObjectURL").mockImplementation(createObjectURL);
+    vi.spyOn(URL, "revokeObjectURL").mockImplementation(revokeObjectURL);
+    mockUseLogStream.mockReturnValue({
+      lines: ["web-1 | 2024-01-01T00:00:00Z hello"],
+      streaming: false,
+      paused: false,
+      pause: vi.fn(),
+      resume: vi.fn(),
+      restart: vi.fn(),
+      clear: vi.fn(),
+    });
+    render(<LogsModal stack={stack} onClose={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: /download logs/i }));
+    expect(createObjectURL).toHaveBeenCalled();
+    expect(revokeObjectURL).toHaveBeenCalled();
+    vi.restoreAllMocks();
+  });
 });

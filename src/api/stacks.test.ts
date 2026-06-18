@@ -9,6 +9,7 @@ import {
   readRunningServiceNames, pauseStack, unpauseStack, killStack,
   streamEvents, composeTop, composeVersion, listImages, listVolumes,
   listNetworkConnectedProjects, inspectNetworkContainerCounts,
+  scaleStack, snapshotProjectContainerIds, forceRemoveOneoffContainers,
 } from "./stacks";
 
 beforeEach(() => { mockSpawn.mockReset(); vi.resetModules(); });
@@ -650,6 +651,18 @@ describe("streamEvents", () => {
     expect(args).toContain("--json");
     expect(args).toContain("myapp");
   });
+
+  it("uses docker events filter for limited backend (podman)", async () => {
+    const { streamEvents: se } = await import("./stacks");
+    const cockpitMod = await import("./cockpit");
+    cockpitMod.setRuntime("podman");
+    vi.spyOn(cockpitMod, "composeIsLimitedBackend").mockReturnValue(true);
+    mockSpawn.mockReturnValue(mockProcess(""));
+    se("myapp");
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args).toContain("events");
+    expect(args).toContain("--filter");
+  });
 });
 
 describe("composeTop", () => {
@@ -659,6 +672,17 @@ describe("composeTop", () => {
     const args = mockSpawn.mock.calls[0][0] as string[];
     expect(args).toContain("top");
     expect(args).toContain("myapp");
+  });
+
+  it("uses podman ps fallback when runtime is podman", async () => {
+    const { composeTop: ct } = await import("./stacks");
+    const cockpitMod = await import("./cockpit");
+    cockpitMod.setRuntime("podman");
+    mockSpawn.mockImplementation(() => mockProcess("[]"));
+    const proc = ct("myapp");
+    await proc;
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args).toContain("ps");
   });
 });
 
@@ -670,6 +694,18 @@ describe("composeVersion", () => {
     expect(args).toContain("version");
     expect(args).toContain("--format");
     expect(args).toContain("json");
+  });
+
+  it("omits --format json for limited backend (podman)", async () => {
+    const { composeVersion: cv } = await import("./stacks");
+    const cockpitMod = await import("./cockpit");
+    cockpitMod.setRuntime("podman");
+    vi.spyOn(cockpitMod, "composeIsLimitedBackend").mockReturnValue(true);
+    mockSpawn.mockReturnValue(mockProcess(""));
+    cv();
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args).toContain("version");
+    expect(args.join(" ")).not.toContain("--format");
   });
 });
 
@@ -717,5 +753,179 @@ describe("inspectNetworkContainerCounts", () => {
     expect(args).toContain("inspect");
     expect(args).toContain("net1");
     expect(args).toContain("net2");
+  });
+
+  it("uses podman JSON format when runtime is podman", async () => {
+    const { inspectNetworkContainerCounts: icc } = await import("./stacks");
+    const cockpitMod = await import("./cockpit");
+    cockpitMod.setRuntime("podman");
+    const podmanOutput = JSON.stringify([
+      { name: "net1", containers: { "abc": {}, "def": {} } },
+      { Name: "net2", containers: {} },
+    ]);
+    mockSpawn.mockReturnValue(mockProcess(podmanOutput));
+    const result = await icc(["net1", "net2"]);
+    expect(result).toContain("net1\t2");
+    expect(result).toContain("net2\t0");
+    cockpitMod.setRuntime("docker");
+  });
+});
+
+describe("scaleStack", () => {
+  it("spawns compose up -d with scale flags", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    scaleStack("myapp", ["/myapp/compose.yml"], { web: 3 });
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args).toContain("up");
+    expect(args).toContain("-d");
+    expect(args).toContain("--scale");
+    expect(args).toContain("web=3");
+  });
+
+  it("includes profile flags when provided", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    scaleStack("myapp", ["/myapp/compose.yml"], { web: 2 }, ["prod"]);
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args).toContain("--profile");
+    expect(args).toContain("prod");
+  });
+
+  it("handles multiple service scales", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    scaleStack("myapp", ["/myapp/compose.yml"], { web: 2, worker: 5 });
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args).toContain("web=2");
+    expect(args).toContain("worker=5");
+  });
+
+  it("uses podman fallback when compose is limited backend", async () => {
+    const { scaleStack: ss } = await import("./stacks");
+    const cockpitMod = await import("./cockpit");
+    cockpitMod.setRuntime("podman");
+    vi.spyOn(cockpitMod, "composeIsLimitedBackend").mockReturnValue(true);
+    mockSpawn
+      .mockReturnValueOnce(mockProcess("Scaling output\n"))  // compose up
+      .mockImplementation(() => mockProcess("[]"));           // ps -a queries (fresh per call)
+    const proc = ss("myapp", ["/myapp/compose.yml"], { web: 2 });
+    let out = "";
+    proc.stream(d => { out += d; });
+    await proc;
+    expect(out).toContain("Scaling");
+  });
+
+  it("removes excess containers in podman fallback", async () => {
+    const { scaleStack: ss } = await import("./stacks");
+    const cockpitMod = await import("./cockpit");
+    cockpitMod.setRuntime("podman");
+    vi.spyOn(cockpitMod, "composeIsLimitedBackend").mockReturnValue(true);
+    const excessContainers = JSON.stringify([
+      { Id: "container3", Names: ["/myapp_web_3"] },
+      { Id: "container2", Names: ["/myapp_web_2"] },
+      { Id: "container1", Names: ["/myapp_web_1"] },
+    ]);
+    let callCount = 0;
+    mockSpawn.mockImplementation(() => {
+      callCount++;
+      if (callCount === 1) return mockProcess("Done\n");      // compose up
+      if (callCount === 2) return mockProcess(excessContainers); // ps -a
+      return mockProcess("");                                  // stop/rm
+    });
+    const proc = ss("myapp", ["/myapp/compose.yml"], { web: 1 });
+    await proc;
+    const stopArgs = mockSpawn.mock.calls[2][0] as string[];
+    expect(stopArgs).toContain("stop");
+  });
+});
+
+describe("snapshotProjectContainerIds", () => {
+  it("returns a Set of container IDs from docker ps output", async () => {
+    mockSpawn.mockReturnValue(mockProcess("abc123\ndef456\n"));
+    const ids = await snapshotProjectContainerIds("myapp");
+    expect(ids.has("abc123")).toBe(true);
+    expect(ids.has("def456")).toBe(true);
+  });
+
+  it("returns empty Set when spawn fails", async () => {
+    mockSpawn.mockReturnValue(mockProcess("", "error"));
+    const ids = await snapshotProjectContainerIds("myapp");
+    expect(ids.size).toBe(0);
+  });
+
+  it("filters out blank lines", async () => {
+    mockSpawn.mockReturnValue(mockProcess("abc123\n\ndef456\n\n"));
+    const ids = await snapshotProjectContainerIds("myapp");
+    expect(ids.size).toBe(2);
+  });
+});
+
+describe("forceRemoveOneoffContainers", () => {
+  it("removes containers that appeared after the snapshot", async () => {
+    const preRunIds = new Set(["oldcontainer"]);
+    mockSpawn.mockReturnValueOnce(mockProcess("oldcontainer\nnewcontainer\n"));
+    mockSpawn.mockReturnValueOnce(mockProcess(""));
+    await forceRemoveOneoffContainers("myapp", preRunIds);
+    const rmArgs = mockSpawn.mock.calls[1][0] as string[];
+    expect(rmArgs).toContain("rm");
+    expect(rmArgs).toContain("-f");
+    expect(rmArgs).toContain("newcontainer");
+  });
+
+  it("does nothing when no new containers appeared", async () => {
+    const preRunIds = new Set(["existing"]);
+    mockSpawn.mockReturnValueOnce(mockProcess("existing\n"));
+    await forceRemoveOneoffContainers("myapp", preRunIds);
+    expect(mockSpawn).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("composeTopPodmanFallback (detailed)", () => {
+  beforeEach(() => { mockSpawn.mockReset(); vi.resetModules(); });
+
+  it("returns empty string when no containers are running", async () => {
+    const { composeTopPodmanFallback: ctpf } = await import("./stacks");
+    const cockpitMod = await import("./cockpit");
+    cockpitMod.setRuntime("podman");
+    mockSpawn.mockImplementation(() => mockProcess("[]"));
+    const proc = ctpf("myapp");
+    const result = await proc;
+    expect(result).toBe("");
+    expect(mockSpawn).toHaveBeenCalledTimes(1); // only ps, no top calls
+  });
+
+  it("collects top output for running containers", async () => {
+    const { composeTopPodmanFallback: ctpf } = await import("./stacks");
+    const cockpitMod = await import("./cockpit");
+    cockpitMod.setRuntime("podman");
+    const containers = JSON.stringify([
+      { Id: "abc123", Names: ["web"], Labels: { "com.docker.compose.service": "web" } },
+    ]);
+    let callCount = 0;
+    mockSpawn.mockImplementation(() => {
+      callCount++;
+      if (callCount === 1) return mockProcess(containers); // ps
+      return mockProcess("PID  CPU\n1234  0.5\n"); // top
+    });
+    const proc = ctpf("myapp");
+    const result = await proc;
+    expect(result).toContain("web");
+    expect(result).toContain("PID");
+  });
+
+  it("skips container when top process fails", async () => {
+    const { composeTopPodmanFallback: ctpf } = await import("./stacks");
+    const cockpitMod = await import("./cockpit");
+    cockpitMod.setRuntime("podman");
+    const containers = JSON.stringify([
+      { Id: "abc123", Names: ["web"], Labels: { "com.docker.compose.service": "web" } },
+    ]);
+    let callCount = 0;
+    mockSpawn.mockImplementation(() => {
+      callCount++;
+      if (callCount === 1) return mockProcess(containers); // ps
+      return mockProcess("", "container not running"); // top fails
+    });
+    const proc = ctpf("myapp");
+    const result = await proc;
+    expect(result).toBe(""); // no sections collected since top failed
   });
 });
