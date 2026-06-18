@@ -1,0 +1,295 @@
+/* Unix layout — terminal simulation */
+.ur-row {
+  display: grid;
+  grid-template-columns: 1.2rem 1fr 6.5rem 2.5rem 5rem 5rem 6rem 1fr;
+  align-items: center;
+  gap: 0;
+  padding: 0.2rem 0.5rem 0.2rem 0.25rem;
+  border-bottom: 1px solid var(--pf-t--global--border--color--default, #d2d2d2);
+  font-family: "JetBrains Mono", "Fira Code", "Courier New", monospace;
+  font-size: 0.8125rem;
+  min-height: 2rem;
+  cursor: default;
+  transition: background 0.1s;
+}
+
+.ur-row:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.ur-row--expanded {
+  background: rgba(0, 0, 0, 0.025);
+  border-bottom: none;
+}
+
+.ur-row--acting {
+  opacity: 0.65;
+}
+
+/* Expand toggle arrow */
+.ur-expand-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.75rem;
+  color: var(--pf-t--global--text--color--subtle, #6a6e73);
+  padding: 0;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.2rem;
+  height: 1.2rem;
+  transition: color 0.1s;
+}
+
+.ur-expand-btn:hover {
+  color: var(--pf-t--global--text--color--regular, #151515);
+}
+
+/* Column layout */
+.ur-col {
+  padding: 0 0.375rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-family: inherit;
+}
+
+.ur-col--name {
+  font-weight: 600;
+  color: var(--pf-t--global--text--color--regular, #151515);
+}
+
+.ur-col--svc {
+  text-align: right;
+  color: var(--pf-t--global--text--color--subtle, #6a6e73);
+}
+
+.ur-col--cpu,
+.ur-col--mem {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.ur-col--ports {
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+
+.ur-port {
+  color: #0984e3;
+  white-space: nowrap;
+}
+
+.ur-port-link {
+  color: #0984e3;
+  cursor: pointer;
+  white-space: nowrap;
+  text-decoration: underline dotted;
+  transition: color 0.1s;
+}
+
+.ur-port-link:hover {
+  color: #0066cc;
+  text-decoration: underline;
+}
+
+.ur-col--actions {
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+}
+
+/* Status indicator */
+.ur-status {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-weight: 600;
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+}
+
+.ur-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.ur-status--running .ur-status-dot { background: #3e8635; }
+.ur-status--partial .ur-status-dot { background: #f0ab00; animation: ur-blink 1.4s ease-in-out infinite; }
+.ur-status--stopped .ur-status-dot { background: #8a8d90; }
+.ur-status--paused  .ur-status-dot { background: #2b9af3; }
+
+.ur-status--running { color: #3e8635; }
+.ur-status--partial { color: #b8860b; }
+.ur-status--stopped { color: #8a8d90; }
+.ur-status--paused  { color: #2b9af3; }
+
+@keyframes ur-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+
+/* CPU coloring */
+.ur-val--high { color: #c9190b; }
+.ur-val--med  { color: #b8860b; }
+.ur-val--ok   { color: var(--pf-t--global--text--color--regular, #151515); }
+
+/* Keyboard-hint action buttons */
+.ur-key {
+  background: transparent;
+  border: 1px solid var(--pf-t--global--border--color--default, #c7c7c7);
+  border-radius: 3px;
+  font-family: inherit;
+  font-size: 0.6875rem;
+  padding: 0.05rem 0.3rem;
+  cursor: pointer;
+  color: var(--pf-t--global--text--color--subtle, #6a6e73);
+  white-space: nowrap;
+  transition: background 0.1s, color 0.1s, border-color 0.1s;
+  line-height: 1.4;
+}
+
+.ur-key:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--pf-t--global--text--color--regular, #151515);
+  border-color: var(--pf-t--global--text--color--regular, #151515);
+}
+
+.ur-key:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.ur-key--up {
+  border-color: #3e8635;
+  color: #3e8635;
+}
+
+.ur-key--up:hover:not(:disabled) {
+  background: rgba(63, 134, 53, 0.10);
+  border-color: #3e8635;
+  color: #3e8635;
+}
+
+.ur-key--stop {
+  border-color: #8a8d90;
+  color: #8a8d90;
+}
+
+.ur-key--stop:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.06);
+  border-color: #6a6e73;
+  color: #6a6e73;
+}
+
+.ur-key--down {
+  border-color: #c9190b;
+  color: #c9190b;
+}
+
+.ur-key--down:hover:not(:disabled) {
+  background: rgba(201, 25, 11, 0.08);
+  border-color: #c9190b;
+  color: #c9190b;
+}
+
+/* Dropdown toggle */
+.ur-menu-toggle.pf-v6-c-menu-toggle {
+  padding: 0;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  width: 1.5rem;
+  font-size: 0.75rem;
+}
+
+/* Expanded section */
+.ur-expanded {
+  border-bottom: 1px solid var(--pf-t--global--border--color--default, #d2d2d2);
+  background: rgba(0, 0, 0, 0.018);
+  font-family: "JetBrains Mono", "Fira Code", "Courier New", monospace;
+  font-size: 0.8125rem;
+}
+
+.ur-expanded-inner {
+  padding: 0.375rem 0.75rem 0.5rem 1.5rem;
+}
+
+.ur-expanded-prefix {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--pf-t--global--text--color--subtle, #6a6e73);
+  margin-bottom: 0.25rem;
+}
+
+.ur-expanded-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0;
+  color: var(--pf-t--global--text--color--subtle, #6a6e73);
+  font-size: 0.75rem;
+}
+
+.ur-expanded-empty {
+  color: var(--pf-t--global--text--color--subtle, #6a6e73);
+  font-size: 0.75rem;
+}
+
+.ur-expanded-table {
+  padding-left: 0.75rem;
+}
+
+/* Unix layout table header (rendered in StacksView) */
+.sv-unix-header {
+  display: grid;
+  grid-template-columns: 1.2rem 1fr 6.5rem 2.5rem 5rem 5rem 6rem 1fr;
+  gap: 0;
+  padding: 0.25rem 0.5rem 0.25rem calc(0.25rem + 1.2rem);
+  font-family: "JetBrains Mono", "Fira Code", "Courier New", monospace;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--pf-t--global--text--color--subtle, #6a6e73);
+  border-bottom: 2px solid var(--pf-t--global--border--color--default, #d2d2d2);
+  background: rgba(0, 0, 0, 0.025);
+}
+
+.sv-unix-header-col {
+  padding: 0 0.375rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.sv-unix-header-col--right {
+  text-align: right;
+}
+
+.sv-unix-container {
+  border: 1px solid var(--pf-t--global--border--color--default, #d2d2d2);
+  border-radius: var(--pf-t--global--border--radius--md, 6px);
+  overflow: hidden;
+  font-family: "JetBrains Mono", "Fira Code", "Courier New", monospace;
+}
+
+.sv-unix-footer {
+  padding: 0.3rem 0.75rem;
+  font-family: "JetBrains Mono", "Fira Code", "Courier New", monospace;
+  font-size: 0.6875rem;
+  color: var(--pf-t--global--text--color--subtle, #6a6e73);
+  background: rgba(0, 0, 0, 0.025);
+  border-top: 1px solid var(--pf-t--global--border--color--default, #d2d2d2);
+  letter-spacing: 0.02em;
+}

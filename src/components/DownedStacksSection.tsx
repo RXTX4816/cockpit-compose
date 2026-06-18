@@ -15,6 +15,7 @@ import {
 import { PlusCircleIcon, FolderOpenIcon, AngleUpIcon, HistoryIcon, PencilAltIcon, ArchiveIcon, TrashIcon } from "@patternfly/react-icons";
 import { type ComposeStack } from "../api";
 import { type DownedStack, useDownedStacksScan } from "../hooks/useDownedStacksScan";
+import { type Layout } from "../lib/layout";
 import { UpModal } from "./UpModal";
 import { UpConfirmModal } from "./UpConfirmModal";
 import { YamlModal } from "./YamlModal";
@@ -23,6 +24,7 @@ import { DeleteStackModal } from "./DeleteStackModal";
 import { RestoreModal } from "./RestoreModal";
 import { BackupModal } from "./BackupModal";
 import "./DownedStacksSection.css";
+import "./StacksView/UnixRow.css";
 import { inferComposeRoot } from "../lib/composeDiscovery";
 export { inferComposeRoot } from "../lib/composeDiscovery";
 
@@ -31,13 +33,14 @@ interface Props {
   manuallyDownedStacks: DownedStack[];
   onRefresh: () => void;
   onUpComplete: (name: string) => void;
+  layout?: Layout;
 }
 
 function toSyntheticStack(d: DownedStack): ComposeStack {
   return { Name: d.name, Status: "", ConfigFiles: d.configFiles.join(",") };
 }
 
-export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, onUpComplete }: Props) {
+export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, onUpComplete, layout }: Props) {
   const { t } = useTranslation();
   const [importOpen, setImportOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
@@ -51,6 +54,8 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
   const [configFileOverrides, setConfigFileOverrides] = useState<Record<string, string[]>>({});
   const [restoreOpen, setRestoreOpen] = useState(false);
   const [backupTarget, setBackupTarget] = useState<DownedStack | null>(null);
+  const [miniMenu, setMiniMenu] = useState<{ stack: DownedStack; x: number; y: number } | null>(null);
+  const miniMenuRef = useRef<HTMLDivElement>(null);
   const autoDetectedRef = useRef(false);
 
   const { downedStacks, scanning, hasScanned, error, warning, scan, removeStack, addStack, updateStack }
@@ -76,6 +81,17 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
       setComposeDir(root);
     }
   }, [stacks]);
+
+  useEffect(() => {
+    if (!miniMenu) return;
+    const handler = (e: globalThis.MouseEvent) => {
+      if (miniMenuRef.current && !miniMenuRef.current.contains(e.target as HTMLElement)) {
+        setMiniMenu(null);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [miniMenu]);
 
   const handleDirChange = useCallback((_e: unknown, val: string) => {
     setComposeDir(val);
@@ -106,96 +122,150 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
   const hasContent = scanning || error !== null || combinedStacks.length > 0
     || (hasScanned && combinedStacks.length === 0);
 
-  return (
-    <>
-      <div className="dss-import-bar">
-        <Button
-          variant="primary"
-          size="sm"
-          icon={<PlusCircleIcon />}
-          onClick={() => setCreateOpen(true)}
-        >
-          {t("downed_section.create_button")}
-        </Button>
-        <Button
-          variant="primary"
-          size="sm"
-          icon={importOpen ? <AngleUpIcon /> : <FolderOpenIcon />}
-          onClick={() => setImportOpen(o => !o)}
-          aria-expanded={importOpen}
-        >
-          {t("downed_section.import_button")}
-        </Button>
+  const scanBar = layout === "unix" ? (
+    <div className="dss-unix-scan">
+      <span className="dss-unix-prompt">$</span>
+      <input
+        className="dss-unix-input"
+        value={composeDir}
+        onChange={(e) => handleDirChange(null, e.target.value)}
+        placeholder={t("downed_section.dir_placeholder")}
+        disabled={scanning}
+        onKeyDown={(e) => { if (e.key === "Enter" && composeDir.trim() && !scanning) scan(); }}
+        aria-label={t("downed_section.dir_aria")}
+      />
+      <span className="dss-unix-label">depth:</span>
+      <button className="ur-key" onClick={handleDepthMinus} disabled={scanning || maxDepth <= 1}>−</button>
+      <span className="dss-unix-depth">{maxDepth}</span>
+      <button className="ur-key" onClick={handleDepthPlus} disabled={scanning || maxDepth >= 5}>+</button>
+      <button className="ur-key" onClick={handleFindBestMatch} disabled={stacks.length === 0 || scanning}>[auto]</button>
+      <button className={`ur-key ur-key--up${scanning ? " ur-key--scanning" : ""}`} onClick={scan} disabled={!composeDir.trim() || scanning}>
+        {scanning ? "…" : "[scan]"}
+      </button>
+      {hasScanned && warning && <span className="dss-unix-warn" title={warning}>⚠</span>}
+    </div>
+  ) : layout === "minimal" ? (
+    <div className="dss-minimal-scan">
+      <input
+        className="dss-minimal-scan-input"
+        value={composeDir}
+        onChange={(e) => handleDirChange(null, e.target.value)}
+        placeholder={t("downed_section.dir_placeholder")}
+        disabled={scanning}
+        onKeyDown={(e) => { if (e.key === "Enter" && composeDir.trim() && !scanning) scan(); }}
+        aria-label={t("downed_section.dir_aria")}
+      />
+      <Tooltip content={t("actions.find_best_match_title")}>
+        <button className="dss-minimal-scan-btn" onClick={handleFindBestMatch} disabled={stacks.length === 0 || scanning} aria-label={t("actions.find_best_match_title")}>
+          <FolderOpenIcon />
+        </button>
+      </Tooltip>
+      <button className="dss-minimal-scan-btn dss-minimal-scan-btn--depth" onClick={handleDepthMinus} disabled={scanning || maxDepth <= 1} aria-label={t("downed_section.depth_minus_aria")}>−</button>
+      <span className="dss-minimal-scan-depth">{maxDepth}</span>
+      <button className="dss-minimal-scan-btn dss-minimal-scan-btn--depth" onClick={handleDepthPlus} disabled={scanning || maxDepth >= 5} aria-label={t("downed_section.depth_plus_aria")}>+</button>
+      <Tooltip content={t("common.scan")}>
+        <button className="dss-minimal-scan-btn dss-minimal-scan-btn--go" onClick={scan} disabled={!composeDir.trim() || scanning} aria-label={t("common.scan")}>
+          {scanning ? <Spinner size="sm" /> : "↵"}
+        </button>
+      </Tooltip>
+      {hasScanned && warning && <span className="dss-minimal-scan-warn" title={warning}>⚠</span>}
+    </div>
+  ) : (
+    <div className="dss-controls">
+      <div className="dss-search-bar">
         <Button
           variant="secondary"
-          size="sm"
-          icon={<HistoryIcon />}
-          onClick={() => setRestoreOpen(true)}
+          isDisabled={stacks.length === 0 || scanning}
+          onClick={handleFindBestMatch}
+          title={t("actions.find_best_match_title")}
+          className="dss-find-btn"
         >
-          {t("downed_section.restore_button")}
+          {t("actions.find_best_match")}
+        </Button>
+        <TextInput
+          className="dss-search-dir"
+          aria-label={t("downed_section.dir_aria")}
+          placeholder={t("downed_section.dir_placeholder")}
+          value={composeDir}
+          onChange={handleDirChange}
+          isDisabled={scanning}
+          onKeyDown={(e) => { if (e.key === "Enter" && composeDir.trim() && !scanning) scan(); }}
+        />
+        <div className="dss-stepper" aria-disabled={scanning}>
+          <span className="dss-stepper-label">{t("downed_section.depth_label")}</span>
+          <button type="button" className="dss-stepper-btn" onClick={handleDepthMinus} disabled={scanning || maxDepth <= 1} aria-label={t("downed_section.depth_minus_aria")}>−</button>
+          <span className="dss-stepper-value" aria-live="polite" aria-label={t("downed_section.depth_aria")}>{maxDepth}</span>
+          <button type="button" className="dss-stepper-btn" onClick={handleDepthPlus} disabled={scanning || maxDepth >= 5} aria-label={t("downed_section.depth_plus_aria")}>+</button>
+        </div>
+        <Button variant="primary" isDisabled={!composeDir.trim() || scanning} isLoading={scanning} onClick={scan} className="dss-scan-btn">
+          {t("common.scan")}
         </Button>
       </div>
+      {hasScanned && warning && (
+        <span className="dss-scan-warning" title={warning}>⚠ {t("downed_section.scan_partial_warning")}</span>
+      )}
+    </div>
+  );
 
-      {importOpen && (
-        <div className="dss-controls">
-          <div className="dss-search-bar">
-            <Button
-              variant="secondary"
-              isDisabled={stacks.length === 0 || scanning}
-              onClick={handleFindBestMatch}
-              title={t("actions.find_best_match_title")}
-              className="dss-find-btn"
-            >
-              {t("actions.find_best_match")}
-            </Button>
-            <TextInput
-              className="dss-search-dir"
-              aria-label={t("downed_section.dir_aria")}
-              placeholder={t("downed_section.dir_placeholder")}
-              value={composeDir}
-              onChange={handleDirChange}
-              isDisabled={scanning}
-              onKeyDown={(e) => { if (e.key === "Enter" && composeDir.trim() && !scanning) scan(); }}
-            />
-            <div className="dss-stepper" aria-disabled={scanning}>
-              <span className="dss-stepper-label">{t("downed_section.depth_label")}</span>
-              <button
-                type="button"
-                className="dss-stepper-btn"
-                onClick={handleDepthMinus}
-                disabled={scanning || maxDepth <= 1}
-                aria-label={t("downed_section.depth_minus_aria")}
-              >−</button>
-              <span
-                className="dss-stepper-value"
-                aria-live="polite"
-                aria-label={t("downed_section.depth_aria")}
-              >{maxDepth}</span>
-              <button
-                type="button"
-                className="dss-stepper-btn"
-                onClick={handleDepthPlus}
-                disabled={scanning || maxDepth >= 5}
-                aria-label={t("downed_section.depth_plus_aria")}
-              >+</button>
-            </div>
-            <Button
-              variant="primary"
-              isDisabled={!composeDir.trim() || scanning}
-              isLoading={scanning}
-              onClick={scan}
-              className="dss-scan-btn"
-            >
-              {t("common.scan")}
-            </Button>
-          </div>
-          {hasScanned && warning && (
-            <span className="dss-scan-warning" title={warning}>
-              ⚠ {t("downed_section.scan_partial_warning")}
-            </span>
-          )}
+  return (
+    <>
+      {layout === "minimal" ? (
+        <div className="dss-minimal-bar">
+          <Tooltip content={t("downed_section.create_button")}>
+            <Button variant="plain" size="sm" icon={<PlusCircleIcon />} onClick={() => setCreateOpen(true)} aria-label={t("downed_section.create_button")} />
+          </Tooltip>
+          <Tooltip content={t("downed_section.import_button")}>
+            <Button variant="plain" size="sm" icon={importOpen ? <AngleUpIcon /> : <FolderOpenIcon />} onClick={() => setImportOpen(o => !o)} aria-label={t("downed_section.import_button")} aria-expanded={importOpen} />
+          </Tooltip>
+          <Tooltip content={t("downed_section.restore_button")}>
+            <Button variant="plain" size="sm" icon={<HistoryIcon />} onClick={() => setRestoreOpen(true)} aria-label={t("downed_section.restore_button")} />
+          </Tooltip>
+        </div>
+      ) : layout === "unix" ? (
+        <div className="dss-unix-bar">
+          <button className="ur-key ur-key--up" onClick={() => setCreateOpen(true)}>[new]</button>
+          <button className={`ur-key${importOpen ? " ur-key--up" : ""}`} onClick={() => setImportOpen(o => !o)}>[import]</button>
+          <button className="ur-key" onClick={() => setRestoreOpen(true)}>[restore]</button>
+        </div>
+      ) : layout === "pretty" ? (
+        <div className="dss-import-bar">
+          <Button variant="primary" size="sm" icon={<PlusCircleIcon />} onClick={() => setCreateOpen(true)}>
+            {t("downed_section.create_button")}
+          </Button>
+          <Button
+            variant="primary"
+            size="sm"
+            icon={importOpen ? <AngleUpIcon /> : <FolderOpenIcon />}
+            onClick={() => setImportOpen(o => !o)}
+            aria-expanded={importOpen}
+          >
+            {t("downed_section.import_button")}
+          </Button>
+          <Button variant="secondary" size="sm" icon={<HistoryIcon />} onClick={() => setRestoreOpen(true)}>
+            {t("downed_section.restore_button")}
+          </Button>
+        </div>
+      ) : (
+        <div className="dss-import-bar">
+          <Button variant="primary" size="sm" icon={<PlusCircleIcon />} onClick={() => setCreateOpen(true)}>
+            {t("downed_section.create_button")}
+          </Button>
+          <Button
+            variant="primary"
+            size="sm"
+            icon={importOpen ? <AngleUpIcon /> : <FolderOpenIcon />}
+            onClick={() => setImportOpen(o => !o)}
+            aria-expanded={importOpen}
+          >
+            {t("downed_section.import_button")}
+          </Button>
+          <Button variant="secondary" size="sm" icon={<HistoryIcon />} onClick={() => setRestoreOpen(true)}>
+            {t("downed_section.restore_button")}
+          </Button>
         </div>
       )}
+
+      {importOpen && scanBar}
 
       {hasContent && (
         <>
@@ -227,61 +297,167 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
           )}
 
           {!scanning && combinedStacks.length > 0 && (
-            <div className="dss-list-wrapper">
-              <DataList aria-label={t("downed_section.down_stacks_aria")} isCompact className="dss-list">
+            layout === "minimal" ? (
+              <div className="dss-list-wrapper">
+                <div className="dss-mini-grid">
+                  {combinedStacks.map(d => (
+                    <div
+                      key={d.name}
+                      className="dss-mini-card"
+                      title={d.configFiles[0] ?? ""}
+                      onClick={(e) => {
+                        const target = e.target as HTMLElement;
+                        if (target.closest(".dss-mini-up")) return;
+                        e.preventDefault();
+                        setMiniMenu({ stack: d, x: e.clientX, y: e.clientY });
+                      }}
+                      onContextMenu={(e) => {
+                        const target = e.target as HTMLElement;
+                        if (target.closest(".dss-mini-up")) return;
+                        e.preventDefault();
+                        setMiniMenu({ stack: d, x: e.clientX, y: e.clientY });
+                      }}
+                    >
+                      <span className="dss-mini-name">{d.name}</span>
+                      <Tooltip content={t("actions.up_title")}>
+                        <Button
+                          variant="plain"
+                          size="sm"
+                          onClick={(e) => { e.stopPropagation(); setUpConfirmTarget(d); }}
+                          aria-label={t("actions.up_title")}
+                          className="dss-mini-btn dss-mini-btn--up dss-mini-up"
+                        >
+                          <AngleUpIcon />
+                        </Button>
+                      </Tooltip>
+                    </div>
+                  ))}
+                </div>
+                {miniMenu && (
+                  <div
+                    ref={miniMenuRef}
+                    className="dss-mini-menu"
+                    style={{ left: miniMenu.x, top: miniMenu.y }}
+                  >
+                    <button className="dss-mini-menu-item" onClick={() => { setYamlTarget(miniMenu.stack); setMiniMenu(null); }}>
+                      <PencilAltIcon /> {t("downed_section.edit_title")}
+                    </button>
+                    <button className="dss-mini-menu-item" onClick={() => { setBackupTarget(miniMenu.stack); setMiniMenu(null); }}>
+                      <ArchiveIcon /> {t("actions.backup")}
+                    </button>
+                    <button className="dss-mini-menu-item dss-mini-menu-item--danger" onClick={() => { setDeleteTarget(miniMenu.stack); setMiniMenu(null); }}>
+                      <TrashIcon /> {t("downed_section.delete_title")}
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : layout === "pretty" ? (
+              <div className="dss-pretty-grid">
                 {combinedStacks.map(d => (
-                  <DataListItem key={d.name} aria-labelledby={`dss-name-${d.name}`} data-status="down">
-                    <DataListItemRow>
-                      <DataListItemCells
-                        dataListCells={[
-                          <DataListCell key="name" width={2}>
-                            <span id={`dss-name-${d.name}`} className="dss-stack-name">
-                              {d.name}
-                            </span>
-                          </DataListCell>,
-                          <DataListCell key="path" width={3}>
-                            <span className="dss-path-dir">{d.configFiles[0]?.replace(/\/[^/]+$/, "") ?? ""}</span>
-                            {d.configFiles.length > 1 && (
-                              <span className="dss-path-files">{d.configFiles.map(f => f.replace(/.*\//, "")).join(" + ")}</span>
-                            )}
-                          </DataListCell>,
-                          <DataListCell key="actions" width={2} className="dss-actions">
-                            <Tooltip content={t("actions.up_title")}>
-                              <Button variant="primary" size="sm" onClick={() => setUpConfirmTarget(d)}>
-                                {t("actions.up")}
-                              </Button>
-                            </Tooltip>
-                            <span className="dss-icon-group">
-                              <Tooltip content={t("downed_section.edit_title")}>
-                                <Button variant="plain" size="sm" onClick={() => setYamlTarget(d)} aria-label={t("downed_section.edit_title")}>
-                                  <PencilAltIcon />
-                                </Button>
-                              </Tooltip>
-                              <Tooltip content={t("actions.backup")}>
-                                <Button variant="plain" size="sm" onClick={() => setBackupTarget(d)} aria-label={t("actions.backup")}>
-                                  <ArchiveIcon />
-                                </Button>
-                              </Tooltip>
-                              <Tooltip content={t("downed_section.delete_title")}>
-                                <Button
-                                  variant="plain"
-                                  size="sm"
-                                  onClick={() => setDeleteTarget(d)}
-                                  aria-label={t("downed_section.delete_title")}
-                                  className="dss-delete-btn"
-                                >
-                                  <TrashIcon />
-                                </Button>
-                              </Tooltip>
-                            </span>
-                          </DataListCell>,
-                        ]}
-                      />
-                    </DataListItemRow>
-                  </DataListItem>
+                  <div key={d.name} className="dss-pretty-card">
+                    <div className="dss-pretty-body">
+                      <span className="dss-pretty-name">{d.name}</span>
+                      <span className="dss-pretty-path">{d.configFiles[0]?.replace(/\/[^/]+$/, "") ?? ""}</span>
+                    </div>
+                    <div className="dss-pretty-actions">
+                      <button className="dss-pretty-up" onClick={() => setUpConfirmTarget(d)} aria-label={t("actions.up_title")}>
+                        <AngleUpIcon /> {t("actions.up")}
+                      </button>
+                      <div className="dss-pretty-icons">
+                        <Tooltip content={t("downed_section.edit_title")}>
+                          <Button variant="plain" size="sm" onClick={() => setYamlTarget(d)} aria-label={t("downed_section.edit_title")}><PencilAltIcon /></Button>
+                        </Tooltip>
+                        <Tooltip content={t("actions.backup")}>
+                          <Button variant="plain" size="sm" onClick={() => setBackupTarget(d)} aria-label={t("actions.backup")}><ArchiveIcon /></Button>
+                        </Tooltip>
+                        <Tooltip content={t("downed_section.delete_title")}>
+                          <Button variant="plain" size="sm" onClick={() => setDeleteTarget(d)} aria-label={t("downed_section.delete_title")} className="dss-delete-btn"><TrashIcon /></Button>
+                        </Tooltip>
+                      </div>
+                    </div>
+                  </div>
                 ))}
-              </DataList>
-            </div>
+              </div>
+            ) : layout === "unix" ? (
+              <div className="dss-unix-list">
+                {combinedStacks.map(d => (
+                  <div key={d.name} className="dss-unix-row">
+                    <span className="dss-unix-name">{d.name}</span>
+                    <span className="dss-unix-path" title={d.configFiles[0] ?? ""}>{d.configFiles[0]?.replace(/.*\/([^/]+\/[^/]+)$/, "$1") ?? ""}</span>
+                    <div className="dss-unix-actions">
+                      <Tooltip content={t("actions.up_title")}>
+                        <button className="ur-key ur-key--up" onClick={() => setUpConfirmTarget(d)}>[up]</button>
+                      </Tooltip>
+                      <Tooltip content={t("downed_section.edit_title")}>
+                        <button className="ur-key" onClick={() => setYamlTarget(d)}>[ed]</button>
+                      </Tooltip>
+                      <Tooltip content={t("actions.backup")}>
+                        <button className="ur-key" onClick={() => setBackupTarget(d)}>[bak]</button>
+                      </Tooltip>
+                      <Tooltip content={t("downed_section.delete_title")}>
+                        <button className="ur-key ur-key--down" onClick={() => setDeleteTarget(d)}>[del]</button>
+                      </Tooltip>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="dss-list-wrapper">
+                <DataList aria-label={t("downed_section.down_stacks_aria")} isCompact className="dss-list">
+                  {combinedStacks.map(d => (
+                    <DataListItem key={d.name} aria-labelledby={`dss-name-${d.name}`} data-status="down">
+                      <DataListItemRow>
+                        <DataListItemCells
+                          dataListCells={[
+                            <DataListCell key="name" width={2}>
+                              <span id={`dss-name-${d.name}`} className="dss-stack-name">
+                                {d.name}
+                              </span>
+                            </DataListCell>,
+                            <DataListCell key="path" width={3}>
+                              <span className="dss-path-dir">{d.configFiles[0]?.replace(/\/[^/]+$/, "") ?? ""}</span>
+                              {d.configFiles.length > 1 && (
+                                <span className="dss-path-files">{d.configFiles.map(f => f.replace(/.*\//, "")).join(" + ")}</span>
+                              )}
+                            </DataListCell>,
+                            <DataListCell key="actions" width={2} className="dss-actions">
+                              <Tooltip content={t("actions.up_title")}>
+                                <Button variant="primary" size="sm" onClick={() => setUpConfirmTarget(d)}>
+                                  {t("actions.up")}
+                                </Button>
+                              </Tooltip>
+                              <span className="dss-icon-group">
+                                <Tooltip content={t("downed_section.edit_title")}>
+                                  <Button variant="plain" size="sm" onClick={() => setYamlTarget(d)} aria-label={t("downed_section.edit_title")}>
+                                    <PencilAltIcon />
+                                  </Button>
+                                </Tooltip>
+                                <Tooltip content={t("actions.backup")}>
+                                  <Button variant="plain" size="sm" onClick={() => setBackupTarget(d)} aria-label={t("actions.backup")}>
+                                    <ArchiveIcon />
+                                  </Button>
+                                </Tooltip>
+                                <Tooltip content={t("downed_section.delete_title")}>
+                                  <Button
+                                    variant="plain"
+                                    size="sm"
+                                    onClick={() => setDeleteTarget(d)}
+                                    aria-label={t("downed_section.delete_title")}
+                                    className="dss-delete-btn"
+                                  >
+                                    <TrashIcon />
+                                  </Button>
+                                </Tooltip>
+                              </span>
+                            </DataListCell>,
+                          ]}
+                        />
+                      </DataListItemRow>
+                    </DataListItem>
+                  ))}
+                </DataList>
+              </div>
+            )
           )}
         </>
       )}

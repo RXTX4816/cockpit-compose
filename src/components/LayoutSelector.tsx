@@ -1,49 +1,71 @@
-import { useTranslation } from "react-i18next";
-import { ToggleGroup, ToggleGroupItem, Tooltip } from "@patternfly/react-core";
+import { useState, useRef, useEffect, type ReactNode } from "react";
+import { Button, ToggleGroup, ToggleGroupItem, Tooltip } from "@patternfly/react-core";
+import { ThIcon, ListAltIcon, MagicIcon, TerminalIcon, SlidersHIcon } from "@patternfly/react-icons";
 import { type Layout, LAYOUT_KEY } from "../lib/layout";
+import "./LayoutSelector.css";
 
 interface Props {
   layout: Layout;
   onLayoutChange: (layout: Layout) => void;
 }
 
+const LAYOUTS: { key: Layout; icon: ReactNode; label: string }[] = [
+  { key: "minimal",   icon: <ThIcon />,       label: "Minimal" },
+  { key: "poweruser", icon: <ListAltIcon />,  label: "Power User" },
+  { key: "pretty",    icon: <MagicIcon />,    label: "Pretty" },
+  { key: "unix",      icon: <TerminalIcon />, label: "Unix" },
+];
+
 export function LayoutSelector({ layout, onLayoutChange }: Props) {
-  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: globalThis.MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as HTMLElement)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
 
   const handleChange = (newLayout: Layout) => {
-    if (newLayout === layout) return;
     localStorage.setItem(LAYOUT_KEY, newLayout);
     onLayoutChange(newLayout);
+    setOpen(false);
   };
 
+  const current = LAYOUTS.find(l => l.key === layout);
+
   return (
-    <Tooltip content={t("layout.toggle_label")}>
-      <ToggleGroup aria-label={t("layout.toggle_label")} isCompact>
-        <ToggleGroupItem
-          text={t("layout.minimal")}
-          isSelected={layout === "minimal"}
-          onChange={() => handleChange("minimal")}
-          aria-label={t("layout.minimal_tooltip")}
-        />
-        <ToggleGroupItem
-          text={t("layout.poweruser")}
-          isSelected={layout === "poweruser"}
-          onChange={() => handleChange("poweruser")}
-          aria-label={t("layout.poweruser_tooltip")}
-        />
-        <ToggleGroupItem
-          text={t("layout.pretty")}
-          isSelected={layout === "pretty"}
-          onChange={() => handleChange("pretty")}
-          aria-label={t("layout.pretty_tooltip")}
-        />
-        <ToggleGroupItem
-          text={t("layout.unix")}
-          isSelected={layout === "unix"}
-          onChange={() => handleChange("unix")}
-          aria-label={t("layout.unix_tooltip")}
-        />
-      </ToggleGroup>
-    </Tooltip>
+    <div ref={containerRef} className={`ls-wrap${open ? " ls-wrap--open" : ""}`}>
+      <Tooltip content={`Layout: ${current?.label ?? layout}`}>
+        <Button
+          variant="plain"
+          size="sm"
+          onClick={() => setOpen(o => !o)}
+          aria-label="Change layout"
+          className={`ls-trigger${open ? " ls-trigger--active" : ""}`}
+        >
+          {current?.icon ?? <SlidersHIcon />}
+        </Button>
+      </Tooltip>
+      {open && (
+        <ToggleGroup aria-label="Layout" isCompact className="ls-toggle">
+          {LAYOUTS.map(({ key, icon, label }) => (
+            <Tooltip key={key} content={label}>
+              <ToggleGroupItem
+                icon={icon}
+                isSelected={layout === key}
+                onChange={() => handleChange(key)}
+                aria-label={label}
+              />
+            </Tooltip>
+          ))}
+        </ToggleGroup>
+      )}
+    </div>
   );
 }

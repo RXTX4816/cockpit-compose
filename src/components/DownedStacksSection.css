@@ -256,3 +256,402 @@
   cursor: default;
 }
 
+/* ── Minimal import bar — icon-only ────────────────────────────────── */
+.dss-minimal-bar {
+  margin-top: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+}
+
+/* ── Minimal scan bar ────────────────────────────────────────────────── */
+.dss-minimal-scan {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 0.375rem;
+  padding: 0.25rem 0;
+}
+
+.dss-minimal-scan-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  border-bottom: 1px solid var(--pf-t--global--border--color--default, #c7c7c7);
+  background: transparent;
+  font-size: 0.8125rem;
+  color: var(--pf-t--global--text--color--regular, #151515);
+  padding: 0.2rem 0.25rem;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.dss-minimal-scan-input:focus {
+  border-bottom-color: var(--pf-t--global--color--brand--default, #0066cc);
+}
+
+.dss-minimal-scan-input::placeholder {
+  color: var(--pf-t--global--text--color--subtle, #6a6e73);
+  font-size: 0.75rem;
+}
+
+.dss-minimal-scan-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: none;
+  background: transparent;
+  border-radius: var(--pf-t--global--border--radius--base, 4px);
+  cursor: pointer;
+  font-size: 0.8125rem;
+  color: var(--pf-t--global--text--color--subtle, #6a6e73);
+  transition: background 0.12s, color 0.12s;
+  flex-shrink: 0;
+}
+
+.dss-minimal-scan-btn:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--pf-t--global--text--color--regular, #151515);
+}
+
+.dss-minimal-scan-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.dss-minimal-scan-btn--depth {
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.dss-minimal-scan-btn--go {
+  color: var(--pf-t--global--color--brand--default, #0066cc);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.dss-minimal-scan-btn--go:hover:not(:disabled) {
+  background: rgba(0, 102, 204, 0.08);
+  color: var(--pf-t--global--color--brand--default, #0066cc);
+}
+
+.dss-minimal-scan-depth {
+  font-size: 0.75rem;
+  font-weight: 600;
+  min-width: 0.875rem;
+  text-align: center;
+  color: var(--pf-t--global--text--color--subtle, #6a6e73);
+}
+
+.dss-minimal-scan-warn {
+  color: #f0ab00;
+  cursor: help;
+  font-size: 0.75rem;
+}
+
+/* ── Pretty import bar ──────────────────────────────────────────────── */
+.dss-pretty-import-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: linear-gradient(135deg, #0984e3, #74b9ff);
+  color: #fff;
+  border: none;
+  border-radius: 100px;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 0.15s ease;
+}
+
+.dss-pretty-import-btn:hover {
+  filter: brightness(1.08);
+}
+
+.dss-pretty-import-btn--secondary {
+  background: linear-gradient(135deg, #636e72, #b2bec3);
+}
+
+/* ── Unix scan input row ─────────────────────────────────────────────── */
+.dss-unix-scan {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.5rem;
+  font-family: "JetBrains Mono", "Fira Code", "Courier New", monospace;
+  font-size: 0.8125rem;
+  border: 1px solid var(--pf-t--global--border--color--default, #d2d2d2);
+  border-radius: var(--pf-t--global--border--radius--md, 6px);
+  background: rgba(0, 0, 0, 0.02);
+  flex-wrap: wrap;
+}
+
+.dss-unix-prompt {
+  color: #3e8635;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.dss-unix-input {
+  flex: 1;
+  min-width: 140px;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: inherit;
+  color: var(--pf-t--global--text--color--regular, #151515);
+  outline: none;
+  padding: 0.1rem 0.2rem;
+  border-bottom: 1px solid var(--pf-t--global--border--color--default, #d2d2d2);
+}
+
+.dss-unix-input::placeholder {
+  color: var(--pf-t--global--text--color--subtle, #6a6e73);
+  font-style: italic;
+}
+
+.dss-unix-label {
+  color: var(--pf-t--global--text--color--subtle, #6a6e73);
+  flex-shrink: 0;
+  font-size: 0.75rem;
+}
+
+.dss-unix-depth {
+  min-width: 1.25rem;
+  text-align: center;
+  font-weight: 600;
+}
+
+.dss-unix-warn {
+  color: #f0ab00;
+  cursor: help;
+}
+
+/* ── Pretty downed section ─────────────────────────────────────────── */
+.dss-pretty-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 0.625rem;
+  padding: 0.5rem 0;
+}
+
+.dss-pretty-card {
+  border-radius: 10px;
+  border: 1.5px solid #b2bec3;
+  background: var(--pf-t--global--background--color--primary--default, #fff);
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.07);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: box-shadow 0.15s ease, transform 0.12s ease;
+}
+
+.dss-pretty-card:hover {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  transform: translateY(-1px);
+}
+
+.dss-pretty-body {
+  padding: 0.625rem 0.75rem 0.375rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  flex: 1;
+}
+
+.dss-pretty-name {
+  font-weight: 700;
+  font-size: 0.9rem;
+  word-break: break-word;
+}
+
+.dss-pretty-path {
+  font-size: 0.7rem;
+  color: var(--pf-t--global--text--color--subtle, #6a6e73);
+  font-family: var(--pf-t--global--font--family--mono, monospace);
+  word-break: break-all;
+}
+
+.dss-pretty-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.375rem 0.5rem 0.5rem 0.75rem;
+  border-top: 1px solid var(--pf-t--global--border--color--default, #e8e8e8);
+  gap: 0.5rem;
+}
+
+.dss-pretty-up {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: linear-gradient(135deg, #00b894, #00cec9);
+  color: #fff;
+  border: none;
+  border-radius: 100px;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 0.15s ease;
+}
+
+.dss-pretty-up:hover {
+  filter: brightness(1.08);
+}
+
+.dss-pretty-icons {
+  display: flex;
+  align-items: center;
+  gap: 0.1rem;
+}
+
+/* ── Unix downed section ───────────────────────────────────────────── */
+.dss-unix-bar {
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-family: "JetBrains Mono", "Fira Code", "Courier New", monospace;
+}
+
+.dss-unix-list {
+  border: 1px solid var(--pf-t--global--border--color--default, #d2d2d2);
+  border-radius: var(--pf-t--global--border--radius--md, 6px);
+  overflow: hidden;
+  font-family: "JetBrains Mono", "Fira Code", "Courier New", monospace;
+  font-size: 0.8125rem;
+}
+
+.dss-unix-row {
+  display: grid;
+  grid-template-columns: 1fr 2fr auto;
+  align-items: center;
+  gap: 0;
+  padding: 0.2rem 0.5rem;
+  border-bottom: 1px solid var(--pf-t--global--border--color--default, #d2d2d2);
+  min-height: 1.75rem;
+  transition: background 0.1s;
+}
+
+.dss-unix-row:last-child {
+  border-bottom: none;
+}
+
+.dss-unix-row:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.dss-unix-name {
+  font-weight: 600;
+  padding: 0 0.375rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dss-unix-path {
+  padding: 0 0.375rem;
+  font-size: 0.75rem;
+  color: var(--pf-t--global--text--color--subtle, #6a6e73);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dss-unix-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+  padding: 0 0.25rem;
+}
+
+/* ── Minimal floating context menu ─────────────────────────────────── */
+.dss-mini-menu {
+  position: fixed;
+  z-index: 9999;
+  background: var(--pf-t--global--background--color--primary--default, #fff);
+  border: 1px solid var(--pf-t--global--border--color--default, #d2d2d2);
+  border-radius: var(--pf-t--global--border--radius--md, 6px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  min-width: 140px;
+  overflow: hidden;
+}
+
+.dss-mini-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: 0.45rem 0.75rem;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  color: var(--pf-t--global--text--color--regular, #151515);
+  text-align: left;
+  transition: background 0.1s;
+}
+
+.dss-mini-menu-item:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.dss-mini-menu-item--danger {
+  color: #c9190b;
+}
+
+.dss-mini-menu-item--danger:hover {
+  background: rgba(201, 25, 11, 0.06);
+}
+
+/* Minimal layout — compact downed stack cards */
+.dss-mini-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  padding: 0.5rem;
+  background: var(--pf-t--global--background--color--primary--default, #fff);
+}
+
+.dss-mini-card {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--pf-t--global--border--color--default, #c7c7c7);
+  border-radius: var(--pf-t--global--border--radius--md, 6px);
+  padding: 0.2rem 0.1rem 0.2rem 0.5rem;
+  background: rgba(0, 0, 0, 0.03);
+  font-size: 0.75rem;
+  max-width: 220px;
+  cursor: pointer;
+  transition: background 0.1s, border-color 0.1s;
+  user-select: none;
+}
+
+.dss-mini-card:hover {
+  background: rgba(0, 0, 0, 0.06);
+  border-color: var(--pf-t--global--border--color--default, #aaa);
+}
+
+.dss-mini-name {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+}
+
+.dss-mini-btn.pf-v6-c-button {
+  padding: 0.1rem 0.35rem;
+  min-width: unset;
+  height: 1.4rem;
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+
+.dss-mini-btn--up { color: #3e8635 !important; }
+

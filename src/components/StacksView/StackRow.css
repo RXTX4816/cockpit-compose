@@ -46,31 +46,31 @@
   margin-left: 0.1rem;
 }
 
-/* Status accent left border */
-[data-status="running"] {
+/* Status accent left border — scoped to DataList items only so it doesn't bleed into card layouts */
+.pf-v6-c-data-list__item[data-status="running"] {
   border-left: 3px solid var(--pf-t--global--icon--color--status--success--default) !important;
 }
 
-[data-status="partial"] {
+.pf-v6-c-data-list__item[data-status="partial"] {
   border-left: 3px solid var(--pf-t--global--icon--color--status--warning--default) !important;
 }
 
-[data-status="paused"] {
+.pf-v6-c-data-list__item[data-status="paused"] {
   border-left: 3px solid var(--pf-t--global--icon--color--status--info--default) !important;
 }
 
-[data-status="stopped"],
-[data-status="unknown"] {
+.pf-v6-c-data-list__item[data-status="stopped"],
+.pf-v6-c-data-list__item[data-status="unknown"] {
   border-left: 3px solid var(--pf-t--global--border--color--default) !important;
 }
 
-[data-status] {
+.pf-v6-c-data-list__item[data-status] {
   box-sizing: border-box;
   transition: background 150ms ease, border-left-color 150ms ease;
 }
 
 /* Row hover glow */
-[data-status]:hover {
+.pf-v6-c-data-list__item[data-status]:hover {
   background: rgba(255, 255, 255, 0.028);
 }
 
