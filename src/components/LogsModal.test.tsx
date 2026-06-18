@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { LogsModal } from "./LogsModal";
 import type { ComposeStack } from "../api";
 
@@ -351,24 +351,43 @@ describe("LogsModal", () => {
     expect(screen.getByText(/something is not right/i)).toBeInTheDocument();
   });
 
-  it("calls download handler when Download button is clicked", () => {
-    const createObjectURL = vi.fn(() => "blob:url");
-    const revokeObjectURL = vi.fn();
-    vi.spyOn(URL, "createObjectURL").mockImplementation(createObjectURL);
-    vi.spyOn(URL, "revokeObjectURL").mockImplementation(revokeObjectURL);
+  it("uses showSaveFilePicker when available", async () => {
+    const close = vi.fn();
+    const write = vi.fn();
+    const createWritable = vi.fn().mockResolvedValue({ write, close });
+    const showSaveFilePicker = vi.fn().mockResolvedValue({ createWritable });
+    (window as unknown as Record<string, unknown>).showSaveFilePicker = showSaveFilePicker;
     mockUseLogStream.mockReturnValue({
       lines: ["web-1 | 2024-01-01T00:00:00Z hello"],
-      streaming: false,
-      paused: false,
-      pause: vi.fn(),
-      resume: vi.fn(),
-      restart: vi.fn(),
-      clear: vi.fn(),
+      streaming: false, paused: false,
+      pause: vi.fn(), resume: vi.fn(), restart: vi.fn(), clear: vi.fn(),
     });
     render(<LogsModal stack={stack} onClose={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: /download logs/i }));
-    expect(createObjectURL).toHaveBeenCalled();
-    expect(revokeObjectURL).toHaveBeenCalled();
+    await vi.waitFor(() => expect(close).toHaveBeenCalled());
+    expect(showSaveFilePicker).toHaveBeenCalledWith(expect.objectContaining({ suggestedName: "myapp-logs.txt" }));
+    expect(write).toHaveBeenCalled();
+    delete (window as unknown as Record<string, unknown>).showSaveFilePicker;
+    vi.restoreAllMocks();
+  });
+
+  it("falls back to cockpit.file when showSaveFilePicker is absent", async () => {
+    const mockReplace = vi.fn().mockResolvedValue(undefined);
+    vi.stubGlobal("cockpit", {
+      spawn: vi.fn(),
+      file: vi.fn().mockReturnValue({ replace: mockReplace }),
+      user: vi.fn().mockResolvedValue({ id: 1000, name: "tok", home: "/home/tok" }),
+    });
+    mockUseLogStream.mockReturnValue({
+      lines: ["web-1 | 2024-01-01T00:00:00Z hello"],
+      streaming: false, paused: false,
+      pause: vi.fn(), resume: vi.fn(), restart: vi.fn(), clear: vi.fn(),
+    });
+    render(<LogsModal stack={stack} onClose={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: /download logs/i }));
+    await waitFor(() => expect(mockReplace).toHaveBeenCalled());
+    expect(cockpit.file).toHaveBeenCalledWith(expect.stringMatching(/\/home\/tok\/Downloads\/myapp-logs-\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}\.txt$/));
+    expect(screen.getByText(/\/home\/tok\/Downloads\/myapp-logs-/i)).toBeInTheDocument();
     vi.restoreAllMocks();
   });
 });

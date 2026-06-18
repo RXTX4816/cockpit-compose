@@ -4,6 +4,8 @@ import {
   Modal,
   ModalHeader,
   ModalBody,
+  Alert,
+  AlertActionCloseButton,
   Button,
   Toolbar,
   ToolbarContent,
@@ -117,6 +119,8 @@ export function LogsModal({ stack, onClose, initialService }: Props) {
   const [levelFilter, setLevelFilter] = useState<LevelFilter>("all");
   const [showTimestamps, setShowTimestamps] = useState(true);
   const [services, setServices] = useState<string[]>([]);
+  const [downloadSavedPath, setDownloadSavedPath] = useState<string | null>(null);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
 
   const configFiles = useMemo(() => splitConfigFiles(stack.ConfigFiles), [stack.ConfigFiles]);
 
@@ -186,15 +190,41 @@ export function LogsModal({ stack, onClose, initialService }: Props) {
     if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight;
   }, []);
 
-  const handleDownload = useCallback(() => {
+  const handleDownload = useCallback(async () => {
     const text = displayedLines.map(p => p.raw).join("\n");
-    const blob = new Blob([text], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${stack.Name}-logs.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
+    // Prefer the File System Access API — opens the OS save dialog without any
+    // URL navigation, so Cockpit's iframe CSP cannot block it.
+    if ("showSaveFilePicker" in window) {
+      try {
+        const handle = await (window as Window & { showSaveFilePicker(opts: object): Promise<{ createWritable(): Promise<{ write(s: string): Promise<void>; close(): Promise<void> }> }> }).showSaveFilePicker({
+          suggestedName: `${stack.Name}-logs.txt`,
+          types: [{ description: "Text files", accept: { "text/plain": [".txt"] } }],
+        });
+        const writable = await handle.createWritable();
+        await writable.write(text);
+        await writable.close();
+        return;
+      } catch (e) {
+        if ((e as { name?: string }).name === "AbortError") return;
+        // SecurityError — showSaveFilePicker is blocked in Cockpit's iframe;
+        // fall through to server-side save below.
+      }
+    }
+    // Fallback: Firefox blocks blob:/data: navigation in iframes via frame-src
+    // CSP (Cockpit's shell-level header, not patchable from here). Write the
+    // file to ~/Downloads/ on the server instead.
+    try {
+      const user = await cockpit.user();
+      const downloadsDir = `${user.home}/Downloads`;
+      const ts = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+      const savePath = `${downloadsDir}/${stack.Name}-logs-${ts}.txt`;
+      await cockpit.spawn(["mkdir", "-p", "--", downloadsDir], { err: "message" });
+      await cockpit.file(savePath).replace(text);
+      setDownloadSavedPath(savePath);
+    } catch (err) {
+      const msg = (err as { message?: string })?.message || String(err);
+      setDownloadError(msg);
+    }
   }, [displayedLines, stack.Name]);
 
   const levelColors: Record<LevelFilter, "grey" | "red" | "orange" | "blue"> = {
@@ -340,6 +370,23 @@ export function LogsModal({ stack, onClose, initialService }: Props) {
             </ToolbarGroup>
           </ToolbarContent>
         </Toolbar>
+
+        {downloadSavedPath && (
+          <Alert
+            variant="info"
+            isInline
+            title={t("logs_modal.download_saved", { path: downloadSavedPath })}
+            actionClose={<AlertActionCloseButton onClose={() => setDownloadSavedPath(null)} />}
+          />
+        )}
+        {downloadError && (
+          <Alert
+            variant="danger"
+            isInline
+            title={downloadError}
+            actionClose={<AlertActionCloseButton onClose={() => setDownloadError(null)} />}
+          />
+        )}
 
         <div
           ref={logRef}
