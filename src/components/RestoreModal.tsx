@@ -225,7 +225,7 @@ export function RestoreModal({ existingStacks, defaultScanDir, onClose, onRestor
     if (!effectiveArchive || !detectedRootDir) return;
     setRestoring(true);
     setRestoreError(null);
-    const parent = targetDir.replace(/\/$/, "");
+    const parent = targetDir === "/" ? "/" : targetDir.replace(/\/$/, "");
     const extractedPath = `${parent}/${detectedRootDir}`;
     const renamedPath = `${parent}/${finalName}`;
     try {
@@ -247,13 +247,13 @@ export function RestoreModal({ existingStacks, defaultScanDir, onClose, onRestor
           }
           const renamedParent = renamedPath.slice(0, renamedPath.lastIndexOf("/"));
           await cockpit.spawn(["mkdir", "-p", "--", renamedParent], { superuser: "try", err: "message" });
-          await cockpit.spawn(["mv", "--", tmpSrc, renamedPath], { err: "message" });
+          await cockpit.spawn(["mv", "--", tmpSrc, renamedPath], { superuser: "try", err: "message" });
         } finally {
           await cockpit.spawn(["rm", "-rf", "--", tmpDir], { err: "message" }).catch(() => {});
         }
       } else {
         await cockpit.spawn(["mkdir", "-p", "--", parent], { superuser: "try", err: "message" });
-        await extractArchive(effectiveArchive, parent);
+        await extractArchive(effectiveArchive, parent, "try");
       }
 
       const finalDir = renameNeeded ? renamedPath : extractedPath;
