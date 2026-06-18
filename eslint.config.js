@@ -52,6 +52,7 @@ export default [
         navigator: "readonly",
         Blob: "readonly",
         KeyboardEvent: "readonly",
+        StorageEvent: "readonly",
         HTMLButtonElement: "readonly",
       },
     },

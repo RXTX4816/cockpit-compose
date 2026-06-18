@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { useSharedNetworks } from "../../hooks/useSharedNetworks";
 import { useTranslation } from "react-i18next";
 import { useModalState } from "../../hooks/useModalState";
@@ -28,7 +28,7 @@ import {
   Spinner,
 } from "@patternfly/react-core";
 import { type ComposeStack, type Runtime } from "../../api";
-import { TimesCircleIcon, BanIcon, PlusCircleIcon, FolderOpenIcon } from "@patternfly/react-icons";
+import { TimesCircleIcon, BanIcon, PlusCircleIcon, FolderOpenIcon, SearchIcon } from "@patternfly/react-icons";
 import { type DownedStack } from "../../hooks/useDownedStacksScan";
 import { useComposeStacks } from "../../hooks/useComposeStacks";
 import { useAutoRefresh } from "../../hooks/useAutoRefresh";
@@ -50,10 +50,16 @@ import { BackupModal } from "../BackupModal";
 import { ScaleModal } from "../ScaleModal";
 import { DownedStacksSection } from "../DownedStacksSection";
 import { StackRow } from "./StackRow";
+import { MinimalCard } from "./MinimalCard";
+import { PrettyCard } from "./PrettyCard";
+import { UnixRow } from "./UnixRow";
+import "./UnixRow.css";
 import { RuntimeToggle } from "../RuntimeToggle";
+import { LayoutSelector } from "../LayoutSelector";
 import { StackSkeleton } from "./StackSkeleton";
 import "./StacksView.css";
 import { splitConfigFiles } from "../../lib/configFiles";
+import { type Layout } from "../../lib/layout";
 
 const filterColorMap: Record<string, "green" | "orange" | "grey" | "blue"> = {
   running: "green",
@@ -65,13 +71,17 @@ const filterColorMap: Record<string, "green" | "orange" | "grey" | "blue"> = {
 interface Props {
   onRuntimeChange?: (runtime: Runtime) => void;
   dockerMissing?: boolean;
+  layout?: Layout;
+  onLayoutChange?: (layout: Layout) => void;
 }
 
-export function StacksView({ onRuntimeChange, dockerMissing }: Props) {
+export function StacksView({ onRuntimeChange, dockerMissing, layout = "poweruser", onLayoutChange = () => {} }: Props) {
   const { t } = useTranslation();
   const { stacks, loading, error, refresh, reset } = useComposeStacks();
   const [manuallyDownedStacks, setManuallyDownedStacks] = useState<DownedStack[]>([]);
   const [runtimeSwitchKey, setRuntimeSwitchKey] = useState(0);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const searchWrapRef = useRef<HTMLDivElement>(null);
 
   // Extracted hooks
   const modals = useModalState();
@@ -81,6 +91,17 @@ export function StacksView({ onRuntimeChange, dockerMissing }: Props) {
     searchTerm, setSearchTerm, activeFilters, toggleFilter,
     filteredStacks: displayedStacks, statusCounts, STATUS_FILTER_OPTIONS, clearFilters,
   } = useStackFilters(stacks);
+
+  useEffect(() => {
+    if (searchOpen) {
+      const input = searchWrapRef.current?.querySelector("input");
+      input?.focus();
+    }
+  }, [searchOpen]);
+
+  useEffect(() => {
+    if (searchTerm) setSearchOpen(true);
+  }, [searchTerm]);
 
   const onActingChange = useCallback((delta: 1 | -1) => {
     if (delta > 0) increment(); else decrement();
@@ -170,19 +191,47 @@ export function StacksView({ onRuntimeChange, dockerMissing }: Props) {
 
           {stacks.length > 0 && (
             <ToolbarItem>
-              <SearchInput
-                className="sv-search"
-                value={searchTerm}
-                onChange={(_e, v) => setSearchTerm(v)}
-                onClear={() => setSearchTerm("")}
-                placeholder={t("stacks.search_placeholder")}
-                aria-label={t("stacks.search_placeholder")}
-              />
+              {searchOpen ? (
+                <div
+                  ref={searchWrapRef}
+                  className="sv-search-wrap"
+                  onBlur={(e) => {
+                    if (!e.currentTarget.contains(e.relatedTarget as HTMLElement) && !searchTerm) {
+                      setSearchOpen(false);
+                    }
+                  }}
+                >
+                  <SearchInput
+                    className="sv-search"
+                    value={searchTerm}
+                    onChange={(_e, v) => setSearchTerm(v)}
+                    onClear={() => { setSearchTerm(""); setSearchOpen(false); }}
+                    placeholder={t("stacks.search_placeholder")}
+                    aria-label={t("stacks.search_placeholder")}
+                    onKeyDown={(e) => { if (e.key === "Escape") { setSearchTerm(""); setSearchOpen(false); } }}
+                  />
+                </div>
+              ) : (
+                <Tooltip content={t("stacks.search_placeholder")}>
+                  <Button
+                    variant="plain"
+                    size="sm"
+                    onClick={() => setSearchOpen(true)}
+                    aria-label={t("stacks.search_placeholder")}
+                    className="sv-search-trigger"
+                  >
+                    <SearchIcon />
+                  </Button>
+                </Tooltip>
+              )}
             </ToolbarItem>
           )}
 
           <ToolbarItem align={{ default: "alignEnd" }}>
-            <RuntimeToggle onRuntimeChange={(r) => { setRuntimeSwitchKey(k => k + 1); reset(); onRuntimeChange?.(r); }} suggestPodman={dockerMissing} />
+            <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+              <LayoutSelector layout={layout} onLayoutChange={onLayoutChange} />
+              <RuntimeToggle onRuntimeChange={(r) => { setRuntimeSwitchKey(k => k + 1); reset(); onRuntimeChange?.(r); }} suggestPodman={dockerMissing} />
+            </div>
           </ToolbarItem>
         </ToolbarContent>
       </Toolbar>
@@ -241,6 +290,94 @@ export function StacksView({ onRuntimeChange, dockerMissing }: Props) {
             </EmptyStateActions>
           </EmptyStateFooter>
         </EmptyState>
+      ) : layout === "minimal" ? (
+        <div className="sv-minimal-grid">
+          {displayedStacks.map(stack => (
+            <MinimalCard
+              key={stack.Name}
+              stack={stack}
+              expanded={expanded.has(stack.Name)}
+              onToggle={() => toggleExpanded(stack.Name)}
+              onLogs={() => modals.open("logs", stack)}
+              onYaml={() => modals.open("yaml", stack)}
+              onInfo={() => modals.open("info", stack)}
+              onDown={() => openDown(stack)}
+              onKill={() => openKill(stack)}
+              onUp={() => modals.open("upConfirm", stack)}
+              onPull={() => modals.open("pullConfirm", stack)}
+              onEvents={() => modals.open("events", stack)}
+              onTop={() => modals.open("top", stack)}
+              onExec={() => modals.open("exec", stack)}
+              onRun={() => modals.open("run", stack)}
+              onPrune={() => modals.open("prune", stack)}
+              onBackup={() => modals.open("backup", stack)}
+              onScale={() => modals.open("scale", stack)}
+              onActingChange={onActingChange}
+            />
+          ))}
+        </div>
+      ) : layout === "pretty" ? (
+        <div className="sv-pretty-grid">
+          {displayedStacks.map(stack => (
+            <PrettyCard
+              key={stack.Name}
+              stack={stack}
+              expanded={expanded.has(stack.Name)}
+              onToggle={() => toggleExpanded(stack.Name)}
+              onLogs={() => modals.open("logs", stack)}
+              onYaml={() => modals.open("yaml", stack)}
+              onInfo={() => modals.open("info", stack)}
+              onDown={() => openDown(stack)}
+              onKill={() => openKill(stack)}
+              onUp={() => modals.open("upConfirm", stack)}
+              onPull={() => modals.open("pullConfirm", stack)}
+              onEvents={() => modals.open("events", stack)}
+              onTop={() => modals.open("top", stack)}
+              onExec={() => modals.open("exec", stack)}
+              onRun={() => modals.open("run", stack)}
+              onPrune={() => modals.open("prune", stack)}
+              onBackup={() => modals.open("backup", stack)}
+              onScale={() => modals.open("scale", stack)}
+              onActingChange={onActingChange}
+            />
+          ))}
+        </div>
+      ) : layout === "unix" ? (
+        <div className="sv-unix-container">
+          <div className="sv-unix-header">
+            <span />
+            <span className="sv-unix-header-col">NAME</span>
+            <span className="sv-unix-header-col">STATUS</span>
+            <span className="sv-unix-header-col sv-unix-header-col--right">SVC</span>
+            <span className="sv-unix-header-col sv-unix-header-col--right">CPU</span>
+            <span className="sv-unix-header-col sv-unix-header-col--right">MEM</span>
+            <span className="sv-unix-header-col">PORTS</span>
+            <span className="sv-unix-header-col sv-unix-header-col--right">ACTIONS</span>
+          </div>
+          {displayedStacks.map(stack => (
+            <UnixRow
+              key={stack.Name}
+              stack={stack}
+              expanded={expanded.has(stack.Name)}
+              onToggle={() => toggleExpanded(stack.Name)}
+              onLogs={() => modals.open("logs", stack)}
+              onYaml={() => modals.open("yaml", stack)}
+              onInfo={() => modals.open("info", stack)}
+              onDown={() => openDown(stack)}
+              onKill={() => openKill(stack)}
+              onUp={() => modals.open("upConfirm", stack)}
+              onPull={() => modals.open("pullConfirm", stack)}
+              onEvents={() => modals.open("events", stack)}
+              onTop={() => modals.open("top", stack)}
+              onExec={() => modals.open("exec", stack)}
+              onRun={() => modals.open("run", stack)}
+              onPrune={() => modals.open("prune", stack)}
+              onBackup={() => modals.open("backup", stack)}
+              onScale={() => modals.open("scale", stack)}
+              onActingChange={onActingChange}
+            />
+          ))}
+        </div>
       ) : (
         <DataList aria-label={t("stacks.aria_label")} isCompact>
           {displayedStacks.map(stack => (
@@ -281,6 +418,7 @@ export function StacksView({ onRuntimeChange, dockerMissing }: Props) {
         manuallyDownedStacks={manuallyDownedStacks}
         onRefresh={refresh}
         onUpComplete={handleUpComplete}
+        layout={layout}
       />
 
       {modals.state.logs && <LogsModal stack={modals.state.logs} onClose={() => modals.close("logs")} />}

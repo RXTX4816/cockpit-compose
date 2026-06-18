@@ -10,15 +10,34 @@
   gap: 0.5rem;
 }
 
-.sv-search {
-  width: 220px;
-  opacity: 0.45;
-  transition: opacity 0.2s ease;
+.sv-search-trigger.pf-v6-c-button {
+  width: 1.875rem;
+  height: 1.875rem;
+  padding: 0.25rem;
+  min-width: unset;
+  border-radius: var(--pf-t--global--border--radius--base, 4px);
+  color: var(--pf-t--global--text--color--subtle, #6a6e73);
+  transition: color 0.15s ease, background 0.15s ease;
 }
 
-.sv-search:hover,
-.sv-search:focus-within {
-  opacity: 1;
+.sv-search-trigger.pf-v6-c-button:hover {
+  color: var(--pf-t--global--text--color--regular, #151515);
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.sv-search-wrap {
+  display: flex;
+  align-items: center;
+}
+
+.sv-search {
+  width: 220px;
+  animation: sv-search-in 0.15s ease-out;
+}
+
+@keyframes sv-search-in {
+  from { opacity: 0; transform: scaleX(0.88); transform-origin: right center; }
+  to   { opacity: 1; transform: scaleX(1); }
 }
 
 .sv-status-badges {
@@ -85,5 +104,20 @@
   justify-content: flex-end;
   padding: 0.25rem 0.5rem 0;
   opacity: 0.5;
+}
+
+/* Minimal layout — responsive card grid */
+.sv-minimal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 0.625rem;
+  padding: 0.25rem 0;
+}
+
+/* Pretty layout — CSS columns gives each card its own height; expanding one card doesn't affect others */
+.sv-pretty-grid {
+  columns: 3;
+  column-gap: 0.875rem;
+  padding: 0.25rem 0;
 }
 
