@@ -20,6 +20,8 @@ Cockpit Compose is a web-based UI for managing [Docker Compose](https://docs.doc
 - Back up a stack to a `.bak.tar.gz` archive and restore it later
 - Switch between Docker and Podman runtimes with one click
 - Works with rootless Docker automatically — no configuration needed
+- Choose between four layout styles for the stack list (Minimal, Power User, Pretty, Unix)
+- Start, stop, restart, or view logs for individual services directly from the expanded stack row
 
 ## Pages
 

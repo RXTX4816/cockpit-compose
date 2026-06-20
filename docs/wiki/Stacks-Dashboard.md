@@ -32,7 +32,17 @@ The toolbar sits above the stack list and contains three controls:
 |---|---|
 | **Status filter chips** | Colored chips for Running, Partial, Stopped, and Paused. Click a chip to show only stacks in that state; click again to deactivate. A chip only appears when at least one stack has that status. Multiple chips can be active at once. |
 | **Search** | Live text filter by stack name. Matching is case-insensitive. Click **✕** to clear. |
+| **Layout selector** | Icon button that opens a toggle group with four layout options. The chosen layout is saved in the browser. See [Layout options](#layout-options) below. |
 | **Runtime toggle** | Switch between **Docker** and **Podman** modes. The choice is saved in the browser and persists across sessions. See [Podman Compatibility](Podman-Compatibility). |
+
+### Layout options
+
+| Layout | Icon | Description |
+|---|---|---|
+| **Minimal** | Grid | Compact grid view focused on density — shows status, name, port badges, and stats in as little space as possible. |
+| **Power User** | List | Dense table row with the full set of stack details visible at a glance. |
+| **Pretty** | Magic wand | Card-style view with a more visual presentation of each stack. |
+| **Unix** | Terminal | Monochrome, terminal-aesthetic row list. |
 
 ## Stack rows
 
@@ -47,7 +57,7 @@ Each stack appears as a collapsible row. The row shows a summary when collapsed 
 | **Status label** | Running, Partial, Stopped, Paused, or Unknown |
 | **Health badge** | ✓ Healthy, ⚠ Partial, or Unhealthy — reflects the aggregate health of all services |
 | **Service count** | Number of services defined in the compose file |
-| **Ports** | Exposed ports shown as blue `host:container` labels |
+| **Ports** | Exposed ports shown as blue `host:container` badges. Ports that resolve to a reachable URL are clickable — clicking opens an external-link confirmation and then opens the service in a new browser tab. Localhost-bound ports are only clickable when Cockpit itself runs on localhost. |
 | **CPU %** | Real-time CPU usage across all containers in the stack |
 | **Memory** | Real-time memory usage across all containers in the stack |
 
@@ -78,9 +88,10 @@ Click the **▶** toggle to expand a stack row. This shows a table of containers
 | Column | Description |
 |---|---|
 | Status badge | Green (running) or grey (stopped) |
-| Name | Service name and container name |
+| Name | Service name and container name. If a changelog URL is known for the image, the service name is a link that opens a confirmation before navigating. A replica count badge appears when a service is scaled to more than one instance. |
 | Image | Docker image in use |
 | Uptime | How long the container has been running, or its current state |
+| Actions | Per-service **Start** or **Stop** (mutually exclusive based on current state), **Restart**, and **Logs** buttons. Logs opens the log viewer pre-filtered to that service. A spinner replaces the buttons while the action is in progress. |
 
 If no containers are found (e.g., the stack was just downed), a "No containers found" message is shown.
 
