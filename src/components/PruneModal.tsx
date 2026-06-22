@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { useAsyncAction } from "../hooks/useAsyncAction";
+import { useAsyncAction } from "@rxtx4816/cockpit-plugin-base-react";
 import { BroomIcon } from "@patternfly/react-icons";
 import { useTranslation } from "react-i18next";
 import {

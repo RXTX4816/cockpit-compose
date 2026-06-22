@@ -11,7 +11,7 @@ import {
   Spinner,
   TextInput,
 } from "@patternfly/react-core";
-import { Tooltip } from "./Tooltip";
+import { Tooltip } from "@rxtx4816/cockpit-plugin-base-react/components";
 import { PlusCircleIcon, FolderOpenIcon, AngleUpIcon, HistoryIcon, PencilAltIcon, ArchiveIcon, TrashIcon } from "@patternfly/react-icons";
 import { type ComposeStack } from "../api";
 import { type DownedStack, useDownedStacksScan } from "../hooks/useDownedStacksScan";

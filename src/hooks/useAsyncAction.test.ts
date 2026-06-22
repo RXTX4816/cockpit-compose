@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { renderHook, act } from "@testing-library/react";
-import { useAsyncAction } from "./useAsyncAction";
+import { useAsyncAction } from "@rxtx4816/cockpit-plugin-base-react";
 
 describe("useAsyncAction", () => {
   it("starts with loading=false and error=null", () => {

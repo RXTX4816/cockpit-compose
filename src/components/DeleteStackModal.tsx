@@ -14,7 +14,7 @@ import {
 import { removeFile, removeDirectory } from "../api";
 import { type DownedStack } from "../hooks/useDownedStacksScan";
 import { useSharedNetworks } from "../hooks/useSharedNetworks";
-import { useAsyncAction } from "../hooks/useAsyncAction";
+import { useAsyncAction } from "@rxtx4816/cockpit-plugin-base-react";
 
 interface Props {
   stack: DownedStack;

@@ -9,7 +9,7 @@ import {
   Label,
   Button,
 } from "@patternfly/react-core";
-import { Tooltip } from "./Tooltip";
+import { Tooltip } from "@rxtx4816/cockpit-plugin-base-react/components";
 import { CopyIcon } from "@patternfly/react-icons";
 import { CheckCircleIcon, ExclamationTriangleIcon, GlobeIcon, InProgressIcon, LaptopIcon, NetworkIcon } from "@patternfly/react-icons";
 import {

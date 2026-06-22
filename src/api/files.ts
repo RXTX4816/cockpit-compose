@@ -1,5 +1,6 @@
 import type { Snapshot } from "./types";
 import { getProfilesFromCompose } from "./parsing";
+import { createTarArchive, type TarCreateResult } from "@rxtx4816/cockpit-plugin-base-react/lib/tar";
 
 export function readComposeFile(path: string): CockpitProcess {
   return cockpit.spawn(["cat", path], { err: "message" });
@@ -142,11 +143,12 @@ export async function createBackupArchive(
   destPath: string,
   options: { includeSnapshots: boolean; includeSubdirs: boolean },
   superuser?: "try",
-): Promise<void> {
-  const args: string[] = ["tar", "-czf", destPath, "-C", parentDir];
+): Promise<TarCreateResult> {
+  const exclude: string[] = [];
+  const extraArgs: string[] = [];
   if (!options.includeSnapshots) {
-    args.push("--wildcards");
-    args.push("--exclude=*.snapshot.*");
+    extraArgs.push("--wildcards");
+    exclude.push("*.snapshot.*");
   }
   if (!options.includeSubdirs) {
     // Discover immediate subdirectories via find and exclude each by exact name.
@@ -161,9 +163,8 @@ export async function createBackupArchive(
     await findProc;
     for (const line of findOut.trim().split("\n").filter(l => l.trim())) {
       const name = line.substring(line.lastIndexOf("/") + 1);
-      args.push(`--exclude=${dirName}/${name}`);
+      exclude.push(`${dirName}/${name}`);
     }
   }
-  args.push(dirName);
-  await cockpit.spawn(args, { superuser, err: "message" });
+  return createTarArchive(destPath, parentDir, dirName, { exclude, extraArgs, superuser });
 }

@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { ToggleGroup, ToggleGroupItem, Alert, Modal, ModalHeader, ModalBody, ModalFooter, Button } from "@patternfly/react-core";
-import { Tooltip } from "./Tooltip";
+import { Tooltip } from "@rxtx4816/cockpit-plugin-base-react/components";
 import { CubeIcon } from "@patternfly/react-icons";
 import { setRuntime, detectComposeCommand, type Runtime } from "../api";
 

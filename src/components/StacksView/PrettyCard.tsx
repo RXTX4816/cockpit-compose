@@ -13,7 +13,7 @@ import {
   ModalFooter,
   Spinner,
 } from "@patternfly/react-core";
-import { Tooltip } from "../Tooltip";
+import { Tooltip } from "@rxtx4816/cockpit-plugin-base-react/components";
 import { type ComposeStack, parseStackStatus, parseServiceCount, formatBytes, getPortUrl, parseShortUptime } from "../../api";
 import { effectiveStatus, stackHealthSummary } from "../../lib/stackStatus";
 import {

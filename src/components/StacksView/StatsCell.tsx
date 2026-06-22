@@ -1,7 +1,7 @@
 import type { ComponentType, CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import { Label, Spinner } from "@patternfly/react-core";
-import { Tooltip } from "../Tooltip";
+import { Tooltip } from "@rxtx4816/cockpit-plugin-base-react/components";
 import { GlobeIcon, LaptopIcon, NetworkIcon } from "@patternfly/react-icons";
 import type { ParsedPort, StackStatus } from "../../api";
 import { formatBytes, getPortUrl } from "../../api";

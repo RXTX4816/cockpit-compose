@@ -7,7 +7,7 @@ import {
   SearchInput,
   Label,
 } from "@patternfly/react-core";
-import { Tooltip } from "../Tooltip";
+import { Tooltip } from "@rxtx4816/cockpit-plugin-base-react/components";
 import { type ComposeStack, type Runtime } from "../../api";
 import { RuntimeToggle } from "../RuntimeToggle";
 

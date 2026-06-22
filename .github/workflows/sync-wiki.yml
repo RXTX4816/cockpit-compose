@@ -8,29 +8,5 @@ on:
 
 jobs:
   sync:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
-    steps:
-      - uses: actions/checkout@v7
-
-      - name: Push docs/wiki to GitHub Wiki
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-
-          git clone "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.wiki.git" wiki-repo
-
-          cp docs/wiki/*.md wiki-repo/
-
-          cd wiki-repo
-          git add -A
-          if git diff --cached --quiet; then
-            echo "No wiki changes to sync."
-          else
-            git commit -m "docs: sync wiki from docs/wiki/ [skip ci]"
-            git push
-          fi
+    uses: RXTX4816/cockpit-plugin-base-react/.github/workflows/sync-wiki-plugin.yml@main
+    secrets: inherit
