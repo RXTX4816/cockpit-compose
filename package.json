@@ -25,7 +25,7 @@
   },
   "devDependencies": {
     "@patternfly/react-core": "^6.5.1",
-    "@rxtx4816/cockpit-plugin-base-react": "file:.yalc/@rxtx4816/cockpit-plugin-base-react",
+    "@rxtx4816/cockpit-plugin-base-react": "1.0.9",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@types/react": "^19.2.17",
