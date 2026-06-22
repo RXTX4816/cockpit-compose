@@ -30,6 +30,29 @@ npm run watch
 
 Then open http://localhost:9090 — Docker Compose appears in the sidebar automatically.
 
+### Working on the base library
+
+This plugin depends on [`@rxtx4816/cockpit-plugin-base-react`](https://github.com/RXTX4816/cockpit-plugin-base-react), which provides shared hooks, components, tooling config, and the VM test harness. If you need to change both repos at the same time, use [yalc](https://github.com/wclr/yalc) to link your local build instead of the published npm package.
+
+**One-time setup:** `npm install -g yalc`
+
+```bash
+# 1. In the cockpit-plugin-base-react repo, publish to the local yalc store
+yalc publish
+
+# 2. In this repo, replace the npm dependency with the local yalc version
+npm run base:add
+
+# 3. Make your changes in both repos. To push updated base library changes:
+#    (in cockpit-plugin-base-react)
+yalc push       # publishes and auto-updates all linked consumers
+
+# 4. When done, restore the npm registry version
+npm run base:reset
+```
+
+**Important:** never commit the `.yalc/` directory or the `yalc.lock` file — they are gitignored. Always run `npm run base:reset` before opening a PR.
+
 ## Running Tests
 
 ```bash

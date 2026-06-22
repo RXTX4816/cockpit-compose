@@ -106,15 +106,32 @@ Open `http://localhost:9090` — **Docker Compose** appears in the sidebar autom
 | `npm run test` | Run tests |
 | `npm run test:coverage` | Coverage report |
 
+### Base library
+
+This plugin builds on [`@rxtx4816/cockpit-plugin-base-react`](https://github.com/RXTX4816/cockpit-plugin-base-react) — a shared foundation that provides bootstrapping, dark theme sync, i18n setup, reusable hooks and components, shared tooling config (TypeScript, ESLint, Vitest), and the QEMU VM test harness.
+
+If you need to develop the base library and this plugin together locally, use [yalc](https://github.com/wclr/yalc):
+
+```bash
+# In the cockpit-plugin-base-react repo
+yalc publish            # or: yalc push (auto-pushes on change)
+
+# In this repo
+npm run base:add        # links the local yalc version
+# ... make changes and test ...
+npm run base:reset      # restores the npm registry version
+```
+
 ### VM Testing
 
-`scripts/test-vm.sh` spins up QEMU VMs across Arch, Debian, and Fedora with Docker, Podman, and both-runtime scenarios. Your `src/` folder is mounted live, so `npm run watch` changes appear in the browser immediately.
+QEMU VMs for testing across Arch, Debian, and Fedora with Docker, Podman, and both-runtime scenarios. Your `src/` folder is mounted live so `npm run watch` changes appear in the browser without restarting anything. The VM harness is provided by the base library; plugin-specific config lives in `scripts/test-vm.config.sh`.
 
 ```bash
 sudo pacman -S qemu-full cloud-image-utils wget   # one-time
 npm run build
-npm run vm:init   # downloads base images and starts all 9 VMs (~2 min)
-# Open https://localhost:9093 — login: test / test
+npm run vm download          # download base images (~500–700 MB each)
+npm run vm start             # start all 9 VMs
+# Open https://localhost:9090 — login: test / test
 ```
 
 See [docs/wiki/VM-Testing.md](docs/wiki/VM-Testing.md) for all VM ports, commands, and troubleshooting.

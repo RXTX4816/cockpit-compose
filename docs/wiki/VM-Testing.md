@@ -1,9 +1,9 @@
 # VM Testing
 
 Automated QEMU VMs for testing cockpit-compose across three distros × three runtime scenarios.
-The script (`scripts/test-vm.sh`) downloads official cloud images, provisions them
-with cloud-init, and mounts your local `src/` folder live into the VM — so
-`npm run watch` changes are visible in the browser without restarting anything.
+The VM harness is provided by [`@rxtx4816/cockpit-plugin-base-react`](https://github.com/RXTX4816/cockpit-plugin-base-react) and invoked via `npm run vm <command>`. Plugin-specific config (VM names, ports, distro packages) lives in `scripts/test-vm.config.sh` in this repo.
+
+The harness downloads official cloud images, provisions them with cloud-init, and mounts your local `src/` folder live into the VM — so `npm run watch` changes are visible in the browser without restarting anything.
 
 ## Scenarios
 
@@ -35,8 +35,8 @@ The script falls back to software emulation automatically if it isn't, but it wi
 
 ```bash
 # 1. Download cloud base images (~500-700 MB each, one per distro)
-./scripts/test-vm.sh download debian        # just debian
-./scripts/test-vm.sh download               # all three distros
+npm run vm download debian        # just debian
+npm run vm download               # all three distros
 
 # 2. Build the plugin so src/main.js exists
 npm run build
@@ -48,16 +48,16 @@ scenarios for that distro — downloading once covers all three scenarios.
 ## Starting a VM
 
 ```bash
-./scripts/test-vm.sh start debian-podman   # specific VM
-./scripts/test-vm.sh start debian          # all three debian scenarios
-./scripts/test-vm.sh start podman          # podman scenario on all three distros
-./scripts/test-vm.sh start                 # all 9 VMs (needs ~18 GB RAM)
+npm run vm start debian-podman   # specific VM
+npm run vm start debian          # all three debian scenarios
+npm run vm start podman          # podman scenario on all three distros
+npm run vm start                 # all 9 VMs (needs ~18 GB RAM)
 ```
 
 The VM boots in the background. Block until cloud-init finishes:
 
 ```bash
-./scripts/test-vm.sh wait debian-podman
+npm run vm wait debian-podman
 ```
 
 `wait` polls SSH then runs `cloud-init status --wait` inside the VM. It warns if
@@ -86,16 +86,16 @@ Then open the URL and accept the self-signed certificate.
 
 | Command | What it does |
 |---|---|
-| `./scripts/test-vm.sh status` | Show all 9 VMs with state and ports |
-| `./scripts/test-vm.sh download [distro\|all]` | Download base cloud images |
-| `./scripts/test-vm.sh build` | `npm run build` shortcut |
-| `./scripts/test-vm.sh start <vm\|shortcut>` | Start VM(s) in background |
-| `./scripts/test-vm.sh wait <vm>` | Block until cloud-init fully finishes |
-| `./scripts/test-vm.sh stop <vm\|shortcut>` | Stop VM(s) |
-| `./scripts/test-vm.sh ssh <vm>` | Open SSH session |
-| `./scripts/test-vm.sh logs <vm>` | Tail serial console output |
-| `./scripts/test-vm.sh clean <vm\|shortcut>` | Wipe disk + re-provision on next start |
-| `./scripts/test-vm.sh reset <distro>` | Remove all files including base image |
+| `npm run vm status` | Show all 9 VMs with state and ports |
+| `npm run vm download [distro\|all]` | Download base cloud images |
+| `npm run vm build` | `npm run build` shortcut |
+| `npm run vm start <vm\|shortcut>` | Start VM(s) in background |
+| `npm run vm wait <vm>` | Block until cloud-init fully finishes |
+| `npm run vm stop <vm\|shortcut>` | Stop VM(s) |
+| `npm run vm ssh <vm>` | Open SSH session |
+| `npm run vm logs <vm>` | Tail serial console output |
+| `npm run vm clean <vm\|shortcut>` | Wipe disk + re-provision on next start |
+| `npm run vm reset <distro>` | Remove all files including base image |
 
 ## Live editing
 
@@ -145,13 +145,13 @@ VMs use an overlay disk over the base image. The base is never modified.
 
 ```bash
 # Wipe one VM's disk and cloud-init state; next start re-provisions from scratch
-./scripts/test-vm.sh clean debian-podman
+npm run vm clean debian-podman
 
 # Wipe all debian VMs at once (shortcut)
-./scripts/test-vm.sh clean debian
+npm run vm clean debian
 
 # Remove everything for a distro including the shared base image
-./scripts/test-vm.sh reset debian
+npm run vm reset debian
 ```
 
 `clean` is the go-to fix when cloud-init fails or you want to test a fresh install
@@ -164,7 +164,7 @@ and want a fresh snapshot, use `reset arch` then `download arch`.
 ## Environment overrides
 
 ```bash
-VM_MEM=4096 VM_CPUS=4 ./scripts/test-vm.sh start fedora
+VM_MEM=4096 VM_CPUS=4 npm run vm start fedora
 ```
 
 | Variable | Default | Description |
@@ -180,7 +180,7 @@ SSH is available before cloud-init finishes installing packages. Use `wait` (not
 `start`) — it runs `cloud-init status --wait` inside the VM to block until everything
 is done. If `wait` reports a warning, SSH in and check:
 ```bash
-./scripts/test-vm.sh ssh debian
+npm run vm ssh debian
 sudo cloud-init status --long
 sudo journalctl -u cloud-init --no-pager -n 50
 ```
@@ -189,9 +189,9 @@ sudo journalctl -u cloud-init --no-pager -n 50
 A package name was wrong or unavailable. The most common cause on Debian is using
 `docker-compose-v2` (not in default repos) instead of `docker-compose`. Clean and retry:
 ```bash
-./scripts/test-vm.sh clean debian
-./scripts/test-vm.sh start debian
-./scripts/test-vm.sh wait debian
+npm run vm clean debian
+npm run vm start debian
+npm run vm wait debian
 ```
 
 **VM won't start / QEMU error about virtfs**
@@ -220,7 +220,7 @@ sudo usermod -aG kvm $USER   # then log out and back in
 Rootless Podman needs a systemd user session, but the `test` user doesn't have one when accessed
 via Cockpit without lingering enabled. Fix for a running VM:
 ```bash
-./scripts/test-vm.sh ssh debian
+npm run vm ssh debian
 sudo loginctl enable-linger test
 mkdir -p /home/test/.config/containers
 echo -e '[network]\ndefault_rootless_network_cmd = "pasta"' > /home/test/.config/containers/containers.conf
@@ -233,14 +233,14 @@ Both are set automatically on newly provisioned VMs.
 Podman on Debian and Fedora doesn't search Docker Hub by default. Fix by adding `docker.io`
 as an unqualified search registry in the running VM:
 ```bash
-./scripts/test-vm.sh ssh debian
+npm run vm ssh debian
 echo 'unqualified-search-registries = ["docker.io"]' | sudo tee /etc/containers/registries.conf.d/docker-io.conf
 ```
 This is set automatically on newly provisioned VMs. For an existing VM that's missing it,
 the one-liner above is enough — no reboot required.
 
 **Port already in use**
-Change the port constants at the top of `scripts/test-vm.sh`:
+Change the port constants in `scripts/test-vm.config.sh`:
 ```bash
 DEBIAN_SSH_PORT=2221
 DEBIAN_COCKPIT_PORT=9091
