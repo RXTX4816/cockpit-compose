@@ -4,6 +4,8 @@ import { RestoreModal } from "./RestoreModal";
 import type { ComposeStack } from "../api";
 import { mockProcess } from "../test/helpers";
 
+const ARCHIVE_MEMBERS = ["myapp/", "myapp/docker-compose.yml", "myapp/.env"];
+
 vi.mock("../api/files", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../api/files")>();
   return {
@@ -30,7 +32,6 @@ const mockExtractArchive = vi.mocked(extractArchive);
 const mockFindComposeFiles = vi.mocked(findComposeFiles);
 const mockSaveComposeFile = vi.mocked(saveComposeFile);
 
-const ARCHIVE_LISTING = "myapp/\nmyapp/docker-compose.yml\nmyapp/.env\n";
 const ARCHIVE_PATH = "/home/user/stacks/myapp-2026-06-12_12-00-00.bak.tar.gz";
 
 const existingStacks: ComposeStack[] = [
@@ -38,10 +39,10 @@ const existingStacks: ComposeStack[] = [
 ];
 
 function setupDefaultMocks() {
-  mockFindBackupArchives.mockImplementation(() => mockProcess(ARCHIVE_PATH + "\n"));
-  mockListArchiveContents.mockImplementation(() => mockProcess(ARCHIVE_LISTING));
-  mockReadFileFromArchive.mockImplementation(() => mockProcess("services:\n  web:\n    image: nginx\n"));
-  mockExtractArchive.mockImplementation(() => mockProcess(""));
+  mockFindBackupArchives.mockResolvedValue([ARCHIVE_PATH]);
+  mockListArchiveContents.mockResolvedValue(ARCHIVE_MEMBERS);
+  mockReadFileFromArchive.mockResolvedValue("services:\n  web:\n    image: nginx\n");
+  mockExtractArchive.mockResolvedValue(undefined);
   mockFindComposeFiles.mockImplementation(() => mockProcess("/home/user/stacks/myapp/docker-compose.yml\n"));
   mockSaveComposeFile.mockResolvedValue(undefined);
   vi.stubGlobal("cockpit", {
@@ -90,7 +91,7 @@ describe("RestoreModal — discovery phase", () => {
   });
 
   it("shows no-backups-found alert when scan returns empty", async () => {
-    mockFindBackupArchives.mockImplementation(() => mockProcess(""));
+    mockFindBackupArchives.mockResolvedValue([]);
     render(
       <RestoreModal
         existingStacks={existingStacks}
@@ -137,10 +138,8 @@ describe("RestoreModal — validation phase", () => {
   });
 
   it("shows name conflict warning when archive name matches a running stack", async () => {
-    mockListArchiveContents.mockImplementation(() =>
-      mockProcess("otherapp/\notherapp/docker-compose.yml\n")
-    );
-    mockReadFileFromArchive.mockImplementation(() => mockProcess("services:\n  web:\n"));
+    mockListArchiveContents.mockResolvedValue(["otherapp/", "otherapp/docker-compose.yml"]);
+    mockReadFileFromArchive.mockResolvedValue("services:\n  web:\n");
     render(
       <RestoreModal
         existingStacks={existingStacks}
@@ -158,7 +157,7 @@ describe("RestoreModal — validation phase", () => {
   });
 
   it("uses name: field from compose file as detected name when present", async () => {
-    mockReadFileFromArchive.mockImplementation(() => mockProcess("name: myapp-custom\nservices:\n  web:\n"));
+    mockReadFileFromArchive.mockResolvedValue("name: myapp-custom\nservices:\n  web:\n");
     render(
       <RestoreModal
         existingStacks={existingStacks}
@@ -294,7 +293,7 @@ describe("RestoreModal — restore execution", () => {
   });
 
   it("shows error alert when extractArchive fails", async () => {
-    mockExtractArchive.mockImplementation(() => mockProcess("", "permission denied"));
+    mockExtractArchive.mockRejectedValue(new Error("permission denied"));
     render(
       <RestoreModal
         existingStacks={existingStacks}
@@ -317,10 +316,8 @@ describe("RestoreModal — restore execution", () => {
   it("extracts into a temp dir (not parent) when rename is needed, protecting the live folder", async () => {
     // Archive root "otherapp" conflicts with existing stack — will be renamed to "otherapp-restored".
     // extractArchive must receive the temp dir, never the live stacks parent, so the live folder is safe.
-    mockListArchiveContents.mockImplementation(() =>
-      mockProcess("otherapp/\notherapp/docker-compose.yml\n")
-    );
-    mockReadFileFromArchive.mockImplementation(() => mockProcess("services:\n  web:\n"));
+    mockListArchiveContents.mockResolvedValue(["otherapp/", "otherapp/docker-compose.yml"]);
+    mockReadFileFromArchive.mockResolvedValue("services:\n  web:\n");
     mockFindComposeFiles.mockImplementation(() =>
       mockProcess("/tmp/restore-test/otherapp/docker-compose.yml\n")
     );
@@ -366,7 +363,7 @@ describe("RestoreModal — restore execution", () => {
 
 describe("RestoreModal — scan error and rescan", () => {
   it("shows scan error alert when findBackupArchives fails", async () => {
-    mockFindBackupArchives.mockImplementation(() => mockProcess("", "permission denied"));
+    mockFindBackupArchives.mockRejectedValue(new Error("permission denied"));
     render(
       <RestoreModal
         existingStacks={existingStacks}
@@ -379,12 +376,7 @@ describe("RestoreModal — scan error and rescan", () => {
   });
 
   it("shows scan error with String(e) when rejection is not an Error", async () => {
-    mockFindBackupArchives.mockImplementation(() =>
-      Object.assign(
-        new Promise<string>((_, reject) => queueMicrotask(() => reject("disk full"))),
-        { stream: vi.fn().mockReturnThis(), close: vi.fn(), input: vi.fn() },
-      ) as CockpitProcess,
-    );
+    mockFindBackupArchives.mockRejectedValue("disk full");
     render(
       <RestoreModal
         existingStacks={existingStacks}
@@ -414,7 +406,7 @@ describe("RestoreModal — scan error and rescan", () => {
 
 describe("RestoreModal — validation edge cases", () => {
   it("shows validation error when archive has no root directory", async () => {
-    mockListArchiveContents.mockImplementation(() => mockProcess("file.txt\nanother.txt\n"));
+    mockListArchiveContents.mockResolvedValue(["file.txt", "another.txt"]);
     render(
       <RestoreModal
         existingStacks={existingStacks}
@@ -431,9 +423,7 @@ describe("RestoreModal — validation edge cases", () => {
   });
 
   it("uses rootDir as name when no compose file found in archive", async () => {
-    mockListArchiveContents.mockImplementation(() =>
-      mockProcess("myapp/\nmyapp/data.json\nmyapp/nginx.conf\n")
-    );
+    mockListArchiveContents.mockResolvedValue(["myapp/", "myapp/data.json", "myapp/nginx.conf"]);
     render(
       <RestoreModal
         existingStacks={existingStacks}
@@ -449,7 +439,7 @@ describe("RestoreModal — validation edge cases", () => {
   });
 
   it("falls back to rootDir when compose file read fails during validation", async () => {
-    mockReadFileFromArchive.mockImplementation(() => mockProcess("", "not found"));
+    mockReadFileFromArchive.mockRejectedValue(new Error("not found"));
     render(
       <RestoreModal
         existingStacks={existingStacks}
@@ -465,10 +455,8 @@ describe("RestoreModal — validation edge cases", () => {
   });
 
   it("shows name slash error when new name contains a slash", async () => {
-    mockListArchiveContents.mockImplementation(() =>
-      mockProcess("otherapp/\notherapp/docker-compose.yml\n")
-    );
-    mockReadFileFromArchive.mockImplementation(() => mockProcess("services:\n  web:\n"));
+    mockListArchiveContents.mockResolvedValue(["otherapp/", "otherapp/docker-compose.yml"]);
+    mockReadFileFromArchive.mockResolvedValue("services:\n  web:\n");
     render(
       <RestoreModal
         existingStacks={existingStacks}
@@ -508,10 +496,8 @@ describe("RestoreModal — validation edge cases", () => {
 
 describe("RestoreModal — restore with name update in compose file", () => {
   it("updates compose name field when renaming and compose file has a name: entry", async () => {
-    mockListArchiveContents.mockImplementation(() =>
-      mockProcess("otherapp/\notherapp/docker-compose.yml\n")
-    );
-    mockReadFileFromArchive.mockImplementation(() => mockProcess("services:\n  web:\n"));
+    mockListArchiveContents.mockResolvedValue(["otherapp/", "otherapp/docker-compose.yml"]);
+    mockReadFileFromArchive.mockResolvedValue("services:\n  web:\n");
     const spawnMock = vi.fn().mockImplementation((args: string[]) => {
       const path = args[args.length - 1] ?? "";
       // Only the extracted source path (ends with "otherapp") should exist
@@ -581,10 +567,8 @@ describe("RestoreModal — target-exists path correctness (regression)", () => {
   it("does NOT show target-exists warning when only the extraction dir exists but the rename dest does not", async () => {
     // Scenario: archive root is "myapp", user renames to "myapp-2" (name conflict forced).
     // Only "myapp/" exists on disk — NOT "myapp-2/". No warning should appear.
-    mockListArchiveContents.mockImplementation(() =>
-      mockProcess("otherapp/\notherapp/docker-compose.yml\n")
-    );
-    mockReadFileFromArchive.mockImplementation(() => mockProcess("services:\n  web:\n"));
+    mockListArchiveContents.mockResolvedValue(["otherapp/", "otherapp/docker-compose.yml"]);
+    mockReadFileFromArchive.mockResolvedValue("services:\n  web:\n");
     vi.stubGlobal("cockpit", {
       spawn: vi.fn().mockImplementation((args: string[]) => {
         const path = args[args.length - 1] ?? "";
@@ -615,10 +599,8 @@ describe("RestoreModal — target-exists path correctness (regression)", () => {
   it("shows target-exists warning when the RENAMED destination already exists", async () => {
     // Scenario: archive root "otherapp", user would rename to "otherapp-restored".
     // "otherapp-restored/" already exists on disk — must warn.
-    mockListArchiveContents.mockImplementation(() =>
-      mockProcess("otherapp/\notherapp/docker-compose.yml\n")
-    );
-    mockReadFileFromArchive.mockImplementation(() => mockProcess("services:\n  web:\n"));
+    mockListArchiveContents.mockResolvedValue(["otherapp/", "otherapp/docker-compose.yml"]);
+    mockReadFileFromArchive.mockResolvedValue("services:\n  web:\n");
     vi.stubGlobal("cockpit", {
       spawn: vi.fn().mockImplementation((args: string[]) => {
         const path = args[args.length - 1] ?? "";

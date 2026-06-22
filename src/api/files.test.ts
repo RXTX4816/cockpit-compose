@@ -139,58 +139,6 @@ describe("listYamlFilesInDir", () => {
   });
 });
 
-describe("findBackupArchives", () => {
-  it("spawns find with -maxdepth 1 and *.bak.tar.gz", async () => {
-    const { findBackupArchives } = await import("./files");
-    mockSpawn.mockReturnValue(mockProcess(""));
-    findBackupArchives("/home/user/stacks");
-    const args = mockSpawn.mock.calls[0][0] as string[];
-    expect(args).toContain("find");
-    expect(args).toContain("/home/user/stacks");
-    expect(args).toContain("-maxdepth");
-    expect(args).toContain("1");
-    expect(args).toContain("*.bak.tar.gz");
-  });
-
-  it("passes superuser: try when provided", async () => {
-    const { findBackupArchives } = await import("./files");
-    mockSpawn.mockReturnValue(mockProcess(""));
-    findBackupArchives("/dir", "try");
-    const opts = mockSpawn.mock.calls[0][1] as { superuser?: string };
-    expect(opts.superuser).toBe("try");
-  });
-});
-
-describe("listArchiveContents", () => {
-  it("spawns tar -tzf on the archive path", async () => {
-    const { listArchiveContents } = await import("./files");
-    mockSpawn.mockReturnValue(mockProcess("myapp/\nmyapp/docker-compose.yml\n"));
-    listArchiveContents("/backups/myapp-2026.bak.tar.gz");
-    const args = mockSpawn.mock.calls[0][0] as string[];
-    expect(args).toEqual(["tar", "-tzf", "/backups/myapp-2026.bak.tar.gz"]);
-  });
-});
-
-describe("extractArchive", () => {
-  it("spawns tar -xzf with -C for the target parent dir", async () => {
-    const { extractArchive } = await import("./files");
-    mockSpawn.mockReturnValue(mockProcess(""));
-    extractArchive("/backups/myapp-2026.bak.tar.gz", "/home/user/stacks");
-    const args = mockSpawn.mock.calls[0][0] as string[];
-    expect(args).toEqual(["tar", "-xzf", "/backups/myapp-2026.bak.tar.gz", "-C", "/home/user/stacks"]);
-  });
-});
-
-describe("readFileFromArchive", () => {
-  it("spawns tar -xzOf with archive and member path", async () => {
-    const { readFileFromArchive } = await import("./files");
-    mockSpawn.mockReturnValue(mockProcess("name: myapp\nservices:\n"));
-    readFileFromArchive("/backups/myapp-2026.bak.tar.gz", "myapp/docker-compose.yml");
-    const args = mockSpawn.mock.calls[0][0] as string[];
-    expect(args).toEqual(["tar", "-xzOf", "/backups/myapp-2026.bak.tar.gz", "myapp/docker-compose.yml"]);
-  });
-});
-
 describe("createBackupArchive", () => {
   it("includes basic tar -czf args with -C and dir name", async () => {
     const { createBackupArchive } = await import("./files");
