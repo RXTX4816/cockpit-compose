@@ -94,11 +94,7 @@ export function RestoreModal({ existingStacks, defaultScanDir, onClose, onRestor
     setDetectedName(null);
     setValidationError(null);
     try {
-      let output = "";
-      const proc = findBackupArchives(dir.trim());
-      proc.stream((d: string) => { output += d; });
-      await proc;
-      const found = output.trim().split("\n").filter(l => l.trim()).sort().reverse();
+      const found = await findBackupArchives(dir.trim());
       setArchives(found);
     } catch (e: unknown) {
       setScanError(e instanceof Error ? e.message : String(e));
@@ -125,11 +121,9 @@ export function RestoreModal({ existingStacks, defaultScanDir, onClose, onRestor
     setTargetExists(false);
     setTargetExistsConfirmed(false);
     try {
-      let listing = "";
-      const listProc = listArchiveContents(archivePath);
-      listProc.stream((d: string) => { listing += d; });
-      await listProc;
-      setArchiveListing(listing.trim());
+      const members = await listArchiveContents(archivePath);
+      const listing = members.join("\n");
+      setArchiveListing(listing);
 
       const rootDir = parseArchiveRootDir(listing);
       if (!rootDir) throw new Error("Could not determine archive root directory");
@@ -139,10 +133,7 @@ export function RestoreModal({ existingStacks, defaultScanDir, onClose, onRestor
       let composeName = rootDir;
       if (composeMember) {
         try {
-          let content = "";
-          const readProc = readFileFromArchive(archivePath, composeMember);
-          readProc.stream((d: string) => { content += d; });
-          await readProc;
+          const content = await readFileFromArchive(archivePath, composeMember);
           composeName = parseComposeName(content) ?? rootDir;
         } catch {
           // compose read failed — fall back to dir name

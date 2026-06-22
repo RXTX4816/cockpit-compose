@@ -1,59 +1,22 @@
 import "@testing-library/jest-dom/vitest";
 import { vi } from "vitest";
 
-class ResizeObserverMock {
-  observe() {}
-  unobserve() {}
-  disconnect() {}
-}
-vi.stubGlobal("ResizeObserver", ResizeObserverMock);
+const mockSpawn = vi.fn();
 
-const localStorageMock = (() => {
-  let store: Record<string, string> = {};
-  return {
-    getItem: (key: string) => store[key] ?? null,
-    setItem: (key: string, value: string) => { store[key] = String(value); },
-    removeItem: (key: string) => { delete store[key]; },
-    clear: () => { store = {}; },
-    get length() { return Object.keys(store).length; },
-    key: (index: number) => Object.keys(store)[index] ?? null,
-  };
-})();
-vi.stubGlobal("localStorage", localStorageMock);
-Object.defineProperty(window, "localStorage", { value: localStorageMock });
+const mockPermission = {
+  allowed: false,
+  addEventListener: vi.fn(),
+  removeEventListener: vi.fn(),
+  close: vi.fn(),
+};
 
-// Dynamic import ensures localStorage mock is in place before i18n's cockpitDetector
-// runs localStorage.getItem(), preventing the Node.js v26 ExperimentalWarning.
+vi.stubGlobal("cockpit", {
+  spawn: mockSpawn,
+  permission: vi.fn().mockReturnValue(mockPermission),
+});
+
+// Dynamic import ensures localStorage mock (from base setup) is in place before
+// i18n's cockpitDetector runs localStorage.getItem()
 await import("../i18n");
 
-const mockSpawn = vi.fn();
-vi.stubGlobal("cockpit", { spawn: mockSpawn });
-
-vi.stubGlobal("requestAnimationFrame", (callback: (timestamp: number) => void) => {
-  callback(0);
-  return 0;
-});
-vi.stubGlobal("cancelAnimationFrame", () => {});
-
-const consoleError = console.error.bind(console);
-vi.spyOn(console, "error").mockImplementation((...args: unknown[]) => {
-  const message = args.map(String).join(" ");
-  if (message.includes("not wrapped in act(...)") || message.includes("Not implemented: navigation to another Document")) {
-    return;
-  }
-  consoleError(...args);
-});
-
-const consoleWarn = console.warn.bind(console);
-vi.spyOn(console, "warn").mockImplementation((...args: unknown[]) => {
-  const message = args.map(String).join(" ");
-  if (message.includes("not wrapped in act(...)") || message.includes("Not implemented: navigation to another Document")) {
-    return;
-  }
-  consoleWarn(...args);
-});
-
 export { mockSpawn };
-
-// jsdom doesn't implement HTMLCanvasElement.getContext; stub it to silence the warning
-window.HTMLCanvasElement.prototype.getContext = () => null;

@@ -3,11 +3,11 @@ name: Release
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Tag to release (e.g. v0.2.0)'
+        description: "Tag to release (e.g. v0.1.0)"
         required: true
 
 permissions:
@@ -15,102 +15,11 @@ permissions:
 
 jobs:
   release:
-    name: Build and Upload Release Assets
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-
-      - uses: actions/setup-node@v6.4.0
-        with:
-          node-version: '22'
-          cache: 'npm'
-
-      - name: Get version from tag
-        run: |
-          VERSION="${{ github.event.inputs.tag || github.ref_name }}"
-          echo "VERSION=${VERSION}" >> "$GITHUB_ENV"
-          echo "VERSION_CLEAN=${VERSION#v}" >> "$GITHUB_ENV"
-
-      - run: npm ci
-
-      - name: Set version in package.json
-        run: npm pkg set version="${VERSION_CLEAN}"
-
-      - run: npm run build
-
-      # ── Tarball ─────────────────────────────────────────────────────────
-      - name: Package release tarball
-        run: |
-          mkdir -p cockpit-compose
-          cp src/main.js src/main.css src/manifest.json src/index.html README.md cockpit-compose/
-          tar -czf "cockpit-compose-${VERSION_CLEAN}.tar.gz" cockpit-compose/
-          sha256sum "cockpit-compose-${VERSION_CLEAN}.tar.gz" > "cockpit-compose-${VERSION_CLEAN}.tar.gz.sha256"
-          rm -rf cockpit-compose
-
-      # ── RPM ─────────────────────────────────────────────────────────────
-      - name: Install RPM build tools
-        run: sudo apt-get install -y rpm
-
-      - name: Build RPM
-        run: |
-          mkdir -p rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
-          cp "cockpit-compose-${VERSION_CLEAN}.tar.gz" rpmbuild/SOURCES/
-          cp cockpit-compose.spec rpmbuild/SPECS/
-          rpmbuild \
-            --define "_topdir $(pwd)/rpmbuild" \
-            --define "version ${VERSION_CLEAN}" \
-            -bb rpmbuild/SPECS/cockpit-compose.spec
-
-      # ── DEB ─────────────────────────────────────────────────────────────
-      - name: Install DEB build tools
-        run: sudo apt-get install -y devscripts debhelper dpkg-dev build-essential
-
-      - name: Build DEB
-        run: |
-          mkdir -p "cockpit-compose-${VERSION_CLEAN}"
-          tar -xzf "cockpit-compose-${VERSION_CLEAN}.tar.gz" \
-              -C "cockpit-compose-${VERSION_CLEAN}"
-          cp -r debian "cockpit-compose-${VERSION_CLEAN}/"
-          printf 'cockpit-compose (%s-1) unstable; urgency=low\n\n  * Release %s.\n\n -- RXTX4816 <RXTX4816@proton.me>  %s\n' \
-            "${VERSION_CLEAN}" "${VERSION}" "$(date -R)" \
-            > "cockpit-compose-${VERSION_CLEAN}/debian/changelog"
-          cd "cockpit-compose-${VERSION_CLEAN}"
-          dpkg-buildpackage -us -uc -b
-
-      # ── Upload ──────────────────────────────────────────────────────────
-      - name: Upload release assets
-        run: |
-          RPM=$(find rpmbuild/RPMS -name "*.rpm" | head -1)
-          DEB=$(find . -maxdepth 1 -name "*.deb" | head -1)
-          TARBALL="cockpit-compose-${VERSION_CLEAN}.tar.gz"
-          CHECKSUM="${TARBALL}.sha256"
-          gh release create "${VERSION}" \
-            --title "${VERSION}" \
-            --generate-notes \
-            "${TARBALL}" "${CHECKSUM}" "${RPM}" "${DEB}" \
-          || gh release upload "${VERSION}" \
-            "${TARBALL}" "${CHECKSUM}" "${RPM}" "${DEB}" --clobber
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      # ── AUR ─────────────────────────────────────────────────────────────
-      - name: Get SHA256 for AUR
-        run: |
-          SHA256=$(cat "cockpit-compose-${VERSION_CLEAN}.tar.gz.sha256" | awk '{print $1}')
-          echo "SHA256=${SHA256}" >> "$GITHUB_ENV"
-
-      - name: Update PKGBUILD
-        run: |
-          sed -i "s/^pkgver=.*/pkgver=${VERSION_CLEAN}/" PKGBUILD
-          sed -i "s/^pkgrel=.*/pkgrel=1/" PKGBUILD
-          sed -i "s/sha256sums=('.*')/sha256sums=('${SHA256}')/" PKGBUILD
-
-      - uses: KSXGitHub/github-actions-deploy-aur@da03e160361ce01bf087e790b6ffd196d7dccff7 # v4.1.3
-        with:
-          pkgname: cockpit-compose
-          pkgbuild: ./PKGBUILD
-          commit_username: RXTX4816
-          commit_email: RXTX4816@proton.me
-          ssh_private_key: ${{ secrets.AUR_SSH_KEY }}
-          commit_message: "Update to ${{ env.VERSION_CLEAN }}"
-          force_push: true
+    uses: RXTX4816/cockpit-plugin-base-react/.github/workflows/release-plugin.yml@main
+    with:
+      plugin-name: cockpit-compose
+      spec-file: cockpit-compose.spec
+      aur-pkgname: cockpit-compose
+      maintainer-name: RXTX4816
+      maintainer-email: RXTX4816@proton.me
+    secrets: inherit

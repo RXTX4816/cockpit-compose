@@ -168,6 +168,7 @@
     "target_folder": "folder {{folder}}",
     "target_file": "file {{file}}",
     "error_default": "Failed to delete",
+    "retry_sudo_button": "Try again with sudo?",
     "checking_networks": "Checking for shared networks…",
     "shared_networks_title": "Shared networks detected",
     "shared_with": "also used by"
@@ -486,7 +487,9 @@
     "depth_aria": "Max scan depth",
     "depth_minus_aria": "Decrease scan depth",
     "depth_plus_aria": "Increase scan depth",
-    "restore_button": "Restore"
+    "restore_button": "Restore",
+    "admin_mismatch_badge": "Cockpit admin mode mismatch",
+    "admin_mismatch_tooltip": "The scan directory is in your home folder but Cockpit is in administrative mode. Files created here may be owned by root, causing permission errors."
   },
   "stack_row": {
     "no_containers": "No containers found.",

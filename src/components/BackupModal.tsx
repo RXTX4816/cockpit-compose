@@ -16,15 +16,11 @@ import {
 import { type ComposeStack } from "../api";
 import { createBackupArchive } from "../api/files";
 import { splitConfigFiles } from "../lib/configFiles";
+import { formatArchiveTimestamp } from "@rxtx4816/cockpit-plugin-base-react/lib/timestamp";
 
 interface Props {
   stack: ComposeStack;
   onClose: () => void;
-}
-
-function formatTimestamp(d: Date): string {
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}_${pad(d.getHours())}-${pad(d.getMinutes())}-${pad(d.getSeconds())}`;
 }
 
 export function BackupModal({ stack, onClose }: Props) {
@@ -44,33 +40,25 @@ export function BackupModal({ stack, onClose }: Props) {
   const [warning, setWarning] = useState<string | null>(null);
   const [savedPath, setSavedPath] = useState<string | null>(null);
 
-  const archiveFilename = `${baseName || stack.Name}-${formatTimestamp(new Date())}.bak.tar.gz`;
+  const archiveFilename = `${baseName || stack.Name}-${formatArchiveTimestamp(new Date())}.bak.tar.gz`;
   const destPath = `${destDir.replace(/\/$/, "")}/${archiveFilename}`;
 
   async function handleCreate() {
     setRunning(true);
     setError(null);
     setWarning(null);
-    const timestamp = formatTimestamp(new Date());
+    const timestamp = formatArchiveTimestamp(new Date());
     const filename = `${baseName || stack.Name}-${timestamp}.bak.tar.gz`;
     const fullDestPath = `${destDir.replace(/\/$/, "")}/${filename}`;
     try {
-      await createBackupArchive(stackParentDir || stackDir, dirName, fullDestPath, {
+      const { warning } = await createBackupArchive(stackParentDir || stackDir, dirName, fullDestPath, {
         includeSnapshots,
         includeSubdirs,
       });
       setSavedPath(fullDestPath);
+      if (warning) setWarning(warning);
     } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : String(e);
-      // tar exits 1 (warning) when some files are unreadable but still writes the archive.
-      // Check whether the archive was actually created before reporting a hard failure.
-      try {
-        await cockpit.spawn(["ls", "--", fullDestPath], { err: "message" });
-        setSavedPath(fullDestPath);
-        setWarning(msg);
-      } catch {
-        setError(msg);
-      }
+      setError(e instanceof Error ? e.message : String(e));
     } finally {
       setRunning(false);
     }

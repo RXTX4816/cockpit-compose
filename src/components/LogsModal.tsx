@@ -15,7 +15,7 @@ import {
   SearchInput,
   Label,
 } from "@patternfly/react-core";
-import { Tooltip } from "./Tooltip";
+import { Tooltip } from "@rxtx4816/cockpit-plugin-base-react/components";
 import {
   SyncAltIcon, PlayIcon, PauseIcon, TimesIcon, DownloadIcon,
   AngleDoubleUpIcon, AngleDoubleDownIcon, ClockIcon,

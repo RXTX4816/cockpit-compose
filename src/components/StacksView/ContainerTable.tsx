@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Badge, Button, Label, Spinner } from "@patternfly/react-core";
-import { Tooltip } from "../Tooltip";
+import { Tooltip } from "@rxtx4816/cockpit-plugin-base-react/components";
 import { CheckCircleIcon, ExclamationTriangleIcon, InProgressIcon, BanIcon, PlayIcon, RedoAltIcon, ListAltIcon } from "@patternfly/react-icons";
 import type { ComposeContainer } from "../../api";
 import { getImageChangelogUrl } from "../../lib/imageUrl";
@@ -46,7 +46,19 @@ export function ContainerTable({
 
   return (
     <>
-      {pendingUrl && <ExternalLinkModal url={pendingUrl} onClose={() => setPendingUrl(null)} />}
+      {pendingUrl && (
+        <ExternalLinkModal
+          url={pendingUrl}
+          onClose={() => setPendingUrl(null)}
+          labels={{
+            title: t("external_link_modal.title"),
+            ariaLabel: t("external_link_modal.aria_label"),
+            warningTitle: t("external_link_modal.warning_title"),
+            continueButton: t("common.continue"),
+            cancelButton: t("common.cancel"),
+          }}
+        />
+      )}
       <div className="ct-list">
         <div className="ct-header">
           <span>{t("container_table.col_status")}</span>

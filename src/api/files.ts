@@ -1,5 +1,13 @@
 import type { Snapshot } from "./types";
 import { getProfilesFromCompose } from "./parsing";
+import {
+  createTarArchive,
+  extractTarArchive,
+  listTarArchives,
+  listArchiveMembers,
+  readArchiveMember,
+  type TarCreateResult,
+} from "@rxtx4816/cockpit-plugin-base-react/lib/tar";
 
 export function readComposeFile(path: string): CockpitProcess {
   return cockpit.spawn(["cat", path], { err: "message" });
@@ -117,23 +125,20 @@ export function removeFile(path: string, superuser?: "try"): CockpitProcess {
   return cockpit.spawn(["rm", "--", path], { superuser, err: "message" });
 }
 
-export function findBackupArchives(dir: string, superuser?: "try"): CockpitProcess {
-  return cockpit.spawn(
-    ["find", dir, "-maxdepth", "1", "-type", "f", "-name", "*.bak.tar.gz"],
-    { superuser, err: "message" },
-  );
+export async function findBackupArchives(dir: string, superuser?: "try"): Promise<string[]> {
+  return listTarArchives(dir, "*.bak.tar.gz", { maxDepth: 1, superuser });
 }
 
-export function listArchiveContents(archivePath: string, superuser?: "try"): CockpitProcess {
-  return cockpit.spawn(["tar", "-tzf", archivePath], { superuser, err: "message" });
+export async function listArchiveContents(archivePath: string, superuser?: "try"): Promise<string[]> {
+  return listArchiveMembers(archivePath, { superuser });
 }
 
-export function extractArchive(archivePath: string, targetParentDir: string, superuser?: "try"): CockpitProcess {
-  return cockpit.spawn(["tar", "-xzf", archivePath, "-C", targetParentDir], { superuser, err: "message" });
+export async function extractArchive(archivePath: string, targetParentDir: string, superuser?: "try"): Promise<void> {
+  return extractTarArchive(archivePath, targetParentDir, { superuser });
 }
 
-export function readFileFromArchive(archivePath: string, memberPath: string, superuser?: "try"): CockpitProcess {
-  return cockpit.spawn(["tar", "-xzOf", archivePath, memberPath], { superuser, err: "message" });
+export async function readFileFromArchive(archivePath: string, memberPath: string, superuser?: "try"): Promise<string> {
+  return readArchiveMember(archivePath, memberPath, { superuser });
 }
 
 export async function createBackupArchive(
@@ -142,11 +147,12 @@ export async function createBackupArchive(
   destPath: string,
   options: { includeSnapshots: boolean; includeSubdirs: boolean },
   superuser?: "try",
-): Promise<void> {
-  const args: string[] = ["tar", "-czf", destPath, "-C", parentDir];
+): Promise<TarCreateResult> {
+  const exclude: string[] = [];
+  const extraArgs: string[] = [];
   if (!options.includeSnapshots) {
-    args.push("--wildcards");
-    args.push("--exclude=*.snapshot.*");
+    extraArgs.push("--wildcards");
+    exclude.push("*.snapshot.*");
   }
   if (!options.includeSubdirs) {
     // Discover immediate subdirectories via find and exclude each by exact name.
@@ -161,9 +167,8 @@ export async function createBackupArchive(
     await findProc;
     for (const line of findOut.trim().split("\n").filter(l => l.trim())) {
       const name = line.substring(line.lastIndexOf("/") + 1);
-      args.push(`--exclude=${dirName}/${name}`);
+      exclude.push(`${dirName}/${name}`);
     }
   }
-  args.push(dirName);
-  await cockpit.spawn(args, { superuser, err: "message" });
+  return createTarArchive(destPath, parentDir, dirName, { exclude, extraArgs, superuser });
 }

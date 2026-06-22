@@ -26,7 +26,7 @@ import {
   Label,
   Spinner,
 } from "@patternfly/react-core";
-import { Tooltip } from "../Tooltip";
+import { Tooltip } from "@rxtx4816/cockpit-plugin-base-react/components";
 import { type ComposeStack, type Runtime } from "../../api";
 import { TimesCircleIcon, BanIcon, PlusCircleIcon, FolderOpenIcon, SearchIcon } from "@patternfly/react-icons";
 import { type DownedStack } from "../../hooks/useDownedStacksScan";

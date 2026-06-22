@@ -10,8 +10,10 @@ import {
   Alert,
   Spinner,
   TextInput,
+  Label,
 } from "@patternfly/react-core";
-import { Tooltip } from "./Tooltip";
+import { ExclamationTriangleIcon } from "@patternfly/react-icons";
+import { Tooltip } from "@rxtx4816/cockpit-plugin-base-react/components";
 import { PlusCircleIcon, FolderOpenIcon, AngleUpIcon, HistoryIcon, PencilAltIcon, ArchiveIcon, TrashIcon } from "@patternfly/react-icons";
 import { type ComposeStack } from "../api";
 import { type DownedStack, useDownedStacksScan } from "../hooks/useDownedStacksScan";
@@ -27,6 +29,7 @@ import "./DownedStacksSection.css";
 import "./StacksView/UnixRow.css";
 import { inferComposeRoot } from "../lib/composeDiscovery";
 export { inferComposeRoot } from "../lib/composeDiscovery";
+import { useAdminMode } from "../hooks/useAdminMode";
 
 interface Props {
   stacks: ComposeStack[];
@@ -42,6 +45,13 @@ function toSyntheticStack(d: DownedStack): ComposeStack {
 
 export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, onUpComplete, layout }: Props) {
   const { t } = useTranslation();
+  const isAdminMode = useAdminMode();
+  const [userHome, setUserHome] = useState<string | null>(null);
+  useEffect(() => {
+    try {
+      cockpit.user().then(u => setUserHome(u.home)).catch(() => {});
+    } catch { /* cockpit.user unavailable */ }
+  }, []);
   const [importOpen, setImportOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
   const [composeDir, setComposeDir] = useState("");
@@ -207,8 +217,24 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
     </div>
   );
 
+  const showAdminMismatch = Boolean(
+    isAdminMode &&
+    userHome &&
+    composeDir &&
+    (composeDir === userHome || composeDir.startsWith(userHome + "/"))
+  );
+
   return (
     <>
+      {showAdminMismatch && (
+        <div className="dss-admin-mismatch">
+          <Tooltip content={t("downed_section.admin_mismatch_tooltip")}>
+            <Label color="orange" icon={<ExclamationTriangleIcon />} isCompact>
+              {t("downed_section.admin_mismatch_badge")}
+            </Label>
+          </Tooltip>
+        </div>
+      )}
       {layout === "minimal" ? (
         <div className="dss-minimal-bar">
           <Tooltip content={t("downed_section.create_button")}>

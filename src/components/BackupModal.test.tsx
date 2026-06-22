@@ -21,7 +21,7 @@ const stack: ComposeStack = {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  mockCreateBackupArchive.mockResolvedValue(undefined);
+  mockCreateBackupArchive.mockResolvedValue({});
   // Default: ls check after a failed backup rejects (archive not created).
   mockSpawn.mockImplementation((args: string[]) => {
     if (args[0] === "ls") return mockProcess("", "No such file");
@@ -135,12 +135,8 @@ describe("BackupModal", () => {
     expect(onClose).toHaveBeenCalledOnce();
   });
 
-  it("shows success with warning when tar fails but archive file was created", async () => {
-    mockCreateBackupArchive.mockRejectedValue(new Error("permission denied: .ssh"));
-    mockSpawn.mockImplementation((args: string[]) => {
-      if (args[0] === "ls") return mockProcess("/path/to/archive.bak.tar.gz");
-      return mockProcess("");
-    });
+  it("shows success with warning when tar exits with warning but archive was created", async () => {
+    mockCreateBackupArchive.mockResolvedValue({ warning: "permission denied: .ssh" });
     render(<BackupModal stack={stack} onClose={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: /Create backup/i }));
     await waitFor(() => expect(screen.getByText(/Backup created/i)).toBeInTheDocument());
@@ -148,12 +144,8 @@ describe("BackupModal", () => {
     expect(screen.queryByRole("alert", { name: /danger/i })).not.toBeInTheDocument();
   });
 
-  it("shows error when tar fails and archive file was not created", async () => {
+  it("shows error when createBackupArchive throws (archive not created)", async () => {
     mockCreateBackupArchive.mockRejectedValue(new Error("no space left on device"));
-    mockSpawn.mockImplementation((args: string[]) => {
-      if (args[0] === "ls") return mockProcess("", "No such file");
-      return mockProcess("");
-    });
     render(<BackupModal stack={stack} onClose={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: /Create backup/i }));
     await waitFor(() => expect(screen.getByText(/no space left on device/i)).toBeInTheDocument());
