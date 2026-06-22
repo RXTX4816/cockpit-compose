@@ -49,6 +49,20 @@ export function DeleteStackModal({ stack, onClose, onDeleted }: Props) {
     onClose();
   });
 
+  const isPermissionError = Boolean(error && /permission/i.test(error));
+
+  const { execute: handleSudoDelete, loading: sudoDeleting, error: sudoError } = useAsyncAction(async () => {
+    if (deleteFolder) {
+      await removeDirectory(folderPath, "try");
+    } else {
+      for (const f of stack.configFiles) {
+        await removeFile(f, "try");
+      }
+    }
+    onDeleted();
+    onClose();
+  });
+
   return (
     <>
       <Modal
@@ -100,9 +114,6 @@ export function DeleteStackModal({ stack, onClose, onDeleted }: Props) {
             </Alert>
           )}
 
-          {error && (
-            <Alert variant="danger" isInline title={error} style={{ marginTop: "1rem" }} />
-          )}
         </ModalBody>
 
         <ModalFooter>
@@ -118,7 +129,7 @@ export function DeleteStackModal({ stack, onClose, onDeleted }: Props) {
       {confirmed && (
         <Modal
           isOpen
-          onClose={() => setConfirmed(false)}
+          onClose={() => { if (!deleting && !sudoDeleting) setConfirmed(false); }}
           variant="small"
           aria-label={t("delete_modal.confirm_aria_label")}
         >
@@ -127,18 +138,37 @@ export function DeleteStackModal({ stack, onClose, onDeleted }: Props) {
             <Alert variant="danger" isInline title={t("delete_modal.confirm_warning_title", { target })}>
               {t("delete_modal.confirm_warning_body")}
             </Alert>
+            {error && (
+              <Alert variant="danger" isInline title={error} style={{ marginTop: "1rem" }}>
+                {isPermissionError && (
+                  <Button
+                    variant="link"
+                    isInline
+                    isDisabled={sudoDeleting}
+                    isLoading={sudoDeleting}
+                    onClick={() => { void handleSudoDelete(); }}
+                    style={{ paddingLeft: 0 }}
+                  >
+                    {t("delete_modal.retry_sudo_button")}
+                  </Button>
+                )}
+              </Alert>
+            )}
+            {sudoError && (
+              <Alert variant="danger" isInline title={sudoError} style={{ marginTop: "0.5rem" }} />
+            )}
           </ModalBody>
           <ModalFooter>
             <Button
               variant="danger"
               icon={<TrashIcon />}
-              isDisabled={deleting}
+              isDisabled={deleting || sudoDeleting}
               isLoading={deleting}
               onClick={() => { void handleDelete(); }}
             >
               {t("delete_modal.confirm_button")}
             </Button>
-            <Button variant="link" isDisabled={deleting} onClick={() => setConfirmed(false)}>
+            <Button variant="link" isDisabled={deleting || sudoDeleting} onClick={() => setConfirmed(false)}>
               {t("common.cancel")}
             </Button>
           </ModalFooter>
