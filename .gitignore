@@ -29,6 +29,10 @@ src/assets/
 coverage/
 .nyc_output/
 
+# Playwright E2E
+test-results/
+playwright-report/
+
 # Environment
 .env
 .env.local

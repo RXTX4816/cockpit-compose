@@ -103,8 +103,11 @@ Open `http://localhost:9090` — **Docker Compose** appears in the sidebar autom
 | `npm run watch` | Build with file watching |
 | `npm run typecheck` | TypeScript type check |
 | `npm run lint` | ESLint |
-| `npm run test` | Run tests |
-| `npm run test:coverage` | Coverage report |
+| `npm run test` | Run unit tests |
+| `npm run test:coverage` | Unit test coverage report |
+| `npm run test:e2e` | Run Playwright E2E tests (requires a running VM) |
+| `npm run test:e2e:ui` | Playwright visual test runner |
+| `npm run test:e2e:codegen` | Record new E2E tests by clicking through the UI |
 
 ### Base library
 
@@ -133,6 +136,19 @@ npm run vm download          # download base images (~500–700 MB each)
 npm run vm start             # start all 9 VMs
 # Open https://localhost:9090 — login: test / test
 ```
+
+### E2E browser tests (Playwright)
+
+Once a VM is running, Playwright drives Chromium against the live Cockpit UI. Each VM is a separate Playwright project — use `--project` to target one or more:
+
+```bash
+npm run vm start debian-podman && npm run vm wait debian-podman
+npm run test:e2e -- --project=debian-podman   # single VM
+npm run test:e2e                              # all 9 VMs (all must be running)
+npm run test:e2e:ui                           # visual runner (great for debugging)
+```
+
+Tests live in `e2e/` and cover login, stack list, YAML editor, and more. Check `npm run vm status` for running VMs and their ports.
 
 See [docs/wiki/VM-Testing.md](docs/wiki/VM-Testing.md) for all VM ports, commands, and troubleshooting.
 

@@ -1,12 +1,12 @@
 # Testing Guide
 
-End-to-end manual testing reference for cockpit-compose. Covers every supported setup
-combination, test stack definitions, and a step-by-step scenario for every UI feature.
+Covers automated E2E browser tests (Playwright) and the manual testing reference for cockpit-compose.
 
 ---
 
 ## Table of Contents
 
+- [Automated E2E Tests (Playwright)](#automated-e2e-tests-playwright)
 1. [Plugin Installation](#1-plugin-installation)
 2. [Docker-Only Setup](#2-docker-only-setup)
 3. [Podman-Only Setup](#3-podman-only-setup)
@@ -15,6 +15,87 @@ combination, test stack definitions, and a step-by-step scenario for every UI fe
 6. [Feature Scenarios](#6-feature-scenarios)
 7. [Runtime-Specific Scenarios](#7-runtime-specific-scenarios)
 8. [Known Issues & Workarounds](#8-known-issues--workarounds)
+
+---
+
+## Automated E2E Tests (Playwright)
+
+Playwright drives a real Chromium browser against a running QEMU VM. Tests are not run in CI — they require a VM to already be up.
+
+### Prerequisites
+
+1. Chromium must be installed (one-time per machine):
+   ```bash
+   npx playwright install chromium
+   ```
+
+2. A VM must be running. See [docs/wiki/VM-Testing.md](wiki/VM-Testing.md) for the full setup. The quickest path:
+   ```bash
+   sudo pacman -S qemu-full cloud-image-utils wget
+   npm run build
+   npm run vm download debian
+   npm run vm start debian-podman
+   npm run vm wait debian-podman
+   ```
+
+### Running the tests
+
+Each VM is a separate Playwright project named after the VM identifier from `scripts/test-vm.config.sh`. Check which VMs are up with `npm run vm status`, then use `--project` to select:
+
+```bash
+# Run against one VM
+npm run test:e2e -- --project=debian-podman
+
+# Run against a subset
+npm run test:e2e -- --project=arch-podman --project=arch-docker --project=arch-both
+
+# Run against all 9 VMs (all must be running)
+npm run test:e2e
+
+# Visual runner — shows every step, great for debugging a failing test
+npm run test:e2e:ui
+
+# Record a new test by clicking through the UI
+BASE_URL=https://localhost:9090 npm run test:e2e:codegen
+```
+
+To target any VM by URL directly (bypasses the project list, creates a single "custom" project):
+
+```bash
+BASE_URL=https://localhost:9094 npm run test:e2e   # debian-docker
+BASE_URL=https://localhost:9096 npm run test:e2e   # fedora-podman
+```
+
+See [docs/wiki/VM-Testing.md](wiki/VM-Testing.md) for the full port table.
+
+### What the tests cover
+
+| File | What it tests |
+|---|---|
+| `e2e/login.spec.ts` | Login flow, plugin page loads, heading visible |
+| `e2e/stacks.spec.ts` | Stack list renders with pre-staged stacks, status badges, click-to-expand |
+| `e2e/yaml-editor.spec.ts` | YAML editor opens with content, Save button, diff toggle, close returns to list |
+
+### Pre-staged test stacks
+
+The VM harness automatically provisions test stacks into `/home/test/testcompose/` during first boot. These are the same stacks documented in [section 5](#5-test-stacks) below — no manual setup needed when using VMs.
+
+### Writing new tests
+
+Tests live in `e2e/`. Import from the base fixture so login is handled automatically:
+
+```ts
+import { test, expect } from '@rxtx4816/cockpit-plugin-base-react/e2e';
+
+test('my test', async ({ pluginPage: page }) => {
+  // page is already logged in and on the plugin's index.html
+  await expect(page.getByRole('heading', { name: 'Docker Compose' })).toBeVisible();
+});
+```
+
+Use `npm run test:e2e:codegen` to record new tests interactively — it generates Playwright code as you click through the UI.
+
+---
 
 ---
 

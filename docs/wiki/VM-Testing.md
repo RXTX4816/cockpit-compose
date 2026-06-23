@@ -173,6 +173,43 @@ VM_MEM=4096 VM_CPUS=4 npm run vm start fedora
 | `VM_CPUS` | `2` | vCPU count |
 | `VM_DISK_SIZE` | `12G` | Overlay disk size |
 
+## Automated browser tests (Playwright)
+
+Once a VM is up, run the Playwright E2E suite against it. Each VM is a Playwright project named after its VM identifier — use `--project` to select which VM(s) to test:
+
+```bash
+# Start and wait for a VM
+npm run vm start debian-podman
+npm run vm wait debian-podman
+
+# Run against that specific VM
+npm run test:e2e -- --project=debian-podman
+
+# Run against a subset (all must be running)
+npm run test:e2e -- --project=arch-podman --project=debian-docker
+
+# Run against all 9 VMs (requires all to be running)
+npm run test:e2e
+
+# Visual runner — shows every step, ideal for debugging failures
+npm run test:e2e:ui
+
+# Record a new test interactively
+BASE_URL=https://localhost:9093 npm run test:e2e:codegen
+```
+
+Check which VMs are currently running before selecting projects:
+
+```bash
+npm run vm status
+```
+
+Tests live in `e2e/` and cover the login flow, stack list, status badges, YAML editor, and more. All test stacks are pre-staged during VM provisioning — no manual setup required.
+
+For full documentation including how to write new tests, see the [Testing Guide](../testing.md).
+
+---
+
 ## Troubleshooting
 
 **`wait` exits but Cockpit page is not accessible**

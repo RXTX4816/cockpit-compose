@@ -20,12 +20,16 @@
     "test:coverage": "NODE_OPTIONS='--max-old-space-size=8192 --disable-warning=ExperimentalWarning' vitest run --coverage",
     "vm": "node_modules/@rxtx4816/cockpit-plugin-base-react/scripts/test-vm.sh",
     "build:watch": "npm run watch",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:codegen": "playwright codegen",
     "base:add": "echo '⚠ Run `yalc push` in cockpit-plugin-base-react first' && yalc add @rxtx4816/cockpit-plugin-base-react && npm install",
     "base:reset": "yalc retreat --all && npm install"
   },
   "devDependencies": {
     "@patternfly/react-core": "^6.5.1",
-    "@rxtx4816/cockpit-plugin-base-react": "1.0.9",
+    "@playwright/test": "^1.61.0",
+    "@rxtx4816/cockpit-plugin-base-react": "1.0.10",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@types/react": "^19.2.17",

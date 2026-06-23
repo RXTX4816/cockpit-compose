@@ -55,11 +55,45 @@ npm run base:reset
 
 ## Running Tests
 
+### Unit tests
+
 ```bash
 npm run test          # Run tests once
 npm run test:watch    # Watch mode
 npm run test:coverage # Coverage report
 ```
+
+### E2E tests (Playwright)
+
+Browser tests that drive Chromium against a real QEMU VM. They are **not run in CI** — run them locally when working on UI features.
+
+**Prerequisites** (one-time per machine):
+```bash
+sudo pacman -S qemu-full cloud-image-utils wget
+npx playwright install chromium
+```
+
+**Run:**
+```bash
+npm run build
+npm run vm download debian       # if you haven't yet
+npm run vm start debian-podman
+npm run vm wait debian-podman
+npm run test:e2e                 # headless
+npm run test:e2e:ui              # visual runner
+```
+
+Tests live in `e2e/`. To add a test, import from the base fixture (handles login automatically):
+
+```ts
+import { test, expect } from '@rxtx4816/cockpit-plugin-base-react/e2e';
+
+test('my scenario', async ({ pluginPage: page }) => {
+  await expect(page.getByRole('heading', { name: 'Docker Compose' })).toBeVisible();
+});
+```
+
+Use `npm run test:e2e:codegen` to record a test by clicking through the live UI. See [docs/testing.md](docs/testing.md) for full documentation.
 
 ## Code Quality
 
