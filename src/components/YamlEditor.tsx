@@ -5,6 +5,7 @@ import { load } from "js-yaml";
 import type { Diagnostic } from "@codemirror/lint";
 import { CodeEditor } from "@rxtx4816/cockpit-plugin-base-react/components";
 import { validateComposeSpec } from "../compose-schema";
+import "./YamlEditor.css";
 
 interface YamlEditorProps {
   content: string;
