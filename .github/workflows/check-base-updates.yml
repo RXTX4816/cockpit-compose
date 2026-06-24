@@ -1,0 +1,9 @@
+name: Check for base package updates
+
+on:
+  workflow_dispatch:
+
+jobs:
+  check-base-updates:
+    uses: RXTX4816/cockpit-plugin-base-react/.github/workflows/check-base-updates-plugin.yml@main
+    secrets: inherit
