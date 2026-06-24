@@ -10,9 +10,7 @@ import {
   Alert,
   Spinner,
   TextInput,
-  Label,
 } from "@patternfly/react-core";
-import { ExclamationTriangleIcon } from "@patternfly/react-icons";
 import { Tooltip } from "@rxtx4816/cockpit-plugin-base-react/components";
 import { PlusCircleIcon, FolderOpenIcon, AngleUpIcon, HistoryIcon, PencilAltIcon, ArchiveIcon, TrashIcon } from "@patternfly/react-icons";
 import { type ComposeStack } from "../api";
@@ -36,6 +34,7 @@ interface Props {
   manuallyDownedStacks: DownedStack[];
   onRefresh: () => void;
   onUpComplete: (name: string) => void;
+  onAdminMismatch?: (show: boolean) => void;
   layout?: Layout;
 }
 
@@ -43,7 +42,7 @@ function toSyntheticStack(d: DownedStack): ComposeStack {
   return { Name: d.name, Status: "", ConfigFiles: d.configFiles.join(",") };
 }
 
-export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, onUpComplete, layout }: Props) {
+export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, onUpComplete, onAdminMismatch, layout }: Props) {
   const { t } = useTranslation();
   const isAdminMode = useAdminMode();
   const [userHome, setUserHome] = useState<string | null>(null);
@@ -224,17 +223,12 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
     (composeDir === userHome || composeDir.startsWith(userHome + "/"))
   );
 
+  useEffect(() => {
+    onAdminMismatch?.(showAdminMismatch);
+  }, [showAdminMismatch, onAdminMismatch]);
+
   return (
     <>
-      {showAdminMismatch && (
-        <div className="dss-admin-mismatch">
-          <Tooltip content={t("downed_section.admin_mismatch_tooltip")}>
-            <Label color="orange" icon={<ExclamationTriangleIcon />} isCompact>
-              {t("downed_section.admin_mismatch_badge")}
-            </Label>
-          </Tooltip>
-        </div>
-      )}
       {layout === "minimal" ? (
         <div className="dss-minimal-bar">
           <Tooltip content={t("downed_section.create_button")}>
