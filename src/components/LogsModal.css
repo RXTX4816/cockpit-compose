@@ -2,7 +2,7 @@
   overflow-y: auto;
   height: calc(100vh - 260px);
   padding: 0.4rem 0;
-  background: #0d1117;
+  background: var(--log-viewer-bg);
   border-radius: var(--pf-t--global--border--radius--200);
   display: grid;
   grid-template-columns: minmax(0, 12rem) max-content 1fr;
@@ -16,14 +16,14 @@
 .lm-empty-state {
   grid-column: 1 / -1;
   padding: 1rem 0.75rem;
-  color: #6e7681;
+  color: var(--pf-t--global--text--color--subtle);
   font-family: var(--pf-t--global--font--family--mono);
   font-size: 0.78rem;
 }
 
 .lm-limit-notice {
   font-size: 0.75rem;
-  color: #6e7681;
+  color: var(--pf-t--global--text--color--subtle);
 }
 
 /* LogLine */
@@ -33,7 +33,7 @@
   font-family: var(--pf-t--global--font--family--mono);
   font-size: 0.78rem;
   line-height: 1.5;
-  color: #6e7681;
+  color: var(--pf-t--global--text--color--subtle);
   font-style: italic;
 }
 
@@ -56,7 +56,7 @@
 }
 
 .lm-line-timestamp {
-  color: #6e7681;
+  color: var(--pf-t--global--text--color--subtle);
   font-size: 0.7rem;
   align-self: center;
   white-space: pre-line;
@@ -70,10 +70,13 @@
 }
 
 /* Level-based backgrounds */
-.lm-bg-error { background: rgba(248, 81, 73, 0.10); }
-.lm-bg-warn  { background: rgba(227, 179, 65, 0.08); }
+.lm-bg-error { background: rgba(185, 28, 28, 0.08); }
+.lm-bg-warn  { background: rgba(146, 64, 14, 0.07); }
 .lm-bg-even  { background: transparent; }
-.lm-bg-odd   { background: rgba(255, 255, 255, 0.015); }
+.lm-bg-odd   { background: var(--log-stripe-odd); }
+
+.pf-v6-theme-dark .lm-bg-error { background: rgba(248, 81, 73, 0.10); }
+.pf-v6-theme-dark .lm-bg-warn  { background: rgba(227, 179, 65, 0.08); }
 
 /* Toolbar controls */
 .lm-toolbar {
@@ -108,9 +111,9 @@
 }
 
 /* Level-based message colours */
-.lm-msg-error { color: #f85149; }
-.lm-msg-warn  { color: #e3b341; }
-.lm-msg-default { color: #e6edf3; }
+.lm-msg-error { color: var(--log-token-error); }
+.lm-msg-warn  { color: var(--log-token-warn); }
+.lm-msg-default { color: var(--log-viewer-text); }
 
 .lm-line-message--no-ts {
   grid-column: 2;
@@ -138,7 +141,7 @@
 }
 
 .lm-regex-btn:hover {
-  background: rgba(255,255,255,0.06);
+  background: var(--pf-t--global--background--color--secondary--hover--default);
   color: var(--pf-t--global--text--color--regular);
 }
 
@@ -168,6 +171,6 @@
 /* Line count */
 .lm-line-count {
   font-size: 0.75rem;
-  color: #6e7681;
+  color: var(--pf-t--global--text--color--subtle);
   white-space: nowrap;
 }

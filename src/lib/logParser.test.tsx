@@ -119,51 +119,51 @@ describe("TOKEN_RE", () => {
 
 describe("tokenColor", () => {
   it("returns red for ERROR", () => {
-    expect(tokenColor("ERROR")).toBe("#f85149");
+    expect(tokenColor("ERROR")).toBe("var(--log-token-error)");
   });
 
   it("returns red for FATAL", () => {
-    expect(tokenColor("FATAL")).toBe("#f85149");
+    expect(tokenColor("FATAL")).toBe("var(--log-token-error)");
   });
 
   it("returns yellow for WARN", () => {
-    expect(tokenColor("WARN")).toBe("#e3b341");
+    expect(tokenColor("WARN")).toBe("var(--log-token-warn)");
   });
 
   it("returns blue for INFO", () => {
-    expect(tokenColor("INFO")).toBe("#79c0ff");
+    expect(tokenColor("INFO")).toBe("var(--log-token-info)");
   });
 
   it("returns grey for DEBUG", () => {
-    expect(tokenColor("DEBUG")).toBe("#8b949e");
+    expect(tokenColor("DEBUG")).toBe("var(--log-token-debug)");
   });
 
   it("returns grey for TRACE", () => {
-    expect(tokenColor("TRACE")).toBe("#6e7681");
+    expect(tokenColor("TRACE")).toBe("var(--log-token-trace)");
   });
 
   it("returns red for 5xx", () => {
-    expect(tokenColor("503")).toBe("#f85149");
+    expect(tokenColor("503")).toBe("var(--log-token-5xx)");
   });
 
   it("returns yellow for 4xx", () => {
-    expect(tokenColor("404")).toBe("#e3b341");
+    expect(tokenColor("404")).toBe("var(--log-token-4xx)");
   });
 
   it("returns green for 2xx", () => {
-    expect(tokenColor("200")).toBe("#56d364");
+    expect(tokenColor("200")).toBe("var(--log-token-2xx)");
   });
 
   it("returns light blue for quoted strings", () => {
-    expect(tokenColor('"hello"')).toBe("#a5d6ff");
+    expect(tokenColor('"hello"')).toBe("var(--log-token-string)");
   });
 
   it("returns purple for paths", () => {
-    expect(tokenColor("/etc/config")).toBe("#d2a8ff");
+    expect(tokenColor("/etc/config")).toBe("var(--log-token-path)");
   });
 
   it("returns orange for IPv4", () => {
-    expect(tokenColor("192.168.1.1")).toBe("#ffa657");
+    expect(tokenColor("192.168.1.1")).toBe("var(--log-token-default)");
   });
 });
 
