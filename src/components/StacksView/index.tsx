@@ -28,7 +28,7 @@ import {
 } from "@patternfly/react-core";
 import { Tooltip } from "@rxtx4816/cockpit-plugin-base-react/components";
 import { type ComposeStack, type Runtime } from "../../api";
-import { TimesCircleIcon, BanIcon, PlusCircleIcon, FolderOpenIcon, SearchIcon } from "@patternfly/react-icons";
+import { TimesCircleIcon, BanIcon, PlusCircleIcon, FolderOpenIcon, SearchIcon, ExclamationTriangleIcon } from "@patternfly/react-icons";
 import { type DownedStack } from "../../hooks/useDownedStacksScan";
 import { useComposeStacks } from "../../hooks/useComposeStacks";
 import { useAutoRefresh } from "../../hooks/useAutoRefresh";
@@ -81,6 +81,7 @@ export function StacksView({ onRuntimeChange, dockerMissing, layout = "poweruser
   const [manuallyDownedStacks, setManuallyDownedStacks] = useState<DownedStack[]>([]);
   const [runtimeSwitchKey, setRuntimeSwitchKey] = useState(0);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [adminMismatch, setAdminMismatch] = useState(false);
   const searchWrapRef = useRef<HTMLDivElement>(null);
 
   // Extracted hooks
@@ -224,6 +225,16 @@ export function StacksView({ onRuntimeChange, dockerMissing, layout = "poweruser
                   </Button>
                 </Tooltip>
               )}
+            </ToolbarItem>
+          )}
+
+          {adminMismatch && (
+            <ToolbarItem>
+              <Tooltip content={t("downed_section.admin_mismatch_tooltip")}>
+                <Label color="orange" icon={<ExclamationTriangleIcon />} isCompact>
+                  {t("downed_section.admin_mismatch_badge")}
+                </Label>
+              </Tooltip>
             </ToolbarItem>
           )}
 
@@ -418,6 +429,7 @@ export function StacksView({ onRuntimeChange, dockerMissing, layout = "poweruser
         manuallyDownedStacks={manuallyDownedStacks}
         onRefresh={refresh}
         onUpComplete={handleUpComplete}
+        onAdminMismatch={setAdminMismatch}
         layout={layout}
       />
 
