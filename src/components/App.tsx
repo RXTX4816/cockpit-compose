@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Page, PageSection } from "@patternfly/react-core";
+import { useLayout } from "@rxtx4816/cockpit-plugin-base-react";
 import { AppFooter } from "./AppFooter";
 import { StacksView } from "./StacksView";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { ToastProvider } from "./ToastProvider";
 import { detectComposeCommand, detectDockerMode, type Runtime } from "../api";
-import { type Layout, LAYOUT_KEY, isValidLayout, loadLayoutFromStorage } from "../lib/layout";
+import { type Layout, LAYOUT_KEY, isValidLayout } from "../lib/layout";
 import "./layouts.css";
 
 export function App() {
@@ -16,7 +17,7 @@ export function App() {
     () => (localStorage.getItem("cockpit-compose:runtime") ?? "docker") as Runtime,
   );
   const [dockerMissing, setDockerMissing] = useState(false);
-  const [layout, setLayout] = useState<Layout>(loadLayoutFromStorage);
+  const [layout, setLayout] = useLayout<Layout>(LAYOUT_KEY, "poweruser", ["minimal", "poweruser", "pretty", "unix"]);
   const initialRuntime = useRef(runtime);
 
   useEffect(() => {
@@ -37,7 +38,7 @@ export function App() {
     };
     window.addEventListener("storage", handleStorageChange);
     return () => window.removeEventListener("storage", handleStorageChange);
-  }, []);
+  }, [setLayout]);
 
   if (!ready) return null;
 

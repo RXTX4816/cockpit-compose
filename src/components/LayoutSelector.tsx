@@ -1,6 +1,6 @@
 import { LayoutSelector as BaseLayoutSelector, type LayoutOption } from "@rxtx4816/cockpit-plugin-base-react/components";
 import { ThIcon, ListAltIcon, MagicIcon, TerminalIcon } from "@patternfly/react-icons";
-import { type Layout, LAYOUT_KEY } from "../lib/layout";
+import { type Layout } from "../lib/layout";
 
 const LAYOUTS: LayoutOption<Layout>[] = [
   { key: "minimal",   icon: <ThIcon />,       label: "Minimal" },
@@ -15,9 +15,5 @@ interface Props {
 }
 
 export function LayoutSelector({ layout, onLayoutChange }: Props) {
-  const handleChange = (newLayout: Layout) => {
-    localStorage.setItem(LAYOUT_KEY, newLayout);
-    onLayoutChange(newLayout);
-  };
-  return <BaseLayoutSelector layout={layout} onLayoutChange={handleChange} layouts={LAYOUTS} />;
+  return <BaseLayoutSelector layout={layout} onLayoutChange={onLayoutChange} layouts={LAYOUTS} />;
 }

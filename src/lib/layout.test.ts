@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach } from "vitest";
-import { isValidLayout, loadLayoutFromStorage, LAYOUT_KEY } from "./layout";
+import { describe, it, expect } from "vitest";
+import { isValidLayout } from "./layout";
 
 describe("isValidLayout", () => {
   it("accepts valid layout values", () => {
@@ -14,25 +14,5 @@ describe("isValidLayout", () => {
     expect(isValidLayout("")).toBe(false);
     expect(isValidLayout(null)).toBe(false);
     expect(isValidLayout(42)).toBe(false);
-  });
-});
-
-describe("loadLayoutFromStorage", () => {
-  beforeEach(() => {
-    localStorage.clear();
-  });
-
-  it("returns poweruser when nothing is stored", () => {
-    expect(loadLayoutFromStorage()).toBe("poweruser");
-  });
-
-  it("returns the stored valid layout", () => {
-    localStorage.setItem(LAYOUT_KEY, "minimal");
-    expect(loadLayoutFromStorage()).toBe("minimal");
-  });
-
-  it("falls back to poweruser for invalid stored value", () => {
-    localStorage.setItem(LAYOUT_KEY, "bogus");
-    expect(loadLayoutFromStorage()).toBe("poweruser");
   });
 });

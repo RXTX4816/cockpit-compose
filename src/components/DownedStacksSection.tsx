@@ -29,7 +29,7 @@ import "./DownedStacksSection.css";
 import "./StacksView/UnixRow.css";
 import { inferComposeRoot } from "../lib/composeDiscovery";
 export { inferComposeRoot } from "../lib/composeDiscovery";
-import { useAdminMode } from "../hooks/useAdminMode";
+import { useAdminMode } from "@rxtx4816/cockpit-plugin-base-react";
 
 interface Props {
   stacks: ComposeStack[];
