@@ -4,8 +4,8 @@ import { colorForKey } from "@rxtx4816/cockpit-plugin-base-react/lib/color";
 export { colorForKey };
 
 export const SERVICE_COLORS = [
-  "#58a6ff", "#56d364", "#d2a8ff", "#ffa657",
-  "#f78166", "#e3b341", "#79c0ff", "#3fb950",
+  "var(--log-svc-0)", "var(--log-svc-1)", "var(--log-svc-2)", "var(--log-svc-3)",
+  "var(--log-svc-4)", "var(--log-svc-5)", "var(--log-svc-6)", "var(--log-svc-7)",
 ];
 
 export function serviceColor(name: string): string {
