@@ -8,6 +8,7 @@ import {
   readArchiveMember,
   type TarCreateResult,
 } from "@rxtx4816/cockpit-plugin-base-react/lib/tar";
+import { readFile, writeFile } from "@rxtx4816/cockpit-plugin-base-react/lib/cockpit-fs";
 
 export function readComposeFile(path: string): CockpitProcess {
   return cockpit.spawn(["cat", path], { err: "message" });
@@ -26,15 +27,13 @@ export async function readAllProfiles(configFile: string): Promise<string[]> {
 }
 
 export async function saveComposeFile(path: string, content: string, superuser?: "try"): Promise<void> {
-  const file = cockpit.file(path, { superuser });
-  await file.replace(content);
+  await writeFile(path, content, superuser);
 }
 
 export async function saveSnapshot(composeFilePath: string, content: string, superuser?: "try"): Promise<Snapshot> {
   const timestamp = Date.now();
   const snapshotPath = `${composeFilePath}.snapshot.${timestamp}`;
-  const file = cockpit.file(snapshotPath, { superuser });
-  await file.replace(content);
+  await writeFile(snapshotPath, content, superuser);
   return {
     timestamp,
     name: new Date(timestamp).toLocaleString(),
@@ -64,14 +63,14 @@ export async function deleteSnapshot(snapshotPath: string, superuser?: "try"): P
 }
 
 export async function readEnvFile(path: string, superuser?: "try"): Promise<{ content: string; exists: boolean }> {
-  const content = await cockpit.file(path, { superuser }).read() as string | null;
+  const content = await readFile(path, superuser);
   return content === null
     ? { content: "", exists: false }
     : { content, exists: true };
 }
 
 export async function saveEnvFile(path: string, content: string, superuser?: "try"): Promise<void> {
-  await cockpit.file(path, { superuser }).replace(content);
+  await writeFile(path, content, superuser);
 }
 
 export function findEnvFiles(dir: string, superuser?: "try"): CockpitProcess {
