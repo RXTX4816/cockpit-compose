@@ -20,20 +20,6 @@
   font-weight: 600;
 }
 
-.pm-log-viewer {
-  overflow-y: auto;
-  height: 50vh;
-  padding: 0.6rem 0.75rem;
-  background: var(--pf-t--global--background--color--secondary--default);
-  border-radius: var(--pf-t--global--border--radius--200);
-  font-family: var(--pf-t--global--font--family--mono);
-  font-size: 0.78rem;
-  line-height: 1.55;
-}
-
-.pm-log-empty {
-  color: var(--pf-t--global--text--color--subtle);
-}
 
 .pm-footer {
   display: flex;

@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
 import { LogsModal } from "./LogsModal";
 import type { ComposeStack } from "../api";
 
@@ -40,6 +40,10 @@ beforeEach(() => {
   mockGetServicesFromCompose.mockReturnValue([]);
 });
 
+afterEach(() => {
+  vi.useRealTimers();
+});
+
 describe("LogsModal", () => {
   it("renders modal with stack name in title", () => {
     render(<LogsModal stack={stack} onClose={vi.fn()} />);
@@ -64,18 +68,18 @@ describe("LogsModal", () => {
     expect(pause).toHaveBeenCalledOnce();
   });
 
-  it("shows Continue button when streaming and paused", () => {
+  it("shows Resume button when streaming and paused", () => {
     mockUseLogStream.mockReturnValue({ lines: [], streaming: true, paused: true, pause: vi.fn(), resume: vi.fn(), restart: vi.fn(), clear: vi.fn() });
     render(<LogsModal stack={stack} onClose={vi.fn()} />);
-    expect(screen.getByRole("button", { name: /Continue/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Resume/i })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /Pause/i })).toBeNull();
   });
 
-  it("calls resume() when Continue button clicked", () => {
+  it("calls resume() when Resume button clicked", () => {
     const resume = vi.fn();
     mockUseLogStream.mockReturnValue({ lines: [], streaming: true, paused: true, pause: vi.fn(), resume, restart: vi.fn(), clear: vi.fn() });
     render(<LogsModal stack={stack} onClose={vi.fn()} />);
-    fireEvent.click(screen.getByRole("button", { name: /Continue/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Resume/i }));
     expect(resume).toHaveBeenCalledOnce();
   });
 
@@ -196,7 +200,8 @@ describe("LogsModal", () => {
     expect(screen.getByPlaceholderText(/Search logs/i)).toBeInTheDocument();
   });
 
-  it("filters log lines by search term", () => {
+  it("filters log lines by search term", async () => {
+    vi.useFakeTimers();
     mockUseLogStream.mockReturnValue({
       lines: [
         "web-1 | 2024-01-01T00:00:00Z hello from web",
@@ -211,12 +216,10 @@ describe("LogsModal", () => {
     });
     render(<LogsModal stack={stack} onClose={vi.fn()} />);
     fireEvent.change(screen.getByPlaceholderText(/Search logs/i), { target: { value: "database" } });
+    await act(async () => { vi.runAllTimers(); });
     expect(screen.queryByText(/hello from web/i)).toBeNull();
-    // "database" is wrapped in <mark> so match on the parent message cell's textContent
-    const msgCell = screen.getByText((_c, el) =>
-      (el?.classList.contains("lm-line-message") && Boolean(el.textContent?.match(/database ready/i))) ?? false
-    );
-    expect(msgCell).toBeInTheDocument();
+    // "database" is split into a <mark> by highlight — check combined textContent
+    expect(document.body.textContent).toMatch(/database ready/i);
   });
 
   it("search is case-insensitive", () => {
@@ -319,7 +322,8 @@ describe("LogsModal", () => {
     expect(tsBtn).toHaveAttribute("aria-pressed", "false");
   });
 
-  it("shows filtered line count when search filters lines", () => {
+  it("shows filtered line count when search filters lines", async () => {
+    vi.useFakeTimers();
     mockUseLogStream.mockReturnValue({
       lines: [
         "web-1 | 2024-01-01T00:00:00Z hello from web",
@@ -334,7 +338,9 @@ describe("LogsModal", () => {
     });
     render(<LogsModal stack={stack} onClose={vi.fn()} />);
     fireEvent.change(screen.getByPlaceholderText(/Search logs/i), { target: { value: "database" } });
-    expect(screen.getByText(/lm-line-count|1 of 2|1.*\/.*2/i, { selector: ".lm-line-count" })).toBeInTheDocument();
+    await act(async () => { vi.runAllTimers(); });
+    // base LogViewer renders "1 / 2 lines" when filtered
+    expect(screen.getByText(/1 \/ 2 lines/i)).toBeInTheDocument();
   });
 
   it("renders warn-level log lines with warn class", () => {
