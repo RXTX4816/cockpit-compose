@@ -10,7 +10,9 @@ interface UseComposeStacksResult {
 }
 
 // How many consecutive failures before we surface an error to the UI.
-// This absorbs transient failures from Docker being busy during restarts/stops.
+// Absorbs transient "Internal error" responses from Docker during restart/stop/pull.
+// Equivalent to usePollingFetch({ errorThreshold: 4 }) but this hook needs
+// streaming output and Docker-specific message rewriting that usePollingFetch doesn't support.
 const FAIL_THRESHOLD = 4;
 
 export function useComposeStacks(): UseComposeStacksResult {

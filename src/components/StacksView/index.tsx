@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useSharedNetworks } from "../../hooks/useSharedNetworks";
 import { useTranslation } from "react-i18next";
-import { useModalState } from "../../hooks/useModalState";
+import { useDialogState } from "@rxtx4816/cockpit-plugin-base-react";
 import { useStackFilters } from "../../hooks/useStackFilters";
 import { useExpandedStacks } from "../../hooks/useExpandedStacks";
 import { useKeyboardShortcuts } from "../../hooks/useKeyboardShortcuts";
@@ -85,7 +85,20 @@ export function StacksView({ onRuntimeChange, dockerMissing, layout = "poweruser
   const searchWrapRef = useRef<HTMLDivElement>(null);
 
   // Extracted hooks
-  const modals = useModalState();
+  type ComposeModals = {
+    logs: ComposeStack; yaml: ComposeStack; info: ComposeStack;
+    upConfirm: ComposeStack; up: ComposeStack;
+    pullConfirm: ComposeStack; pull: ComposeStack;
+    down: ComposeStack; kill: ComposeStack; env: ComposeStack;
+    scale: ComposeStack; prune: ComposeStack; exec: ComposeStack;
+    run: ComposeStack; events: ComposeStack; top: ComposeStack; backup: ComposeStack;
+  };
+  const MODAL_NAMES = [
+    "logs", "yaml", "info", "upConfirm", "up", "pullConfirm", "pull",
+    "down", "kill", "env", "scale", "prune", "exec", "run", "events", "top", "backup",
+  ] as const;
+  const modals = useDialogState<ComposeModals>(MODAL_NAMES);
+  const [upProfiles, setUpProfiles] = useState<string[]>([]);
   const { expanded, toggleExpanded } = useExpandedStacks();
   const { activeOps, increment, decrement } = useOperationCounter();
   const {
@@ -433,63 +446,63 @@ export function StacksView({ onRuntimeChange, dockerMissing, layout = "poweruser
         layout={layout}
       />
 
-      {modals.state.logs && <LogsModal stack={modals.state.logs} onClose={() => modals.close("logs")} />}
-      {modals.state.yaml && (
+      {modals.isOpen("logs") && <LogsModal stack={modals.getData("logs")!} onClose={() => modals.close("logs")} />}
+      {modals.isOpen("yaml") && (
         <YamlModal
-          stack={modals.state.yaml}
+          stack={modals.getData("yaml")!}
           onClose={() => modals.close("yaml")}
           onFileAdded={(newPath) => {
-            const prev = modals.state.yaml;
+            const prev = modals.getData("yaml");
             if (prev) modals.open("yaml", { ...prev, ConfigFiles: [prev.ConfigFiles, newPath].join(",") });
           }}
           onFileRemoved={(removedPath) => {
-            const prev = modals.state.yaml;
+            const prev = modals.getData("yaml");
             if (prev) modals.open("yaml", { ...prev, ConfigFiles: prev.ConfigFiles.split(",").map(f => f.trim()).filter(f => f !== removedPath).join(",") });
           }}
         />
       )}
-      {modals.state.info && <StackInfoModal stack={modals.state.info} onClose={() => modals.close("info")} />}
-      {modals.state.upConfirm && (
+      {modals.isOpen("info") && <StackInfoModal stack={modals.getData("info")!} onClose={() => modals.close("info")} />}
+      {modals.isOpen("upConfirm") && (
         <UpConfirmModal
-          stack={modals.state.upConfirm}
+          stack={modals.getData("upConfirm")!}
           onConfirm={(profiles) => {
-            modals.dispatch({ type: "setProfiles", profiles });
+            setUpProfiles(profiles);
             modals.transition("upConfirm", "up");
           }}
           onClose={() => modals.close("upConfirm")}
         />
       )}
-      {modals.state.up && (
+      {modals.isOpen("up") && (
         <UpModal
-          stack={modals.state.up}
-          profiles={modals.state.upProfiles}
+          stack={modals.getData("up")!}
+          profiles={upProfiles}
           onClose={() => { modals.close("up"); void refresh(); }}
         />
       )}
-      {modals.state.pullConfirm && (
+      {modals.isOpen("pullConfirm") && (
         <PullConfirmModal
-          stack={modals.state.pullConfirm}
+          stack={modals.getData("pullConfirm")!}
           onConfirm={() => modals.transition("pullConfirm", "pull")}
           onClose={() => modals.close("pullConfirm")}
         />
       )}
-      {modals.state.pull && <PullModal stack={modals.state.pull} onClose={() => modals.close("pull")} />}
-      {modals.state.events && <EventsModal stack={modals.state.events} onClose={() => modals.close("events")} />}
-      {modals.state.top && <TopModal stack={modals.state.top} onClose={() => modals.close("top")} />}
-      {modals.state.exec && <ExecModal stack={modals.state.exec} onClose={() => modals.close("exec")} />}
-      {modals.state.run && <RunModal stack={modals.state.run} onClose={() => modals.close("run")} />}
-      {modals.state.prune && (
+      {modals.isOpen("pull") && <PullModal stack={modals.getData("pull")!} onClose={() => modals.close("pull")} />}
+      {modals.isOpen("events") && <EventsModal stack={modals.getData("events")!} onClose={() => modals.close("events")} />}
+      {modals.isOpen("top") && <TopModal stack={modals.getData("top")!} onClose={() => modals.close("top")} />}
+      {modals.isOpen("exec") && <ExecModal stack={modals.getData("exec")!} onClose={() => modals.close("exec")} />}
+      {modals.isOpen("run") && <RunModal stack={modals.getData("run")!} onClose={() => modals.close("run")} />}
+      {modals.isOpen("prune") && (
         <PruneModal
-          stack={modals.state.prune}
+          stack={modals.getData("prune")!}
           onClose={() => modals.close("prune")}
           onSuccess={refresh}
         />
       )}
-      {modals.state.backup && (
-        <BackupModal stack={modals.state.backup} onClose={() => modals.close("backup")} />
+      {modals.isOpen("backup") && (
+        <BackupModal stack={modals.getData("backup")!} onClose={() => modals.close("backup")} />
       )}
-      {modals.state.scale && (
-        <ScaleModal stack={modals.state.scale} onClose={() => modals.close("scale")} onSuccess={refresh} />
+      {modals.isOpen("scale") && (
+        <ScaleModal stack={modals.getData("scale")!} onClose={() => modals.close("scale")} onSuccess={refresh} />
       )}
 
       {downTarget && (

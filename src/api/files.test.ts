@@ -29,7 +29,7 @@ describe("saveComposeFile", () => {
   it("calls cockpit.file().replace() without superuser when not provided", async () => {
     const { saveComposeFile } = await import("./files");
     await saveComposeFile("/path/compose.yml", "services:\n  web:\n");
-    expect(mockCockpitFile).toHaveBeenCalledWith("/path/compose.yml", { superuser: undefined });
+    expect(mockCockpitFile).toHaveBeenCalledWith("/path/compose.yml", undefined);
     expect(mockReplace).toHaveBeenCalledWith("services:\n  web:\n");
   });
 
@@ -310,7 +310,7 @@ describe("saveEnvFile", () => {
   it("calls cockpit.file().replace() with the given content", async () => {
     const { saveEnvFile } = await import("./files");
     await saveEnvFile("/path/.env", "KEY=value\n");
-    expect(mockCockpitFile).toHaveBeenCalledWith("/path/.env", { superuser: undefined });
+    expect(mockCockpitFile).toHaveBeenCalledWith("/path/.env", undefined);
     expect(mockReplace).toHaveBeenCalledWith("KEY=value\n");
   });
 

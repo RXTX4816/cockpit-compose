@@ -7,7 +7,7 @@ import { StacksView } from "./StacksView";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { ToastProvider } from "./ToastProvider";
 import { detectComposeCommand, detectDockerMode, type Runtime } from "../api";
-import { type Layout, LAYOUT_KEY, isValidLayout } from "../lib/layout";
+import { type Layout, LAYOUT_KEY } from "../lib/layout";
 import "./layouts.css";
 
 export function App() {
@@ -17,7 +17,10 @@ export function App() {
     () => (localStorage.getItem("cockpit-compose:runtime") ?? "docker") as Runtime,
   );
   const [dockerMissing, setDockerMissing] = useState(false);
-  const [layout, setLayout] = useLayout<Layout>(LAYOUT_KEY, "poweruser", ["minimal", "poweruser", "pretty", "unix"]);
+  const [layout, setLayout] = useLayout<Layout>(
+    LAYOUT_KEY, "poweruser", ["minimal", "poweruser", "pretty", "unix"],
+    { crossTabSync: true },
+  );
   const initialRuntime = useRef(runtime);
 
   useEffect(() => {
@@ -28,17 +31,6 @@ export function App() {
         setReady(true);
       });
   }, []);
-
-  // Sync layout from other tabs
-  useEffect(() => {
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === LAYOUT_KEY && e.newValue && isValidLayout(e.newValue)) {
-        setLayout(e.newValue as Layout);
-      }
-    };
-    window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
-  }, [setLayout]);
 
   if (!ready) return null;
 
