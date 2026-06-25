@@ -1,87 +1,6 @@
-.lm-log-viewer {
-  overflow-y: auto;
-  height: calc(100vh - 260px);
-  padding: 0.4rem 0;
-  background: var(--log-viewer-bg);
-  border-radius: var(--pf-t--global--border--radius--200);
-  display: grid;
-  grid-template-columns: minmax(0, 12rem) max-content 1fr;
-  align-content: start;
-}
-
-.lm-log-viewer--no-ts {
-  grid-template-columns: minmax(0, 12rem) 1fr;
-}
-
-.lm-empty-state {
-  grid-column: 1 / -1;
-  padding: 1rem 0.75rem;
-  color: var(--pf-t--global--text--color--subtle);
-  font-family: var(--pf-t--global--font--family--mono);
-  font-size: 0.78rem;
-}
-
 .lm-limit-notice {
   font-size: 0.75rem;
   color: var(--pf-t--global--text--color--subtle);
-}
-
-/* LogLine */
-.lm-line-raw {
-  grid-column: 1 / -1;
-  padding: 0.1rem 0.75rem;
-  font-family: var(--pf-t--global--font--family--mono);
-  font-size: 0.78rem;
-  line-height: 1.5;
-  color: var(--pf-t--global--text--color--subtle);
-  font-style: italic;
-}
-
-.lm-line-parsed {
-  display: contents;
-}
-
-.lm-line-parsed > * {
-  font-family: var(--pf-t--global--font--family--mono);
-  font-size: 0.78rem;
-  line-height: 1.5;
-  padding: 0.1rem 0;
-}
-
-.lm-line-service {
-  font-weight: 600;
-  word-break: break-all;
-  padding-left: 0.75rem;
-  padding-right: 0.5rem;
-}
-
-.lm-line-timestamp {
-  color: var(--pf-t--global--text--color--subtle);
-  font-size: 0.7rem;
-  align-self: center;
-  white-space: pre-line;
-  text-align: center;
-  padding-right: 0.5rem;
-}
-
-.lm-line-message {
-  word-break: break-all;
-  padding-right: 0.75rem;
-}
-
-/* Level-based backgrounds */
-.lm-bg-error { background: rgba(185, 28, 28, 0.08); }
-.lm-bg-warn  { background: rgba(146, 64, 14, 0.07); }
-.lm-bg-even  { background: transparent; }
-.lm-bg-odd   { background: var(--log-stripe-odd); }
-
-.pf-v6-theme-dark .lm-bg-error { background: rgba(248, 81, 73, 0.10); }
-.pf-v6-theme-dark .lm-bg-warn  { background: rgba(227, 179, 65, 0.08); }
-
-/* Toolbar controls */
-.lm-toolbar {
-  padding-inline: 0;
-  margin-bottom: 0.5rem;
 }
 
 .lm-select {
@@ -100,57 +19,6 @@
   outline-offset: -2px;
 }
 
-.lm-search-input {
-  width: 220px;
-}
-
-.lm-search-match {
-  background: rgba(255, 213, 0, 0.35);
-  color: inherit;
-  border-radius: 2px;
-}
-
-/* Level-based message colours */
-.lm-msg-error { color: var(--log-token-error); }
-.lm-msg-warn  { color: var(--log-token-warn); }
-.lm-msg-default { color: var(--log-viewer-text); }
-
-.lm-line-message--no-ts {
-  grid-column: 2;
-}
-
-/* Search + regex controls */
-.lm-search-wrap {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.lm-regex-btn {
-  height: var(--pf-t--global--control--size--base, 36px);
-  padding: 0 0.5rem;
-  font-family: var(--pf-t--global--font--family--mono);
-  font-size: 0.8rem;
-  font-weight: 600;
-  border: 1px solid var(--pf-t--global--border--color--default);
-  border-radius: var(--pf-t--global--border--radius--100);
-  background: var(--pf-t--global--background--color--primary--default);
-  color: var(--pf-t--global--text--color--subtle);
-  cursor: pointer;
-  transition: background 120ms ease, color 120ms ease;
-}
-
-.lm-regex-btn:hover {
-  background: var(--pf-t--global--background--color--secondary--hover--default);
-  color: var(--pf-t--global--text--color--regular);
-}
-
-.lm-regex-btn--active {
-  background: var(--pf-t--global--color--brand--default);
-  color: #fff;
-  border-color: var(--pf-t--global--color--brand--default);
-}
-
 /* Level filter chips */
 .lm-level-filters {
   display: flex;
@@ -159,18 +27,36 @@
 }
 
 .lm-level-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1rem 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border-radius: 1rem;
+  border: 1.5px solid currentColor;
+  background: transparent;
   cursor: pointer;
   user-select: none;
-  opacity: 0.6;
-  transition: opacity 120ms ease, box-shadow 120ms ease;
+  opacity: 0.55;
+  transition: opacity 120ms ease, background 120ms ease;
 }
 
-.lm-level-chip:hover { opacity: 0.85; }
-.lm-level-chip--active { opacity: 1; box-shadow: 0 0 0 2px currentColor; }
+.lm-level-chip:hover { opacity: 0.8; }
 
-/* Line count */
-.lm-line-count {
-  font-size: 0.75rem;
-  color: var(--pf-t--global--text--color--subtle);
-  white-space: nowrap;
+.lm-level-chip--active {
+  opacity: 1;
+  background: color-mix(in srgb, currentColor 15%, transparent);
+}
+
+.lm-chip-all   { color: var(--pf-t--global--text--color--subtle); }
+.lm-chip-error { color: var(--log-token-error); }
+.lm-chip-warn  { color: var(--log-token-warn); }
+.lm-chip-info  { color: var(--log-token-info); }
+
+/* Extra controls row inside LogViewer toolbar */
+.lm-extra-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
 }

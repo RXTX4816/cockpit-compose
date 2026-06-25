@@ -13,6 +13,7 @@ import {
   Spinner,
   Alert,
 } from "@patternfly/react-core";
+import { LogViewer } from "@rxtx4816/cockpit-plugin-base-react/components";
 import {
   type ComposeStack,
   readComposeFile,
@@ -22,7 +23,7 @@ import {
   snapshotProjectContainerIds,
   forceRemoveOneoffContainers,
 } from "../api";
-import { stripAnsi, classifyLine, kindColor, type LineEntry } from "../lib/pullParser";
+import { stripAnsi, classifyLine, type LineEntry } from "../lib/pullParser";
 import "./RunModal.css";
 import { splitConfigFiles } from "../lib/configFiles";
 
@@ -52,7 +53,6 @@ export function RunModal({ stack, onClose }: Props) {
   const preRunIdsRef = useRef<Set<string>>(new Set());
   const killedByUserRef = useRef(false);
   const bufRef = useRef("");
-  const logRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let raw = "";
@@ -66,10 +66,6 @@ export function RunModal({ stack, onClose }: Props) {
       })
       .catch(() => {});
   }, [configFile]);
-
-  useEffect(() => {
-    if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight;
-  }, [lines]);
 
   const handleRun = useCallback(async () => {
     const service = selectedService.trim();
@@ -195,24 +191,15 @@ export function RunModal({ stack, onClose }: Props) {
               )}
             </div>
 
-            {done && failed && errorMsg && (
-              <Alert variant="danger" isInline title={errorMsg} style={{ marginBottom: "0.75rem" }} />
-            )}
             {killError && (
               <Alert variant="danger" isInline title={killError} style={{ marginBottom: "0.75rem" }} />
             )}
 
-            <div ref={logRef} className="rm-log-viewer">
-              {lines.length === 0 ? (
-                <span className="rm-log-empty">{t("run_modal.initializing")}</span>
-              ) : (
-                lines.map((entry, i) => (
-                  <div key={i} style={{ color: kindColor[entry.kind] }}>
-                    {entry.text}
-                  </div>
-                ))
-              )}
-            </div>
+            <LogViewer
+              lines={lines.map(l => l.text)}
+              error={done && failed ? errorMsg : null}
+              emptyMessage={t("run_modal.initializing")}
+            />
           </>
         )}
       </ModalBody>
