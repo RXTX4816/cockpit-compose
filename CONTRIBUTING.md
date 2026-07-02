@@ -144,6 +144,7 @@ BREAKING CHANGE: old configuration files are no longer supported
 - **Bug?** Open an issue with `[BUG]` in the title, include environment details and steps to reproduce
 - **Feature request?** Open an issue with `[FEATURE]` in the title, describe the problem being solved
 - **Question?** GitHub Discussions (coming soon) or open an issue marked `[QUESTION]`
+- **Security vulnerability?** Do **not** open a public issue. Follow the private disclosure process in [SECURITY.md](SECURITY.md).
 
 ## License
 
