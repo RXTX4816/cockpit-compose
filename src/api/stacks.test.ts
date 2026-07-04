@@ -433,7 +433,7 @@ describe("pruneNetworks", () => {
 describe("composeRunStream", () => {
   it("spawns compose run with service and command args", () => {
     mockSpawn.mockReturnValue(mockProcess(""));
-    composeRunStream("myapp", ["/path/compose.yml"], "web", ["echo", "hello"], true);
+    composeRunStream("myapp", ["/path/compose.yml"], "web", { mode: "args", command: ["echo", "hello"] }, true);
     const args = mockSpawn.mock.calls[0][0] as string[];
     expect(args).toContain("run");
     expect(args).toContain("web");
@@ -443,21 +443,21 @@ describe("composeRunStream", () => {
 
   it("includes --rm when rm is true", () => {
     mockSpawn.mockReturnValue(mockProcess(""));
-    composeRunStream("myapp", ["/path/compose.yml"], "web", ["sh"], true);
+    composeRunStream("myapp", ["/path/compose.yml"], "web", { mode: "args", command: ["sh"] }, true);
     const args = mockSpawn.mock.calls[0][0] as string[];
     expect(args).toContain("--rm");
   });
 
   it("omits --rm when rm is false", () => {
     mockSpawn.mockReturnValue(mockProcess(""));
-    composeRunStream("myapp", ["/path/compose.yml"], "web", ["sh"], false);
+    composeRunStream("myapp", ["/path/compose.yml"], "web", { mode: "args", command: ["sh"] }, false);
     const args = mockSpawn.mock.calls[0][0] as string[];
     expect(args).not.toContain("--rm");
   });
 
   it("passes project and config file", () => {
     mockSpawn.mockReturnValue(mockProcess(""));
-    composeRunStream("myapp", ["/path/compose.yml"], "web", ["sh"], true);
+    composeRunStream("myapp", ["/path/compose.yml"], "web", { mode: "args", command: ["sh"] }, true);
     const args = mockSpawn.mock.calls[0][0] as string[];
     expect(args).toContain("-p");
     expect(args).toContain("myapp");
@@ -467,25 +467,44 @@ describe("composeRunStream", () => {
 
   it("merges stderr into stdout with err: out", () => {
     mockSpawn.mockReturnValue(mockProcess(""));
-    composeRunStream("myapp", ["/path/compose.yml"], "web", ["sh"], true);
+    composeRunStream("myapp", ["/path/compose.yml"], "web", { mode: "args", command: ["sh"] }, true);
     const opts = mockSpawn.mock.calls[0][1] as Record<string, unknown>;
     expect(opts.err).toBe("out");
   });
 
   it("passes superuser option when provided", () => {
     mockSpawn.mockReturnValue(mockProcess(""));
-    composeRunStream("myapp", ["/path/compose.yml"], "web", ["sh"], true, "try");
+    composeRunStream("myapp", ["/path/compose.yml"], "web", { mode: "args", command: ["sh"] }, true, "try");
     const opts = mockSpawn.mock.calls[0][1] as Record<string, unknown>;
     expect(opts.superuser).toBe("try");
   });
 
   it("emits two -f flags for multi-file input", () => {
     mockSpawn.mockReturnValue(mockProcess(""));
-    composeRunStream("myapp", ["/path/base.yml", "/path/override.yml"], "web", ["sh"], true);
+    composeRunStream("myapp", ["/path/base.yml", "/path/override.yml"], "web", { mode: "args", command: ["sh"] }, true);
     const args = mockSpawn.mock.calls[0][0] as string[];
     expect(args.filter(a => a === "-f")).toHaveLength(2);
     expect(args).toContain("/path/base.yml");
     expect(args).toContain("/path/override.yml");
+  });
+
+  it("mode 'args' does not override the entrypoint", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    composeRunStream("myapp", ["/path/compose.yml"], "web", { mode: "args", command: ["--help"] }, true);
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args).not.toContain("--entrypoint");
+    expect(args).toContain("--help");
+  });
+
+  it("mode 'override' replaces the entrypoint with the command's own first token, without invoking a shell", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    composeRunStream("myapp", ["/path/compose.yml"], "web", { mode: "override", command: ["/app/vikunja/vikunja", "--help"] }, true);
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    const entrypointIdx = args.indexOf("--entrypoint");
+    expect(entrypointIdx).toBeGreaterThan(-1);
+    expect(args[entrypointIdx + 1]).toBe("/app/vikunja/vikunja");
+    expect(args).not.toContain("sh");
+    expect(args).toContain("--help");
   });
 });
 

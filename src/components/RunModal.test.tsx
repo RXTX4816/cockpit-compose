@@ -36,7 +36,7 @@ describe("RunModal", () => {
       mockSpawn.mockReturnValue(mockProcess(""));
       render(<RunModal stack={stack} onClose={vi.fn()} />);
       expect(screen.getByLabelText(/Command/i)).toBeInTheDocument();
-      expect(screen.getByRole("checkbox")).toBeInTheDocument();
+      expect(screen.getByRole("checkbox", { name: /remove container/i })).toBeInTheDocument();
       expect(screen.getByRole("button", { name: /^Run$/i })).toBeInTheDocument();
       expect(screen.getByRole("button", { name: /Cancel/i })).toBeInTheDocument();
       await act(async () => {});
@@ -45,8 +45,25 @@ describe("RunModal", () => {
     it("--rm checkbox is checked by default", async () => {
       mockSpawn.mockReturnValue(mockProcess(""));
       render(<RunModal stack={stack} onClose={vi.fn()} />);
-      const checkbox = screen.getByRole("checkbox") as HTMLInputElement;
+      const checkbox = screen.getByRole("checkbox", { name: /remove container/i }) as HTMLInputElement;
       expect(checkbox.checked).toBe(true);
+      await act(async () => {});
+    });
+
+    it("override entrypoint checkbox is unchecked by default and shows args help text", async () => {
+      mockSpawn.mockReturnValue(mockProcess(""));
+      render(<RunModal stack={stack} onClose={vi.fn()} />);
+      const checkbox = screen.getByRole("checkbox", { name: /override entrypoint/i }) as HTMLInputElement;
+      expect(checkbox.checked).toBe(false);
+      expect(screen.getByText(/runs as arguments to the image's entrypoint/i)).toBeInTheDocument();
+      await act(async () => {});
+    });
+
+    it("toggling override entrypoint shows override help text", async () => {
+      mockSpawn.mockReturnValue(mockProcess(""));
+      render(<RunModal stack={stack} onClose={vi.fn()} />);
+      fireEvent.click(screen.getByRole("checkbox", { name: /override entrypoint/i }));
+      expect(screen.getByText(/replaces the image's entrypoint entirely/i)).toBeInTheDocument();
       await act(async () => {});
     });
 
@@ -183,10 +200,26 @@ describe("RunModal", () => {
       render(<RunModal stack={stack} onClose={vi.fn()} />);
       await waitFor(() => screen.getByRole("option", { name: "web" }));
       if (!rm) {
-        await act(async () => { fireEvent.click(screen.getByRole("checkbox")); });
+        await act(async () => { fireEvent.click(screen.getByRole("checkbox", { name: /remove container/i })); });
       }
       await act(async () => {
         fireEvent.change(screen.getByLabelText(/Command/i), { target: { value: "echo hello" } });
+      });
+      await act(async () => {
+        fireEvent.click(screen.getByRole("button", { name: /^Run$/i }));
+      });
+    }
+
+    async function triggerRunOverrideEntrypoint(cmd: string) {
+      mockSpawn
+        .mockReturnValueOnce(mockProcess(composeYaml))
+        .mockReturnValueOnce(mockProcess("")) // snapshotProjectContainerIds
+        .mockReturnValueOnce(mockProcess(""));
+      render(<RunModal stack={stack} onClose={vi.fn()} />);
+      await waitFor(() => screen.getByRole("option", { name: "web" }));
+      await act(async () => { fireEvent.click(screen.getByRole("checkbox", { name: /override entrypoint/i })); });
+      await act(async () => {
+        fireEvent.change(screen.getByLabelText(/Command/i), { target: { value: cmd } });
       });
       await act(async () => {
         fireEvent.click(screen.getByRole("button", { name: /^Run$/i }));
@@ -218,6 +251,30 @@ describe("RunModal", () => {
       expect(args).toContain("-f");
       expect(args).toContain("/path/docker-compose.yml");
       expect(opts.err).toBe("out");
+    });
+
+    it("does not override the entrypoint by default (regression guard: plain args like --help must keep working)", async () => {
+      await triggerRun(true);
+      const args = mockSpawn.mock.calls[2][0] as string[];
+      expect(args).not.toContain("--entrypoint");
+    });
+
+    it("override mode replaces the entrypoint with the command's own first token (no shell involved)", async () => {
+      await triggerRunOverrideEntrypoint("/app/vikunja/vikunja --help");
+      const args = mockSpawn.mock.calls[2][0] as string[];
+      const entrypointIdx = args.indexOf("--entrypoint");
+      expect(entrypointIdx).toBeGreaterThan(-1);
+      expect(args[entrypointIdx + 1]).toBe("/app/vikunja/vikunja");
+      expect(args).not.toContain("sh");
+      expect(args).toContain("--help");
+    });
+
+    it("override mode respects quoted arguments", async () => {
+      await triggerRunOverrideEntrypoint('/app/mybin "an arg with spaces"');
+      const args = mockSpawn.mock.calls[2][0] as string[];
+      const entrypointIdx = args.indexOf("--entrypoint");
+      expect(args[entrypointIdx + 1]).toBe("/app/mybin");
+      expect(args).toContain("an arg with spaces");
     });
   });
 });
