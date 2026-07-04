@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Button,
@@ -32,10 +32,21 @@ export function BackgroundTasksDrawer() {
   const { tasks, stop, remove } = useBackgroundTasks();
   const [open, setOpen] = useState(false);
   const [openTask, setOpenTask] = useState<BackgroundTask | null>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
 
   const activeCount = tasks.filter(t => t.status === "pending" || t.status === "running").length;
   // Reflects live status/lines of the task currently shown in the log modal, if still tracked.
   const liveOpenTask = openTask ? tasks.find(t => t.id === openTask.id) ?? openTask : null;
+
+  // Newest task is last in the list (closest to the floating icon) — scroll it
+  // into view and focus it whenever the panel opens or a new task arrives.
+  useEffect(() => {
+    if (!open || !bodyRef.current) return;
+    const items = bodyRef.current.querySelectorAll("li");
+    const last = items[items.length - 1] as HTMLElement | undefined;
+    last?.scrollIntoView?.({ block: "nearest" });
+    last?.focus();
+  }, [open, tasks.length]);
 
   return (
     <>
@@ -58,6 +69,7 @@ export function BackgroundTasksDrawer() {
               onClose={() => setOpen(false)}
             />
             <NotificationDrawerBody className="btd-body">
+              <div ref={bodyRef} className="btd-body-inner">
               {tasks.length === 0 ? (
                 <EmptyState titleText={t("background_tasks.empty_title")} headingLevel="h4">
                   <EmptyStateBody>{t("background_tasks.empty_body")}</EmptyStateBody>
@@ -108,6 +120,7 @@ export function BackgroundTasksDrawer() {
                   })}
                 </NotificationDrawerList>
               )}
+              </div>
             </NotificationDrawerBody>
           </NotificationDrawer>
         </div>

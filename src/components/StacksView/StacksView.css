@@ -46,6 +46,19 @@
   flex-wrap: wrap;
 }
 
+.sv-bulk-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  animation: sv-search-in 0.15s ease-out;
+}
+
+.sv-bulk-count {
+  font-size: var(--pf-t--global--font--size--sm);
+  color: var(--pf-t--global--text--color--subtle);
+  white-space: nowrap;
+}
+
 .sv-filter-chip {
   cursor: pointer;
   user-select: none;

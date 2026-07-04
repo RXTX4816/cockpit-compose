@@ -7,9 +7,10 @@ import {
   Spinner,
 } from "@patternfly/react-core";
 import { LogViewer } from "@rxtx4816/cockpit-plugin-base-react/components";
-import { type ComposeStack, upStackStream, composeFileSuperuser, isRootlessMode } from "../api";
+import { type ComposeStack } from "../api";
 import { useUpStream } from "../hooks/useUpStream";
 import { useBackgroundTasks } from "../hooks/useBackgroundTasks";
+import { buildUpStarter } from "../lib/backgroundActions";
 import "./UpModal.css";
 import { splitConfigFiles } from "../lib/configFiles";
 
@@ -32,10 +33,7 @@ export function UpModal({ stack, profiles = [], onClose }: Props) {
 
   const handleBackground = () => {
     cancel();
-    enqueue(stack.Name, "up", t("up_modal.background_label", { name: stack.Name }), launch => {
-      const suPromise = isRootlessMode() ? Promise.resolve(undefined) : composeFileSuperuser(configFiles);
-      return suPromise.then(su => { launch(upStackStream(stack.Name, configFiles, profiles, su)); });
-    });
+    enqueue(stack.Name, "up", t("up_modal.background_label", { name: stack.Name }), buildUpStarter(stack, profiles));
     onClose(true);
   };
 

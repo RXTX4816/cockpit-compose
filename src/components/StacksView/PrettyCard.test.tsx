@@ -301,4 +301,20 @@ describe("PrettyCard", () => {
     render(<PrettyCard {...defaultProps} expanded={true} />);
     expect(screen.getByLabelText("Start service")).toBeInTheDocument();
   });
+
+  describe("selection", () => {
+    it("does not render a checkbox when onToggleSelect is not provided", () => {
+      render(<PrettyCard {...defaultProps} />);
+      expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
+    });
+
+    it("renders a checkbox reflecting isSelected and calls onToggleSelect on click", () => {
+      const onToggleSelect = vi.fn();
+      render(<PrettyCard {...defaultProps} onToggleSelect={onToggleSelect} isSelected />);
+      const checkbox = screen.getByRole("checkbox") as HTMLInputElement;
+      expect(checkbox.checked).toBe(true);
+      fireEvent.click(checkbox);
+      expect(onToggleSelect).toHaveBeenCalledOnce();
+    });
+  });
 });

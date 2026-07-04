@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import {
   DataListItem,
   DataListItemRow,
+  DataListCheck,
   DataListToggle,
   DataListItemCells,
   DataListCell,
@@ -78,9 +79,12 @@ interface StackRowProps {
   onBackup: () => void;
   onScale: () => void;
   onActingChange: (delta: 1 | -1) => void;
+  isSelected?: boolean;
+  onToggleSelect?: () => void;
+  anySelected?: boolean;
 }
 
-export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, onDown, onKill, onUp, onPull, onEvents, onTop, onExec, onRun, onPrune, onBackup, onScale, onActingChange }: StackRowProps) {
+export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, onDown, onKill, onUp, onPull, onEvents, onTop, onExec, onRun, onPrune, onBackup, onScale, onActingChange, isSelected = false, onToggleSelect, anySelected = false }: StackRowProps) {
   const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [confirmStopOpen, setConfirmStopOpen] = useState(false);
@@ -124,6 +128,15 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
     <>
     <DataListItem isExpanded={expanded} aria-labelledby={`stack-${stack.Name}`} data-status={status} data-stack-name={stack.Name}>
       <DataListItemRow onClick={handleRowClick} style={{ cursor: "pointer" }}>
+        {onToggleSelect && (
+          <DataListCheck
+            aria-labelledby={`stack-${stack.Name}`}
+            aria-label={t("stacks.select_stack", { name: stack.Name })}
+            isChecked={isSelected}
+            onChange={onToggleSelect}
+            className={`sr-check${anySelected ? " sr-check--visible" : ""}`}
+          />
+        )}
         <DataListToggle
           onClick={handleToggle}
           isExpanded={expanded}

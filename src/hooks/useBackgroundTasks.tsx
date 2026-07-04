@@ -35,6 +35,16 @@ export interface BackgroundTasksContextValue {
   stop: (id: number) => void;
   /** Removes a task from the list. No-op while the task is still running. */
   remove: (id: number) => void;
+  /**
+   * Drops every not-yet-started task and returns how many were removed.
+   *
+   * Pending tasks hold a closure that calls into `compose()`/`cli()`, which read
+   * the *live* docker/podman runtime at execution time, not at enqueue time —
+   * so a task queued before a runtime switch would otherwise run against the
+   * wrong backend once it finally starts. Already-running or finished tasks
+   * already dispatched their command under the correct runtime, so they're safe.
+   */
+  clearPending: () => number;
 }
 
 const BackgroundTasksContext = createContext<BackgroundTasksContextValue | null>(null);
@@ -44,6 +54,7 @@ const NOOP_BACKGROUND_TASKS: BackgroundTasksContextValue = {
   enqueue: () => {},
   stop: () => {},
   remove: () => {},
+  clearPending: () => 0,
 };
 
 /**
@@ -133,8 +144,16 @@ export function BackgroundTasksProvider({ children }: { children: ReactNode }) {
     startersRef.current.delete(id);
   }, []);
 
+  const clearPending = useCallback((): number => {
+    const pendingIds = tasks.filter(t => t.status === "pending").map(t => t.id);
+    if (pendingIds.length === 0) return 0;
+    setTasks(prev => prev.filter(t => t.status !== "pending"));
+    for (const id of pendingIds) startersRef.current.delete(id);
+    return pendingIds.length;
+  }, [tasks]);
+
   return (
-    <BackgroundTasksContext.Provider value={{ tasks, enqueue, stop, remove }}>
+    <BackgroundTasksContext.Provider value={{ tasks, enqueue, stop, remove, clearPending }}>
       {children}
     </BackgroundTasksContext.Provider>
   );

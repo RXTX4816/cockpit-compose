@@ -46,6 +46,23 @@
   opacity: 1;
 }
 
+/* Select checkbox in top-left — ghost until card hovered, any card selected, or checked */
+.mc-select {
+  position: absolute;
+  top: 0.2rem;
+  left: 0.3rem;
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  cursor: pointer;
+}
+
+.mc-card:hover .mc-select,
+.mc-card:focus-within .mc-select,
+.mc-select--visible {
+  opacity: 1;
+}
+
 .mc-menu-toggle.pf-v6-c-menu-toggle {
   padding: 0.15rem 0.2rem;
   min-width: unset;
