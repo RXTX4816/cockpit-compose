@@ -6,6 +6,8 @@ import { AppFooter } from "./AppFooter";
 import { StacksView } from "./StacksView";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { ToastProvider } from "./ToastProvider";
+import { BackgroundTasksProvider } from "../hooks/useBackgroundTasks";
+import { BackgroundTasksDrawer } from "./BackgroundTasksDrawer";
 import { detectComposeCommand, detectDockerMode, type Runtime } from "../api";
 import { type Layout, LAYOUT_KEY } from "../lib/layout";
 import "./layouts.css";
@@ -36,21 +38,24 @@ export function App() {
 
   return (
     <ToastProvider>
-      <div data-layout={layout}>
-        <Page className="pf-m-no-sidebar">
-          <PageSection hasBodyWrapper={false} isFilled>
-            <ErrorBoundary fallbackTitle={t("error_boundary.load_stacks_error")}>
-              <StacksView
-                onRuntimeChange={setRuntime}
-                dockerMissing={dockerMissing}
-                layout={layout}
-                onLayoutChange={setLayout}
-              />
-            </ErrorBoundary>
-          </PageSection>
-          <AppFooter runtime={runtime} />
-        </Page>
-      </div>
+      <BackgroundTasksProvider>
+        <div data-layout={layout}>
+          <Page className="pf-m-no-sidebar">
+            <PageSection hasBodyWrapper={false} isFilled>
+              <ErrorBoundary fallbackTitle={t("error_boundary.load_stacks_error")}>
+                <StacksView
+                  onRuntimeChange={setRuntime}
+                  dockerMissing={dockerMissing}
+                  layout={layout}
+                  onLayoutChange={setLayout}
+                />
+              </ErrorBoundary>
+            </PageSection>
+            <AppFooter runtime={runtime} />
+          </Page>
+          <BackgroundTasksDrawer />
+        </div>
+      </BackgroundTasksProvider>
     </ToastProvider>
   );
 }

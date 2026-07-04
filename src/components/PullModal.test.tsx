@@ -7,6 +7,11 @@ vi.mock("../hooks/usePullStream", () => ({
   usePullStream: vi.fn(),
 }));
 
+const mockEnqueue = vi.fn();
+vi.mock("../hooks/useBackgroundTasks", () => ({
+  useBackgroundTasks: () => ({ enqueue: mockEnqueue, tasks: [], stop: vi.fn(), remove: vi.fn() }),
+}));
+
 import { usePullStream } from "../hooks/usePullStream";
 const mockUsePullStream = vi.mocked(usePullStream);
 
@@ -24,6 +29,7 @@ beforeEach(() => {
     errorMsg: "",
     cancel: vi.fn(),
   });
+  mockEnqueue.mockReset();
 });
 
 describe("PullModal", () => {
@@ -103,5 +109,27 @@ describe("PullModal", () => {
     mockUsePullStream.mockReturnValue({ lines: [], done: false, failed: false, errorMsg: "", cancel: vi.fn() });
     render(<PullModal stack={multiStack} onClose={vi.fn()} />);
     expect(mockUsePullStream).toHaveBeenCalledWith("myapp", ["/a.yml", "/b.yml"]);
+  });
+
+  it("shows Run in Background button while not done", () => {
+    render(<PullModal stack={stack} onClose={vi.fn()} />);
+    expect(screen.getByRole("button", { name: /Run in Background/i })).toBeInTheDocument();
+  });
+
+  it("does not show Run in Background button when done", () => {
+    mockUsePullStream.mockReturnValue({ lines: [], done: true, failed: false, errorMsg: "", cancel: vi.fn() });
+    render(<PullModal stack={stack} onClose={vi.fn()} />);
+    expect(screen.queryByRole("button", { name: /Run in Background/i })).not.toBeInTheDocument();
+  });
+
+  it("clicking Run in Background cancels the foreground stream, enqueues a task, and closes", () => {
+    const cancel = vi.fn();
+    const onClose = vi.fn();
+    mockUsePullStream.mockReturnValue({ lines: [], done: false, failed: false, errorMsg: "", cancel });
+    render(<PullModal stack={stack} onClose={onClose} />);
+    fireEvent.click(screen.getByRole("button", { name: /Run in Background/i }));
+    expect(cancel).toHaveBeenCalledOnce();
+    expect(mockEnqueue).toHaveBeenCalledWith("myapp", "pull", expect.stringContaining("myapp"), expect.any(Function));
+    expect(onClose).toHaveBeenCalledOnce();
   });
 });

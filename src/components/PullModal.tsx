@@ -7,8 +7,9 @@ import {
   Spinner,
 } from "@patternfly/react-core";
 import { LogViewer } from "@rxtx4816/cockpit-plugin-base-react/components";
-import { type ComposeStack } from "../api";
+import { type ComposeStack, pullStack, composeFileSuperuser, isRootlessMode, readAllProfiles } from "../api";
 import { usePullStream } from "../hooks/usePullStream";
+import { useBackgroundTasks } from "../hooks/useBackgroundTasks";
 import "./PullModal.css";
 import { splitConfigFiles } from "../lib/configFiles";
 
@@ -21,9 +22,21 @@ export function PullModal({ stack, onClose }: Props) {
   const { t } = useTranslation();
   const configFiles = splitConfigFiles(stack.ConfigFiles);
   const { lines, done, failed, errorMsg, cancel } = usePullStream(stack.Name, configFiles);
+  const { enqueue } = useBackgroundTasks();
 
   const handleClose = () => {
     cancel();
+    onClose();
+  };
+
+  const handleBackground = () => {
+    cancel();
+    enqueue(stack.Name, "pull", t("pull_modal.background_label", { name: stack.Name }), launch => {
+      return Promise.all([
+        isRootlessMode() ? Promise.resolve(undefined) : composeFileSuperuser(configFiles),
+        readAllProfiles(configFiles[0]),
+      ]).then(([su, profiles]) => { launch(pullStack(stack.Name, configFiles, profiles, su)); });
+    });
     onClose();
   };
 
@@ -46,7 +59,12 @@ export function PullModal({ stack, onClose }: Props) {
 
         <div className="pm-footer">
           {!done
-            ? <Button variant="secondary" onClick={handleClose}>{t("common.cancel")}</Button>
+            ? (
+              <>
+                <Button variant="secondary" onClick={handleBackground}>{t("pull_modal.background_button")}</Button>
+                <Button variant="secondary" onClick={handleClose}>{t("common.cancel")}</Button>
+              </>
+            )
             : <Button variant="primary" onClick={handleClose}>{t("common.close")}</Button>
           }
         </div>
