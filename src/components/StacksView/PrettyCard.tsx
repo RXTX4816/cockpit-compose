@@ -66,6 +66,9 @@ interface PrettyCardProps {
   onBackup: () => void;
   onScale: () => void;
   onActingChange: (delta: 1 | -1) => void;
+  isSelected?: boolean;
+  onToggleSelect?: () => void;
+  anySelected?: boolean;
 }
 
 const STATUS_BORDER: Record<string, string> = {
@@ -87,6 +90,7 @@ const STATUS_GLOW: Record<string, string> = {
 export function PrettyCard({
   stack, expanded, onToggle, onLogs, onYaml, onInfo, onDown, onKill, onUp, onPull,
   onEvents, onTop, onExec, onRun, onPrune, onBackup, onScale, onActingChange,
+  isSelected = false, onToggleSelect, anySelected = false,
 }: PrettyCardProps) {
   const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -136,6 +140,16 @@ export function PrettyCard({
         data-stack-name={stack.Name}
       >
         {status === "running" && <span className="pc-pulse" />}
+
+        {onToggleSelect && (
+          <input
+            type="checkbox"
+            className={`pc-select${anySelected ? " pc-select--visible" : ""}`}
+            checked={isSelected}
+            onChange={onToggleSelect}
+            aria-label={t("stacks.select_stack", { name: stack.Name })}
+          />
+        )}
 
         {/* Header */}
         <div className="pc-header">

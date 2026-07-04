@@ -7,9 +7,10 @@ import {
   Spinner,
 } from "@patternfly/react-core";
 import { LogViewer } from "@rxtx4816/cockpit-plugin-base-react/components";
-import { type ComposeStack, pullStack, composeFileSuperuser, isRootlessMode, readAllProfiles } from "../api";
+import { type ComposeStack } from "../api";
 import { usePullStream } from "../hooks/usePullStream";
 import { useBackgroundTasks } from "../hooks/useBackgroundTasks";
+import { buildPullStarter } from "../lib/backgroundActions";
 import "./PullModal.css";
 import { splitConfigFiles } from "../lib/configFiles";
 
@@ -31,12 +32,7 @@ export function PullModal({ stack, onClose }: Props) {
 
   const handleBackground = () => {
     cancel();
-    enqueue(stack.Name, "pull", t("pull_modal.background_label", { name: stack.Name }), launch => {
-      return Promise.all([
-        isRootlessMode() ? Promise.resolve(undefined) : composeFileSuperuser(configFiles),
-        readAllProfiles(configFiles[0]),
-      ]).then(([su, profiles]) => { launch(pullStack(stack.Name, configFiles, profiles, su)); });
-    });
+    enqueue(stack.Name, "pull", t("pull_modal.background_label", { name: stack.Name }), buildPullStarter(stack));
     onClose();
   };
 

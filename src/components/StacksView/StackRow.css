@@ -1,3 +1,14 @@
+.sr-check {
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.sr-check--visible,
+.pf-v6-c-data-list__item-row:hover .sr-check,
+.pf-v6-c-data-list__item-row:focus-within .sr-check {
+  opacity: 1;
+}
+
 .sr-name-cell {
   display: flex;
   align-items: center;

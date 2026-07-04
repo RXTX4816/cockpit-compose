@@ -406,4 +406,35 @@ describe("StackRow", () => {
     expect(clearContainers).toHaveBeenCalled();
     expect(loadContainers).toHaveBeenCalled();
   });
+
+  describe("selection", () => {
+    it("does not render a checkbox when onToggleSelect is not provided", () => {
+      render(<StackRow {...defaultProps} />);
+      expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
+    });
+
+    it("renders a checkbox reflecting isSelected when onToggleSelect is provided", () => {
+      render(<StackRow {...defaultProps} onToggleSelect={vi.fn()} isSelected />);
+      expect((screen.getByRole("checkbox") as HTMLInputElement).checked).toBe(true);
+    });
+
+    it("calls onToggleSelect when the checkbox is clicked, without also toggling row expansion", () => {
+      const onToggleSelect = vi.fn();
+      const onToggle = vi.fn();
+      render(<StackRow {...defaultProps} onToggle={onToggle} onToggleSelect={onToggleSelect} />);
+      fireEvent.click(screen.getByRole("checkbox"));
+      expect(onToggleSelect).toHaveBeenCalledOnce();
+      expect(onToggle).not.toHaveBeenCalled();
+    });
+
+    it("adds the visible modifier class once any row is selected", () => {
+      const { container } = render(<StackRow {...defaultProps} onToggleSelect={vi.fn()} anySelected />);
+      expect(container.querySelector(".sr-check--visible")).toBeInTheDocument();
+    });
+
+    it("omits the visible modifier class when nothing is selected", () => {
+      const { container } = render(<StackRow {...defaultProps} onToggleSelect={vi.fn()} anySelected={false} />);
+      expect(container.querySelector(".sr-check--visible")).not.toBeInTheDocument();
+    });
+  });
 });

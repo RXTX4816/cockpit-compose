@@ -171,6 +171,12 @@
   cursor: not-allowed;
 }
 
+.ur-key--select-on {
+  background: var(--pf-t--global--color--brand--default, #06c);
+  color: #fff;
+  border-color: var(--pf-t--global--color--brand--default, #06c);
+}
+
 .ur-key--up {
   border-color: #3e8635;
   color: #3e8635;

@@ -15,12 +15,14 @@ vi.mock("./StackRow", () => ({
   StackRow: ({
     stack,
     onLogs, onYaml, onInfo, onUp, onPull, onEvents, onTop, onExec, onRun, onPrune, onBackup, onDown, onKill, onToggle,
+    isSelected, onToggleSelect,
   }: {
     stack: ComposeStack;
     onLogs: () => void; onYaml: () => void; onInfo: () => void; onUp: () => void;
     onPull: () => void; onEvents: () => void; onTop: () => void; onExec: () => void;
     onRun: () => void; onPrune: () => void; onBackup: () => void; onDown: () => void; onKill: () => void;
     onToggle: () => void;
+    isSelected?: boolean; onToggleSelect?: () => void;
   }) => (
     <div data-testid={`stack-row-${stack.Name}`}>
       <span>{stack.Name}</span>
@@ -38,6 +40,9 @@ vi.mock("./StackRow", () => ({
       <button onClick={onDown}>Down</button>
       <button onClick={onKill}>Kill</button>
       <button onClick={onToggle}>Toggle</button>
+      {onToggleSelect && (
+        <input type="checkbox" aria-label={`select-${stack.Name}`} checked={isSelected} onChange={onToggleSelect} />
+      )}
     </div>
   ),
 }));
@@ -142,6 +147,31 @@ vi.mock("./UnixRow", () => ({
   ),
 }));
 
+const mockEnqueue = vi.fn();
+const mockClearPending = vi.fn(() => 0);
+vi.mock("../../hooks/useBackgroundTasks", () => ({
+  useBackgroundTasks: () => ({ tasks: [], enqueue: mockEnqueue, stop: vi.fn(), remove: vi.fn(), clearPending: mockClearPending }),
+}));
+
+const mockToastWarn = vi.fn();
+vi.mock("../ToastProvider", () => ({
+  useToast: () => ({ success: vi.fn(), error: vi.fn(), warn: mockToastWarn, info: vi.fn(), addToast: vi.fn() }),
+}));
+
+vi.mock("../BulkActionConfirmModal", () => ({
+  BulkActionConfirmModal: ({
+    stacks, action, onConfirm, onClose,
+  }: {
+    stacks: ComposeStack[]; action: string; onConfirm: () => void; onClose: () => void;
+  }) => (
+    <div data-testid="bulk-confirm-modal">
+      <span>{action} {stacks.map(s => s.Name).join(",")}</span>
+      <button onClick={onConfirm}>Confirm</button>
+      <button onClick={onClose}>Cancel</button>
+    </div>
+  ),
+}));
+
 import { useComposeStacks } from "../../hooks/useComposeStacks";
 import { useDownStack } from "../../hooks/useDownStack";
 import { useKillStack } from "../../hooks/useKillStack";
@@ -174,6 +204,9 @@ beforeEach(() => {
   mockUseDownStack.mockReturnValue(defaultDownStack);
   mockUseKillStack.mockReturnValue(defaultKillStack);
   mockUseSharedNetworks.mockReturnValue({ sharedNetworks: [], loading: false, error: null });
+  mockEnqueue.mockReset();
+  mockClearPending.mockReset().mockReturnValue(0);
+  mockToastWarn.mockReset();
 });
 
 describe("StacksView — loading and empty states", () => {
@@ -513,6 +546,30 @@ describe("StacksView — onRuntimeChange prop", () => {
     render(<StacksView />);
     expect(() => fireEvent.click(screen.getByTestId("runtime-toggle"))).not.toThrow();
   });
+
+  it("clears the stack selection when the runtime changes", () => {
+    mockUseComposeStacks.mockReturnValue({ stacks: [stack], loading: false, error: null, refresh: vi.fn(), reset: vi.fn() });
+    render(<StacksView />);
+    fireEvent.click(screen.getByLabelText("select-myapp"));
+    expect(screen.getByText(/1 selected/i)).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId("runtime-toggle"));
+    expect(screen.queryByText(/selected/i)).toBeNull();
+  });
+
+  it("cancels pending background tasks when the runtime changes, since they'd otherwise run against the new runtime", () => {
+    mockClearPending.mockReturnValue(2);
+    render(<StacksView />);
+    fireEvent.click(screen.getByTestId("runtime-toggle"));
+    expect(mockClearPending).toHaveBeenCalled();
+    expect(mockToastWarn).toHaveBeenCalledWith(expect.stringContaining("2"));
+  });
+
+  it("does not show a toast when there were no pending tasks to cancel", () => {
+    mockClearPending.mockReturnValue(0);
+    render(<StacksView />);
+    fireEvent.click(screen.getByTestId("runtime-toggle"));
+    expect(mockToastWarn).not.toHaveBeenCalled();
+  });
 });
 
 describe("StacksView — layout variants", () => {
@@ -625,5 +682,86 @@ describe("StacksView — modal close callbacks", () => {
     expect(screen.getByTestId("pull-modal")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "ClosePull" }));
     expect(screen.queryByTestId("pull-modal")).toBeNull();
+  });
+});
+
+describe("StacksView — bulk selection and bulk actions", () => {
+  const stack2: ComposeStack = { Name: "otherapp", Status: "exit(1)", ConfigFiles: "/other/compose.yml" };
+
+  beforeEach(() => {
+    mockUseComposeStacks.mockReturnValue({ stacks: [stack, stack2], loading: false, error: null, refresh: vi.fn(), reset: vi.fn() });
+  });
+
+  it("does not show the bulk action bar when nothing is selected", () => {
+    render(<StacksView />);
+    expect(screen.queryByTestId("bulk-confirm-modal")).toBeNull();
+    expect(screen.queryByText(/selected/i)).toBeNull();
+  });
+
+  it("shows the bulk action bar once a stack is selected", () => {
+    render(<StacksView />);
+    fireEvent.click(screen.getByLabelText("select-myapp"));
+    expect(screen.getByText(/1 selected/i)).toBeInTheDocument();
+  });
+
+  it("selecting multiple stacks and confirming Up opens the bulk modal with both stacks, then enqueues one task per stack", () => {
+    render(<StacksView />);
+    fireEvent.click(screen.getByLabelText("select-myapp"));
+    fireEvent.click(screen.getByLabelText("select-otherapp"));
+    fireEvent.click(within(screen.getByTestId("sv-bulk-bar")).getByRole("button", { name: "Up" }));
+    expect(screen.getByTestId("bulk-confirm-modal")).toBeInTheDocument();
+    expect(screen.getByText("up myapp,otherapp")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
+    expect(mockEnqueue).toHaveBeenCalledTimes(2);
+    expect(mockEnqueue.mock.calls[0][0]).toBe("myapp");
+    expect(mockEnqueue.mock.calls[0][1]).toBe("up");
+    expect(mockEnqueue.mock.calls[1][0]).toBe("otherapp");
+  });
+
+  it("clears the selection and closes the modal after confirming", () => {
+    render(<StacksView />);
+    fireEvent.click(screen.getByLabelText("select-myapp"));
+    fireEvent.click(within(screen.getByTestId("sv-bulk-bar")).getByRole("button", { name: /Pull/i }));
+    fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
+    expect(screen.queryByTestId("bulk-confirm-modal")).toBeNull();
+    expect(screen.queryByText(/selected/i)).toBeNull();
+  });
+
+  it("closing the bulk modal without confirming keeps the selection intact", () => {
+    render(<StacksView />);
+    fireEvent.click(screen.getByLabelText("select-myapp"));
+    fireEvent.click(within(screen.getByTestId("sv-bulk-bar")).getByRole("button", { name: /Down/i }));
+    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(screen.queryByTestId("bulk-confirm-modal")).toBeNull();
+    expect(mockEnqueue).not.toHaveBeenCalled();
+    expect(screen.getByText(/1 selected/i)).toBeInTheDocument();
+  });
+
+  it("Clear selection link empties the selection", () => {
+    render(<StacksView />);
+    fireEvent.click(screen.getByLabelText("select-myapp"));
+    fireEvent.click(screen.getByRole("button", { name: /clear selection/i }));
+    expect(screen.queryByText(/selected/i)).toBeNull();
+  });
+
+  it("supports bulk restart", () => {
+    render(<StacksView />);
+    fireEvent.click(screen.getByLabelText("select-myapp"));
+    fireEvent.click(within(screen.getByTestId("sv-bulk-bar")).getByRole("button", { name: /Restart/i }));
+    expect(screen.getByTestId("bulk-confirm-modal")).toBeInTheDocument();
+    expect(screen.getByText("restart myapp")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
+    expect(mockEnqueue).toHaveBeenCalledWith("myapp", "restart", expect.anything(), expect.any(Function));
+  });
+
+  it("supports bulk kill", () => {
+    render(<StacksView />);
+    fireEvent.click(screen.getByLabelText("select-myapp"));
+    fireEvent.click(within(screen.getByTestId("sv-bulk-bar")).getByRole("button", { name: /^Kill$/i }));
+    expect(screen.getByTestId("bulk-confirm-modal")).toBeInTheDocument();
+    expect(screen.getByText("kill myapp")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
+    expect(mockEnqueue).toHaveBeenCalledWith("myapp", "kill", expect.anything(), expect.any(Function));
   });
 });

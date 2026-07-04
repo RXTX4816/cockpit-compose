@@ -105,4 +105,15 @@ describe("BackgroundTasksDrawer", () => {
     fireEvent.click(screen.getByText("Pull b"));
     expect(screen.queryByText(/Waiting for output/i)).not.toBeInTheDocument();
   });
+
+  it("focuses the newest (last) task row when the panel opens", () => {
+    mockTasks = [
+      { id: 1, stackName: "a", action: "up", label: "Up a", status: "success", lines: [], createdAt: 0 },
+      { id: 2, stackName: "b", action: "pull", label: "Pull b", status: "running", lines: [], createdAt: 1 },
+    ];
+    render(<BackgroundTasksDrawer />);
+    fireEvent.click(screen.getByRole("button", { name: /Background tasks/i }));
+    const items = screen.getAllByRole("listitem");
+    expect(items[items.length - 1]).toHaveFocus();
+  });
 });

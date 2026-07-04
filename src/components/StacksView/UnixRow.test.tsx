@@ -298,4 +298,23 @@ describe("UnixRow", () => {
     render(<UnixRow {...defaultProps} stack={{ ...stack, Status: "paused(2)" }} />);
     expect(screen.getByText("PAUSED")).toBeInTheDocument();
   });
+
+  describe("selection", () => {
+    it("does not render a select toggle when onToggleSelect is not provided", () => {
+      render(<UnixRow {...defaultProps} />);
+      expect(screen.queryByText("[ ]")).not.toBeInTheDocument();
+      expect(screen.queryByText("[x]")).not.toBeInTheDocument();
+    });
+
+    it("shows [ ] when unselected and [x] when selected, and calls onToggleSelect on click", () => {
+      const onToggleSelect = vi.fn();
+      const { rerender } = render(<UnixRow {...defaultProps} onToggleSelect={onToggleSelect} isSelected={false} />);
+      expect(screen.getByText("[ ]")).toBeInTheDocument();
+      fireEvent.click(screen.getByText("[ ]"));
+      expect(onToggleSelect).toHaveBeenCalledOnce();
+
+      rerender(<UnixRow {...defaultProps} onToggleSelect={onToggleSelect} isSelected={true} />);
+      expect(screen.getByText("[x]")).toBeInTheDocument();
+    });
+  });
 });

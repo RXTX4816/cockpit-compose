@@ -139,4 +139,45 @@ describe("useBackgroundTasks", () => {
     expect(result.current.tasks).toHaveLength(1);
     expect(start2).not.toHaveBeenCalled();
   });
+
+  describe("clearPending", () => {
+    it("removes only pending tasks, leaving the running one alone, and returns the removed count", () => {
+      const { result } = renderHook(() => useBackgroundTasks(), { wrapper });
+      const start2 = vi.fn();
+      const start3 = vi.fn();
+
+      act(() => {
+        result.current.enqueue("a", "up", "Up a", launch => launch(fakeProcess("resolve"))); // becomes running
+        result.current.enqueue("b", "up", "Up b", start2); // stays pending
+        result.current.enqueue("c", "up", "Up c", start3); // stays pending
+      });
+      expect(result.current.tasks[0].status).toBe("running");
+      expect(result.current.tasks[1].status).toBe("pending");
+      expect(result.current.tasks[2].status).toBe("pending");
+
+      let removedCount = -1;
+      act(() => { removedCount = result.current.clearPending(); });
+
+      expect(removedCount).toBe(2);
+      expect(result.current.tasks).toHaveLength(1);
+      expect(result.current.tasks[0].stackName).toBe("a");
+      expect(start2).not.toHaveBeenCalled();
+      expect(start3).not.toHaveBeenCalled();
+    });
+
+    it("does not affect a task that has already started running by the time it's called", async () => {
+      const { result } = renderHook(() => useBackgroundTasks(), { wrapper });
+      act(() => { result.current.enqueue("a", "up", "Up a", launch => launch(fakeProcess("resolve"))); });
+      await waitFor(() => expect(result.current.tasks[0].status).toBe("success"));
+
+      const removedCount = result.current.clearPending();
+      expect(removedCount).toBe(0);
+      expect(result.current.tasks).toHaveLength(1);
+    });
+
+    it("returns 0 and is a no-op when there are no tasks at all (noop fallback outside a provider)", () => {
+      const { result } = renderHook(() => useBackgroundTasks());
+      expect(result.current.clearPending()).toBe(0);
+    });
+  });
 });

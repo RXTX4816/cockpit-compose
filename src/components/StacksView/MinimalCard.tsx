@@ -64,6 +64,9 @@ interface MinimalCardProps {
   onBackup: () => void;
   onScale: () => void;
   onActingChange: (delta: 1 | -1) => void;
+  isSelected?: boolean;
+  onToggleSelect?: () => void;
+  anySelected?: boolean;
 }
 
 const STATUS_VARS: Record<string, { bg: string; border: string }> = {
@@ -77,6 +80,7 @@ const STATUS_VARS: Record<string, { bg: string; border: string }> = {
 export function MinimalCard({
   stack, onLogs, onYaml, onInfo, onDown, onKill, onUp, onPull,
   onEvents, onTop, onExec, onRun, onPrune, onBackup, onScale, onActingChange,
+  isSelected = false, onToggleSelect, anySelected = false,
 }: MinimalCardProps) {
   const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -116,7 +120,7 @@ export function MinimalCard({
 
   const handleCardClick = (e: MouseEvent<HTMLDivElement>) => {
     const target = e.target as HTMLElement;
-    if (target.closest("button, [role=button], .pf-v6-c-dropdown")) return;
+    if (target.closest("button, input, [role=button], .pf-v6-c-dropdown")) return;
     if (bubble) {
       setBubble(null);
     } else {
@@ -151,6 +155,16 @@ export function MinimalCard({
         aria-label={`${stack.Name} — ${status}`}
         onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") handleCardClick(e as unknown as MouseEvent<HTMLDivElement>); }}
       >
+        {onToggleSelect && (
+          <input
+            type="checkbox"
+            className={`mc-select${anySelected ? " mc-select--visible" : ""}`}
+            checked={isSelected}
+            onChange={onToggleSelect}
+            onClick={(e) => e.stopPropagation()}
+            aria-label={t("stacks.select_stack", { name: stack.Name })}
+          />
+        )}
         <div className="mc-kebab" onClick={(e) => e.stopPropagation()}>
           <Dropdown
             isOpen={menuOpen}

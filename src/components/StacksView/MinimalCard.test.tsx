@@ -253,4 +253,21 @@ describe("MinimalCard", () => {
     fireEvent.click(screen.getByText(/^start$/i));
     expect(doAction).toHaveBeenCalledWith("start", expect.any(Function));
   });
+
+  describe("selection", () => {
+    it("does not render a checkbox when onToggleSelect is not provided", () => {
+      render(<MinimalCard {...defaultProps} />);
+      expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
+    });
+
+    it("renders a checkbox reflecting isSelected and calls onToggleSelect on click, without opening the container bubble", () => {
+      const onToggleSelect = vi.fn();
+      render(<MinimalCard {...defaultProps} onToggleSelect={onToggleSelect} isSelected />);
+      const checkbox = screen.getByRole("checkbox") as HTMLInputElement;
+      expect(checkbox.checked).toBe(true);
+      fireEvent.click(checkbox);
+      expect(onToggleSelect).toHaveBeenCalledOnce();
+      expect(screen.queryByText(/no containers/i)).not.toBeInTheDocument();
+    });
+  });
 });

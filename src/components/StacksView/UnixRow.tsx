@@ -58,6 +58,8 @@ interface UnixRowProps {
   onBackup: () => void;
   onScale: () => void;
   onActingChange: (delta: 1 | -1) => void;
+  isSelected?: boolean;
+  onToggleSelect?: () => void;
 }
 
 const STATUS_LABEL: Record<string, { text: string; cls: string }> = {
@@ -71,6 +73,7 @@ const STATUS_LABEL: Record<string, { text: string; cls: string }> = {
 export function UnixRow({
   stack, expanded, onToggle, onLogs, onYaml, onInfo, onDown, onKill, onUp, onPull,
   onEvents, onTop, onExec, onRun, onPrune, onBackup, onScale, onActingChange,
+  isSelected = false, onToggleSelect,
 }: UnixRowProps) {
   const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -156,6 +159,18 @@ export function UnixRow({
         </span>
 
         <div className="ur-col ur-col--actions">
+          {onToggleSelect && (
+            <Tooltip content={t("stacks.select_stack", { name: stack.Name })}>
+              <button
+                className={`ur-key ur-key--select${isSelected ? " ur-key--select-on" : ""}`}
+                onClick={onToggleSelect}
+                aria-label={t("stacks.select_stack", { name: stack.Name })}
+                aria-pressed={isSelected}
+              >
+                {isSelected ? "[x]" : "[ ]"}
+              </button>
+            </Tooltip>
+          )}
           {isUp ? (
             <Tooltip content={t("actions.stop")}>
               <button className="ur-key ur-key--stop" onClick={() => setConfirmStopOpen(true)} disabled={acting}>[stop]</button>

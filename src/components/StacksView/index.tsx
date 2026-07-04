@@ -28,7 +28,10 @@ import {
 } from "@patternfly/react-core";
 import { Tooltip } from "@rxtx4816/cockpit-plugin-base-react/components";
 import { type ComposeStack, type Runtime } from "../../api";
-import { TimesCircleIcon, BanIcon, PlusCircleIcon, FolderOpenIcon, SearchIcon, ExclamationTriangleIcon } from "@patternfly/react-icons";
+import {
+  TimesCircleIcon, TimesIcon, BanIcon, PlusCircleIcon, FolderOpenIcon, SearchIcon, ExclamationTriangleIcon,
+  DownloadIcon, RedoAltIcon, ArrowAltCircleDownIcon,
+} from "@patternfly/react-icons";
 import { type DownedStack } from "../../hooks/useDownedStacksScan";
 import { useComposeStacks } from "../../hooks/useComposeStacks";
 import { useAutoRefresh } from "../../hooks/useAutoRefresh";
@@ -49,6 +52,10 @@ import { PruneModal } from "../PruneModal";
 import { BackupModal } from "../BackupModal";
 import { ScaleModal } from "../ScaleModal";
 import { DownedStacksSection } from "../DownedStacksSection";
+import { BulkActionConfirmModal, type BulkAction } from "../BulkActionConfirmModal";
+import { useBackgroundTasks } from "../../hooks/useBackgroundTasks";
+import { useToast } from "../ToastProvider";
+import { buildUpStarter, buildPullStarter, buildRestartStarter, buildDownStarter, buildKillStarter } from "../../lib/backgroundActions";
 import { StackRow } from "./StackRow";
 import { MinimalCard } from "./MinimalCard";
 import { PrettyCard } from "./PrettyCard";
@@ -60,6 +67,14 @@ import { StackSkeleton } from "./StackSkeleton";
 import "./StacksView.css";
 import { splitConfigFiles } from "../../lib/configFiles";
 import { type Layout } from "../../lib/layout";
+
+const BULK_STARTERS: Record<BulkAction, typeof buildUpStarter> = {
+  up: buildUpStarter,
+  pull: buildPullStarter,
+  restart: buildRestartStarter,
+  down: buildDownStarter,
+  kill: buildKillStarter,
+};
 
 const filterColorMap: Record<string, "green" | "orange" | "grey" | "blue"> = {
   running: "green",
@@ -92,13 +107,24 @@ export function StacksView({ onRuntimeChange, dockerMissing, layout = "poweruser
     down: ComposeStack; kill: ComposeStack; env: ComposeStack;
     scale: ComposeStack; prune: ComposeStack; exec: ComposeStack;
     run: ComposeStack; events: ComposeStack; top: ComposeStack; backup: ComposeStack;
+    bulkConfirm: { stacks: ComposeStack[]; action: BulkAction };
   };
   const MODAL_NAMES = [
     "logs", "yaml", "info", "upConfirm", "up", "pullConfirm", "pull",
-    "down", "kill", "env", "scale", "prune", "exec", "run", "events", "top", "backup",
+    "down", "kill", "env", "scale", "prune", "exec", "run", "events", "top", "backup", "bulkConfirm",
   ] as const;
   const modals = useDialogState<ComposeModals>(MODAL_NAMES);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const toggleSelect = useCallback((name: string) => {
+    setSelected(prev => {
+      const next = new Set(prev);
+      if (next.has(name)) next.delete(name); else next.add(name);
+      return next;
+    });
+  }, []);
   const [upProfiles, setUpProfiles] = useState<string[]>([]);
+  const { enqueue, clearPending } = useBackgroundTasks();
+  const toast = useToast();
   const { expanded, toggleExpanded } = useExpandedStacks();
   const { activeOps, increment, decrement } = useOperationCounter();
   const {
@@ -132,6 +158,22 @@ export function StacksView({ onRuntimeChange, dockerMissing, layout = "poweruser
   const handleUpComplete = useCallback((name: string) => {
     setManuallyDownedStacks(prev => prev.filter(d => d.name.toLowerCase() !== name.toLowerCase()));
   }, []);
+
+  const handleBulkConfirm = useCallback(() => {
+    const data = modals.getData("bulkConfirm");
+    if (!data) return;
+    const buildStarter = BULK_STARTERS[data.action];
+    for (const stack of data.stacks) {
+      enqueue(
+        stack.Name,
+        data.action,
+        t(`${data.action}_modal.background_label`, { name: stack.Name }),
+        buildStarter(stack),
+      );
+    }
+    setSelected(new Set());
+    modals.close("bulkConfirm");
+  }, [modals, enqueue, t]);
 
   const { target: downTarget, downing, error: downError, open: openDown, close: closeDown, execute: performDown }
     = useDownStack(refresh, onActingChange, handleDownComplete);
@@ -251,10 +293,98 @@ export function StacksView({ onRuntimeChange, dockerMissing, layout = "poweruser
             </ToolbarItem>
           )}
 
+          {selected.size > 0 && (
+            <ToolbarItem>
+              <div className="sv-bulk-bar" data-testid="sv-bulk-bar">
+                <span className="sv-bulk-count">{t("stacks.bulk_selected", { count: selected.size })}</span>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => modals.open("bulkConfirm", {
+                    stacks: displayedStacks.filter(s => selected.has(s.Name)), action: "up",
+                  })}
+                >
+                  {t("actions.up")}
+                </Button>
+                <span className="sr-icon-group">
+                  <Tooltip content={t("actions.restart")}>
+                    <Button
+                      variant="plain"
+                      size="sm"
+                      aria-label={t("actions.restart")}
+                      onClick={() => modals.open("bulkConfirm", {
+                        stacks: displayedStacks.filter(s => selected.has(s.Name)), action: "restart",
+                      })}
+                    >
+                      <RedoAltIcon />
+                    </Button>
+                  </Tooltip>
+                  <Tooltip content={t("actions.pull_title")}>
+                    <Button
+                      variant="plain"
+                      size="sm"
+                      aria-label={t("actions.pull_title")}
+                      onClick={() => modals.open("bulkConfirm", {
+                        stacks: displayedStacks.filter(s => selected.has(s.Name)), action: "pull",
+                      })}
+                    >
+                      <DownloadIcon />
+                    </Button>
+                  </Tooltip>
+                  <Tooltip content={t("actions.down_title")}>
+                    <Button
+                      variant="plain"
+                      size="sm"
+                      className="sr-down-btn"
+                      aria-label={t("actions.down_title")}
+                      onClick={() => modals.open("bulkConfirm", {
+                        stacks: displayedStacks.filter(s => selected.has(s.Name)), action: "down",
+                      })}
+                    >
+                      <ArrowAltCircleDownIcon />
+                    </Button>
+                  </Tooltip>
+                  <Tooltip content={t("actions.kill")}>
+                    <Button
+                      variant="plain"
+                      size="sm"
+                      aria-label={t("actions.kill")}
+                      onClick={() => modals.open("bulkConfirm", {
+                        stacks: displayedStacks.filter(s => selected.has(s.Name)), action: "kill",
+                      })}
+                    >
+                      <BanIcon />
+                    </Button>
+                  </Tooltip>
+                </span>
+                <Tooltip content={t("stacks.bulk_clear")}>
+                  <Button
+                    variant="plain"
+                    size="sm"
+                    aria-label={t("stacks.bulk_clear")}
+                    onClick={() => setSelected(new Set())}
+                  >
+                    <TimesIcon />
+                  </Button>
+                </Tooltip>
+              </div>
+            </ToolbarItem>
+          )}
+
           <ToolbarItem align={{ default: "alignEnd" }}>
             <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
               <LayoutSelector layout={layout} onLayoutChange={onLayoutChange} />
-              <RuntimeToggle onRuntimeChange={(r) => { setRuntimeSwitchKey(k => k + 1); reset(); onRuntimeChange?.(r); }} suggestPodman={dockerMissing} />
+              <RuntimeToggle
+                onRuntimeChange={(r) => {
+                  setRuntimeSwitchKey(k => k + 1);
+                  reset();
+                  setSelected(new Set());
+                  const cancelled = clearPending();
+                  if (cancelled > 0) toast.warn(t("stacks.runtime_switch_cancelled_tasks", { count: cancelled }));
+                  onRuntimeChange?.(r);
+                }}
+                suggestPodman={dockerMissing}
+              />
             </div>
           </ToolbarItem>
         </ToolbarContent>
@@ -337,6 +467,9 @@ export function StacksView({ onRuntimeChange, dockerMissing, layout = "poweruser
               onBackup={() => modals.open("backup", stack)}
               onScale={() => modals.open("scale", stack)}
               onActingChange={onActingChange}
+              isSelected={selected.has(stack.Name)}
+              onToggleSelect={() => toggleSelect(stack.Name)}
+              anySelected={selected.size > 0}
             />
           ))}
         </div>
@@ -363,6 +496,9 @@ export function StacksView({ onRuntimeChange, dockerMissing, layout = "poweruser
               onBackup={() => modals.open("backup", stack)}
               onScale={() => modals.open("scale", stack)}
               onActingChange={onActingChange}
+              isSelected={selected.has(stack.Name)}
+              onToggleSelect={() => toggleSelect(stack.Name)}
+              anySelected={selected.size > 0}
             />
           ))}
         </div>
@@ -399,6 +535,8 @@ export function StacksView({ onRuntimeChange, dockerMissing, layout = "poweruser
               onBackup={() => modals.open("backup", stack)}
               onScale={() => modals.open("scale", stack)}
               onActingChange={onActingChange}
+              isSelected={selected.has(stack.Name)}
+              onToggleSelect={() => toggleSelect(stack.Name)}
             />
           ))}
         </div>
@@ -425,6 +563,9 @@ export function StacksView({ onRuntimeChange, dockerMissing, layout = "poweruser
               onBackup={() => modals.open("backup", stack)}
               onScale={() => modals.open("scale", stack)}
               onActingChange={onActingChange}
+              isSelected={selected.has(stack.Name)}
+              onToggleSelect={() => toggleSelect(stack.Name)}
+              anySelected={selected.size > 0}
             />
           ))}
         </DataList>
@@ -503,6 +644,14 @@ export function StacksView({ onRuntimeChange, dockerMissing, layout = "poweruser
       )}
       {modals.isOpen("scale") && (
         <ScaleModal stack={modals.getData("scale")!} onClose={() => modals.close("scale")} onSuccess={refresh} />
+      )}
+      {modals.isOpen("bulkConfirm") && (
+        <BulkActionConfirmModal
+          stacks={modals.getData("bulkConfirm")!.stacks}
+          action={modals.getData("bulkConfirm")!.action}
+          onConfirm={handleBulkConfirm}
+          onClose={() => modals.close("bulkConfirm")}
+        />
       )}
 
       {downTarget && (

@@ -29,7 +29,19 @@
   flex-direction: column;
 }
 
+/* NotificationDrawer defaults to height:100%, which only resolves against a
+   parent with a definite height. Our parent (.btd-panel) only has max-height,
+   so without these overrides the drawer just grows past it and gets clipped
+   by .btd-panel's overflow:hidden instead of scrolling internally. */
+.btd-panel .pf-v6-c-notification-drawer {
+  height: auto;
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
 .btd-body {
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
 }
 

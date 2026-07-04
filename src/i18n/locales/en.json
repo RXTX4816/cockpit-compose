@@ -46,7 +46,9 @@
     "select_stack": "Select {{name}}",
     "select_all": "Select all",
     "bulk_selected": "{{count}} selected",
-    "bulk_clear": "Clear selection"
+    "bulk_clear": "Clear selection",
+    "runtime_switch_cancelled_tasks_one": "Cancelled {{count}} pending background task because the runtime changed",
+    "runtime_switch_cancelled_tasks_other": "Cancelled {{count}} pending background tasks because the runtime changed"
   },
   "actions": {
     "up": "Up",
@@ -129,7 +131,8 @@
     "confirm_button": "Down (remove)",
     "checking_networks": "Checking for shared networks…",
     "shared_networks_title": "Shared networks detected",
-    "shared_with": "also used by"
+    "shared_with": "also used by",
+    "background_label": "Down — {{name}}"
   },
   "kill_modal": {
     "aria_label": "Confirm kill",
@@ -137,7 +140,8 @@
     "body_prefix": "Running",
     "body_sigkill": "sends SIGKILL to all containers in",
     "body_suffix": ", forcefully terminating them immediately. Unlike Stop, processes have no chance to clean up. Use only when Stop does not respond.",
-    "confirm_button": "Kill all containers"
+    "confirm_button": "Kill all containers",
+    "background_label": "Kill — {{name}}"
   },
   "stop_modal": {
     "aria_label": "Confirm stop",
@@ -149,7 +153,8 @@
     "aria_label": "Confirm restart",
     "title": "Restart \"{{name}}\"?",
     "body": "This will restart all running services. Services will briefly be unavailable.",
-    "confirm_button": "Restart"
+    "confirm_button": "Restart",
+    "background_label": "Restart — {{name}}"
   },
   "delete_modal": {
     "aria_label": "Delete compose stack — {{name}}",
@@ -636,5 +641,31 @@
     "stop_button": "Stop",
     "remove_button": "Remove",
     "log_empty": "Waiting for output…"
+  },
+  "bulk_confirm_modal": {
+    "aria_label": "Confirm bulk action",
+    "title_up_one": "Run Up on {{count}} stack?",
+    "title_up_other": "Run Up on {{count}} stacks?",
+    "title_pull_one": "Pull {{count}} stack?",
+    "title_pull_other": "Pull {{count}} stacks?",
+    "title_restart_one": "Restart {{count}} stack?",
+    "title_restart_other": "Restart {{count}} stacks?",
+    "title_down_one": "Down {{count}} stack?",
+    "title_down_other": "Down {{count}} stacks?",
+    "title_kill_one": "Kill {{count}} stack?",
+    "title_kill_other": "Kill {{count}} stacks?",
+    "background_notice": "This will run as background tasks. You can monitor, stop, or remove them from the background tasks panel.",
+    "warning_up": "This might restart containers and pull new images if any service configuration changed.",
+    "warning_restart": "Running services in the selected stacks will briefly be unavailable while they restart.",
+    "warning_down_title": "This stops and removes all containers for every selected stack",
+    "warning_down_body": "Volumes are kept, but any state outside of them (e.g. in-memory caches) is lost. The stacks will disappear from the list until brought back up.",
+    "warning_kill_title": "This forcefully terminates every container in every selected stack",
+    "warning_kill_body": "Kill sends SIGKILL immediately — unlike Stop, processes get no chance to clean up or flush data. Use only when Stop does not respond.",
+    "stacks_label": "Affected stacks:",
+    "confirm_button_up": "Up",
+    "confirm_button_pull": "Pull",
+    "confirm_button_restart": "Restart",
+    "confirm_button_down": "Down",
+    "confirm_button_kill": "Kill"
   }
 }
