@@ -9,6 +9,11 @@ on:
     # Run weekly on Mondays at 08:00 UTC to catch newly published CVEs
     - cron: "0 8 * * 1"
 
+permissions:
+  actions: read
+  contents: read
+  security-events: write
+
 jobs:
   codeql:
     uses: RXTX4816/cockpit-plugin-base-react/.github/workflows/codeql-plugin.yml@main

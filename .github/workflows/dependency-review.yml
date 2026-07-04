@@ -4,6 +4,10 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   dependency-review:
     uses: RXTX4816/cockpit-plugin-base-react/.github/workflows/dependency-review-plugin.yml@main
