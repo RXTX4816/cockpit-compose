@@ -21,6 +21,7 @@ services:
 
 beforeEach(() => {
   mockSpawn.mockReset();
+  localStorage.clear();
 });
 
 describe("RunModal", () => {
@@ -112,8 +113,8 @@ describe("RunModal", () => {
       mockSpawn.mockReturnValue(mockProcess(composeYaml));
       render(<RunModal stack={stack} onClose={vi.fn()} />);
       await waitFor(() => screen.getByRole("option", { name: "db" }));
-      fireEvent.change(screen.getByRole("combobox"), { target: { value: "db" } });
-      const select = screen.getByRole("combobox") as HTMLSelectElement;
+      fireEvent.change(screen.getByRole("combobox", { name: /service/i }), { target: { value: "db" } });
+      const select = screen.getByRole("combobox", { name: /service/i }) as HTMLSelectElement;
       expect(select.value).toBe("db");
     });
 
@@ -275,6 +276,40 @@ describe("RunModal", () => {
       const entrypointIdx = args.indexOf("--entrypoint");
       expect(args[entrypointIdx + 1]).toBe("/app/mybin");
       expect(args).toContain("an arg with spaces");
+    });
+  });
+
+  describe("command history", () => {
+    it("wires the command field to a datalist for browser-native suggestions", async () => {
+      mockSpawn.mockReturnValue(mockProcess(""));
+      render(<RunModal stack={stack} onClose={vi.fn()} />);
+      const input = screen.getByLabelText(/Command/i) as HTMLInputElement;
+      expect(input.getAttribute("list")).toBeTruthy();
+      await act(async () => {});
+    });
+
+    it("records the command on Run, and it appears as a suggestion in a freshly mounted modal", async () => {
+      mockSpawn
+        .mockReturnValueOnce(mockProcess(composeYaml))
+        .mockReturnValueOnce(mockProcess(""))
+        .mockImplementationOnce(() => mockProcess(""));
+      const { unmount } = render(<RunModal stack={stack} onClose={vi.fn()} />);
+      await waitFor(() => screen.getByRole("option", { name: "web" }));
+      await act(async () => {
+        fireEvent.change(screen.getByLabelText(/Command/i), { target: { value: "echo hello" } });
+      });
+      await act(async () => {
+        fireEvent.click(screen.getByRole("button", { name: /^Run$/i }));
+      });
+      await act(async () => {});
+      unmount();
+
+      mockSpawn.mockReturnValue(mockProcess(""));
+      render(<RunModal stack={stack} onClose={vi.fn()} />);
+      const input = screen.getByLabelText(/Command/i);
+      const listId = input.getAttribute("list")!;
+      const option = document.querySelector(`#${listId} option[value="echo hello"]`);
+      expect(option).not.toBeNull();
     });
   });
 });
