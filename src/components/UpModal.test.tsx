@@ -7,6 +7,11 @@ vi.mock("../hooks/useUpStream", () => ({
   useUpStream: vi.fn(),
 }));
 
+const mockEnqueue = vi.fn();
+vi.mock("../hooks/useBackgroundTasks", () => ({
+  useBackgroundTasks: () => ({ enqueue: mockEnqueue, tasks: [], stop: vi.fn(), remove: vi.fn() }),
+}));
+
 import { useUpStream } from "../hooks/useUpStream";
 const mockUseUpStream = vi.mocked(useUpStream);
 
@@ -24,6 +29,7 @@ beforeEach(() => {
     errorMsg: "",
     cancel: vi.fn(),
   });
+  mockEnqueue.mockReset();
 });
 
 describe("UpModal", () => {
@@ -128,5 +134,27 @@ describe("UpModal", () => {
     mockUseUpStream.mockReturnValue({ lines: [], done: false, failed: false, errorMsg: "", cancel: vi.fn() });
     render(<UpModal stack={stack} profiles={["dev", "debug"]} onClose={vi.fn()} />);
     expect(mockUseUpStream).toHaveBeenCalledWith("myapp", ["/path/compose.yml"], ["dev", "debug"]);
+  });
+
+  it("shows Run in Background button while not done", () => {
+    render(<UpModal stack={stack} onClose={vi.fn()} />);
+    expect(screen.getByRole("button", { name: /Run in Background/i })).toBeInTheDocument();
+  });
+
+  it("does not show Run in Background button when done", () => {
+    mockUseUpStream.mockReturnValue({ lines: [], done: true, failed: false, errorMsg: "", cancel: vi.fn() });
+    render(<UpModal stack={stack} onClose={vi.fn()} />);
+    expect(screen.queryByRole("button", { name: /Run in Background/i })).not.toBeInTheDocument();
+  });
+
+  it("clicking Run in Background cancels the foreground stream, enqueues a task, and closes with success", () => {
+    const cancel = vi.fn();
+    const onClose = vi.fn();
+    mockUseUpStream.mockReturnValue({ lines: [], done: false, failed: false, errorMsg: "", cancel });
+    render(<UpModal stack={stack} onClose={onClose} />);
+    fireEvent.click(screen.getByRole("button", { name: /Run in Background/i }));
+    expect(cancel).toHaveBeenCalledOnce();
+    expect(mockEnqueue).toHaveBeenCalledWith("myapp", "up", expect.stringContaining("myapp"), expect.any(Function));
+    expect(onClose).toHaveBeenCalledWith(true);
   });
 });

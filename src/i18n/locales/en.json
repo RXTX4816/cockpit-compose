@@ -383,7 +383,9 @@
     "pulling": "Pulling images for {{name}}…",
     "complete": "✓ Pull complete",
     "failed": "✗ Pull failed",
-    "starting": "Starting pull…"
+    "starting": "Starting pull…",
+    "background_button": "Run in Background",
+    "background_label": "Pull — {{name}}"
   },
   "pull_confirm_modal": {
     "aria_label": "Confirm pull — {{name}}",
@@ -402,7 +404,9 @@
     "starting": "Starting {{name}}…",
     "initializing": "Starting…",
     "complete": "✓ Up complete",
-    "failed": "✗ Up failed"
+    "failed": "✗ Up failed",
+    "background_button": "Run in Background",
+    "background_label": "Up — {{name}}"
   },
   "up_confirm_modal": {
     "aria_label": "Confirm up — {{name}}",
@@ -618,5 +622,19 @@
     "port_conflict_title": "Port conflict likely",
     "port_conflict_body": "The following services have static host port bindings. Docker will not be able to start more than one replica because a host port can only be bound by a single container:",
     "port_conflict_icon_title": "Has static host port bindings"
+  },
+  "background_tasks": {
+    "toggle_button": "Background tasks",
+    "title": "Background tasks",
+    "empty_title": "No background tasks",
+    "empty_body": "Tasks sent to the background will show up here.",
+    "status_pending": "Pending",
+    "status_running": "Running",
+    "status_success": "Complete",
+    "status_error": "Failed",
+    "status_stopped": "Stopped",
+    "stop_button": "Stop",
+    "remove_button": "Remove",
+    "log_empty": "Waiting for output…"
   }
 }

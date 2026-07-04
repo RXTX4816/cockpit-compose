@@ -1,0 +1,62 @@
+.btd-toggle {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  z-index: var(--pf-t--global--z-index--xl, 500);
+  background: var(--pf-t--global--background--color--primary--default);
+  border-radius: 999px;
+  box-shadow: var(--pf-t--global--box-shadow--md);
+}
+
+.btd-toggle-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  transform: translate(35%, -35%);
+}
+
+.btd-panel {
+  position: fixed;
+  bottom: 4.25rem;
+  right: 1rem;
+  width: min(380px, calc(100vw - 2rem));
+  max-height: 50vh;
+  z-index: var(--pf-t--global--z-index--xl, 500);
+  box-shadow: var(--pf-t--global--box-shadow--lg);
+  border-radius: var(--pf-t--global--border--radius--200, 8px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.btd-body {
+  overflow-y: auto;
+}
+
+.btd-item-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.btd-item-status {
+  font-size: 0.8125rem;
+  color: var(--pf-t--global--text--color--subtle);
+  text-transform: capitalize;
+}
+
+.btd-item-error {
+  font-size: 0.8125rem;
+  color: var(--pf-t--global--text--color--status--danger--default, #f85149);
+}
+
+.btd-item-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btd-log-footer {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: flex-end;
+}
