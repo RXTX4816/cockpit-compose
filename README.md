@@ -11,13 +11,16 @@ Docker and Podman Compose management for [Cockpit](https://cockpit-project.org) 
 
 - Dashboard listing all stacks with live status and container stats (auto-refreshing)
 - Search and filter stacks by name and status
+- Select multiple stacks and run Up, Restart, Pull, Down, or Kill on all of them at once
+- Send long-running actions (Up, Pull) to the background and keep working, tracked in a floating panel
 - Create new Compose Stacks or import existing ones directly from the WebUI
 - Start, stop, restart, pause/unpause, pull, prune, scale, and kill stacks with one click
 - Live log viewer per stack with per-service filtering and text search
-- Interactive shell into any running service
+- Interactive shell into any running service, with quote-aware command parsing and command history
+- Run one-off commands with an option to override the image's entrypoint when needed
 - YAML editor with syntax validation, diff view, auto-snapshot + .ENV editor
 - Backup and restore stacks as `.bak.tar.gz` archives
-- Docker and Podman support
+- Docker and Podman support, including rootless setups
 
 ## Requirements
 

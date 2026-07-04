@@ -25,7 +25,7 @@ Before the terminal opens, you configure how to connect:
 | Field | Description |
 |---|---|
 | **Service** | The service you want to connect to. If services are detected from the compose file, a dropdown is shown. Otherwise, type the service name manually. |
-| **Command** | The shell to launch inside the container. Defaults to `/bin/sh`, which works in almost all images. Change to `/bin/bash` if you prefer bash and it is installed. |
+| **Command** | The shell to launch inside the container. Defaults to `/bin/sh`, which works in almost all images. Change to `/bin/bash` if you prefer bash and it is installed. Quoted arguments are respected (e.g. `sh -c "echo foo bar"` keeps `echo foo bar` together as one argument). Suggests previously used commands via your browser's native autocomplete. |
 | **User (optional)** | Run the shell as this user. Leave empty to use the container's default user. Enter `root` to run as root. |
 
 Click **Open shell** to connect. The button is disabled if no service name has been entered.

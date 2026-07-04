@@ -22,6 +22,9 @@ Cockpit Compose is a web-based UI for managing [Docker Compose](https://docs.doc
 - Works with rootless Docker automatically — no configuration needed
 - Choose between four layout styles for the stack list (Minimal, Power User, Pretty, Unix)
 - Start, stop, restart, or view logs for individual services directly from the expanded stack row
+- Select multiple stacks and run Up, Restart, Pull, Down, or Kill on all of them at once
+- Send long-running actions (Up, Pull) to the background and keep working, tracked in a floating panel
+- Suggested commands from your history when using Run or Shell
 
 ## Pages
 
@@ -29,6 +32,8 @@ Cockpit Compose is a web-based UI for managing [Docker Compose](https://docs.doc
 |---|---|
 | [Stacks Dashboard](Stacks-Dashboard) | The main screen — stack list, status indicators, stats, and action buttons |
 | [Managing Stacks](Managing-Stacks) | Up, Start, Stop, Down, Restart, Pause / Unpause, Kill |
+| [Bulk Actions](Bulk-Actions) | Select multiple stacks and run one action across all of them |
+| [Background Tasks](Background-Tasks) | Send long-running actions to the background and track them in a floating panel |
 | [Viewing Logs](Viewing-Logs) | Streaming logs with service filter and search |
 | [Editing Configuration](Editing-Configuration) | YAML editor, multi-file tabs, diff view, snapshots, env file editor |
 | [Stack Info](Stack-Info) | Containers, images, volumes, and networks |

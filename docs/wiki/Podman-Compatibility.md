@@ -10,6 +10,8 @@ The selected runtime is saved in the browser and persists across sessions.
 
 If Docker is not installed when the plugin loads, it automatically prompts you to switch to Podman.
 
+Switching runtimes also clears your current stack selection and cancels any [background tasks](Background-Tasks) that haven't started running yet, since they would otherwise execute against the newly selected runtime instead of the one they were queued under.
+
 ## What changes in Podman mode
 
 - All compose commands (`up`, `down`, `logs`, `pull`, etc.) are routed through `podman compose` instead of `docker compose`.
@@ -27,6 +29,8 @@ systemctl --user enable --now podman.socket
 ```
 
 The plugin detects the user socket automatically when Podman mode is active. No additional configuration is needed.
+
+When creating your first stack in rootless mode, the suggested compose root directory defaults to `<your home directory>/compose` instead of `/etc/docker/compose`, since `/etc` typically isn't writable without root — see [Creating Stacks](Creating-Stacks).
 
 ## Supported compose providers
 
