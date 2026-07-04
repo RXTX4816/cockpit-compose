@@ -61,6 +61,7 @@ beforeEach(() => {
   MockFitAddon.mockClear();
   mockFitInstance.fit.mockClear();
   vi.stubGlobal("cockpit", { spawn: mockSpawn, channel: vi.fn().mockReturnValue(mockChannel) });
+  try { localStorage.clear(); } catch { /* some tests in this file unstub globals, including the localStorage polyfill */ }
 });
 
 describe("ExecModal", () => {
@@ -124,7 +125,7 @@ describe("ExecModal", () => {
     mockSpawn.mockReturnValue(mockProcess(composeYaml));
     render(<ExecModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => screen.getByRole("option", { name: "web" }));
-    const select = screen.getByRole("combobox");
+    const select = screen.getByRole("combobox", { name: /service/i });
     fireEvent.change(select, { target: { value: "db" } });
     // No crash — selectedService updated to "db"
     expect(screen.getByRole("option", { name: "db" })).toBeInTheDocument();
@@ -396,5 +397,49 @@ describe("ExecModal", () => {
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     vi.unstubAllGlobals();
     vi.stubGlobal("cockpit", { spawn: mockSpawn, channel: vi.fn().mockReturnValue(mockChannel) });
+  });
+
+  describe("command history", () => {
+    // Other tests in this file call vi.unstubAllGlobals(), which permanently strips the
+    // shared setup's localStorage polyfill for the rest of the file's test run (jsdom has
+    // no native localStorage here — it only exists because setup.ts stubs it once). Provide
+    // a self-contained fake so these tests don't depend on file-wide execution order.
+    beforeEach(() => {
+      const store = new Map<string, string>();
+      vi.stubGlobal("localStorage", {
+        getItem: (k: string) => store.get(k) ?? null,
+        setItem: (k: string, v: string) => { store.set(k, v); },
+        removeItem: (k: string) => { store.delete(k); },
+        clear: () => { store.clear(); },
+      });
+    });
+
+    it("wires the command field to a datalist for browser-native suggestions", async () => {
+      mockSpawn.mockReturnValue(mockProcess(""));
+      render(<ExecModal stack={stack} onClose={vi.fn()} />);
+      const input = screen.getByLabelText(/Command/i) as HTMLInputElement;
+      expect(input.getAttribute("list")).toBeTruthy();
+      await act(async () => {});
+    });
+
+    it("records the command on launch, and it appears as a suggestion in a freshly mounted modal", async () => {
+      vi.stubGlobal("requestAnimationFrame", (fn: (time: number) => void) => { fn(0); return 0; });
+      vi.stubGlobal("cockpit", { spawn: mockSpawn, channel: vi.fn().mockReturnValue(mockChannel) });
+      mockSpawn.mockReturnValue(mockProcess(composeYaml));
+      const { unmount } = render(<ExecModal stack={stack} onClose={vi.fn()} />);
+      await waitFor(() => screen.getByRole("option", { name: "web" }));
+      fireEvent.change(screen.getByLabelText(/Command/i), { target: { value: "/bin/bash" } });
+      await act(async () => {
+        fireEvent.click(screen.getByRole("button", { name: /Open shell/i }));
+      });
+      unmount();
+
+      mockSpawn.mockReturnValue(mockProcess(""));
+      render(<ExecModal stack={stack} onClose={vi.fn()} />);
+      const input = screen.getByLabelText(/Command/i);
+      const listId = input.getAttribute("list")!;
+      const option = document.querySelector(`#${listId} option[value="/bin/bash"]`);
+      expect(option).not.toBeNull();
+    });
   });
 });

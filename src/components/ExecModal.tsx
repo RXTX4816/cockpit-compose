@@ -24,6 +24,8 @@ import {
 import "./ExecModal.css";
 import { splitConfigFiles } from "../lib/configFiles";
 import { tokenizeCommand } from "../lib/commandTokenize";
+import { useInputHistory } from "../hooks/useInputHistory";
+import { HistoryDatalist } from "./HistoryDatalist";
 
 interface Props {
   stack: ComposeStack;
@@ -48,6 +50,7 @@ export function ExecModal({ stack, onClose }: Props) {
   const [selectedService, setSelectedService] = useState("");
   const [shell, setShell] = useState("/bin/sh");
   const [user, setUser] = useState("");
+  const { history: commandHistory, record: recordCommand } = useInputHistory("exec-command");
   const [step, setStep] = useState<"config" | "terminal">("config");
   const [connectError, setConnectError] = useState<string | null>(null);
   const [fontSize, setFontSize] = useState<number>(() => {
@@ -94,6 +97,7 @@ export function ExecModal({ stack, onClose }: Props) {
     const service = selectedService.trim();
     if (!service) return;
 
+    recordCommand(shell);
     setConnectError(null);
     setStep("terminal");
 
@@ -150,7 +154,7 @@ export function ExecModal({ stack, onClose }: Props) {
         channelRef.current?.send(data);
       });
     });
-  }, [selectedService, shell, user, fontSize, stack.Name, stack.ConfigFiles, configFile]);
+  }, [selectedService, shell, user, fontSize, stack.Name, stack.ConfigFiles, configFile, recordCommand]);
 
   const disconnect = useCallback(() => {
     channelRef.current?.close();
@@ -204,7 +208,9 @@ export function ExecModal({ stack, onClose }: Props) {
                 value={shell}
                 onChange={(_e, v) => setShell(v)}
                 placeholder={t("exec_modal.field_command_placeholder")}
+                list="em2-shell-history"
               />
+              <HistoryDatalist id="em2-shell-history" history={commandHistory} />
             </FormGroup>
 
             <FormGroup label={t("exec_modal.field_user")} fieldId="em2-user">

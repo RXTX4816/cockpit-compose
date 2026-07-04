@@ -27,6 +27,8 @@ import { stripAnsi, classifyLine, type LineEntry } from "../lib/pullParser";
 import "./RunModal.css";
 import { splitConfigFiles } from "../lib/configFiles";
 import { tokenizeCommand } from "../lib/commandTokenize";
+import { useInputHistory } from "../hooks/useInputHistory";
+import { HistoryDatalist } from "./HistoryDatalist";
 
 interface Props {
   stack: ComposeStack;
@@ -43,6 +45,7 @@ export function RunModal({ stack, onClose }: Props) {
   const [command, setCommand] = useState("");
   const [removeContainer, setRemoveContainer] = useState(true);
   const [overrideEntrypoint, setOverrideEntrypoint] = useState(false);
+  const { history: commandHistory, record: recordCommand } = useInputHistory("run-command");
   const [step, setStep] = useState<"config" | "running">("config");
   const [lines, setLines] = useState<LineEntry[]>([]);
   const [done, setDone] = useState(false);
@@ -74,6 +77,7 @@ export function RunModal({ stack, onClose }: Props) {
     const cmd = command.trim();
     if (!service || !cmd) return;
 
+    recordCommand(cmd);
     setStep("running");
     const files = splitConfigFiles(stack.ConfigFiles);
     const [su, preRunIds] = await Promise.all([
@@ -112,7 +116,7 @@ export function RunModal({ stack, onClose }: Props) {
         }
         procRef.current = null;
       });
-  }, [selectedService, command, removeContainer, overrideEntrypoint, stack.Name, stack.ConfigFiles]);
+  }, [selectedService, command, removeContainer, overrideEntrypoint, stack.Name, stack.ConfigFiles, recordCommand]);
 
   const handleClose = useCallback(() => {
     procRef.current?.close();
@@ -167,7 +171,9 @@ export function RunModal({ stack, onClose }: Props) {
                 value={command}
                 onChange={(_e, v) => setCommand(v)}
                 placeholder={t("run_modal.field_command_placeholder")}
+                list="rm-command-history"
               />
+              <HistoryDatalist id="rm-command-history" history={commandHistory} />
               <div className="rm-command-help">
                 {overrideEntrypoint ? t("run_modal.field_command_help_override") : t("run_modal.field_command_help_args")}
               </div>
