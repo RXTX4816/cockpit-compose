@@ -176,6 +176,8 @@ Pull requests are welcome. Please make sure your changes pass CI (lint, typechec
 
 Found a security vulnerability? Please report it privately — see [SECURITY.md](SECURITY.md) for the disclosure process. Do not open a public issue for security reports.
 
+This repository has GitHub secret scanning and push protection enabled — do not commit secrets (API keys, tokens, passwords, `.env` files with real credentials, etc.). See [SECURITY.md](SECURITY.md) for the bypass process if a push is blocked by mistake.
+
 ## License
 
 MIT
