@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 import { load } from "js-yaml";
@@ -17,7 +17,7 @@ import {
   InputGroupItem,
 } from "@patternfly/react-core";
 import { CodeBranchIcon, CubesIcon, PencilAltIcon } from "@patternfly/react-icons";
-import { type ComposeStack, COMPOSE_TEMPLATES, type ComposeTemplate, makeTempDir, fetchComposeFromGit, removeDirectory, createDirectory } from "../api";
+import { type ComposeStack, COMPOSE_TEMPLATES, type ComposeTemplate, makeTempDir, fetchComposeFromGit, removeDirectory, createDirectory, isRootlessMode } from "../api";
 import { type DownedStack } from "../hooks/useDownedStacksScan";
 import { inferComposeRoot } from "./DownedStacksSection";
 import { composeFileSuperuser } from "../api";
@@ -77,6 +77,13 @@ function generateStackName() {
   return `stack-${Math.floor(1000000 + Math.random() * 9000000)}`;
 }
 
+function defaultComposeDir(stacks: ComposeStack[], userHome: string | null): string {
+  const root = inferComposeRoot(stacks);
+  if (root) return root;
+  if (isRootlessMode() && userHome) return `${userHome}/compose`;
+  return "";
+}
+
 export function CreateStackModal({ stacks, onClose, onCreated }: Props) {
   const { t } = useTranslation();
   const [step, setStep] = useState<Step>("setup");
@@ -85,12 +92,27 @@ export function CreateStackModal({ stacks, onClose, onCreated }: Props) {
   const [stackName, setStackName] = useState(() => generateStackName());
   const [composeDir, setComposeDir] = useState("");
   const [method, setMethod] = useState<Method | null>(null);
+  const [userHome, setUserHome] = useState<string | null>(null);
 
-  // Prefill compose dir from active stacks on mount
   useEffect(() => {
-    const root = inferComposeRoot(stacks);
-    if (root) setComposeDir(root);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    try {
+      cockpit.user().then(u => setUserHome(u.home)).catch(() => {});
+    } catch { /* cockpit.user unavailable */ }
+  }, []);
+
+  // Prefill compose dir from active stacks (or, if none exist yet and running
+  // rootless, the current user's home directory) on mount. Guarded by a ref
+  // since userHome resolves asynchronously — without it, this would re-fire
+  // once cockpit.user() resolves and clobber a value the user already typed.
+  const didPrefillDirRef = useRef(false);
+  useEffect(() => {
+    if (didPrefillDirRef.current) return;
+    const dir = defaultComposeDir(stacks, userHome);
+    if (dir) {
+      didPrefillDirRef.current = true;
+      setComposeDir(dir);
+    }
+  }, [userHome]); // eslint-disable-line react-hooks/exhaustive-deps
   const [setupError, setSetupError] = useState<string | null>(null);
   const [checkingDir, setCheckingDir] = useState(false);
 
@@ -121,8 +143,8 @@ export function CreateStackModal({ stacks, onClose, onCreated }: Props) {
   const canNext = !nameError && composeDir.trim() !== "" && method !== null;
 
   const handleFindBestMatch = useCallback(() => {
-    setComposeDir(inferComposeRoot(stacks));
-  }, [stacks]);
+    setComposeDir(defaultComposeDir(stacks, userHome));
+  }, [stacks, userHome]);
 
   const handleNext = useCallback(async () => {
     setSetupError(null);

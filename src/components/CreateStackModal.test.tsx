@@ -8,10 +8,12 @@ const {
   mockFetchComposeFromGit,
   mockRemoveDirectory,
   mockCreateDirectory,
+  mockIsRootlessMode,
   mockRead,
   mockReplace,
   mockCockpitFile,
   mockCockpitSpawn,
+  mockCockpitUser,
 } = vi.hoisted(() => {
   const mockRead = vi.fn();
   const mockReplace = vi.fn().mockResolvedValue(undefined);
@@ -21,10 +23,12 @@ const {
     mockFetchComposeFromGit: vi.fn(),
     mockRemoveDirectory: vi.fn(),
     mockCreateDirectory: vi.fn(),
+    mockIsRootlessMode: vi.fn(() => false),
     mockRead,
     mockReplace,
     mockCockpitFile,
     mockCockpitSpawn: vi.fn(),
+    mockCockpitUser: vi.fn().mockResolvedValue({ home: "/home/test" }),
   };
 });
 
@@ -36,14 +40,19 @@ vi.mock("../api", async (importOriginal) => {
     fetchComposeFromGit: mockFetchComposeFromGit,
     removeDirectory: mockRemoveDirectory,
     createDirectory: mockCreateDirectory,
+    isRootlessMode: mockIsRootlessMode,
   };
 });
+
+const { mockInferComposeRoot } = vi.hoisted(() => ({
+  mockInferComposeRoot: vi.fn(() => "/etc/docker/compose"),
+}));
 
 vi.mock("./DownedStacksSection", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./DownedStacksSection")>();
   return {
     ...actual,
-    inferComposeRoot: vi.fn(() => "/etc/docker/compose"),
+    inferComposeRoot: mockInferComposeRoot,
   };
 });
 
@@ -62,9 +71,12 @@ beforeEach(() => {
   mockReplace.mockReset().mockResolvedValue(undefined);
   mockCockpitFile.mockReset().mockReturnValue({ read: mockRead, replace: mockReplace });
   mockCockpitSpawn.mockReset();
+  mockIsRootlessMode.mockReset().mockReturnValue(false);
+  mockInferComposeRoot.mockReset().mockReturnValue("/etc/docker/compose");
+  mockCockpitUser.mockReset().mockResolvedValue({ home: "/home/test" });
   // Default: ls fails (dir does not exist — proceed without folder-exists error)
   mockCockpitSpawn.mockImplementation(() => mockProcess("", "No such file or directory"));
-  vi.stubGlobal("cockpit", { spawn: mockCockpitSpawn, file: mockCockpitFile });
+  vi.stubGlobal("cockpit", { spawn: mockCockpitSpawn, file: mockCockpitFile, user: mockCockpitUser });
 });
 
 import { CreateStackModal } from "./CreateStackModal";
@@ -169,6 +181,29 @@ describe("CreateStackModal — step 1 rendering", () => {
     render(<CreateStackModal {...defaultProps} onClose={onClose} />);
     fireEvent.click(screen.getByRole("button", { name: /Cancel/i }));
     expect(onClose).toHaveBeenCalled();
+  });
+});
+
+describe("CreateStackModal — rootless compose dir suggestion (no stacks yet)", () => {
+  beforeEach(() => {
+    // No stacks yet: inferComposeRoot returns "" as it would for a real empty list
+    mockInferComposeRoot.mockReturnValue("");
+  });
+
+  it("defaults to the user's home directory when rootless", async () => {
+    mockIsRootlessMode.mockReturnValue(true);
+    render(<CreateStackModal {...defaultProps} stacks={[]} />);
+    await waitFor(() => {
+      const dirInput = screen.getByPlaceholderText("/etc/docker/compose") as HTMLInputElement;
+      expect(dirInput.value).toBe("/home/test/compose");
+    });
+  });
+
+  it("keeps the field empty (default placeholder) when rootful", async () => {
+    mockIsRootlessMode.mockReturnValue(false);
+    render(<CreateStackModal {...defaultProps} stacks={[]} />);
+    const dirInput = screen.getByPlaceholderText("/etc/docker/compose") as HTMLInputElement;
+    expect(dirInput.value).toBe("");
   });
 });
 
