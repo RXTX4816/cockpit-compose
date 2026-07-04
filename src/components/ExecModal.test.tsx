@@ -334,6 +334,26 @@ describe("ExecModal", () => {
     vi.stubGlobal("cockpit", { spawn: mockSpawn, channel: vi.fn().mockReturnValue(mockChannel) });
   });
 
+  it("launchTerminal tokenizes the command respecting quotes, without requiring a shell in the container", async () => {
+    vi.stubGlobal("requestAnimationFrame", (fn: (time: number) => void) => { fn(0); return 0; });
+    const mockCockpit = { spawn: mockSpawn, channel: vi.fn().mockReturnValue(mockChannel) };
+    vi.stubGlobal("cockpit", mockCockpit);
+    mockSpawn.mockReturnValue(mockProcess(composeYaml));
+    render(<ExecModal stack={stack} onClose={vi.fn()} />);
+    await waitFor(() => screen.getByRole("option", { name: "web" }));
+    fireEvent.change(screen.getByLabelText(/Command/i), { target: { value: '/app/mybin "an arg with spaces"' } });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /Open shell/i }));
+    });
+    await waitFor(() => expect(mockCockpit.channel).toHaveBeenCalled());
+    const channelArgs = (mockCockpit.channel as ReturnType<typeof vi.fn>).mock.calls[0][0] as { spawn: string[] };
+    const spawnArgs = channelArgs.spawn;
+    expect(spawnArgs.slice(-2)).toEqual(["/app/mybin", "an arg with spaces"]);
+    expect(spawnArgs).not.toContain("sh");
+    vi.unstubAllGlobals();
+    vi.stubGlobal("cockpit", { spawn: mockSpawn, channel: vi.fn().mockReturnValue(mockChannel) });
+  });
+
   it("channel close with terminated reason does not show error alert", async () => {
     vi.stubGlobal("requestAnimationFrame", (fn: (time: number) => void) => { fn(0); return 0; });
     const mockCockpit = { spawn: mockSpawn, channel: vi.fn().mockReturnValue(mockChannel) };

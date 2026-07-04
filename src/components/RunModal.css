@@ -5,6 +5,12 @@
   max-width: 480px;
 }
 
+.rm-command-help {
+  margin-top: 0.3rem;
+  font-size: 0.8125rem;
+  color: var(--pf-t--global--text--color--subtle);
+}
+
 .rm-select {
   width: 100%;
   padding: 0.3rem 0.5rem;

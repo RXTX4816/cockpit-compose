@@ -26,6 +26,7 @@ import {
 import { stripAnsi, classifyLine, type LineEntry } from "../lib/pullParser";
 import "./RunModal.css";
 import { splitConfigFiles } from "../lib/configFiles";
+import { tokenizeCommand } from "../lib/commandTokenize";
 
 interface Props {
   stack: ComposeStack;
@@ -41,6 +42,7 @@ export function RunModal({ stack, onClose }: Props) {
   const [selectedService, setSelectedService] = useState("");
   const [command, setCommand] = useState("");
   const [removeContainer, setRemoveContainer] = useState(true);
+  const [overrideEntrypoint, setOverrideEntrypoint] = useState(false);
   const [step, setStep] = useState<"config" | "running">("config");
   const [lines, setLines] = useState<LineEntry[]>([]);
   const [done, setDone] = useState(false);
@@ -80,8 +82,11 @@ export function RunModal({ stack, onClose }: Props) {
     ]);
     preRunIdsRef.current = preRunIds;
 
+    const tokens = tokenizeCommand(cmd);
     const proc = composeRunStream(
-      stack.Name, files, service, cmd.split(/\s+/).filter(Boolean), removeContainer, su,
+      stack.Name, files, service,
+      overrideEntrypoint ? { mode: "override", command: tokens } : { mode: "args", command: tokens },
+      removeContainer, su,
     );
     procRef.current = proc;
 
@@ -107,7 +112,7 @@ export function RunModal({ stack, onClose }: Props) {
         }
         procRef.current = null;
       });
-  }, [selectedService, command, removeContainer, stack.Name, stack.ConfigFiles]);
+  }, [selectedService, command, removeContainer, overrideEntrypoint, stack.Name, stack.ConfigFiles]);
 
   const handleClose = useCallback(() => {
     procRef.current?.close();
@@ -163,7 +168,17 @@ export function RunModal({ stack, onClose }: Props) {
                 onChange={(_e, v) => setCommand(v)}
                 placeholder={t("run_modal.field_command_placeholder")}
               />
+              <div className="rm-command-help">
+                {overrideEntrypoint ? t("run_modal.field_command_help_override") : t("run_modal.field_command_help_args")}
+              </div>
             </FormGroup>
+
+            <Checkbox
+              id="rm-override-entrypoint"
+              label={t("run_modal.field_override_entrypoint")}
+              isChecked={overrideEntrypoint}
+              onChange={(_e, checked) => setOverrideEntrypoint(checked)}
+            />
 
             <Checkbox
               id="rm-remove"

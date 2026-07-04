@@ -23,6 +23,7 @@ import {
 } from "../api";
 import "./ExecModal.css";
 import { splitConfigFiles } from "../lib/configFiles";
+import { tokenizeCommand } from "../lib/commandTokenize";
 
 interface Props {
   stack: ComposeStack;
@@ -121,7 +122,7 @@ export function ExecModal({ stack, onClose }: Props) {
         "exec",
         ...(user.trim() ? ["-u", user.trim()] : []),
         service,
-        ...shell.trim().split(/\s+/).filter(Boolean),
+        ...tokenizeCommand(shell.trim()),
       );
 
       const ch = cockpit.channel({
