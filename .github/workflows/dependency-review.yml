@@ -1,0 +1,10 @@
+name: Dependency Review
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  dependency-review:
+    uses: RXTX4816/cockpit-plugin-base-react/.github/workflows/dependency-review-plugin.yml@main
+    secrets: inherit

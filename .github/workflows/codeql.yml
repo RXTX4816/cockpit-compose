@@ -1,0 +1,15 @@
+name: CodeQL
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Run weekly on Mondays at 08:00 UTC to catch newly published CVEs
+    - cron: "0 8 * * 1"
+
+jobs:
+  codeql:
+    uses: RXTX4816/cockpit-plugin-base-react/.github/workflows/codeql-plugin.yml@main
+    secrets: inherit
