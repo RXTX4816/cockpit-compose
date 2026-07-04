@@ -1,4 +1,4 @@
-import { initCockpitI18n } from "@rxtx4816/cockpit-plugin-base-react/i18n";
+import { initCockpitI18n, buildLocaleResources } from "@rxtx4816/cockpit-plugin-base-react/i18n";
 import en from "./locales/en.json";
 import ar from "./locales/ar.json";
 import cs from "./locales/cs.json";
@@ -24,31 +24,33 @@ import uk from "./locales/uk.json";
 import zhCN from "./locales/zh-CN.json";
 import zhTW from "./locales/zh-TW.json";
 
-initCockpitI18n({
-  en: { translation: en },
-  ar: { translation: ar },
-  cs: { translation: cs },
-  de: { translation: de },
-  es: { translation: es },
-  fi: { translation: fi },
-  fr: { translation: fr },
-  he: { translation: he },
-  id: { translation: id },
-  it: { translation: it },
-  ja: { translation: ja },
-  ka: { translation: ka },
-  ko: { translation: ko },
-  nl: { translation: nl },
-  pl: { translation: pl },
-  "pt-BR": { translation: ptBR },
-  ro: { translation: ro },
-  ru: { translation: ru },
-  sk: { translation: sk },
-  sv: { translation: sv },
-  tr: { translation: tr },
-  uk: { translation: uk },
-  "zh-CN": { translation: zhCN },
-  "zh-TW": { translation: zhTW },
-});
+initCockpitI18n(
+  buildLocaleResources({
+    en,
+    ar,
+    cs,
+    de,
+    es,
+    fi,
+    fr,
+    he,
+    id,
+    it,
+    ja,
+    ka,
+    ko,
+    nl,
+    pl,
+    "pt-BR": ptBR,
+    ro,
+    ru,
+    sk,
+    sv,
+    tr,
+    uk,
+    "zh-CN": zhCN,
+    "zh-TW": zhTW,
+  }),
+);
 
 export { i18n } from "@rxtx4816/cockpit-plugin-base-react/i18n";
