@@ -6,6 +6,8 @@
 
 - [Stacks Dashboard](Stacks-Dashboard)
 - [Managing Stacks](Managing-Stacks)
+- [Bulk Actions](Bulk-Actions)
+- [Background Tasks](Background-Tasks)
 - [Viewing Logs](Viewing-Logs)
 - [Editing Configuration](Editing-Configuration)
 - [Stack Info](Stack-Info)

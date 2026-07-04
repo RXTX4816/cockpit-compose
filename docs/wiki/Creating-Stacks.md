@@ -32,7 +32,7 @@ Click the **Create** button in the **Stopped / offline stacks** section at the b
 | Field | Description |
 |---|---|
 | **Stack name** | The name for your new stack. Must not contain spaces or slashes. This becomes the Compose project name and the folder name under the root directory. |
-| **Compose root directory** | The parent directory where the new stack folder will be created. For example, if you enter `/etc/docker/compose` and a stack name of `myapp`, the file will be created at `/etc/docker/compose/myapp/docker-compose.yml`. |
+| **Compose root directory** | The parent directory where the new stack folder will be created. For example, if you enter `/etc/docker/compose` and a stack name of `myapp`, the file will be created at `/etc/docker/compose/myapp/docker-compose.yml`. If you have existing stacks, this is pre-filled based on where they're stored. Otherwise, it defaults to `/etc/docker/compose` — or, if you're running rootless Docker/Podman (see [Podman Compatibility](Podman-Compatibility)), to `<your home directory>/compose`, since `/etc` typically isn't writable without root. |
 | **Best match** button | Automatically suggests a root directory based on where your other active stacks are stored. Useful if all your stacks share a common parent directory. |
 | **Creation method** | How the compose file content will be generated — see the three options below. |
 

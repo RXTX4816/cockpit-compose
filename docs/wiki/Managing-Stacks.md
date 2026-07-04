@@ -2,6 +2,8 @@
 
 This page covers all the lifecycle actions you can perform on a stack: bringing it up, stopping it, starting it, taking it down, restarting it, pausing it, and killing it.
 
+> **Working with multiple stacks?** Select more than one stack and run Up, Restart, Pull, Down, or Kill on all of them at once — see [Bulk Actions](Bulk-Actions).
+
 ## Up
 
 **What it does:** Runs `docker compose up -d`. Docker creates or recreates containers as needed, applies configuration changes, and leaves everything running in the background.
@@ -25,7 +27,7 @@ A progress modal opens and streams the output of `docker compose up` in real tim
 - **✓ Up complete** — all containers started successfully
 - **✗ Up failed** — an error occurred; the full error is shown below the status
 
-Click **Close** when done. If the operation is still running, click **Cancel** to abort it.
+Click **Close** when done. If the operation is still running, click **Cancel** to abort it. Alternatively, click **Run in Background** to close the modal and keep the operation running — see [Background Tasks](Background-Tasks).
 
 ---
 

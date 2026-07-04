@@ -14,6 +14,9 @@ Click the **⋮ more** menu on any running stack row, then select **Run**.
 ├──────────────────────────────────────────────────┤
 │  Service   [web ▼]                               │
 │  Command   [python manage.py migrate  ]          │
+│  Runs as arguments to the image's entrypoint     │
+│  (e.g. type "--help").                           │
+│  [ ] Override entrypoint                         │
 │  [✓] Remove container when done                  │
 ├──────────────────────────────────────────────────┤
 │                         [Run]  [Cancel]          │
@@ -23,10 +26,13 @@ Click the **⋮ more** menu on any running stack row, then select **Run**.
 | Field | Description |
 |---|---|
 | **Service** | The service whose image will be used to run the command. If services can be detected from the compose file, a dropdown is shown; otherwise type the service name manually. |
-| **Command** | The command to run inside the container. Multiple words are split on whitespace and passed as separate arguments (e.g., `python manage.py migrate` becomes `python`, `manage.py`, `migrate`). |
+| **Command** | The command to run inside the container. Quoted arguments are respected (e.g. `sh -c "echo foo bar"` keeps `echo foo bar` together as one argument) — previously this only split on whitespace. Suggests previously used commands via your browser's native autocomplete. |
+| **Override entrypoint** | Unchecked by default: the command runs as arguments appended after the image's own `ENTRYPOINT` — this is what makes typing just `--help` work. Check this if you want to run an arbitrary command instead, exactly as typed — for example, the full path to a binary, the same way you would with `docker exec`. This does **not** wrap your command in a shell, so it works even on minimal/distroless images that have no `/bin/sh`. |
 | **Remove container when done** | Checked by default. Passes `--rm` to `docker compose run`, so the container is automatically removed after the command exits. Uncheck if you need to inspect the container after it finishes. |
 
 Click **Run** to start. The button is disabled until both **Service** and **Command** are filled in.
+
+> **Why "Override entrypoint" exists:** `docker compose run` only replaces a container's `CMD`, not its `ENTRYPOINT`. If an image's entrypoint is already the binary you want to run (common for single-purpose images), typing that binary's own path in **Command** — the way you would with `docker exec` — collides with the entrypoint and fails with an error like `unknown command "/app/mybinary" for "mybinary"`. Checking **Override entrypoint** runs your command as-is instead of appending it to the existing entrypoint, avoiding the collision.
 
 ## Output
 
