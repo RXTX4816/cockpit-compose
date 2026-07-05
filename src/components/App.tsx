@@ -1,11 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { Page, PageSection } from "@patternfly/react-core";
+import { PluginPage } from "@rxtx4816/cockpit-plugin-base-react/components";
 import { useLayout } from "@rxtx4816/cockpit-plugin-base-react";
 import { AppFooter } from "./AppFooter";
 import { StacksView } from "./StacksView";
 import { ErrorBoundary } from "./ErrorBoundary";
-import { ToastProvider } from "./ToastProvider";
 import { BackgroundTasksProvider } from "../hooks/useBackgroundTasks";
 import { BackgroundTasksDrawer } from "./BackgroundTasksDrawer";
 import { detectComposeCommand, detectDockerMode, type Runtime } from "../api";
@@ -37,25 +36,20 @@ export function App() {
   if (!ready) return null;
 
   return (
-    <ToastProvider>
-      <BackgroundTasksProvider>
-        <div data-layout={layout}>
-          <Page className="pf-m-no-sidebar">
-            <PageSection hasBodyWrapper={false} isFilled>
-              <ErrorBoundary fallbackTitle={t("error_boundary.load_stacks_error")}>
-                <StacksView
-                  onRuntimeChange={setRuntime}
-                  dockerMissing={dockerMissing}
-                  layout={layout}
-                  onLayoutChange={setLayout}
-                />
-              </ErrorBoundary>
-            </PageSection>
-            <AppFooter runtime={runtime} />
-          </Page>
-          <BackgroundTasksDrawer />
-        </div>
-      </BackgroundTasksProvider>
-    </ToastProvider>
+    <BackgroundTasksProvider>
+      <div data-layout={layout}>
+        <PluginPage footer={<AppFooter runtime={runtime} />}>
+          <ErrorBoundary fallbackTitle={t("error_boundary.load_stacks_error")}>
+            <StacksView
+              onRuntimeChange={setRuntime}
+              dockerMissing={dockerMissing}
+              layout={layout}
+              onLayoutChange={setLayout}
+            />
+          </ErrorBoundary>
+        </PluginPage>
+        <BackgroundTasksDrawer />
+      </div>
+    </BackgroundTasksProvider>
   );
 }
