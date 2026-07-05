@@ -4,6 +4,9 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   pkg-ci:
     uses: RXTX4816/cockpit-plugin-base-react/.github/workflows/pkg-ci-plugin.yml@main
