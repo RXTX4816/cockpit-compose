@@ -352,7 +352,7 @@ describe("CreateStackModal — step 2 git url", () => {
   it("shows URL input and Fetch button", async () => {
     render(<CreateStackModal {...defaultProps} />);
     await fillSetupAndAdvance("git");
-    expect(screen.getByPlaceholderText(/github.com/i)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/^https:\/\/github\.com\//i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Fetch/i })).toBeInTheDocument();
   });
 
@@ -371,7 +371,7 @@ describe("CreateStackModal — step 2 git url", () => {
   it("rejects non-https URL without cloning", async () => {
     render(<CreateStackModal {...defaultProps} />);
     await fillSetupAndAdvance("git");
-    fireEvent.change(screen.getByPlaceholderText(/github.com/i), {
+    fireEvent.change(screen.getByPlaceholderText(/^https:\/\/github\.com\//i), {
       target: { value: "file:///etc/passwd" },
     });
     await act(async () => {
@@ -386,7 +386,7 @@ describe("CreateStackModal — step 2 git url", () => {
   it("rejects non-URL string without cloning", async () => {
     render(<CreateStackModal {...defaultProps} />);
     await fillSetupAndAdvance("git");
-    fireEvent.change(screen.getByPlaceholderText(/github.com/i), {
+    fireEvent.change(screen.getByPlaceholderText(/^https:\/\/github\.com\//i), {
       target: { value: "../../../etc/passwd" },
     });
     await act(async () => {
@@ -406,7 +406,7 @@ describe("CreateStackModal — step 2 git url", () => {
 
     render(<CreateStackModal {...defaultProps} />);
     await fillSetupAndAdvance("git");
-    fireEvent.change(screen.getByPlaceholderText(/github.com/i), {
+    fireEvent.change(screen.getByPlaceholderText(/^https:\/\/github\.com\//i), {
       target: { value: "https://example.com/repo.git" },
     });
     await act(async () => {
@@ -425,7 +425,7 @@ describe("CreateStackModal — step 2 git url", () => {
 
     render(<CreateStackModal {...defaultProps} />);
     await fillSetupAndAdvance("git");
-    fireEvent.change(screen.getByPlaceholderText(/github.com/i), {
+    fireEvent.change(screen.getByPlaceholderText(/^https:\/\/github\.com\//i), {
       target: { value: "https://example.com/repo.git" },
     });
     await act(async () => {
@@ -442,7 +442,7 @@ describe("CreateStackModal — step 2 git url", () => {
 
     render(<CreateStackModal {...defaultProps} />);
     await fillSetupAndAdvance("git");
-    fireEvent.change(screen.getByPlaceholderText(/github.com/i), {
+    fireEvent.change(screen.getByPlaceholderText(/^https:\/\/github\.com\//i), {
       target: { value: "https://example.com/repo.git" },
     });
     await act(async () => {
@@ -462,7 +462,7 @@ describe("CreateStackModal — step 2 git url", () => {
     const onCreated = vi.fn();
     render(<CreateStackModal {...defaultProps} onCreated={onCreated} />);
     await fillSetupAndAdvance("git");
-    fireEvent.change(screen.getByPlaceholderText(/github.com/i), {
+    fireEvent.change(screen.getByPlaceholderText(/^https:\/\/github\.com\//i), {
       target: { value: "https://example.com/repo.git" },
     });
     await act(async () => {
