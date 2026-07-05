@@ -9,6 +9,18 @@
   opacity: 1;
 }
 
+.sr-check .pf-v6-c-check__input {
+  width: 1.05rem;
+  height: 1.05rem;
+  accent-color: var(--pf-t--global--color--brand--default, #06c);
+  cursor: pointer;
+}
+
+.sr-row--selected {
+  box-shadow: inset 0 0 0 2px var(--pf-t--global--color--brand--default, #06c), 0 0 14px rgba(0, 102, 204, 0.22);
+  background: rgba(0, 102, 204, 0.06);
+}
+
 .sr-name-cell {
   display: flex;
   align-items: center;

@@ -8,7 +8,7 @@
 
 .ct-header {
   display: grid;
-  grid-template-columns: 7rem 10rem 1fr auto auto;
+  grid-template-columns: 7rem 10rem 1fr 3rem auto;
   gap: 0.75rem;
   padding: 0.2rem 0 0.35rem;
   font-size: var(--pf-t--global--font--size--sm);
@@ -20,7 +20,7 @@
 
 .ct-row {
   display: grid;
-  grid-template-columns: 7rem 10rem 1fr auto auto;
+  grid-template-columns: 7rem 10rem 1fr 3rem auto;
   gap: 0.75rem;
   align-items: center;
   padding: 0.35rem 0.4rem;

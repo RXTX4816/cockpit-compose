@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Badge, Button, Label, Spinner } from "@patternfly/react-core";
 import { Tooltip } from "@rxtx4816/cockpit-plugin-base-react/components";
 import { CheckCircleIcon, ExclamationTriangleIcon, InProgressIcon, BanIcon, PlayIcon, RedoAltIcon, ListAltIcon } from "@patternfly/react-icons";
-import type { ComposeContainer } from "../../api";
+import { parseShortUptime, type ComposeContainer } from "../../api";
 import { getImageChangelogUrl } from "../../lib/imageUrl";
 import { ExternalLinkModal } from "../ExternalLinkModal";
 import "./ContainerTable.css";
@@ -103,7 +103,7 @@ export function ContainerTable({
                 {anyHealthy && <HealthIcon health="healthy" />}
               </span>
               <span className="ct-image">{rep?.Image}</span>
-              <span className="ct-uptime">{rep?.Status}</span>
+              <span className="ct-uptime" title={rep?.Status}>{rep?.Status ? parseShortUptime(rep.Status) : rep?.Status}</span>
               {actions && (
                 <span className="ct-actions">
                   {isActing

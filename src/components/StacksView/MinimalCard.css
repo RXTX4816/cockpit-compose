@@ -31,6 +31,12 @@
   box-shadow: 0 3px 12px rgba(0, 0, 0, 0.13);
 }
 
+.mc-card--selected,
+.mc-card--selected:hover,
+.mc-card--selected.mc-card--open {
+  box-shadow: 0 0 0 2px var(--pf-t--global--color--brand--default, #06c), 0 4px 16px rgba(0, 102, 204, 0.28);
+}
+
 /* Kebab in top-right — ghost until card hovered */
 .mc-kebab {
   position: absolute;
@@ -43,23 +49,6 @@
 
 .mc-card:hover .mc-kebab,
 .mc-card:focus-within .mc-kebab {
-  opacity: 1;
-}
-
-/* Select checkbox in top-left — ghost until card hovered, any card selected, or checked */
-.mc-select {
-  position: absolute;
-  top: 0.2rem;
-  left: 0.3rem;
-  z-index: 10;
-  opacity: 0;
-  transition: opacity 0.15s ease;
-  cursor: pointer;
-}
-
-.mc-card:hover .mc-select,
-.mc-card:focus-within .mc-select,
-.mc-select--visible {
   opacity: 1;
 }
 
@@ -162,22 +151,10 @@
   border: 1px solid var(--pf-t--global--border--color--default, #d2d2d2);
   border-radius: var(--pf-t--global--border--radius--md, 6px);
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18), 0 2px 8px rgba(0, 0, 0, 0.10);
-  min-width: 340px;
-  max-width: 500px;
+  min-width: 480px;
+  max-width: 620px;
   max-height: 350px;
   overflow: auto;
-}
-
-.mc-bubble::after {
-  content: "";
-  position: absolute;
-  bottom: -9px;
-  left: 50%;
-  transform: translateX(-50%);
-  border-left: 9px solid transparent;
-  border-right: 9px solid transparent;
-  border-top: 9px solid var(--pf-t--global--background--color--primary--default, #fff);
-  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.08));
 }
 
 .mc-bubble-title {

@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, type CSSProperties } from "react";
+import { useState, useCallback, useEffect, type CSSProperties, type MouseEvent } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Button,
@@ -68,7 +68,6 @@ interface PrettyCardProps {
   onActingChange: (delta: 1 | -1) => void;
   isSelected?: boolean;
   onToggleSelect?: () => void;
-  anySelected?: boolean;
 }
 
 const STATUS_BORDER: Record<string, string> = {
@@ -90,7 +89,7 @@ const STATUS_GLOW: Record<string, string> = {
 export function PrettyCard({
   stack, expanded, onToggle, onLogs, onYaml, onInfo, onDown, onKill, onUp, onPull,
   onEvents, onTop, onExec, onRun, onPrune, onBackup, onScale, onActingChange,
-  isSelected = false, onToggleSelect, anySelected = false,
+  isSelected = false, onToggleSelect,
 }: PrettyCardProps) {
   const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -121,6 +120,14 @@ export function PrettyCard({
     if (!expanded) void loadContainers();
   };
 
+  const handleCardClick = onToggleSelect
+    ? (e: MouseEvent<HTMLDivElement>) => {
+        const target = e.target as HTMLElement;
+        if (target.closest("button, input, a, .pf-v6-c-dropdown, .pc-port-pill, .pc-expanded")) return;
+        onToggleSelect();
+      }
+    : undefined;
+
   useEffect(() => { void loadContainers(); }, [loadContainers]);
   useAutoRefresh(loadContainers, acting ? 500 : 3000, false);
 
@@ -131,25 +138,17 @@ export function PrettyCard({
   return (
     <>
       <div
-        className={`pc-card${acting ? " pc-card--acting" : ""}${expanded ? " pc-card--expanded" : ""}`}
+        className={`pc-card${acting ? " pc-card--acting" : ""}${expanded ? " pc-card--expanded" : ""}${isSelected ? " pc-card--selected" : ""}`}
         style={{
           "--status-glow": STATUS_GLOW[status],
           "--status-border": STATUS_BORDER[status] ?? STATUS_BORDER.unknown,
         } as CSSProperties}
         data-status={status}
         data-stack-name={stack.Name}
+        onClick={handleCardClick}
+        aria-pressed={onToggleSelect ? isSelected : undefined}
       >
         {status === "running" && <span className="pc-pulse" />}
-
-        {onToggleSelect && (
-          <input
-            type="checkbox"
-            className={`pc-select${anySelected ? " pc-select--visible" : ""}`}
-            checked={isSelected}
-            onChange={onToggleSelect}
-            aria-label={t("stacks.select_stack", { name: stack.Name })}
-          />
-        )}
 
         {/* Header */}
         <div className="pc-header">

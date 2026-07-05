@@ -469,7 +469,6 @@ export function StacksView({ onRuntimeChange, dockerMissing, layout = "poweruser
               onActingChange={onActingChange}
               isSelected={selected.has(stack.Name)}
               onToggleSelect={() => toggleSelect(stack.Name)}
-              anySelected={selected.size > 0}
             />
           ))}
         </div>
@@ -498,7 +497,6 @@ export function StacksView({ onRuntimeChange, dockerMissing, layout = "poweruser
               onActingChange={onActingChange}
               isSelected={selected.has(stack.Name)}
               onToggleSelect={() => toggleSelect(stack.Name)}
-              anySelected={selected.size > 0}
             />
           ))}
         </div>

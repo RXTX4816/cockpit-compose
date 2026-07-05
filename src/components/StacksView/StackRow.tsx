@@ -127,7 +127,7 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
   return (
     <>
     <DataListItem isExpanded={expanded} aria-labelledby={`stack-${stack.Name}`} data-status={status} data-stack-name={stack.Name}>
-      <DataListItemRow onClick={handleRowClick} style={{ cursor: "pointer" }}>
+      <DataListItemRow onClick={handleRowClick} style={{ cursor: "pointer" }} className={isSelected ? "sr-row--selected" : undefined}>
         {onToggleSelect && (
           <DataListCheck
             aria-labelledby={`stack-${stack.Name}`}
