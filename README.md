@@ -53,26 +53,27 @@ paru -S cockpit-compose
 
 ### Fedora / RHEL / CentOS Stream / openSUSE
 
-Download the `.rpm` from the [Releases](https://github.com/RXTX4816/cockpit-compose/releases) page:
+Every release publishes a `-latest.rpm` alias alongside the versioned one, so you can always grab the newest build without checking the [Releases](https://github.com/RXTX4816/cockpit-compose/releases) page for a version number:
 
 ```bash
-sudo rpm -i cockpit-compose-X.Y.Z-1.noarch.rpm
+curl -LO https://github.com/RXTX4816/cockpit-compose/releases/latest/download/cockpit-compose-latest.rpm
+sudo rpm -i cockpit-compose-latest.rpm
 ```
 
 ### Debian / Ubuntu / Linux Mint / Pop!\_OS
 
-Download the `.deb` from the [Releases](https://github.com/RXTX4816/cockpit-compose/releases) page:
-
 ```bash
-sudo apt install ./cockpit-compose_X.Y.Z-1_all.deb
+curl -LO https://github.com/RXTX4816/cockpit-compose/releases/latest/download/cockpit-compose-latest.deb
+sudo apt install ./cockpit-compose-latest.deb
 ```
 
 ### Manual
 
-Download the latest release tarball from the [Releases](https://github.com/RXTX4816/cockpit-compose/releases) page.
-
 ```bash
-tar -xzf cockpit-compose-X.Y.Z.tar.gz
+curl -LO https://github.com/RXTX4816/cockpit-compose/releases/latest/download/cockpit-compose-latest.tar.gz
+curl -LO https://github.com/RXTX4816/cockpit-compose/releases/latest/download/cockpit-compose-latest.tar.gz.sha256
+sha256sum -c cockpit-compose-latest.tar.gz.sha256
+tar -xzf cockpit-compose-latest.tar.gz
 sudo mkdir -p /usr/share/cockpit/cockpit-compose
 sudo cp -r cockpit-compose/* /usr/share/cockpit/cockpit-compose/
 ```
