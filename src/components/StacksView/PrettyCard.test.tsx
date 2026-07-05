@@ -303,18 +303,29 @@ describe("PrettyCard", () => {
   });
 
   describe("selection", () => {
-    it("does not render a checkbox when onToggleSelect is not provided", () => {
-      render(<PrettyCard {...defaultProps} />);
-      expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
+    it("does not toggle selection when clicking the card if onToggleSelect is not provided", () => {
+      const { container } = render(<PrettyCard {...defaultProps} />);
+      const card = container.querySelector(".pc-card") as HTMLElement;
+      expect(card).not.toHaveAttribute("aria-pressed");
+      fireEvent.click(card);
+      // no error, no-op
     });
 
-    it("renders a checkbox reflecting isSelected and calls onToggleSelect on click", () => {
+    it("reflects isSelected via aria-pressed and the selected class, and toggles selection when the card is clicked", () => {
       const onToggleSelect = vi.fn();
-      render(<PrettyCard {...defaultProps} onToggleSelect={onToggleSelect} isSelected />);
-      const checkbox = screen.getByRole("checkbox") as HTMLInputElement;
-      expect(checkbox.checked).toBe(true);
-      fireEvent.click(checkbox);
+      const { container } = render(<PrettyCard {...defaultProps} onToggleSelect={onToggleSelect} isSelected />);
+      const card = container.querySelector(".pc-card") as HTMLElement;
+      expect(card).toHaveAttribute("aria-pressed", "true");
+      expect(card).toHaveClass("pc-card--selected");
+      fireEvent.click(card);
       expect(onToggleSelect).toHaveBeenCalledOnce();
+    });
+
+    it("does not toggle selection when clicking the expand toggle", () => {
+      const onToggleSelect = vi.fn();
+      render(<PrettyCard {...defaultProps} onToggleSelect={onToggleSelect} />);
+      fireEvent.click(screen.getByRole("button", { name: /expand/i }));
+      expect(onToggleSelect).not.toHaveBeenCalled();
     });
   });
 });

@@ -45,6 +45,9 @@ import { LogsModal } from "../LogsModal";
 import { splitConfigFiles } from "../../lib/configFiles";
 import "./MinimalCard.css";
 
+const BUBBLE_OPEN_DELAY_MS = 400;
+const BUBBLE_CLOSE_DELAY_MS = 25;
+
 interface MinimalCardProps {
   stack: ComposeStack;
   expanded: boolean;
@@ -66,7 +69,6 @@ interface MinimalCardProps {
   onActingChange: (delta: 1 | -1) => void;
   isSelected?: boolean;
   onToggleSelect?: () => void;
-  anySelected?: boolean;
 }
 
 const STATUS_VARS: Record<string, { bg: string; border: string }> = {
@@ -80,13 +82,15 @@ const STATUS_VARS: Record<string, { bg: string; border: string }> = {
 export function MinimalCard({
   stack, onLogs, onYaml, onInfo, onDown, onKill, onUp, onPull,
   onEvents, onTop, onExec, onRun, onPrune, onBackup, onScale, onActingChange,
-  isSelected = false, onToggleSelect, anySelected = false,
+  isSelected = false, onToggleSelect,
 }: MinimalCardProps) {
   const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [confirmStopOpen, setConfirmStopOpen] = useState(false);
-  const [bubble, setBubble] = useState<{ x: number; y: number } | null>(null);
-  const bubbleRef = useRef<HTMLDivElement>(null);
+  const [bubblePos, setBubblePos] = useState<{ left: number; top: number } | null>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const openTimerRef = useRef<number | null>(null);
+  const closeTimerRef = useRef<number | null>(null);
 
   const baseStatus = parseStackStatus(stack.Status);
   const count = parseServiceCount(stack.Status);
@@ -107,36 +111,48 @@ export function MinimalCard({
   useEffect(() => { void loadContainers(); }, [loadContainers]);
   useAutoRefresh(loadContainers, acting ? 500 : 3000, false);
 
-  useEffect(() => {
-    if (!bubble) return;
-    const handler = (e: globalThis.MouseEvent) => {
-      if (bubbleRef.current && !bubbleRef.current.contains(e.target as HTMLElement)) {
-        setBubble(null);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [bubble]);
-
-  const handleCardClick = (e: MouseEvent<HTMLDivElement>) => {
-    const target = e.target as HTMLElement;
-    if (target.closest("button, input, [role=button], .pf-v6-c-dropdown")) return;
-    if (bubble) {
-      setBubble(null);
-    } else {
-      setBubble({ x: e.clientX, y: e.clientY });
-      void loadContainers();
+  const clearOpenTimer = () => {
+    if (openTimerRef.current !== null) {
+      window.clearTimeout(openTimerRef.current);
+      openTimerRef.current = null;
     }
   };
+  const clearCloseTimer = () => {
+    if (closeTimerRef.current !== null) {
+      window.clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+  };
+  const scheduleBubbleClose = () => {
+    clearOpenTimer();
+    clearCloseTimer();
+    closeTimerRef.current = window.setTimeout(() => setBubblePos(null), BUBBLE_CLOSE_DELAY_MS);
+  };
+  const showBubble = () => {
+    const rect = cardRef.current?.getBoundingClientRect();
+    if (rect) {
+      const W = 560, H = 320;
+      const vw = window.innerWidth;
+      let left = rect.left + rect.width / 2 - W / 2;
+      const top = rect.top - H - 8 < 8 ? rect.bottom + 8 : rect.top - H - 8;
+      if (left < 8) left = 8;
+      if (left + W > vw - 8) left = vw - W - 8;
+      setBubblePos({ left, top });
+    }
+    void loadContainers();
+  };
+  const scheduleBubbleOpen = () => {
+    clearCloseTimer();
+    clearOpenTimer();
+    openTimerRef.current = window.setTimeout(showBubble, BUBBLE_OPEN_DELAY_MS);
+  };
+  useEffect(() => () => { clearOpenTimer(); clearCloseTimer(); }, []);
 
-  const getBubblePos = (x: number, y: number) => {
-    const W = 380, H = 320;
-    const vw = window.innerWidth;
-    let left = x - W / 2;
-    const top = y - H - 12 < 8 ? y + 12 : y - H - 12;
-    if (left < 8) left = 8;
-    if (left + W > vw - 8) left = vw - W - 8;
-    return { left, top };
+  const handleCardClick = (e: MouseEvent<HTMLDivElement>) => {
+    if (!onToggleSelect) return;
+    const target = e.target as HTMLElement;
+    if (target.closest("button, input, .pf-v6-c-dropdown")) return;
+    onToggleSelect();
   };
 
   const isUp = status === "running" || status === "partial" || status === "paused";
@@ -145,26 +161,20 @@ export function MinimalCard({
   return (
     <>
       <div
-        className={`mc-card${acting ? " mc-card--acting" : ""}${bubble ? " mc-card--open" : ""}`}
+        ref={cardRef}
+        className={`mc-card${acting ? " mc-card--acting" : ""}${isSelected ? " mc-card--selected" : ""}${bubblePos ? " mc-card--open" : ""}`}
         style={{ backgroundColor: sv.bg, borderColor: sv.border }}
         data-status={status}
         data-stack-name={stack.Name}
         onClick={handleCardClick}
+        onMouseEnter={scheduleBubbleOpen}
+        onMouseLeave={scheduleBubbleClose}
         role="button"
         tabIndex={0}
+        aria-pressed={onToggleSelect ? isSelected : undefined}
         aria-label={`${stack.Name} — ${status}`}
         onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") handleCardClick(e as unknown as MouseEvent<HTMLDivElement>); }}
       >
-        {onToggleSelect && (
-          <input
-            type="checkbox"
-            className={`mc-select${anySelected ? " mc-select--visible" : ""}`}
-            checked={isSelected}
-            onChange={onToggleSelect}
-            onClick={(e) => e.stopPropagation()}
-            aria-label={t("stacks.select_stack", { name: stack.Name })}
-          />
-        )}
         <div className="mc-kebab" onClick={(e) => e.stopPropagation()}>
           <Dropdown
             isOpen={menuOpen}
@@ -275,11 +285,12 @@ export function MinimalCard({
         </Modal>
       )}
 
-      {bubble && (
+      {bubblePos && (
         <div
-          ref={bubbleRef}
           className="mc-bubble"
-          style={getBubblePos(bubble.x, bubble.y)}
+          style={bubblePos}
+          onMouseEnter={clearCloseTimer}
+          onMouseLeave={scheduleBubbleClose}
           onClick={(e) => e.stopPropagation()}
         >
           {loadingContainers ? (

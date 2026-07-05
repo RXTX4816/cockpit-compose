@@ -255,19 +255,29 @@ describe("MinimalCard", () => {
   });
 
   describe("selection", () => {
-    it("does not render a checkbox when onToggleSelect is not provided", () => {
+    it("does not toggle selection when clicking the card if onToggleSelect is not provided", () => {
       render(<MinimalCard {...defaultProps} />);
-      expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
+      const card = screen.getByRole("button", { name: "myapp — running" });
+      expect(card).not.toHaveAttribute("aria-pressed");
+      fireEvent.click(card);
+      // no error, no-op
     });
 
-    it("renders a checkbox reflecting isSelected and calls onToggleSelect on click, without opening the container bubble", () => {
+    it("reflects isSelected via aria-pressed and the selected class, and toggles selection when the card is clicked", () => {
       const onToggleSelect = vi.fn();
       render(<MinimalCard {...defaultProps} onToggleSelect={onToggleSelect} isSelected />);
-      const checkbox = screen.getByRole("checkbox") as HTMLInputElement;
-      expect(checkbox.checked).toBe(true);
-      fireEvent.click(checkbox);
+      const card = screen.getByRole("button", { name: "myapp — running" });
+      expect(card).toHaveAttribute("aria-pressed", "true");
+      expect(card).toHaveClass("mc-card--selected");
+      fireEvent.click(card);
       expect(onToggleSelect).toHaveBeenCalledOnce();
-      expect(screen.queryByText(/no containers/i)).not.toBeInTheDocument();
+    });
+
+    it("does not toggle selection when clicking the kebab menu toggle", () => {
+      const onToggleSelect = vi.fn();
+      render(<MinimalCard {...defaultProps} onToggleSelect={onToggleSelect} />);
+      fireEvent.click(screen.getByRole("button", { name: /more actions/i }));
+      expect(onToggleSelect).not.toHaveBeenCalled();
     });
   });
 });

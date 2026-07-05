@@ -10,11 +10,17 @@
   flex-direction: column;
   break-inside: avoid;
   margin-bottom: 0.875rem;
+  cursor: pointer;
 }
 
 .pc-card:hover {
   box-shadow: 0 6px 22px var(--status-glow, rgba(0, 0, 0, 0.10));
   transform: translateY(-2px);
+}
+
+.pc-card--selected,
+.pc-card--selected:hover {
+  box-shadow: 0 0 0 2px var(--pf-t--global--color--brand--default, #06c), 0 6px 20px rgba(0, 102, 204, 0.30);
 }
 
 .pc-card--acting {
@@ -42,23 +48,6 @@
   0%   { box-shadow: 0 0 0 0 rgba(110, 198, 100, 0.55); }
   70%  { box-shadow: 0 0 0 7px rgba(110, 198, 100, 0); }
   100% { box-shadow: 0 0 0 0 rgba(110, 198, 100, 0); }
-}
-
-/* Select checkbox in top-left — ghost until card hovered, any card selected, or checked */
-.pc-select {
-  position: absolute;
-  top: 0.45rem;
-  left: 0.5rem;
-  z-index: 10;
-  opacity: 0;
-  transition: opacity 0.15s ease;
-  cursor: pointer;
-}
-
-.pc-card:hover .pc-select,
-.pc-card:focus-within .pc-select,
-.pc-select--visible {
-  opacity: 1;
 }
 
 /* Header */

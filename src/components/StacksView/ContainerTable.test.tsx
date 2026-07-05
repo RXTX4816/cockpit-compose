@@ -35,9 +35,11 @@ describe("ContainerTable", () => {
     expect(screen.getByText("nginx:latest")).toBeInTheDocument();
   });
 
-  it("renders the status text", () => {
+  it("renders a shortened uptime with the full status as a tooltip title", () => {
     render(<ContainerTable containers={[runningContainer]} />);
-    expect(screen.getByText("Up 2 hours")).toBeInTheDocument();
+    const uptime = screen.getByText("2h");
+    expect(uptime).toBeInTheDocument();
+    expect(uptime).toHaveAttribute("title", "Up 2 hours");
   });
 
   it("renders multiple containers", () => {
