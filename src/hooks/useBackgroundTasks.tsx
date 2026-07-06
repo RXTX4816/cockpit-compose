@@ -29,8 +29,11 @@ type TaskStarter = (launch: (proc: CockpitProcess) => void) => void | Promise<vo
 
 export interface BackgroundTasksContextValue {
   tasks: BackgroundTask[];
-  /** Enqueues a task. `start` is only invoked once the task reaches the front of the queue. */
-  enqueue: (stackName: string, action: string, label: string, start: TaskStarter) => void;
+  /**
+   * Enqueues a task. `start` is only invoked once the task reaches the front of the queue.
+   * `onSuccess`, if given, fires once the task settles with status "success".
+   */
+  enqueue: (stackName: string, action: string, label: string, start: TaskStarter, onSuccess?: () => void) => void;
   /** Closes the underlying process of a running task (or marks a not-yet-started one to stop as soon as it starts). */
   stop: (id: number) => void;
   /** Removes a task from the list. No-op while the task is still running. */
@@ -68,6 +71,7 @@ export function BackgroundTasksProvider({ children }: { children: ReactNode }) {
   const [tasks, setTasks] = useState<BackgroundTask[]>([]);
   const countersRef = useRef(0);
   const startersRef = useRef(new Map<number, TaskStarter>());
+  const onSuccessRef = useRef(new Map<number, () => void>());
   const procsRef = useRef(new Map<number, CockpitProcess>());
   const stoppedRef = useRef(new Set<number>());
   const bufsRef = useRef(new Map<number, string>());
@@ -90,8 +94,10 @@ export function BackgroundTasksProvider({ children }: { children: ReactNode }) {
       if (settledRef.current.has(next.id)) return;
       settledRef.current.add(next.id);
       setTasks(prev => prev.map(t => (t.id === next.id ? { ...t, status, errorMsg } : t)));
+      if (status === "success") onSuccessRef.current.get(next.id)?.();
       procsRef.current.delete(next.id);
       startersRef.current.delete(next.id);
+      onSuccessRef.current.delete(next.id);
       stoppedRef.current.delete(next.id);
       bufsRef.current.delete(next.id);
       settledRef.current.delete(next.id);
@@ -128,9 +134,10 @@ export function BackgroundTasksProvider({ children }: { children: ReactNode }) {
     }
   }, [tasks]);
 
-  const enqueue = useCallback((stackName: string, action: string, label: string, start: TaskStarter) => {
+  const enqueue = useCallback((stackName: string, action: string, label: string, start: TaskStarter, onSuccess?: () => void) => {
     const id = ++countersRef.current;
     startersRef.current.set(id, start);
+    if (onSuccess) onSuccessRef.current.set(id, onSuccess);
     setTasks(prev => [...prev, { id, stackName, action, label, status: "pending", lines: [], createdAt: Date.now() }]);
   }, []);
 
@@ -142,13 +149,17 @@ export function BackgroundTasksProvider({ children }: { children: ReactNode }) {
   const remove = useCallback((id: number) => {
     setTasks(prev => prev.filter(t => !(t.id === id && t.status !== "running")));
     startersRef.current.delete(id);
+    onSuccessRef.current.delete(id);
   }, []);
 
   const clearPending = useCallback((): number => {
     const pendingIds = tasks.filter(t => t.status === "pending").map(t => t.id);
     if (pendingIds.length === 0) return 0;
     setTasks(prev => prev.filter(t => t.status !== "pending"));
-    for (const id of pendingIds) startersRef.current.delete(id);
+    for (const id of pendingIds) {
+      startersRef.current.delete(id);
+      onSuccessRef.current.delete(id);
+    }
     return pendingIds.length;
   }, [tasks]);
 

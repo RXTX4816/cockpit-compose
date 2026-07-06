@@ -181,12 +181,13 @@ export function StacksView({ onRuntimeChange, dockerMissing, layout = "poweruser
         data.action,
         t(`${data.action}_modal.background_label`, { name: stack.Name }),
         buildStarter(stack),
+        data.action === "down" ? () => handleDownComplete(stack) : undefined,
       );
     }
     setSelected(new Set());
     setShowBulkBar(false);
     modals.close("bulkConfirm");
-  }, [modals, enqueue, t]);
+  }, [modals, enqueue, t, handleDownComplete]);
 
   const { target: downTarget, downing, error: downError, open: openDown, close: closeDown, execute: performDown }
     = useDownStack(refresh, onActingChange, handleDownComplete);

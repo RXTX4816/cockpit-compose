@@ -752,7 +752,7 @@ describe("StacksView — bulk selection and bulk actions", () => {
     expect(screen.getByTestId("bulk-confirm-modal")).toBeInTheDocument();
     expect(screen.getByText("restart myapp")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
-    expect(mockEnqueue).toHaveBeenCalledWith("myapp", "restart", expect.anything(), expect.any(Function));
+    expect(mockEnqueue).toHaveBeenCalledWith("myapp", "restart", expect.anything(), expect.any(Function), undefined);
   });
 
   it("supports bulk kill", () => {
@@ -762,7 +762,26 @@ describe("StacksView — bulk selection and bulk actions", () => {
     expect(screen.getByTestId("bulk-confirm-modal")).toBeInTheDocument();
     expect(screen.getByText("kill myapp")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
-    expect(mockEnqueue).toHaveBeenCalledWith("myapp", "kill", expect.anything(), expect.any(Function));
+    expect(mockEnqueue).toHaveBeenCalledWith("myapp", "kill", expect.anything(), expect.any(Function), undefined);
+  });
+
+  it("supports bulk down and adds each downed stack to DownedStacksSection once its task succeeds", () => {
+    render(<StacksView />);
+    fireEvent.click(screen.getByLabelText("select-myapp"));
+    fireEvent.click(screen.getByLabelText("select-otherapp"));
+    fireEvent.click(within(screen.getByTestId("sv-bulk-bar")).getByRole("button", { name: /Down/i }));
+    fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
+
+    expect(mockEnqueue).toHaveBeenCalledTimes(2);
+    const onSuccessMyapp = mockEnqueue.mock.calls[0][4] as () => void;
+    const onSuccessOtherapp = mockEnqueue.mock.calls[1][4] as () => void;
+    expect(onSuccessMyapp).toEqual(expect.any(Function));
+    expect(onSuccessOtherapp).toEqual(expect.any(Function));
+
+    act(() => { onSuccessMyapp(); });
+    expect(screen.getByTestId("downed-section")).toHaveTextContent("1 downed");
+    act(() => { onSuccessOtherapp(); });
+    expect(screen.getByTestId("downed-section")).toHaveTextContent("2 downed");
   });
 
   it("selects all displayed stacks when the select-all toggle is checked", () => {

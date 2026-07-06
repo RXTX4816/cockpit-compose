@@ -98,12 +98,25 @@ describe("BackgroundTasksDrawer", () => {
     expect(screen.queryByText(/Waiting for output/i)).not.toBeInTheDocument();
   });
 
-  it("clicking a finished task's row does not reopen a modal", () => {
-    mockTasks = [{ id: 2, stackName: "b", action: "pull", label: "Pull b", status: "success", lines: [], createdAt: 0 }];
+  it("clicking a finished task's row opens its log modal with the captured output", () => {
+    mockTasks = [{
+      id: 2, stackName: "b", action: "pull", label: "Pull b", status: "success",
+      lines: ["Pulling b-web-1  Done"], createdAt: 0,
+    }];
     render(<BackgroundTasksDrawer />);
     fireEvent.click(screen.getByRole("button", { name: /Background tasks/i }));
     fireEvent.click(screen.getByText("Pull b"));
-    expect(screen.queryByText(/Waiting for output/i)).not.toBeInTheDocument();
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(screen.getByText(/Pulling b-web-1/)).toBeInTheDocument();
+  });
+
+  it("clicking Remove on a finished row does not also reopen its log modal", () => {
+    mockTasks = [{ id: 2, stackName: "b", action: "pull", label: "Pull b", status: "success", lines: [], createdAt: 0 }];
+    render(<BackgroundTasksDrawer />);
+    fireEvent.click(screen.getByRole("button", { name: /Background tasks/i }));
+    fireEvent.click(screen.getByRole("button", { name: /^Remove$/i }));
+    expect(mockRemove).toHaveBeenCalledWith(2);
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
   it("focuses the newest (last) task row when the panel opens", () => {

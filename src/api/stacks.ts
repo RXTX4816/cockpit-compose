@@ -106,7 +106,8 @@ export function restartStack(project: string, configFiles: string[], profiles: s
   const profileFlags = profiles.flatMap(p => ["--profile", p]);
   return cockpit.spawn(
     compose(...profileFlags, "-p", project, ...fileFlags(configFiles), "restart", ...services),
-    { superuser, err: "message", ...dockerSpawnEnviron() },
+    // err:"out" merges stderr into the streamable stdout so the log viewer gets all output
+    { superuser, err: "out", ...dockerSpawnEnviron() },
   );
 }
 
@@ -154,7 +155,8 @@ export function downStack(project: string, configFiles: string[], profiles: stri
   const profileFlags = profiles.flatMap(p => ["--profile", p]);
   return cockpit.spawn(
     compose(...profileFlags, "-p", project, ...fileFlags(configFiles), "down"),
-    { superuser, err: "message", ...dockerSpawnEnviron() },
+    // err:"out" merges stderr into the streamable stdout so the log viewer gets all output
+    { superuser, err: "out", ...dockerSpawnEnviron() },
   );
 }
 
