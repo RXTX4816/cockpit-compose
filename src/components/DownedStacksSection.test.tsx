@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, within } from "@testing-library/react";
 import { DownedStacksSection, inferComposeRoot } from "./DownedStacksSection";
 
 vi.mock("../hooks/useDownedStacksScan", () => ({
@@ -70,6 +70,24 @@ vi.mock("./GlobalPruneModal", () => ({
     </div>
   ),
 }));
+vi.mock("./BulkActionConfirmModal", () => ({
+  BulkActionConfirmModal: ({
+    stacks, action, onConfirm, onClose,
+  }: {
+    stacks: { Name: string }[]; action: string; onConfirm: () => void; onClose: () => void;
+  }) => (
+    <div data-testid="bulk-confirm-modal">
+      <span>{action} {stacks.map(s => s.Name).join(",")}</span>
+      <button onClick={onConfirm}>Confirm</button>
+      <button onClick={onClose}>Cancel</button>
+    </div>
+  ),
+}));
+
+const mockEnqueue = vi.fn();
+vi.mock("../hooks/useBackgroundTasks", () => ({
+  useBackgroundTasks: () => ({ tasks: [], enqueue: mockEnqueue, stop: vi.fn(), remove: vi.fn(), clearPending: vi.fn() }),
+}));
 
 import { useDownedStacksScan } from "../hooks/useDownedStacksScan";
 const mockUseScan = vi.mocked(useDownedStacksScan);
@@ -104,6 +122,7 @@ beforeEach(() => {
   noopRemove.mockReset();
   noopAdd.mockReset();
   noopUpdate.mockReset();
+  mockEnqueue.mockReset();
   mockUseScan.mockReturnValue(defaultScanResult());
 });
 
@@ -528,6 +547,126 @@ describe("DownedStacksSection — RestoreModal", () => {
     render(<DownedStacksSection {...defaultProps} stacks={[]} manuallyDownedStacks={manuallyDownedStacks} />);
     fireEvent.click(screen.getByRole("button", { name: /restore/i }));
     expect(screen.getByTestId("restore-modal")).toHaveAttribute("data-scandir", "/etc/docker/compose");
+  });
+});
+
+describe("DownedStacksSection — bulk select-all and bulk Up", () => {
+  const stackA = { name: "alpha", configFiles: ["/etc/compose/alpha/compose.yml"] };
+  const stackB = { name: "beta", configFiles: ["/etc/compose/beta/compose.yml"] };
+
+  beforeEach(() => {
+    mockUseScan.mockReturnValue(defaultScanResult({ downedStacks: [stackA, stackB], hasScanned: true }));
+  });
+
+  it("does not show the bulk bar when nothing is selected", () => {
+    render(<DownedStacksSection {...defaultProps} />);
+    expect(screen.queryByTestId("dss-bulk-bar")).not.toBeInTheDocument();
+  });
+
+  it("shows the bulk bar once a stack is selected", () => {
+    render(<DownedStacksSection {...defaultProps} />);
+    fireEvent.click(screen.getByLabelText("Select alpha"));
+    expect(screen.getByTestId("dss-bulk-bar")).toBeInTheDocument();
+    expect(screen.getByText(/1 selected/i)).toBeInTheDocument();
+  });
+
+  it("select-all selects every downed stack", () => {
+    render(<DownedStacksSection {...defaultProps} />);
+    fireEvent.click(screen.getByLabelText("Select alpha"));
+    fireEvent.click(screen.getByTestId("dss-select-all"));
+    expect(screen.getByText(/2 selected/i)).toBeInTheDocument();
+    expect(screen.getByLabelText("Select alpha")).toBeChecked();
+    expect(screen.getByLabelText("Select beta")).toBeChecked();
+  });
+
+  it("de-toggling select-all clears the selection but keeps the bar visible with the Up button disabled", () => {
+    render(<DownedStacksSection {...defaultProps} />);
+    fireEvent.click(screen.getByLabelText("Select alpha"));
+    fireEvent.click(screen.getByTestId("dss-select-all"));
+    fireEvent.click(screen.getByTestId("dss-select-all"));
+
+    expect(screen.getByTestId("dss-bulk-bar")).toBeInTheDocument();
+    expect(screen.getByText(/0 selected/i)).toBeInTheDocument();
+    expect(within(screen.getByTestId("dss-bulk-bar")).getByRole("button", { name: "Up" })).toBeDisabled();
+  });
+
+  it("clear selection button fully hides the bulk bar", () => {
+    render(<DownedStacksSection {...defaultProps} />);
+    fireEvent.click(screen.getByLabelText("Select alpha"));
+    fireEvent.click(screen.getByRole("button", { name: /clear selection/i }));
+    expect(screen.queryByTestId("dss-bulk-bar")).not.toBeInTheDocument();
+  });
+
+  it("bulk Up opens the confirm modal, and confirming enqueues an up task per selected stack", () => {
+    render(<DownedStacksSection {...defaultProps} />);
+    fireEvent.click(screen.getByLabelText("Select alpha"));
+    fireEvent.click(screen.getByLabelText("Select beta"));
+    fireEvent.click(within(screen.getByTestId("dss-bulk-bar")).getByRole("button", { name: "Up" }));
+
+    expect(screen.getByTestId("bulk-confirm-modal")).toBeInTheDocument();
+    expect(screen.getByText("up alpha,beta")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
+    expect(mockEnqueue).toHaveBeenCalledTimes(2);
+    expect(mockEnqueue.mock.calls[0][0]).toBe("alpha");
+    expect(mockEnqueue.mock.calls[0][1]).toBe("up");
+    expect(mockEnqueue.mock.calls[1][0]).toBe("beta");
+    expect(screen.queryByTestId("bulk-confirm-modal")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("dss-bulk-bar")).not.toBeInTheDocument();
+  });
+
+  it("calls removeStack/onUpComplete/onRefresh via the enqueued onSuccess callback once a bulk up task succeeds", () => {
+    const removeStack = vi.fn();
+    const onUpComplete = vi.fn();
+    const onRefresh = vi.fn();
+    mockUseScan.mockReturnValue(defaultScanResult({ downedStacks: [stackA, stackB], hasScanned: true, removeStack }));
+    render(<DownedStacksSection {...defaultProps} onUpComplete={onUpComplete} onRefresh={onRefresh} />);
+    fireEvent.click(screen.getByLabelText("Select alpha"));
+    fireEvent.click(within(screen.getByTestId("dss-bulk-bar")).getByRole("button", { name: "Up" }));
+    fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
+
+    const onSuccess = mockEnqueue.mock.calls[0][4] as () => void;
+    onSuccess();
+    expect(removeStack).toHaveBeenCalledWith("alpha");
+    expect(onUpComplete).toHaveBeenCalledWith("alpha");
+    expect(onRefresh).toHaveBeenCalled();
+  });
+
+  it("cancelling the bulk confirm modal keeps the selection intact", () => {
+    render(<DownedStacksSection {...defaultProps} />);
+    fireEvent.click(screen.getByLabelText("Select alpha"));
+    fireEvent.click(within(screen.getByTestId("dss-bulk-bar")).getByRole("button", { name: "Up" }));
+    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(screen.queryByTestId("bulk-confirm-modal")).not.toBeInTheDocument();
+    expect(mockEnqueue).not.toHaveBeenCalled();
+    expect(screen.getByText(/1 selected/i)).toBeInTheDocument();
+  });
+
+  it("clicking a default-layout row (not a button) toggles its selection", () => {
+    render(<DownedStacksSection {...defaultProps} />);
+    fireEvent.click(screen.getByText("alpha"));
+    expect(screen.getByText(/1 selected/i)).toBeInTheDocument();
+    expect(screen.getByLabelText("Select alpha")).toBeChecked();
+  });
+
+  it("clicking a button within a default-layout row does not toggle its selection", () => {
+    render(<DownedStacksSection {...defaultProps} />);
+    fireEvent.click(screen.getAllByRole("button", { name: /^Up$/i })[0]);
+    expect(screen.queryByTestId("dss-bulk-bar")).not.toBeInTheDocument();
+  });
+
+  it("clicking a pretty-layout card (not a button) toggles its selection", () => {
+    mockUseScan.mockReturnValue(defaultScanResult({ downedStacks: [stackA, stackB], hasScanned: true }));
+    render(<DownedStacksSection {...defaultProps} layout="pretty" />);
+    fireEvent.click(screen.getByText("alpha"));
+    expect(screen.getByText(/1 selected/i)).toBeInTheDocument();
+  });
+
+  it("clicking the Up button within a pretty-layout card does not toggle its selection", () => {
+    mockUseScan.mockReturnValue(defaultScanResult({ downedStacks: [stackA, stackB], hasScanned: true }));
+    render(<DownedStacksSection {...defaultProps} layout="pretty" />);
+    fireEvent.click(screen.getAllByRole("button", { name: /up/i })[0]);
+    expect(screen.queryByTestId("dss-bulk-bar")).not.toBeInTheDocument();
   });
 });
 

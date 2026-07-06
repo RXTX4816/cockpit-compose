@@ -6,13 +6,15 @@ import {
   DataListItemRow,
   DataListItemCells,
   DataListCell,
+  DataListCheck,
   Button,
   Alert,
   Spinner,
   TextInput,
+  Checkbox,
 } from "@patternfly/react-core";
 import { Tooltip } from "@rxtx4816/cockpit-plugin-base-react/components";
-import { PlusCircleIcon, FolderOpenIcon, AngleUpIcon, HistoryIcon, PencilAltIcon, ArchiveIcon, TrashIcon, BroomIcon } from "@patternfly/react-icons";
+import { PlusCircleIcon, FolderOpenIcon, AngleUpIcon, HistoryIcon, PencilAltIcon, ArchiveIcon, TrashIcon, BroomIcon, TimesIcon } from "@patternfly/react-icons";
 import { type ComposeStack } from "../api";
 import { type DownedStack, useDownedStacksScan } from "../hooks/useDownedStacksScan";
 import { type Layout } from "../lib/layout";
@@ -24,6 +26,9 @@ import { DeleteStackModal } from "./DeleteStackModal";
 import { RestoreModal } from "./RestoreModal";
 import { BackupModal } from "./BackupModal";
 import { GlobalPruneModal } from "./GlobalPruneModal";
+import { BulkActionConfirmModal } from "./BulkActionConfirmModal";
+import { useBackgroundTasks } from "../hooks/useBackgroundTasks";
+import { buildUpStarter } from "../lib/backgroundActions";
 import "./DownedStacksSection.css";
 import "./StacksView/UnixRow.css";
 import { inferComposeRoot } from "../lib/composeDiscovery";
@@ -68,6 +73,18 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
   const [miniMenu, setMiniMenu] = useState<{ stack: DownedStack; x: number; y: number } | null>(null);
   const miniMenuRef = useRef<HTMLDivElement>(null);
   const autoDetectedRef = useRef(false);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [showBulkBar, setShowBulkBar] = useState(false);
+  const [bulkConfirmStacks, setBulkConfirmStacks] = useState<DownedStack[] | null>(null);
+  const { enqueue } = useBackgroundTasks();
+  const toggleSelect = useCallback((name: string) => {
+    setSelected(prev => {
+      const next = new Set(prev);
+      if (next.has(name)) next.delete(name); else next.add(name);
+      if (next.size > 0) setShowBulkBar(true);
+      return next;
+    });
+  }, []);
 
   const { downedStacks, scanning, hasScanned, error, warning, scan, removeStack, addStack, updateStack }
     = useDownedStacksScan(composeDir, maxDepth, stacks);
@@ -82,6 +99,33 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
     const override = configFileOverrides[d.name.toLowerCase()];
     return override ? { ...d, configFiles: override } : d;
   });
+
+  const allSelected = combinedStacks.length > 0 && combinedStacks.every(d => selected.has(d.name));
+  const someSelected = selected.size > 0 && !allSelected;
+
+  useEffect(() => {
+    if (showBulkBar && selected.size === 0) {
+      const timer = setTimeout(() => setShowBulkBar(false), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [showBulkBar, selected.size]);
+
+  const handleBulkUpConfirm = useCallback(() => {
+    if (!bulkConfirmStacks) return;
+    for (const d of bulkConfirmStacks) {
+      const stack = toSyntheticStack(d);
+      enqueue(
+        d.name,
+        "up",
+        t("up_modal.background_label", { name: d.name }),
+        buildUpStarter(stack, []),
+        () => { removeStack(d.name); onUpComplete(d.name); onRefresh(); },
+      );
+    }
+    setSelected(new Set());
+    setShowBulkBar(false);
+    setBulkConfirmStacks(null);
+  }, [bulkConfirmStacks, enqueue, t, removeStack, onUpComplete, onRefresh]);
 
   // Auto-detect the compose root on first stacks load
   useEffect(() => {
@@ -307,6 +351,46 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
             <span className="dss-separator-label">{t("downed_section.down_status")}</span>
           </div>
 
+          {showBulkBar && (
+            <div className="dss-bulk-bar" data-testid="dss-bulk-bar">
+              <Tooltip content={t(allSelected ? "stacks.deselect_all" : "stacks.select_all")}>
+                <Checkbox
+                  id="dss-select-all"
+                  data-testid="dss-select-all"
+                  aria-label={t(allSelected ? "stacks.deselect_all" : "stacks.select_all")}
+                  isChecked={allSelected ? true : (someSelected ? null : false)}
+                  onChange={() => {
+                    if (allSelected) {
+                      setSelected(new Set());
+                    } else {
+                      setSelected(new Set(combinedStacks.map(d => d.name)));
+                      setShowBulkBar(true);
+                    }
+                  }}
+                />
+              </Tooltip>
+              <span className="sv-bulk-count">{t("stacks.bulk_selected", { count: selected.size })}</span>
+              <Button
+                variant="primary"
+                size="sm"
+                isDisabled={selected.size === 0}
+                onClick={() => setBulkConfirmStacks(combinedStacks.filter(d => selected.has(d.name)))}
+              >
+                {t("actions.up")}
+              </Button>
+              <Tooltip content={t("stacks.bulk_clear")}>
+                <Button
+                  variant="plain"
+                  size="sm"
+                  aria-label={t("stacks.bulk_clear")}
+                  onClick={() => { setSelected(new Set()); setShowBulkBar(false); }}
+                >
+                  <TimesIcon />
+                </Button>
+              </Tooltip>
+            </div>
+          )}
+
           {scanning && (
             <div className="dss-list-wrapper dss-scanning">
               <Spinner size="sm" />
@@ -341,17 +425,25 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
                       title={d.configFiles[0] ?? ""}
                       onClick={(e) => {
                         const target = e.target as HTMLElement;
-                        if (target.closest(".dss-mini-up")) return;
+                        if (target.closest(".dss-mini-up") || target.closest(".dss-mini-select")) return;
                         e.preventDefault();
                         setMiniMenu({ stack: d, x: e.clientX, y: e.clientY });
                       }}
                       onContextMenu={(e) => {
                         const target = e.target as HTMLElement;
-                        if (target.closest(".dss-mini-up")) return;
+                        if (target.closest(".dss-mini-up") || target.closest(".dss-mini-select")) return;
                         e.preventDefault();
                         setMiniMenu({ stack: d, x: e.clientX, y: e.clientY });
                       }}
                     >
+                      <input
+                        type="checkbox"
+                        className={`dss-mini-select${selected.size > 0 ? " dss-mini-select--visible" : ""}`}
+                        aria-label={t("stacks.select_stack", { name: d.name })}
+                        checked={selected.has(d.name)}
+                        onClick={(e) => e.stopPropagation()}
+                        onChange={() => toggleSelect(d.name)}
+                      />
                       <span className="dss-mini-name">{d.name}</span>
                       <Tooltip content={t("actions.up_title")}>
                         <Button
@@ -388,7 +480,16 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
             ) : layout === "pretty" ? (
               <div className="dss-pretty-grid">
                 {combinedStacks.map(d => (
-                  <div key={d.name} className="dss-pretty-card">
+                  <div
+                    key={d.name}
+                    className={`dss-pretty-card${selected.has(d.name) ? " dss-pretty-card--selected" : ""}`}
+                    onClick={(e) => {
+                      const target = e.target as HTMLElement;
+                      if (target.closest("button, input, a")) return;
+                      toggleSelect(d.name);
+                    }}
+                    aria-pressed={selected.has(d.name)}
+                  >
                     <div className="dss-pretty-body">
                       <span className="dss-pretty-name">{d.name}</span>
                       <span className="dss-pretty-path">{d.configFiles[0]?.replace(/\/[^/]+$/, "") ?? ""}</span>
@@ -419,6 +520,14 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
                     <span className="dss-unix-name">{d.name}</span>
                     <span className="dss-unix-path" title={d.configFiles[0] ?? ""}>{d.configFiles[0]?.replace(/.*\/([^/]+\/[^/]+)$/, "$1") ?? ""}</span>
                     <div className="dss-unix-actions">
+                      <button
+                        className={`ur-key ur-key--select${selected.has(d.name) ? " ur-key--select-on" : ""}`}
+                        onClick={() => toggleSelect(d.name)}
+                        aria-pressed={selected.has(d.name)}
+                        aria-label={t("stacks.select_stack", { name: d.name })}
+                      >
+                        {selected.has(d.name) ? "[x]" : "[ ]"}
+                      </button>
                       <Tooltip content={t("actions.up_title")}>
                         <button className="ur-key ur-key--up" onClick={() => setUpConfirmTarget(d)}>[up]</button>
                       </Tooltip>
@@ -440,7 +549,22 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
                 <DataList aria-label={t("downed_section.down_stacks_aria")} isCompact className="dss-list">
                   {combinedStacks.map(d => (
                     <DataListItem key={d.name} aria-labelledby={`dss-name-${d.name}`} data-status="down">
-                      <DataListItemRow>
+                      <DataListItemRow
+                        onClick={(e) => {
+                          const target = e.target as HTMLElement;
+                          if (target.closest("button, input, select, a")) return;
+                          toggleSelect(d.name);
+                        }}
+                        style={{ cursor: "pointer" }}
+                        className={selected.has(d.name) ? "dss-row--selected" : undefined}
+                      >
+                        <DataListCheck
+                          aria-labelledby={`dss-name-${d.name}`}
+                          aria-label={t("stacks.select_stack", { name: d.name })}
+                          isChecked={selected.has(d.name)}
+                          onChange={() => toggleSelect(d.name)}
+                          className={`dss-check${selected.size > 0 ? " dss-check--visible" : ""}`}
+                        />
                         <DataListItemCells
                           dataListCells={[
                             <DataListCell key="name" width={2}>
@@ -564,6 +688,14 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
         <GlobalPruneModal
           onClose={() => setPruneOpen(false)}
           onSuccess={onRefresh}
+        />
+      )}
+      {bulkConfirmStacks && (
+        <BulkActionConfirmModal
+          stacks={bulkConfirmStacks.map(toSyntheticStack)}
+          action="up"
+          onConfirm={handleBulkUpConfirm}
+          onClose={() => setBulkConfirmStacks(null)}
         />
       )}
     </>
