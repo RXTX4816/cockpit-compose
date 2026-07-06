@@ -44,6 +44,24 @@ describe("useBackgroundTasks", () => {
     expect(start).toHaveBeenCalledOnce();
   });
 
+  it("calls the optional onSuccess callback once the task settles as success, but not for a failed task", async () => {
+    const { result } = renderHook(() => useBackgroundTasks(), { wrapper });
+    const onSuccess = vi.fn();
+    act(() => {
+      result.current.enqueue("myapp", "down", "Down myapp", launch => launch(fakeProcess("resolve")), onSuccess);
+    });
+
+    await waitFor(() => expect(result.current.tasks[0].status).toBe("success"));
+    expect(onSuccess).toHaveBeenCalledOnce();
+
+    onSuccess.mockClear();
+    act(() => {
+      result.current.enqueue("otherapp", "down", "Down otherapp", launch => launch(fakeProcess("reject")), onSuccess);
+    });
+    await waitFor(() => expect(result.current.tasks[1].status).toBe("error"));
+    expect(onSuccess).not.toHaveBeenCalled();
+  });
+
   it("a failed task ends in 'error' status with the error message", async () => {
     const { result } = renderHook(() => useBackgroundTasks(), { wrapper });
     act(() => { result.current.enqueue("myapp", "up", "Up myapp", launch => launch(fakeProcess("reject"))); });

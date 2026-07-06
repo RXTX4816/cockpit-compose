@@ -77,13 +77,12 @@ export function BackgroundTasksDrawer() {
               ) : (
                 <NotificationDrawerList>
                   {tasks.map(task => {
-                    const clickable = task.status === "running" || task.status === "pending";
                     return (
                       <NotificationDrawerListItem
                         key={task.id}
                         variant={statusVariant(task.status)}
-                        isHoverable={clickable}
-                        onClick={clickable ? () => setOpenTask(task) : undefined}
+                        isHoverable
+                        onClick={() => setOpenTask(task)}
                       >
                         <NotificationDrawerListItemHeader
                           variant={statusVariant(task.status)}

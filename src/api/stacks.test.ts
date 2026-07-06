@@ -188,6 +188,13 @@ describe("restartStack", () => {
     const args = mockSpawn.mock.calls[0][0] as string[];
     expect(args).toContain("restart");
   });
+
+  it("merges stderr into stdout (err: out)", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    restartStack("myapp", ["/path/compose.yml"]);
+    const opts = mockSpawn.mock.calls[0][1] as { err: string };
+    expect(opts.err).toBe("out");
+  });
 });
 
 describe("streamLogs", () => {
@@ -226,6 +233,13 @@ describe("downStack", () => {
     downStack("myapp", ["/path/base.yml", "/path/override.yml"]);
     const args = mockSpawn.mock.calls[0][0] as string[];
     expect(args.filter(a => a === "-f")).toHaveLength(2);
+  });
+
+  it("merges stderr into stdout (err: out)", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    downStack("myapp", ["/path/compose.yml"]);
+    const opts = mockSpawn.mock.calls[0][1] as { err: string };
+    expect(opts.err).toBe("out");
   });
 });
 
