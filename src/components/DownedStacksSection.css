@@ -9,6 +9,46 @@
   margin-left: auto;
 }
 
+.dss-bulk-bar {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.4rem 0.75rem;
+  margin: 0.5rem 0;
+  background: var(--pf-t--global--background--color--secondary--default);
+  border: 1px solid var(--pf-t--global--border--color--default);
+  border-radius: var(--pf-t--global--border--radius--200);
+}
+
+.dss-mini-select {
+  margin-right: 0.25rem;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.dss-mini-select--visible,
+.dss-mini-card:hover .dss-mini-select,
+.dss-mini-select:checked {
+  opacity: 1;
+}
+
+.dss-check {
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.dss-check--visible,
+.pf-v6-c-data-list__item-row:hover .dss-check,
+.pf-v6-c-data-list__item-row:focus-within .dss-check {
+  opacity: 1;
+}
+
+.dss-row--selected {
+  box-shadow: inset 0 0 0 2px var(--pf-t--global--color--brand--default, #06c), 0 0 14px rgba(0, 102, 204, 0.22);
+  background: rgba(0, 102, 204, 0.06);
+}
+
 
 .dss-controls {
   display: flex;
@@ -456,6 +496,11 @@
 .dss-pretty-card:hover {
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
   transform: translateY(-1px);
+}
+
+.dss-pretty-card--selected,
+.dss-pretty-card--selected:hover {
+  box-shadow: 0 0 0 2px var(--pf-t--global--color--brand--default, #06c), 0 6px 20px rgba(0, 102, 204, 0.30);
 }
 
 .dss-pretty-body {
