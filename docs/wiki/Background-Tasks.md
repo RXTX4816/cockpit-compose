@@ -71,9 +71,9 @@ Only **one task runs at a time**, in the order it was queued. This avoids two ac
 | **Stop** | Running | Closes the underlying process. The task ends up in the **Stopped** state. |
 | **Remove** | Pending, Complete, Failed, or Stopped | Removes the task from the panel. A pending task removed this way never actually runs. |
 
-### Viewing live output
+### Viewing output
 
-Click anywhere on a **Running** or **Pending** task's row to reopen its log — the same streaming output view you'd see in the foreground modal, with a **Stop** button. Finished tasks don't reopen a log view; their outcome is already visible in the panel.
+Click anywhere on a task's row — **Pending**, **Running**, or already finished (**Complete**, **Failed**, **Stopped**) — to open its log. Output is captured from the moment the task starts, so finished tasks show the exact same output you'd have seen live, not just their final status. A **Running** task's log view includes a **Stop** button; a finished task's just has **Close**.
 
 ## Switching Docker/Podman while tasks are queued
 

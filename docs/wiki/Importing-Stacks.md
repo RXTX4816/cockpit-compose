@@ -5,17 +5,19 @@ The **Stopped / offline stacks** section at the bottom of the dashboard shows co
 ## The Stopped section
 
 ```
-┌────────────────────────────────────────────────────────────┐
-│  Stopped / offline stacks                                  │
-│  [Create]  [▼ Import]                                      │
+┌──────────────────────────────────────────────────────────────┐
+│  Stopped / offline stacks                                    │
+│  [Create]  [▼ Import]  [Restore]           [Prune images]    │
 ├────────────────────────────────────────────────────────────┤
-│  myapp   ● down   /etc/docker/compose/myapp/compose.yml    │
-│                              [↑ Up]  [Edit]  [✕ Delete]    │
+│  myapp   ● down   /etc/docker/compose/myapp/compose.yml      │
+│                    [↑ Up]  [Edit]  [Backup]  [✕ Delete]      │
 ├────────────────────────────────────────────────────────────┤
-│  oldsite  ● down  /etc/docker/compose/oldsite/compose.yml  │
-│                              [↑ Up]  [Edit]  [✕ Delete]    │
-└────────────────────────────────────────────────────────────┘
+│  oldsite  ● down  /etc/docker/compose/oldsite/compose.yml    │
+│                    [↑ Up]  [Edit]  [Backup]  [✕ Delete]      │
+└──────────────────────────────────────────────────────────────┘
 ```
+
+The toolbar above the list also has **Restore** (see [Backup and Restore](Backup-and-Restore)) and, pinned to the right edge, **Prune images** — a host-wide unused-image cleanup that isn't limited to these stacks (see [Global image prune](Prune-Resources#global-image-prune-all-stacks)).
 
 Each row shows:
 
@@ -26,6 +28,7 @@ Each row shows:
 | **File path** | Full path to the `docker-compose.yml` (or `compose.yml`) file |
 | **Up** | Bring the stack online — see [Managing Stacks](Managing-Stacks) |
 | **Edit** | Open the YAML editor — see [Editing Configuration](Editing-Configuration) |
+| **Backup** | Archive the stack's files — see [Backup and Restore](Backup-and-Restore) |
 | **Delete** | Delete the compose file from disk (two-step confirmation) |
 
 ## Scanning for compose files
@@ -123,3 +126,18 @@ Click **Delete** to proceed to the second confirmation.
 Click **Yes, delete** to confirm. The file (or folder) is deleted and the stack disappears from the list.
 
 > **Note:** Delete only removes files from disk. It does not stop running containers. If you want to stop containers first, use **Down** from the running stacks section before deleting.
+
+## Selecting multiple downed stacks and bulk Up
+
+The downed stacks list supports the same kind of multi-select as the running-stacks dashboard (see [Bulk Actions](Bulk-Actions)), with the selection control adapted per [layout](Stacks-Dashboard#layout-options):
+
+| Layout | Selection control |
+|---|---|
+| **Power User** | A checkbox at the start of the row, hidden until you hover/focus a row or already have something selected. |
+| **Minimal** | Same checkbox behavior, shown next to the stack name on the card. |
+| **Pretty** | Click anywhere on the card (except its buttons) to toggle selection — it glows blue when selected, exactly like the running-stacks Pretty layout. |
+| **Unix** | A small `[ ]` / `[x]` toggle at the start of the action row. |
+
+Once at least one stack is selected, a bulk bar appears with a **select all** toggle and a single **Up** action (down stacks only support being brought back up in bulk — there's no bulk Restart/Pull/Down/Kill here). Like the main dashboard's bulk bar, toggling select-all off — or deselecting everything manually — keeps the bar visible with **Up** grayed out instead of hiding it immediately; the explicit **✕** clear button dismisses it right away.
+
+Confirming **Up** enqueues one background task per selected stack (see [Background Tasks](Background-Tasks)); each stack disappears from this list as its task completes successfully.
