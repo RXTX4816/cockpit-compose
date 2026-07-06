@@ -45,6 +45,7 @@
     "filter_tooltip_paused": "Show only paused stacks",
     "select_stack": "Select {{name}}",
     "select_all": "Select all",
+    "deselect_all": "Deselect all",
     "bulk_selected": "{{count}} selected",
     "bulk_clear": "Clear selection",
     "runtime_switch_cancelled_tasks_one": "Cancelled {{count}} pending background task because the runtime changed",
