@@ -25,6 +25,7 @@ import {
   SearchInput,
   Label,
   Spinner,
+  Checkbox,
 } from "@patternfly/react-core";
 import { Tooltip } from "@rxtx4816/cockpit-plugin-base-react/components";
 import { type ComposeStack, type Runtime } from "../../api";
@@ -115,10 +116,12 @@ export function StacksView({ onRuntimeChange, dockerMissing, layout = "poweruser
   ] as const;
   const modals = useDialogState<ComposeModals>(MODAL_NAMES);
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [showBulkBar, setShowBulkBar] = useState(false);
   const toggleSelect = useCallback((name: string) => {
     setSelected(prev => {
       const next = new Set(prev);
       if (next.has(name)) next.delete(name); else next.add(name);
+      if (next.size > 0) setShowBulkBar(true);
       return next;
     });
   }, []);
@@ -131,6 +134,8 @@ export function StacksView({ onRuntimeChange, dockerMissing, layout = "poweruser
     searchTerm, setSearchTerm, activeFilters, toggleFilter,
     filteredStacks: displayedStacks, statusCounts, STATUS_FILTER_OPTIONS, clearFilters,
   } = useStackFilters(stacks);
+  const allSelected = displayedStacks.length > 0 && displayedStacks.every(s => selected.has(s.Name));
+  const someSelected = selected.size > 0 && !allSelected;
 
   useEffect(() => {
     if (searchOpen) {
@@ -142,6 +147,13 @@ export function StacksView({ onRuntimeChange, dockerMissing, layout = "poweruser
   useEffect(() => {
     if (searchTerm) setSearchOpen(true);
   }, [searchTerm]);
+
+  useEffect(() => {
+    if (showBulkBar && selected.size === 0) {
+      const timer = setTimeout(() => setShowBulkBar(false), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [showBulkBar, selected.size]);
 
   const onActingChange = useCallback((delta: 1 | -1) => {
     if (delta > 0) increment(); else decrement();
@@ -172,6 +184,7 @@ export function StacksView({ onRuntimeChange, dockerMissing, layout = "poweruser
       );
     }
     setSelected(new Set());
+    setShowBulkBar(false);
     modals.close("bulkConfirm");
   }, [modals, enqueue, t]);
 
@@ -293,13 +306,30 @@ export function StacksView({ onRuntimeChange, dockerMissing, layout = "poweruser
             </ToolbarItem>
           )}
 
-          {selected.size > 0 && (
+          {showBulkBar && (
             <ToolbarItem>
               <div className="sv-bulk-bar" data-testid="sv-bulk-bar">
+                <Tooltip content={t(allSelected ? "stacks.deselect_all" : "stacks.select_all")}>
+                  <Checkbox
+                    id="sv-select-all"
+                    data-testid="sv-select-all"
+                    aria-label={t(allSelected ? "stacks.deselect_all" : "stacks.select_all")}
+                    isChecked={allSelected ? true : (someSelected ? null : false)}
+                    onChange={() => {
+                      if (allSelected) {
+                        setSelected(new Set());
+                      } else {
+                        setSelected(new Set(displayedStacks.map(s => s.Name)));
+                        setShowBulkBar(true);
+                      }
+                    }}
+                  />
+                </Tooltip>
                 <span className="sv-bulk-count">{t("stacks.bulk_selected", { count: selected.size })}</span>
                 <Button
                   variant="primary"
                   size="sm"
+                  isDisabled={selected.size === 0}
                   onClick={() => modals.open("bulkConfirm", {
                     stacks: displayedStacks.filter(s => selected.has(s.Name)), action: "up",
                   })}
@@ -311,6 +341,7 @@ export function StacksView({ onRuntimeChange, dockerMissing, layout = "poweruser
                     <Button
                       variant="plain"
                       size="sm"
+                      isDisabled={selected.size === 0}
                       aria-label={t("actions.restart")}
                       onClick={() => modals.open("bulkConfirm", {
                         stacks: displayedStacks.filter(s => selected.has(s.Name)), action: "restart",
@@ -323,6 +354,7 @@ export function StacksView({ onRuntimeChange, dockerMissing, layout = "poweruser
                     <Button
                       variant="plain"
                       size="sm"
+                      isDisabled={selected.size === 0}
                       aria-label={t("actions.pull_title")}
                       onClick={() => modals.open("bulkConfirm", {
                         stacks: displayedStacks.filter(s => selected.has(s.Name)), action: "pull",
@@ -336,6 +368,7 @@ export function StacksView({ onRuntimeChange, dockerMissing, layout = "poweruser
                       variant="plain"
                       size="sm"
                       className="sr-down-btn"
+                      isDisabled={selected.size === 0}
                       aria-label={t("actions.down_title")}
                       onClick={() => modals.open("bulkConfirm", {
                         stacks: displayedStacks.filter(s => selected.has(s.Name)), action: "down",
@@ -348,6 +381,7 @@ export function StacksView({ onRuntimeChange, dockerMissing, layout = "poweruser
                     <Button
                       variant="plain"
                       size="sm"
+                      isDisabled={selected.size === 0}
                       aria-label={t("actions.kill")}
                       onClick={() => modals.open("bulkConfirm", {
                         stacks: displayedStacks.filter(s => selected.has(s.Name)), action: "kill",
@@ -362,7 +396,7 @@ export function StacksView({ onRuntimeChange, dockerMissing, layout = "poweruser
                     variant="plain"
                     size="sm"
                     aria-label={t("stacks.bulk_clear")}
-                    onClick={() => setSelected(new Set())}
+                    onClick={() => { setSelected(new Set()); setShowBulkBar(false); }}
                   >
                     <TimesIcon />
                   </Button>
@@ -379,6 +413,7 @@ export function StacksView({ onRuntimeChange, dockerMissing, layout = "poweruser
                   setRuntimeSwitchKey(k => k + 1);
                   reset();
                   setSelected(new Set());
+                  setShowBulkBar(false);
                   const cancelled = clearPending();
                   if (cancelled > 0) toast.warn(t("stacks.runtime_switch_cancelled_tasks", { count: cancelled }));
                   onRuntimeChange?.(r);

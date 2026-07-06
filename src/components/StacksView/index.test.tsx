@@ -764,4 +764,48 @@ describe("StacksView — bulk selection and bulk actions", () => {
     fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
     expect(mockEnqueue).toHaveBeenCalledWith("myapp", "kill", expect.anything(), expect.any(Function));
   });
+
+  it("selects all displayed stacks when the select-all toggle is checked", () => {
+    render(<StacksView />);
+    fireEvent.click(screen.getByLabelText("select-myapp"));
+    fireEvent.click(screen.getByTestId("sv-select-all"));
+    expect(screen.getByText(/2 selected/i)).toBeInTheDocument();
+    expect(screen.getByLabelText("select-myapp")).toBeChecked();
+    expect(screen.getByLabelText("select-otherapp")).toBeChecked();
+  });
+
+  it("de-toggling select-all clears the selection but keeps the toolbar visible with grayed-out actions", () => {
+    render(<StacksView />);
+    fireEvent.click(screen.getByLabelText("select-myapp"));
+    fireEvent.click(screen.getByTestId("sv-select-all"));
+    fireEvent.click(screen.getByTestId("sv-select-all"));
+
+    expect(screen.getByTestId("sv-bulk-bar")).toBeInTheDocument();
+    expect(screen.getByText(/0 selected/i)).toBeInTheDocument();
+    expect(within(screen.getByTestId("sv-bulk-bar")).getByRole("button", { name: "Up" })).toBeDisabled();
+    expect(within(screen.getByTestId("sv-bulk-bar")).getByRole("button", { name: /Restart/i })).toBeDisabled();
+  });
+
+  it("clear selection button fully hides the toolbar even after select-all was used", () => {
+    render(<StacksView />);
+    fireEvent.click(screen.getByLabelText("select-myapp"));
+    fireEvent.click(screen.getByTestId("sv-select-all"));
+    fireEvent.click(screen.getByRole("button", { name: /clear selection/i }));
+    expect(screen.queryByTestId("sv-bulk-bar")).toBeNull();
+  });
+
+  it("auto-hides the grayed-out toolbar after 5 seconds of an empty selection", () => {
+    vi.useFakeTimers();
+    try {
+      render(<StacksView />);
+      fireEvent.click(screen.getByLabelText("select-myapp"));
+      fireEvent.click(screen.getByLabelText("select-myapp"));
+      expect(screen.getByTestId("sv-bulk-bar")).toBeInTheDocument();
+
+      act(() => { vi.advanceTimersByTime(5000); });
+      expect(screen.queryByTestId("sv-bulk-bar")).toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 });
