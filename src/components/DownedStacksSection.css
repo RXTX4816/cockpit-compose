@@ -5,6 +5,10 @@
   gap: 0.75rem;
 }
 
+.dss-prune-btn {
+  margin-left: auto;
+}
+
 
 .dss-controls {
   display: flex;

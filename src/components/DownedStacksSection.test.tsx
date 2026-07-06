@@ -63,6 +63,13 @@ vi.mock("./RestoreModal", () => ({
     </div>
   ),
 }));
+vi.mock("./GlobalPruneModal", () => ({
+  GlobalPruneModal: ({ onClose }: { onClose: () => void }) => (
+    <div data-testid="global-prune-modal">
+      <button onClick={onClose}>ClosePruneImages</button>
+    </div>
+  ),
+}));
 
 import { useDownedStacksScan } from "../hooks/useDownedStacksScan";
 const mockUseScan = vi.mocked(useDownedStacksScan);
@@ -396,7 +403,7 @@ describe("DownedStacksSection — Down section content", () => {
     }));
     render(<DownedStacksSection {...defaultProps} />);
     expect(screen.queryByRole("button", { name: /Info/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /Prune/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Prune" })).not.toBeInTheDocument();
   });
 
   it("shows abbreviated file names when there are multiple configFiles", () => {
@@ -521,6 +528,44 @@ describe("DownedStacksSection — RestoreModal", () => {
     render(<DownedStacksSection {...defaultProps} stacks={[]} manuallyDownedStacks={manuallyDownedStacks} />);
     fireEvent.click(screen.getByRole("button", { name: /restore/i }));
     expect(screen.getByTestId("restore-modal")).toHaveAttribute("data-scandir", "/etc/docker/compose");
+  });
+});
+
+describe("DownedStacksSection — GlobalPruneModal", () => {
+  it("Prune images button opens GlobalPruneModal", () => {
+    mockUseScan.mockReturnValue(defaultScanResult({ hasScanned: true }));
+    render(<DownedStacksSection {...defaultProps} />);
+    fireEvent.click(screen.getByRole("button", { name: /prune images/i }));
+    expect(screen.getByTestId("global-prune-modal")).toBeInTheDocument();
+  });
+
+  it("ClosePruneImages closes the GlobalPruneModal", () => {
+    mockUseScan.mockReturnValue(defaultScanResult({ hasScanned: true }));
+    render(<DownedStacksSection {...defaultProps} />);
+    fireEvent.click(screen.getByRole("button", { name: /prune images/i }));
+    fireEvent.click(screen.getByRole("button", { name: "ClosePruneImages" }));
+    expect(screen.queryByTestId("global-prune-modal")).not.toBeInTheDocument();
+  });
+
+  it("shows the Prune images button in minimal layout", () => {
+    mockUseScan.mockReturnValue(defaultScanResult({ hasScanned: true }));
+    render(<DownedStacksSection {...defaultProps} layout="minimal" />);
+    fireEvent.click(screen.getByRole("button", { name: /prune images/i }));
+    expect(screen.getByTestId("global-prune-modal")).toBeInTheDocument();
+  });
+
+  it("shows the [prune images] button in unix layout", () => {
+    mockUseScan.mockReturnValue(defaultScanResult({ hasScanned: true }));
+    render(<DownedStacksSection {...defaultProps} layout="unix" />);
+    fireEvent.click(screen.getByText("[prune images]"));
+    expect(screen.getByTestId("global-prune-modal")).toBeInTheDocument();
+  });
+
+  it("shows the Prune images button in pretty layout", () => {
+    mockUseScan.mockReturnValue(defaultScanResult({ hasScanned: true }));
+    render(<DownedStacksSection {...defaultProps} layout="pretty" />);
+    fireEvent.click(screen.getByRole("button", { name: /prune images/i }));
+    expect(screen.getByTestId("global-prune-modal")).toBeInTheDocument();
   });
 });
 
