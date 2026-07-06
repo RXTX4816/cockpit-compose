@@ -483,6 +483,26 @@
     "prune_button": "Prune selected",
     "nothing_to_remove": "Nothing to remove."
   },
+  "prune_global": {
+    "button": "Prune images",
+    "aria_label": "Prune unused images (all stacks)",
+    "title": "Prune unused images",
+    "body_intro": "This scans for images not currently used by any container, across the whole host — not just one stack. This includes images belonging to fully down stacks (no container exists to keep them \"in use\") and old versions left behind when a floating tag like :latest is re-pulled.",
+    "loading": "Scanning for unused images…",
+    "nothing_found": "No unused images found — nothing to reclaim.",
+    "column_id": "ID",
+    "column_repo_tag": "Repository:Tag",
+    "column_size": "Size",
+    "column_age": "Created",
+    "total_reclaimable": "Total reclaimable: {{size}}",
+    "confirm_title": "This will permanently delete these images",
+    "confirm_body": "{{count}} image(s) will be removed. If any belong to a currently down stack, that stack will need to re-pull them the next time it's brought up. This cannot be undone.",
+    "confirm_checkbox": "I understand this will permanently delete the images listed above",
+    "prune_button": "Prune",
+    "pruning": "Pruning…",
+    "result_title": "Done",
+    "error_title": "Prune failed"
+  },
   "downed_section": {
     "create_button": "Create",
     "import_button": "Import",

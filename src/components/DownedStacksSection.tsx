@@ -12,7 +12,7 @@ import {
   TextInput,
 } from "@patternfly/react-core";
 import { Tooltip } from "@rxtx4816/cockpit-plugin-base-react/components";
-import { PlusCircleIcon, FolderOpenIcon, AngleUpIcon, HistoryIcon, PencilAltIcon, ArchiveIcon, TrashIcon } from "@patternfly/react-icons";
+import { PlusCircleIcon, FolderOpenIcon, AngleUpIcon, HistoryIcon, PencilAltIcon, ArchiveIcon, TrashIcon, BroomIcon } from "@patternfly/react-icons";
 import { type ComposeStack } from "../api";
 import { type DownedStack, useDownedStacksScan } from "../hooks/useDownedStacksScan";
 import { type Layout } from "../lib/layout";
@@ -23,6 +23,7 @@ import { CreateStackModal } from "./CreateStackModal";
 import { DeleteStackModal } from "./DeleteStackModal";
 import { RestoreModal } from "./RestoreModal";
 import { BackupModal } from "./BackupModal";
+import { GlobalPruneModal } from "./GlobalPruneModal";
 import "./DownedStacksSection.css";
 import "./StacksView/UnixRow.css";
 import { inferComposeRoot } from "../lib/composeDiscovery";
@@ -62,6 +63,7 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
   const [deleteTarget, setDeleteTarget] = useState<DownedStack | null>(null);
   const [configFileOverrides, setConfigFileOverrides] = useState<Record<string, string[]>>({});
   const [restoreOpen, setRestoreOpen] = useState(false);
+  const [pruneOpen, setPruneOpen] = useState(false);
   const [backupTarget, setBackupTarget] = useState<DownedStack | null>(null);
   const [miniMenu, setMiniMenu] = useState<{ stack: DownedStack; x: number; y: number } | null>(null);
   const miniMenuRef = useRef<HTMLDivElement>(null);
@@ -240,12 +242,18 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
           <Tooltip content={t("downed_section.restore_button")}>
             <Button variant="plain" size="sm" icon={<HistoryIcon />} onClick={() => setRestoreOpen(true)} aria-label={t("downed_section.restore_button")} />
           </Tooltip>
+          <div className="dss-prune-btn">
+            <Tooltip content={t("prune_global.button")}>
+              <Button variant="plain" size="sm" icon={<BroomIcon />} onClick={() => setPruneOpen(true)} aria-label={t("prune_global.button")} />
+            </Tooltip>
+          </div>
         </div>
       ) : layout === "unix" ? (
         <div className="dss-unix-bar">
           <button className="ur-key ur-key--up" onClick={() => setCreateOpen(true)}>[new]</button>
           <button className={`ur-key${importOpen ? " ur-key--up" : ""}`} onClick={() => setImportOpen(o => !o)}>[import]</button>
           <button className="ur-key" onClick={() => setRestoreOpen(true)}>[restore]</button>
+          <button className="ur-key dss-prune-btn" onClick={() => setPruneOpen(true)}>[prune images]</button>
         </div>
       ) : layout === "pretty" ? (
         <div className="dss-import-bar">
@@ -264,6 +272,9 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
           <Button variant="secondary" size="sm" icon={<HistoryIcon />} onClick={() => setRestoreOpen(true)}>
             {t("downed_section.restore_button")}
           </Button>
+          <Button className="dss-prune-btn" variant="secondary" size="sm" icon={<BroomIcon />} onClick={() => setPruneOpen(true)}>
+            {t("prune_global.button")}
+          </Button>
         </div>
       ) : (
         <div className="dss-import-bar">
@@ -281,6 +292,9 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
           </Button>
           <Button variant="secondary" size="sm" icon={<HistoryIcon />} onClick={() => setRestoreOpen(true)}>
             {t("downed_section.restore_button")}
+          </Button>
+          <Button className="dss-prune-btn" variant="secondary" size="sm" icon={<BroomIcon />} onClick={() => setPruneOpen(true)}>
+            {t("prune_global.button")}
           </Button>
         </div>
       )}
@@ -544,6 +558,12 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
           defaultScanDir={inferComposeRoot([...stacks, ...manuallyDownedStacks.map(toSyntheticStack)])}
           onClose={() => setRestoreOpen(false)}
           onRestored={d => { addStack(d); setRestoreOpen(false); }}
+        />
+      )}
+      {pruneOpen && (
+        <GlobalPruneModal
+          onClose={() => setPruneOpen(false)}
+          onSuccess={onRefresh}
         />
       )}
     </>
