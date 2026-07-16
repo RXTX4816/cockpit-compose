@@ -154,7 +154,7 @@ npm run test:e2e:ui                           # visual runner (great for debuggi
 
 Tests live in `e2e/` and cover login, stack list, YAML editor, and more. Check `npm run vm status` for running VMs and their ports.
 
-See [docs/wiki/VM-Testing.md](docs/wiki/VM-Testing.md) for all VM ports, commands, and troubleshooting.
+See [docs/wiki/VM-Testing.md](docs/wiki/VM-Testing.md) for all VM ports, commands, and troubleshooting, and [docs/wiki/E2E-Test-Reference.md](docs/wiki/E2E-Test-Reference.md) for what every test actually covers.
 
 ## Translations
 
