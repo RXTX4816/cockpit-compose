@@ -25,6 +25,7 @@ install -m 0644 main.js       %{buildroot}%{_datadir}/cockpit/cockpit-compose/
 install -m 0644 main.css      %{buildroot}%{_datadir}/cockpit/cockpit-compose/
 install -m 0644 manifest.json %{buildroot}%{_datadir}/cockpit/cockpit-compose/
 install -m 0644 index.html    %{buildroot}%{_datadir}/cockpit/cockpit-compose/
+cp -r assets                  %{buildroot}%{_datadir}/cockpit/cockpit-compose/
 
 %files
 %doc README.md

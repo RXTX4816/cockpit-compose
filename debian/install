@@ -2,3 +2,4 @@ cockpit-compose/main.js       usr/share/cockpit/cockpit-compose/
 cockpit-compose/main.css      usr/share/cockpit/cockpit-compose/
 cockpit-compose/manifest.json usr/share/cockpit/cockpit-compose/
 cockpit-compose/index.html    usr/share/cockpit/cockpit-compose/
+cockpit-compose/assets        usr/share/cockpit/cockpit-compose/
