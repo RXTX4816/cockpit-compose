@@ -75,6 +75,16 @@ See [docs/wiki/VM-Testing.md](wiki/VM-Testing.md) for the full port table.
 | `e2e/login.spec.ts` | Login flow, plugin page loads, heading visible |
 | `e2e/stacks.spec.ts` | Stack list renders with pre-staged stacks, status badges, click-to-expand |
 | `e2e/yaml-editor.spec.ts` | YAML editor opens with content, Save button, diff toggle, close returns to list |
+| `e2e/stack-lifecycle.spec.ts` | Up starts a downed stack and Down removes it again, asserting real status transitions |
+| `e2e/rootless-compose-root.spec.ts` | Create Stack suggests the home directory when rootless (podman VMs only) |
+| `e2e/logs.spec.ts` | Log streaming, service filter, search, pause/resume, clear, refresh |
+| `e2e/exec.spec.ts` | Shell exec runs a real command in the container |
+| `e2e/scale.spec.ts` | Scaling a service creates real extra replica containers |
+| `e2e/prune.spec.ts` | Pruning actually removes stopped containers |
+| `e2e/create-stack.spec.ts` | Creating a stack (manual method) writes a real compose file to disk |
+| `e2e/adversarial.spec.ts` | Malformed YAML, a nonexistent scan directory, and scan-depth bounds all fail safely |
+
+Full per-test detail (what each one asserts, preconditions, VM scope) is in [E2E Test Reference](wiki/E2E-Test-Reference.md).
 
 ### Pre-staged test stacks
 
@@ -94,6 +104,8 @@ test('my test', async ({ pluginPage: page }) => {
 ```
 
 Use `npm run test:e2e:codegen` to record new tests interactively — it generates Playwright code as you click through the UI.
+
+For shared setup/action helpers (`baseData`, stack actions, runtime assertions), see `e2e/helpers/`. For the full backlog of planned e2e coverage mapped to the feature scenarios below, see [E2E Test Inventory](wiki/E2E-Test-Inventory.md).
 
 ---
 

@@ -36,3 +36,5 @@
 **Development**
 
 - [VM Testing](VM-Testing)
+- [E2E Test Reference](E2E-Test-Reference)
+- [E2E Test Inventory](E2E-Test-Inventory)

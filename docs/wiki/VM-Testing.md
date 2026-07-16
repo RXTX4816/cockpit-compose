@@ -169,9 +169,57 @@ VM_MEM=4096 VM_CPUS=4 npm run vm start fedora
 
 | Variable | Default | Description |
 |---|---|---|
-| `VM_MEM` | `2048` | RAM in MB |
+| `VM_MEM` | `1024` | RAM in MB |
 | `VM_CPUS` | `2` | vCPU count |
 | `VM_DISK_SIZE` | `12G` | Overlay disk size |
+
+## Managing resource usage across the matrix
+
+Starting all 9 VMs at once (`npm run vm start`) needs ~9 GB of RAM at the
+default `VM_MEM=1024`, plus 18 vCPUs — enough to bog down most dev machines.
+There's no built-in concurrency limiter (VMs launch back-to-back as
+daemonized QEMU processes), so manage this by controlling *what* you start:
+
+- **Day-to-day development and most feature tests**: use a single distro's
+  three scenarios instead of the full matrix — behavior for app-level logic
+  (stack CRUD, YAML editor, etc.) doesn't depend on the distro.
+  ```bash
+  npm run vm start arch      # arch-podman, arch-docker, arch-both — ~3 GB RAM
+  npm run vm wait arch
+  npm run test:e2e -- --project=arch-podman --project=arch-docker --project=arch-both
+  npm run vm stop arch
+  ```
+- **Full 9-VM matrix** (needed for rootless/rootful and distro-specific
+  quirks — see testing guide §7): run it in batches, one distro at a time,
+  rather than starting all 9 concurrently:
+  ```bash
+  for distro in arch debian fedora; do
+    npm run vm start "$distro"
+    npm run vm wait "$distro"
+    npm run test:e2e -- --project="$distro-podman" --project="$distro-docker" --project="$distro-both"
+    npm run vm stop "$distro"
+  done
+  ```
+  This caps peak usage to one distro's VMs instead of all 9 at once.
+
+**Don't go below the `VM_MEM=1024` default — go above it for the heavier
+specs.** Earlier guidance here suggested `VM_MEM=768` was safe since the
+fixture stacks are individually lightweight, but live testing during the
+issue #227 e2e expansion found the *default* 1024 MB itself is already too
+tight once a spec brings up something like `volumes-test` (runs Postgres)
+or drives a real exec/PTY session (`exec.spec.ts`) — `free -h` inside the
+guest showed it swapping internally (only ~950 MB total RAM, actively
+using swap) under that load, which manifests as flaky timeouts that look
+like app bugs but aren't. If you're running `logs.spec.ts`, `exec.spec.ts`,
+`prune.spec.ts`, or `scale.spec.ts` — or the full suite — start those VMs
+with more headroom:
+```bash
+VM_MEM=2048 npm run vm start arch-docker
+```
+`logs.spec.ts` went from consistently failing to consistently passing after
+bumping a VM from 1024 → 2048 MB with no code changes. See "Known flaky
+behavior" in [E2E Test Reference](E2E-Test-Reference.md) for the full
+writeup.
 
 ## Automated browser tests (Playwright)
 
