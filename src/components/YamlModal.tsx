@@ -256,8 +256,9 @@ export function YamlModal({ stack, onClose, onFileAdded, onFileRemoved }: Props)
     setError(null);
     setConfirmSave(false);
     try {
-      await saveSnapshot(configFile, content);
-      await saveComposeFile(configFile, editedContent);
+      const su = await composeFileSuperuser([configFile]);
+      await saveSnapshot(configFile, content, su);
+      await saveComposeFile(configFile, editedContent, su);
       setContent(editedContent);
       setEditing(false);
       await loadSnapshots();
