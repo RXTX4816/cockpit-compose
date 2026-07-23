@@ -10,6 +10,8 @@ ALL_VMS=(
   arch-podman   arch-docker   arch-both
   debian-podman debian-docker debian-both
   fedora-podman fedora-docker fedora-both
+  fedora-podman-rootful
+  fedora-full
 )
 SSH_BASE=2220
 COCKPIT_BASE=9090
@@ -21,7 +23,7 @@ extra_packages() {
   local scenario="${vm#*-}"
 
   # Podman packages
-  if [[ "$scenario" == "podman" || "$scenario" == "both" ]]; then
+  if [[ "$scenario" == "podman" || "$scenario" == "both" || "$scenario" == "podman-rootful" || "$scenario" == "full" ]]; then
     # passt is the Podman rootless network backend; not needed for Docker-only VMs
     printf 'passt\npodman\npodman-compose\n'
     # docker-compose as external podman compose provider (both scenario, arch/debian only)
@@ -33,11 +35,18 @@ extra_packages() {
   fi
 
   # Docker packages — Arch installs from pacman; Debian/Fedora install Docker CE via runcmd
-  if [[ "$scenario" == "docker" || "$scenario" == "both" ]]; then
+  if [[ "$scenario" == "docker" || "$scenario" == "both" || "$scenario" == "full" ]]; then
     if [[ "$distro" == "arch" ]]; then
       printf 'docker\ndocker-compose\n'
     fi
   fi
+
+  # fedora-full note: rootless Docker's newuidmap/newgidmap ship in Fedora's base shadow-utils
+  # package (already present on every install) — there's no separate "uidmap" package like on
+  # Debian/Ubuntu, so nothing extra is needed here for that.
+  # docker-ce-rootless-extras is NOT listed here — it only exists in Docker's own repo, which
+  # is added later via runcmd, after this initial package list is installed. Listing it here
+  # would fail the whole `dnf install` transaction atomically (taking cockpit down with it).
 }
 
 extra_runcmd() {
@@ -52,21 +61,34 @@ extra_runcmd() {
 YAML
 
   # ── Podman setup ──────────────────────────────────────────────────────────────
-  if [[ "$scenario" == "podman" || "$scenario" == "both" ]]; then
+  if [[ "$scenario" == "podman" || "$scenario" == "both" || "$scenario" == "podman-rootful" || "$scenario" == "full" ]]; then
     cat <<YAML
-  # Podman — rootful socket + rootless socket for test user
+  # Podman — system-wide rootful socket, needed by every podman scenario
   - systemctl enable --now podman.socket
+  - mkdir -p /root/.config/containers
+  - printf '[network]\ndefault_rootless_network_cmd = "pasta"\n' > /root/.config/containers/containers.conf
+YAML
+
+    if [[ "$scenario" == "podman-rootful" ]]; then
+      cat <<YAML
+  # Rootful-only scenario (issue #242 regression test): deliberately skip linger/user-session
+  # setup below so /run/user/<uid>/podman/podman.sock never exists — only the system-wide
+  # /run/podman/podman.sock is available, exactly like a "sudo podman compose up" setup.
+YAML
+    else
+      cat <<YAML
+  # Rootless socket for test user (podman/both scenarios only)
   - systemctl --global enable podman.socket || true
   - loginctl enable-linger test
   # Delegate full cgroup subtree to user sessions so crun can freeze containers (needed for pause/unpause).
   - mkdir -p /etc/systemd/system/user@.service.d
   - printf '[Service]\nDelegate=yes\n' > /etc/systemd/system/user@.service.d/delegate.conf
   - systemctl daemon-reload
-  - mkdir -p /root/.config/containers /home/test/.config/containers
-  - printf '[network]\ndefault_rootless_network_cmd = "pasta"\n' > /root/.config/containers/containers.conf
+  - mkdir -p /home/test/.config/containers
   - printf '[network]\ndefault_rootless_network_cmd = "pasta"\n' > /home/test/.config/containers/containers.conf
   - chown -R test:test /home/test/.config
 YAML
+    fi
 
     # Debian bookworm ships podman-compose 1.0.3 which predates pause/unpause and version --format json.
     # Upgrade via pip so the installed version matches what Fedora/Arch ship from their repos.
@@ -90,14 +112,18 @@ YAML
     if [[ "$distro" == "fedora" ]]; then
       cat <<YAML
   - printf '[containers]\nlabel = false\n\n[network]\ndefault_rootless_network_cmd = "pasta"\n' > /root/.config/containers/containers.conf
-  - printf '[containers]\nlabel = false\n\n[network]\ndefault_rootless_network_cmd = "pasta"\n' > /home/test/.config/containers/containers.conf
   - setsebool -P container_execmem 1 || true
 YAML
+      if [[ "$scenario" != "podman-rootful" ]]; then
+        cat <<YAML
+  - printf '[containers]\nlabel = false\n\n[network]\ndefault_rootless_network_cmd = "pasta"\n' > /home/test/.config/containers/containers.conf
+YAML
+      fi
     fi
   fi
 
-  # ── Docker setup ──────────────────────────────────────────────────────────────
-  if [[ "$scenario" == "docker" || "$scenario" == "both" ]]; then
+  # ── Docker setup (rootful) ────────────────────────────────────────────────────
+  if [[ "$scenario" == "docker" || "$scenario" == "both" || "$scenario" == "full" ]]; then
     case "$distro" in
       arch)
         cat <<YAML
@@ -130,7 +156,7 @@ YAML
         cat <<YAML
   # Docker CE (Fedora — from Docker's official dnf repo)
   - curl -fsSL https://download.docker.com/linux/fedora/docker-ce.repo -o /etc/yum.repos.d/docker-ce.repo
-  - dnf install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+  - dnf install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin$( [[ "$scenario" == "full" ]] && printf ' docker-ce-rootless-extras' )
   - systemctl enable --now docker
   - usermod -aG docker test
 YAML
@@ -138,12 +164,42 @@ YAML
     esac
   fi
 
+  # ── Docker setup (rootless, fedora-full only) ────────────────────────────────
+  # EXPERIMENTAL: rootless Docker is a genuinely separate daemon/socket from the rootful one
+  # (unlike Podman, which shares one binary across both modes) — this recipe follows Docker's
+  # documented rootless install (https://docs.docker.com/engine/security/rootless/) but has not
+  # been verified end-to-end by actually booting this scenario. Treat first boot as best-effort;
+  # if `dockerd-rootless-setuptool.sh install` fails, `npm run vm logs fedora-full` and
+  # `journalctl --user -u docker` (as the test user) are the first places to look.
+  if [[ "$scenario" == "full" ]]; then
+    cat <<YAML
+  # Rootless Docker needs subuid/subgid ranges for the test user (cloud images don't always
+  # pre-populate these for non-root users).
+  - grep -q "^test:" /etc/subuid || echo "test:100000:65536" >> /etc/subuid
+  - grep -q "^test:" /etc/subgid || echo "test:100000:65536" >> /etc/subgid
+  - loginctl enable-linger test
+  - mkdir -p /etc/systemd/system/user@.service.d
+  - printf '[Service]\nDelegate=yes\n' > /etc/systemd/system/user@.service.d/delegate.conf
+  - systemctl daemon-reload
+  - systemctl start "user@\$(id -u test).service" || true
+  # --force: the setuptool refuses to run otherwise when rootful Docker (enabled earlier in this
+  # same runcmd, above) is already active and accessible — confirmed by actually running this
+  # without --force on a booted VM: "Aborting because rootful Docker (/var/run/docker.sock) is
+  # running and accessible. Set --force to ignore." We want both running side by side, so force it.
+  - su - test -c 'PATH=/usr/bin:\$PATH dockerd-rootless-setuptool.sh install --force' || true
+  - su - test -c 'systemctl --user enable --now docker' || true
+YAML
+  fi
+
   # Explicitly start the user's systemd instance so user-level services (podman.socket, D-Bus) are
   # active immediately after first boot rather than waiting for the first interactive login.
   # Also explicitly start podman.socket in the user session: --global enable marks it for autostart
   # but doesn't create the socket file. In the "both" scenario docker-compose acts as the podman
   # compose external provider and needs /run/user/UID/podman/podman.sock to exist immediately.
-  if [[ "$scenario" == "podman" || "$scenario" == "both" ]]; then
+  # "full" needs this too — confirmed by booting a VM without it: rootless podman.socket ended up
+  # enabled (from --global enable above) but never actually started, staying "inactive" forever.
+  # Skipped for podman-rootful: that scenario must NOT have a rootless socket (see above).
+  if [[ "$scenario" == "podman" || "$scenario" == "both" || "$scenario" == "full" ]]; then
     cat <<YAML
   - systemctl start "user@\$(id -u test).service" || true
   - su - test -c 'systemctl --user start podman.socket' || true

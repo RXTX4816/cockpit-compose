@@ -6,37 +6,21 @@ import { mockProcess } from "../test/helpers";
 
 vi.mock("../api", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../api")>();
-  return { ...actual, isRootlessMode: vi.fn().mockReturnValue(false) };
+  return { ...actual, stackSuperuser: vi.fn().mockResolvedValue(undefined) };
 });
 
-import { isRootlessMode } from "../api";
-const mockIsRootlessMode = vi.mocked(isRootlessMode);
-
-const mockUser = vi.fn().mockResolvedValue({ id: 1000, name: "user", home: "/home/user" });
+import { stackSuperuser } from "../api";
+const mockStackSuperuser = vi.mocked(stackSuperuser);
 
 beforeEach(() => {
   mockSpawn.mockReset();
-  mockUser.mockReset().mockResolvedValue({ id: 1000, name: "user", home: "/home/user" });
-  // Include user() so composeFileSuperuser can resolve the current user.
-  // Spawn is called twice for stat (dir + file) then once for the actual process.
-  vi.stubGlobal("cockpit", { spawn: mockSpawn, user: mockUser });
+  mockStackSuperuser.mockReset().mockResolvedValue(undefined);
+  vi.stubGlobal("cockpit", { spawn: mockSpawn });
 });
-
-// The first two spawns from any test are stat calls from composeFileSuperuser.
-// Use a factory so the actual process is created lazily (when spawn is called),
-// preventing queueMicrotask-based rejections from firing before a handler attaches.
-function withStatMocks(makeActual: () => CockpitProcess) {
-  let count = 0;
-  mockSpawn.mockImplementation(() => {
-    count++;
-    if (count <= 2) return mockProcess("1000\n");
-    return makeActual();
-  });
-}
 
 describe("useUpStream", () => {
   it("starts with empty lines and done=false, failed=false", () => {
-    withStatMocks(() => mockProcess(""));
+    mockSpawn.mockImplementation(() => mockProcess(""));
     const { result } = renderHook(() => useUpStream("myapp", ["/path/compose.yml"]));
     expect(result.current.lines).toEqual([]);
     expect(result.current.done).toBe(false);
@@ -44,14 +28,14 @@ describe("useUpStream", () => {
   });
 
   it("sets done=true on process completion", async () => {
-    withStatMocks(() => mockProcess(""));
+    mockSpawn.mockImplementation(() => mockProcess(""));
     const { result } = renderHook(() => useUpStream("myapp", ["/path/compose.yml"]));
     await waitFor(() => expect(result.current.done).toBe(true));
     expect(result.current.failed).toBe(false);
   });
 
   it("sets done=true and failed=true on process error", async () => {
-    withStatMocks(() => mockProcess("", "up failed"));
+    mockSpawn.mockImplementation(() => mockProcess("", "up failed"));
     const { result } = renderHook(() => useUpStream("myapp", ["/path/compose.yml"]));
     await waitFor(() => expect(result.current.done).toBe(true));
     expect(result.current.failed).toBe(true);
@@ -59,7 +43,7 @@ describe("useUpStream", () => {
   });
 
   it("parses newline-delimited output into LineEntry items", async () => {
-    withStatMocks(() => mockProcess("Container myapp-web-1  Running\nContainer myapp-db-1  Started\n"));
+    mockSpawn.mockImplementation(() => mockProcess("Container myapp-web-1  Running\nContainer myapp-db-1  Started\n"));
     const { result } = renderHook(() => useUpStream("myapp", ["/path/compose.yml"]));
     await waitFor(() => expect(result.current.lines.length).toBeGreaterThan(0));
     expect(result.current.lines[0]).toHaveProperty("text");
@@ -67,21 +51,21 @@ describe("useUpStream", () => {
   });
 
   it("strips ANSI escape codes from output", async () => {
-    withStatMocks(() => mockProcess("\x1b[32mGreen text\x1b[0m\n"));
+    mockSpawn.mockImplementation(() => mockProcess("\x1b[32mGreen text\x1b[0m\n"));
     const { result } = renderHook(() => useUpStream("myapp", ["/path/compose.yml"]));
     await waitFor(() => expect(result.current.lines.length).toBeGreaterThan(0));
     expect(result.current.lines[0].text).toBe("Green text");
   });
 
   it("handles \\r carriage return — takes the last segment", async () => {
-    withStatMocks(() => mockProcess("first\rsecond\n"));
+    mockSpawn.mockImplementation(() => mockProcess("first\rsecond\n"));
     const { result } = renderHook(() => useUpStream("myapp", ["/path/compose.yml"]));
     await waitFor(() => expect(result.current.lines.length).toBeGreaterThan(0));
     expect(result.current.lines[0].text).toBe("second");
   });
 
   it("filters out whitespace-only lines", async () => {
-    withStatMocks(() => mockProcess("real line\n   \n\n"));
+    mockSpawn.mockImplementation(() => mockProcess("real line\n   \n\n"));
     const { result } = renderHook(() => useUpStream("myapp", ["/path/compose.yml"]));
     await waitFor(() => expect(result.current.done).toBe(true));
     expect(result.current.lines.every(l => l.text.trim() !== "")).toBe(true);
@@ -93,9 +77,9 @@ describe("useUpStream", () => {
       close: vi.fn(),
       input: vi.fn(),
     }) as CockpitProcess;
-    withStatMocks(() => proc);
+    mockSpawn.mockReturnValue(proc);
     const { result } = renderHook(() => useUpStream("myapp", ["/path/compose.yml"]));
-    await waitFor(() => expect(mockSpawn).toHaveBeenCalledTimes(3));
+    await waitFor(() => expect(mockSpawn).toHaveBeenCalledTimes(1));
     result.current.cancel();
     expect((proc as unknown as { close: ReturnType<typeof vi.fn> }).close).toHaveBeenCalled();
   });
@@ -106,36 +90,35 @@ describe("useUpStream", () => {
       close: vi.fn(),
       input: vi.fn(),
     }) as CockpitProcess;
-    withStatMocks(() => proc);
+    mockSpawn.mockReturnValue(proc);
     const { unmount } = renderHook(() => useUpStream("myapp", ["/path/compose.yml"]));
-    await waitFor(() => expect(mockSpawn).toHaveBeenCalledTimes(3));
+    await waitFor(() => expect(mockSpawn).toHaveBeenCalledTimes(1));
     unmount();
     expect((proc as unknown as { close: ReturnType<typeof vi.fn> }).close).toHaveBeenCalled();
   });
 
   it("produces no line entries when stream only contains whitespace-only lines", async () => {
-    withStatMocks(() => mockProcess("   \n   \n"));
+    mockSpawn.mockImplementation(() => mockProcess("   \n   \n"));
     const { result } = renderHook(() => useUpStream("myapp", ["/path/compose.yml"]));
     await waitFor(() => expect(result.current.done).toBe(true));
     expect(result.current.lines).toHaveLength(0);
   });
 
-  it("skips composeFileSuperuser when in rootless mode", async () => {
-    mockIsRootlessMode.mockReturnValue(true);
+  it("requests superuser escalation via stackSuperuser and passes it to the spawn", async () => {
+    mockStackSuperuser.mockResolvedValue("try");
     mockSpawn.mockImplementation(() => mockProcess("Up output\n"));
     const { result } = renderHook(() => useUpStream("myapp", ["/path/compose.yml"]));
     await waitFor(() => expect(result.current.done).toBe(true));
     expect(mockSpawn).toHaveBeenCalledTimes(1);
-    mockIsRootlessMode.mockReturnValue(false);
+    expect(mockSpawn.mock.calls[0][1]).toMatchObject({ superuser: "try" });
   });
 
   it("uses String(ex) when rejection is not an Error instance", async () => {
-    withStatMocks(() =>
-      Object.assign(
-        new Promise<string>((_, reject) => queueMicrotask(() => reject("plain string error"))),
-        { stream: vi.fn().mockReturnThis(), close: vi.fn(), input: vi.fn() },
-      ) as CockpitProcess,
-    );
+    const proc = Object.assign(
+      new Promise<string>((_, reject) => queueMicrotask(() => reject("plain string error"))),
+      { stream: vi.fn().mockReturnThis(), close: vi.fn(), input: vi.fn() },
+    ) as CockpitProcess;
+    mockSpawn.mockReturnValue(proc);
     const { result } = renderHook(() => useUpStream("myapp", ["/path/compose.yml"]));
     await waitFor(() => expect(result.current.done).toBe(true));
     expect(result.current.failed).toBe(true);

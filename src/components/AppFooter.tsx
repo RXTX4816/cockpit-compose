@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { PageSection, Label } from "@patternfly/react-core";
 import { Tooltip } from "@rxtx4816/cockpit-plugin-base-react/components";
 import { HelpPopover } from "./HelpPopover";
-import { composeVersion, containerVersion, isRootlessMode, getDockerSocketPath, getPodmanSocketPath, type ComposeVersion, type Runtime } from "../api";
+import { composeVersion, containerVersion, isRootlessMode, getDockerSocketPath, getPodmanSocketPath, SOCKET_MODE_CHANGE_EVENT, type ComposeVersion, type Runtime } from "../api";
 // @ts-expect-error: ESM import assertion for JSON
 import pkg from "../../package.json" assert { type: "json" };
 
@@ -15,6 +15,15 @@ export function AppFooter({ runtime }: Props) {
   const { t } = useTranslation();
   const [version, setVersion] = useState<ComposeVersion | null>(null);
   const [dockerVer, setDockerVer] = useState<string | null>(null);
+  const [, forceRefresh] = useState(0);
+
+  // The socket-mode toggle lives in RuntimeToggle, a sibling elsewhere in the tree — listen
+  // for its change event rather than prop-drilling, so the badge below stays in sync.
+  useEffect(() => {
+    const handler = () => forceRefresh(v => v + 1);
+    window.addEventListener(SOCKET_MODE_CHANGE_EVENT, handler);
+    return () => window.removeEventListener(SOCKET_MODE_CHANGE_EVENT, handler);
+  }, []);
 
   useEffect(() => {
     setVersion(null);
@@ -79,7 +88,7 @@ export function AppFooter({ runtime }: Props) {
           {version && (
             <Label isCompact color="blue">{t("footer.compose_version", { version: version.version, runtime: runtimeLabel })}</Label>
           )}
-          {rootless && (
+          {rootless ? (
             <span style={{ display: "inline-flex", alignItems: "center", gap: "0.2rem" }}>
               <Label isCompact color="green">{t("footer.rootless")}</Label>
               <HelpPopover
@@ -88,7 +97,16 @@ export function AppFooter({ runtime }: Props) {
                 aria-label={t("footer.rootless_help_title")}
               />
             </span>
-          )}
+          ) : socketPath ? (
+            <span style={{ display: "inline-flex", alignItems: "center", gap: "0.2rem" }}>
+              <Label isCompact color="orange">{t("footer.rootful")}</Label>
+              <HelpPopover
+                header={t("footer.rootful_help_title")}
+                body={t("footer.rootful_help_body")}
+                aria-label={t("footer.rootful_help_title")}
+              />
+            </span>
+          ) : null}
         </div>
         <div style={{ display: "flex", flexDirection: "row", gap: 16, justifyContent: "center" }}>
           <a href="https://github.com/RXTX4816/cockpit-compose/wiki" target="_blank" rel="noopener noreferrer" style={{ color: "#0071c1", textDecoration: "none" }}>{t("footer.help")}</a>

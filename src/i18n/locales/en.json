@@ -97,6 +97,9 @@
     "rootless": "Rootless",
     "rootless_help_title": "Rootless mode",
     "rootless_help_body": "Docker or Podman is running in rootless mode — containers run as your user, not root. This improves security but may limit some features such as binding privileged ports (<1024), accessing system paths, or using certain network drivers.",
+    "rootful": "Rootful",
+    "rootful_help_title": "Rootful mode",
+    "rootful_help_body": "Docker or Podman is running in rootful (system-wide) mode — containers run as root. Actions are escalated via Cockpit's administrative access when needed.",
     "help": "Help",
     "feedback": "Feedback / Report bug"
   },
@@ -107,7 +110,17 @@
     "not_installed": "{{runtime}} not found — install it to switch",
     "podman_confirm_title": "Switch to Podman",
     "podman_confirm_body": "Podman support is experimental. Depending on your setup, some features may not work as expected — including stack discovery, log streaming, and certain compose commands.",
-    "podman_suggest_docker_missing": "Docker was not found on this system. Switch to Podman to manage your containers."
+    "podman_suggest_docker_missing": "Docker was not found on this system. Switch to Podman to manage your containers.",
+    "rootless": "Rootless",
+    "rootful": "Rootful",
+    "socket_mode_toggle_label": "Socket mode",
+    "rootless_help": "Use the per-user (rootless) socket. Containers run as your own user.",
+    "rootful_help": "Use the system-wide (rootful) socket. Containers run as root, escalated via Cockpit's administrative access.",
+    "socket_not_detected": "Socket not detected",
+    "rootful_needs_admin_access": "Rootful socket detected but couldn't be confirmed — turn on Cockpit's Administrative access, then click Recheck",
+    "recheck_sockets": "Recheck socket availability",
+    "no_socket_detected": "No {{runtime}} engine socket detected. Make sure {{runtime}} is installed and running.",
+    "no_socket_needs_admin_access": "No {{runtime}} engine socket confirmed — a rootful socket was found but requires Cockpit's Administrative access. Turn it on, then click Recheck."
   },
   "layout": {
     "toggle_label": "Display layout",

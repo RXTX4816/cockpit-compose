@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { downStack, composeFileSuperuser, readAllProfiles, isRootlessMode, type ComposeStack } from "../api";
+import { downStack, stackSuperuser, readAllProfiles, type ComposeStack } from "../api";
 import { splitConfigFiles } from "../lib/configFiles";
 
 export function useDownStack(
@@ -25,7 +25,7 @@ export function useDownStack(
     onActingChange(1);
     try {
       const [su, profiles] = await Promise.all([
-        isRootlessMode() ? Promise.resolve<"try" | undefined>(undefined) : composeFileSuperuser(configFiles),
+        stackSuperuser(configFiles),
         readAllProfiles(configFiles[0]),
       ]);
       await downStack(target.Name, configFiles, profiles, su);

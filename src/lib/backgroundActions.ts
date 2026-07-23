@@ -5,18 +5,12 @@ import {
   downStack,
   restartStack,
   killStack,
-  composeFileSuperuser,
-  isRootlessMode,
+  stackSuperuser,
   readAllProfiles,
 } from "../api";
 import { splitConfigFiles } from "./configFiles";
 
 type Launch = (proc: CockpitProcess) => void;
-
-/** Resolves superuser, skipping the check entirely in rootless mode (no escalation possible/needed). */
-function resolveSuperuser(configFiles: string[]): Promise<"try" | undefined> {
-  return isRootlessMode() ? Promise.resolve(undefined) : composeFileSuperuser(configFiles);
-}
 
 /**
  * Builds a background-task starter for `up`, given the stack and (already
@@ -25,7 +19,7 @@ function resolveSuperuser(configFiles: string[]): Promise<"try" | undefined> {
  */
 export function buildUpStarter(stack: ComposeStack, profiles: string[] = []) {
   const configFiles = splitConfigFiles(stack.ConfigFiles);
-  return (launch: Launch) => resolveSuperuser(configFiles)
+  return (launch: Launch) => stackSuperuser(configFiles)
     .then(su => { launch(upStackStream(stack.Name, configFiles, profiles, su)); });
 }
 
@@ -33,7 +27,7 @@ export function buildUpStarter(stack: ComposeStack, profiles: string[] = []) {
 export function buildPullStarter(stack: ComposeStack) {
   const configFiles = splitConfigFiles(stack.ConfigFiles);
   return (launch: Launch) => Promise.all([
-    resolveSuperuser(configFiles),
+    stackSuperuser(configFiles),
     readAllProfiles(configFiles[0]),
   ]).then(([su, profiles]) => { launch(pullStack(stack.Name, configFiles, profiles, su)); });
 }
@@ -41,20 +35,20 @@ export function buildPullStarter(stack: ComposeStack) {
 /** Builds a background-task starter for `down`. */
 export function buildDownStarter(stack: ComposeStack) {
   const configFiles = splitConfigFiles(stack.ConfigFiles);
-  return (launch: Launch) => resolveSuperuser(configFiles)
+  return (launch: Launch) => stackSuperuser(configFiles)
     .then(su => { launch(downStack(stack.Name, configFiles, [], su)); });
 }
 
 /** Builds a background-task starter for `restart`. */
 export function buildRestartStarter(stack: ComposeStack) {
   const configFiles = splitConfigFiles(stack.ConfigFiles);
-  return (launch: Launch) => resolveSuperuser(configFiles)
+  return (launch: Launch) => stackSuperuser(configFiles)
     .then(su => { launch(restartStack(stack.Name, configFiles, [], [], su)); });
 }
 
 /** Builds a background-task starter for `kill`. */
 export function buildKillStarter(stack: ComposeStack) {
   const configFiles = splitConfigFiles(stack.ConfigFiles);
-  return (launch: Launch) => resolveSuperuser(configFiles)
+  return (launch: Launch) => stackSuperuser(configFiles)
     .then(su => { launch(killStack(stack.Name, configFiles, [], su)); });
 }

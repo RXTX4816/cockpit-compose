@@ -20,7 +20,7 @@ Docker and Podman Compose management for [Cockpit](https://cockpit-project.org) 
 - Run one-off commands with an option to override the image's entrypoint when needed
 - YAML editor with syntax validation, diff view, auto-snapshot + .ENV editor
 - Backup and restore stacks as `.bak.tar.gz` archives
-- Docker and Podman support, including rootless setups
+- Docker and Podman support, including rootless and rootful setups, with a manual toggle when both are available
 
 ## Requirements
 
@@ -41,7 +41,7 @@ Docker is not installed by default on most distros. Install it and add your user
 sudo usermod -aG docker $USER
 ```
 
-For rootless Docker or Podman, see [Podman Compatibility](docs/wiki/Podman-Compatibility.md) in the wiki.
+For rootless or rootful Docker/Podman, and the toggle to switch between them when both are detected, see [Podman Compatibility](docs/wiki/Podman-Compatibility.md) in the wiki.
 
 ## Installation
 
@@ -131,15 +131,17 @@ npm run base:reset      # restores the npm registry version
 
 ### VM Testing
 
-QEMU VMs for testing across Arch, Debian, and Fedora with Docker, Podman, and both-runtime scenarios. Your `src/` folder is mounted live so `npm run watch` changes appear in the browser without restarting anything. The VM harness is provided by the base library; plugin-specific config lives in `scripts/test-vm.config.sh`.
+QEMU VMs for testing across Arch, Debian, and Fedora with Docker, Podman, and both-runtime scenarios — plus two Fedora-only scenarios for rootless/rootful-specific bugs (`podman-rootful`: no rootless socket at all; `full`: Docker and Podman each running rootless *and* rootful simultaneously). Your `src/` folder is mounted live so `npm run watch` changes appear in the browser without restarting anything. The VM harness is provided by the base library; plugin-specific config lives in `scripts/test-vm.config.sh`.
 
 ```bash
 sudo pacman -S qemu-full cloud-image-utils wget   # one-time
 npm run build
 npm run vm download          # download base images (~500–700 MB each)
-npm run vm start             # start all 9 VMs
+npm run vm start             # start every VM
 # Open https://localhost:9090 — login: test / test
 ```
+
+See [docs/wiki/VM-Testing.md](docs/wiki/VM-Testing.md) for the full list of VMs, ports, and scenario details.
 
 ### E2E browser tests (Playwright)
 
@@ -148,9 +150,13 @@ Once a VM is running, Playwright drives Chromium against the live Cockpit UI. Ea
 ```bash
 npm run vm start debian-podman && npm run vm wait debian-podman
 npm run test:e2e -- --project=debian-podman   # single VM
-npm run test:e2e                              # all 9 VMs (all must be running)
+npm run test:e2e                              # every VM (all must be running)
 npm run test:e2e:ui                           # visual runner (great for debugging)
 ```
+
+Specs needing real Cockpit Administrative access (e.g. rootful Podman with no rootless socket
+available) use `loginWithAdminAccess` from `e2e/helpers/admin.ts` instead of the default
+`pluginPage` fixture — see [E2E Test Reference](docs/wiki/E2E-Test-Reference.md) for why.
 
 Tests live in `e2e/` and cover login, stack list, YAML editor, and more. Check `npm run vm status` for running VMs and their ports.
 
@@ -164,8 +170,8 @@ The UI language follows Cockpit's language setting.
 | Coverage | Languages |
 |---|---|
 | 100% | English (`en`) — source |
-| 87% | `de`, `pl` |
-| 85% | `ar`, `cs`, `es`, `fi`, `fr`, `he`, `id`, `it`, `ja`, `ka`, `ko`, `nl`, `pt-BR`, `ro`, `ru`, `sk`, `sv`, `tr`, `uk`, `zh-CN`, `zh-TW` |
+| 85% | `de`, `pl` |
+| 83% | `ar`, `cs`, `es`, `fi`, `fr`, `he`, `id`, `it`, `ja`, `ka`, `ko`, `nl`, `pt-BR`, `ro`, `ru`, `sk`, `sv`, `tr`, `uk`, `zh-CN`, `zh-TW` |
 <!-- i18n-coverage-end -->
 
 To add a new language, copy `src/i18n/locales/en.json`, translate the values, and register the file in `src/i18n/index.ts`.

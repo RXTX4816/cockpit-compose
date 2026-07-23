@@ -88,6 +88,7 @@ export function StacksToolbar({
         <ToolbarItem align={{ default: "alignEnd" }}>
           <RuntimeToggle
             onRuntimeChange={(r) => { onReset(); onRuntimeChange?.(r); }}
+            onSocketModeChange={onReset}
             suggestPodman={dockerMissing}
           />
         </ToolbarItem>

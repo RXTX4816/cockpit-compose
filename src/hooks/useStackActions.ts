@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { startStack, stopStack, restartStack, readRunningServiceNames, pauseStack, unpauseStack, composeFileSuperuser, readAllProfiles, isRootlessMode } from "../api";
+import { startStack, stopStack, restartStack, readRunningServiceNames, pauseStack, unpauseStack, stackSuperuser, readAllProfiles } from "../api";
 import { useToast } from "../components/ToastProvider";
 
 export function useStackActions(
@@ -23,7 +23,7 @@ export function useStackActions(
     setActionError(null);
     try {
       const [su, profiles] = await Promise.all([
-        isRootlessMode() ? Promise.resolve<"try" | undefined>(undefined) : composeFileSuperuser(configFiles),
+        stackSuperuser(configFiles),
         readAllProfiles(configFiles[0]),
       ]);
       if (action === "start") await startStack(stackName, configFiles, profiles, su);

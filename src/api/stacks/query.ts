@@ -1,5 +1,25 @@
-import { compose, cli, getIsPodman, dockerSpawnEnviron, composeIsLimitedBackend } from "../cockpit";
+import { compose, cli, getIsPodman, dockerSpawnEnviron, composeIsLimitedBackend, socketSuperuser } from "../cockpit";
 import { fileFlags, makeFakeProcess, type PodmanPsContainer, type PodmanPsForImages, type PodmanImageInspect, type PodmanVolumeJson } from "./internal";
+
+// podman-compose (Python) is known to record whatever path was passed on the CLI in the
+// com.docker.compose.project.config_files label, without resolving it to an absolute path
+// (unlike docker compose / podman compose v2, which always store the resolved absolute path).
+// If the stack was started from its own directory (e.g. `cd mystack && sudo podman compose up`),
+// that label ends up holding a bare relative filename like "docker-compose.yml" — which then
+// fails every subsequent action, since our own spawns don't share that directory as their cwd.
+// The working_dir label (also standard) records the absolute directory compose was invoked
+// from, so relative config_files entries are resolved against it here, once, at discovery time.
+function resolveConfigFiles(rawConfigFiles: string, workingDir: string): string {
+  if (!rawConfigFiles) return rawConfigFiles;
+  return rawConfigFiles
+    .split(",")
+    .map(f => {
+      const trimmed = f.trim();
+      if (!trimmed || trimmed.startsWith("/") || !workingDir) return trimmed;
+      return `${workingDir.replace(/\/+$/, "")}/${trimmed}`;
+    })
+    .join(",");
+}
 
 export function groupPodmanContainers(containers: PodmanPsContainer[]): { Name: string; Status: string; ConfigFiles: string }[] {
   const projects = new Map<string, { configFiles: string; states: string[] }>();
@@ -7,8 +27,10 @@ export function groupPodmanContainers(containers: PodmanPsContainer[]): { Name: 
     const name = c.Labels?.["com.docker.compose.project"] ?? "";
     if (!name) continue;
     if (!projects.has(name)) {
+      const rawConfigFiles = c.Labels["com.docker.compose.project.config_files"] ?? "";
+      const workingDir = c.Labels["com.docker.compose.project.working_dir"] ?? "";
       projects.set(name, {
-        configFiles: c.Labels["com.docker.compose.project.config_files"] ?? "",
+        configFiles: resolveConfigFiles(rawConfigFiles, workingDir),
         states: [],
       });
     }
@@ -36,7 +58,7 @@ function listPodmanStacks(): CockpitProcess {
       let raw = "";
       const proc = cockpit.spawn(
         cli("ps", "--all", "--filter", "label=com.docker.compose.project", "--format", "json"),
-        { err: "message" },
+        { superuser: socketSuperuser(), err: "message" },
       );
       proc.stream((d: string) => { raw += d; });
       await proc;
@@ -58,7 +80,7 @@ function listPodmanStacks(): CockpitProcess {
 export function listStacks(): CockpitProcess {
   if (getIsPodman()) return listPodmanStacks();
   return cockpit.spawn(compose("ls", "--all", "--format", "json"), {
-    err: "message", ...dockerSpawnEnviron(),
+    superuser: socketSuperuser(), err: "message", ...dockerSpawnEnviron(),
   });
 }
 
@@ -68,7 +90,7 @@ export async function readRunningServiceNames(project: string): Promise<string[]
     const proc = cockpit.spawn(
       cli("ps", "--filter", `label=com.docker.compose.project=${project}`, "--filter", "status=running",
         "--format", `{{index .Labels "com.docker.compose.service"}}`),
-      { err: "message", ...dockerSpawnEnviron() },
+      { superuser: socketSuperuser(), err: "message", ...dockerSpawnEnviron() },
     );
     proc.stream((d: string) => { raw += d; });
     await proc;
@@ -88,7 +110,7 @@ export function streamLogs(project: string, configFiles: string[], service?: str
     : base.environ;
   return cockpit.spawn(
     compose("-p", project, ...fileFlags(configFiles), "logs", "--follow", "--tail", "200", ...tsFlag, ...serviceArgs),
-    { err: "out", ...(environ ? { environ } : {}) },
+    { superuser: socketSuperuser(), err: "out", ...(environ ? { environ } : {}) },
   );
 }
 
@@ -96,10 +118,10 @@ export function streamEvents(project: string): CockpitProcess {
   if (composeIsLimitedBackend()) {
     return cockpit.spawn(
       cli("events", "--filter", `label=com.docker.compose.project=${project}`, "--format", "json"),
-      { err: "message", ...dockerSpawnEnviron() },
+      { superuser: socketSuperuser(), err: "message", ...dockerSpawnEnviron() },
     );
   }
-  return cockpit.spawn(compose("-p", project, "events", "--json"), { err: "message", ...dockerSpawnEnviron() });
+  return cockpit.spawn(compose("-p", project, "events", "--json"), { superuser: socketSuperuser(), err: "message", ...dockerSpawnEnviron() });
 }
 
 function composeTopPodmanFallback(project: string): CockpitProcess {
@@ -107,7 +129,7 @@ function composeTopPodmanFallback(project: string): CockpitProcess {
     let psRaw = "";
     const psProc = cockpit.spawn(
       cli("ps", "--filter", `label=com.docker.compose.project=${project}`, "--format", "json"),
-      { err: "message", ...dockerSpawnEnviron() },
+      { superuser: socketSuperuser(), err: "message", ...dockerSpawnEnviron() },
     );
     psProc.stream((d: string) => { psRaw += d; });
     await psProc;
@@ -120,7 +142,7 @@ function composeTopPodmanFallback(project: string): CockpitProcess {
     for (const c of containers) {
       const service = c.Labels?.["com.docker.compose.service"] ?? c.Names?.[0] ?? c.Id.slice(0, 12);
       let topRaw = "";
-      const topProc = cockpit.spawn(cli("top", c.Id), { err: "message", ...dockerSpawnEnviron() });
+      const topProc = cockpit.spawn(cli("top", c.Id), { superuser: socketSuperuser(), err: "message", ...dockerSpawnEnviron() });
       topProc.stream((d: string) => { topRaw += d; });
       try {
         await topProc;
@@ -135,7 +157,7 @@ export function composeTop(project: string): CockpitProcess {
   if (getIsPodman()) return composeTopPodmanFallback(project);
   return cockpit.spawn(
     compose("-p", project, "top"),
-    { err: "message", ...dockerSpawnEnviron() },
+    { superuser: socketSuperuser(), err: "message", ...dockerSpawnEnviron() },
   );
 }
 
@@ -144,7 +166,7 @@ function listImagesPodmanFallback(project: string): CockpitProcess {
     let psRaw = "";
     const psProc = cockpit.spawn(
       cli("ps", "-a", "--filter", `label=com.docker.compose.project=${project}`, "--format", "json"),
-      { err: "message", ...dockerSpawnEnviron() },
+      { superuser: socketSuperuser(), err: "message", ...dockerSpawnEnviron() },
     );
     psProc.stream((d: string) => { psRaw += d; });
     await psProc;
@@ -167,7 +189,7 @@ function listImagesPodmanFallback(project: string): CockpitProcess {
     let inspRaw = "";
     const inspProc = cockpit.spawn(
       cli("image", "inspect", "--format", "json", ...imageIds),
-      { err: "message", ...dockerSpawnEnviron() },
+      { superuser: socketSuperuser(), err: "message", ...dockerSpawnEnviron() },
     );
     inspProc.stream((d: string) => { inspRaw += d; });
     await inspProc;
@@ -195,7 +217,7 @@ function listVolumesPodmanFallback(project: string): CockpitProcess {
     let raw = "";
     const proc = cockpit.spawn(
       cli("volume", "ls", "--filter", `label=com.docker.compose.project=${project}`, "--format", "json"),
-      { err: "message", ...dockerSpawnEnviron() },
+      { superuser: socketSuperuser(), err: "message", ...dockerSpawnEnviron() },
     );
     proc.stream((d: string) => { raw += d; });
     await proc;
@@ -208,7 +230,7 @@ export function listImages(project: string, configFiles: string[]): CockpitProce
   if (composeIsLimitedBackend()) return listImagesPodmanFallback(project);
   return cockpit.spawn(
     compose("-p", project, ...fileFlags(configFiles), "images", "--format", "json"),
-    { err: "message", ...dockerSpawnEnviron() },
+    { superuser: socketSuperuser(), err: "message", ...dockerSpawnEnviron() },
   );
 }
 
@@ -216,7 +238,7 @@ export function listVolumes(project: string, configFiles: string[]): CockpitProc
   if (composeIsLimitedBackend()) return listVolumesPodmanFallback(project);
   return cockpit.spawn(
     compose("-p", project, ...fileFlags(configFiles), "volumes", "--format", "json"),
-    { err: "message", ...dockerSpawnEnviron() },
+    { superuser: socketSuperuser(), err: "message", ...dockerSpawnEnviron() },
   );
 }
 
@@ -224,55 +246,55 @@ export function composeVersion(): CockpitProcess {
   const args = composeIsLimitedBackend()
     ? compose("version")
     : compose("version", "--format", "json");
-  return cockpit.spawn(args, { err: "message", ...dockerSpawnEnviron() });
+  return cockpit.spawn(args, { superuser: socketSuperuser(), err: "message", ...dockerSpawnEnviron() });
 }
 
 export function containerVersion(): CockpitProcess {
   return cockpit.spawn(
     cli("version", "--format", "{{.Client.Version}}"),
-    { err: "message", ...dockerSpawnEnviron() },
+    { superuser: socketSuperuser(), err: "message", ...dockerSpawnEnviron() },
   );
 }
 
 export function listProjectContainerImageRefs(project: string): CockpitProcess {
   return cockpit.spawn(
     cli("ps", "-a", "--filter", `label=com.docker.compose.project=${project}`, "--format", "{{.Image}}"),
-    { err: "message", ...dockerSpawnEnviron() },
+    { superuser: socketSuperuser(), err: "message", ...dockerSpawnEnviron() },
   );
 }
 
 export function listImagesByRepo(repo: string): CockpitProcess {
   return cockpit.spawn(
     cli("images", repo, "--format", "{{.Repository}}:{{.Tag}}\t{{.Size}}"),
-    { err: "message", ...dockerSpawnEnviron() },
+    { superuser: socketSuperuser(), err: "message", ...dockerSpawnEnviron() },
   );
 }
 
 export function listAllContainerImages(): CockpitProcess {
   return cockpit.spawn(
     cli("ps", "-a", "--format", "{{.Image}}"),
-    { err: "message", ...dockerSpawnEnviron() },
+    { superuser: socketSuperuser(), err: "message", ...dockerSpawnEnviron() },
   );
 }
 
 export function listStoppedContainers(project: string): CockpitProcess {
   return cockpit.spawn(
     cli("ps", "-a", "--filter", "status=exited", "--filter", `label=com.docker.compose.project=${project}`, "--format", "{{.Names}} — {{.Status}}"),
-    { err: "message", ...dockerSpawnEnviron() },
+    { superuser: socketSuperuser(), err: "message", ...dockerSpawnEnviron() },
   );
 }
 
 export function listDanglingVolumes(project: string): CockpitProcess {
   return cockpit.spawn(
     cli("volume", "ls", "--filter", "dangling=true", "--filter", `label=com.docker.compose.project=${project}`, "--format", "{{.Name}}"),
-    { err: "message", ...dockerSpawnEnviron() },
+    { superuser: socketSuperuser(), err: "message", ...dockerSpawnEnviron() },
   );
 }
 
 export function listProjectNetworks(project: string): CockpitProcess {
   return cockpit.spawn(
     cli("network", "ls", "--filter", `label=com.docker.compose.project=${project}`, "--format", "{{.Name}}"),
-    { err: "message", ...dockerSpawnEnviron() },
+    { superuser: socketSuperuser(), err: "message", ...dockerSpawnEnviron() },
   );
 }
 
@@ -282,7 +304,7 @@ export function listNetworkConnectedProjects(networkName: string): CockpitProces
     : `{{.Label "com.docker.compose.project"}}`;
   return cockpit.spawn(
     cli("ps", "--filter", `network=${networkName}`, "--format", labelTpl),
-    { err: "message", ...dockerSpawnEnviron() },
+    { superuser: socketSuperuser(), err: "message", ...dockerSpawnEnviron() },
   );
 }
 
@@ -291,7 +313,7 @@ export async function inspectNetworkContainerCounts(names: string[]): Promise<st
     let raw = "";
     const proc = cockpit.spawn(
       cli("network", "inspect", "--format", "json", ...names),
-      { err: "message", ...dockerSpawnEnviron() },
+      { superuser: socketSuperuser(), err: "message", ...dockerSpawnEnviron() },
     );
     proc.stream(d => { raw += d; });
     await proc;
@@ -304,7 +326,7 @@ export async function inspectNetworkContainerCounts(names: string[]): Promise<st
   let raw = "";
   const proc = cockpit.spawn(
     cli("network", "inspect", ...names, "--format", "{{.Name}}\t{{len .Containers}}"),
-    { err: "message", ...dockerSpawnEnviron() },
+    { superuser: socketSuperuser(), err: "message", ...dockerSpawnEnviron() },
   );
   proc.stream(d => { raw += d; });
   await proc;

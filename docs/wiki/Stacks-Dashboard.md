@@ -132,14 +132,23 @@ At the bottom of the page you will find version and connection information follo
 | **Docker: x.y.z** | The Docker client version on your server (shows **Podman: x.y.z** in Podman mode) |
 | **Docker Compose: x.y.z** | The Compose plugin version (shows **Podman Compose: x.y.z** in Podman mode) |
 | **unix:///…/docker.sock** | The socket the plugin is communicating with |
-| **Rootless Docker** | Shown in green when a rootless Docker daemon is detected (see below) |
+| **Rootless** | Shown in green when the active socket is the per-user (rootless) one (see below) |
+| **Rootful** | Shown in orange when the active socket is the system-wide (rootful) one |
 
-### Rootless Docker
+### Rootless vs. rootful
 
-If your system runs a rootless Docker daemon (socket at `/run/user/<uid>/docker.sock`), the plugin detects this automatically at startup and shows a green **Rootless Docker** badge in the footer. In this mode:
+If your system runs a rootless Docker or Podman daemon (socket at `/run/user/<uid>/…`), the plugin
+detects this and shows a green **Rootless** badge in the footer. If only the system-wide socket is
+available, it shows an orange **Rootful** badge instead. In rootless mode:
 
-- All Docker and Compose commands are directed to your user-level daemon via `DOCKER_HOST`.
-- Privilege escalation is suppressed for Docker operations — no sudo prompt appears.
-- The resolved socket path is shown in the footer so you can confirm which daemon is in use.
+- All commands are directed to your user-level daemon via `DOCKER_HOST`.
+- Privilege escalation is suppressed — no administrative-access prompt appears.
+
+In rootful mode, actions escalate via Cockpit's administrative access (superuser bridge) as needed.
+
+When **both** sockets are detected, a toggle next to the Docker/Podman switch lets you choose which
+one to use — see [Podman Compatibility](Podman-Compatibility#rootless-and-rootful-podman) for
+details on that toggle, its health check, and how the choice is remembered. The resolved socket
+path is always shown as a tooltip on the version badge so you can confirm which daemon is in use.
 
 If you have `DOCKER_HOST` set in your session environment before opening Cockpit, that value is respected as-is. Otherwise, the plugin checks for a user socket first, then the system socket at `/var/run/docker.sock`.

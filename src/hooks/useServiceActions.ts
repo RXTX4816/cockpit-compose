@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { startService, stopService, restartStack, composeFileSuperuser, readAllProfiles, isRootlessMode } from "../api";
+import { startService, stopService, restartStack, stackSuperuser, readAllProfiles } from "../api";
 import type { ComposeStack } from "../api";
 import { splitConfigFiles } from "../lib/configFiles";
 import { useToast } from "../components/ToastProvider";
@@ -25,7 +25,7 @@ export function useServiceActions(
     try {
       const files = splitConfigFiles(configFilesKey);
       const [su, profiles] = await Promise.all([
-        isRootlessMode() ? Promise.resolve<"try" | undefined>(undefined) : composeFileSuperuser(files),
+        stackSuperuser(files),
         readAllProfiles(files[0]),
       ]);
       if (action === "start") await startService(stack.Name, files, serviceName, profiles, su);

@@ -91,3 +91,44 @@ describe("getContainerStats", () => {
     expect(formatArg).toBeDefined();
   });
 });
+
+// Regression: these three spawns had no superuser escalation at all — for a rootful
+// Podman/Docker socket, that meant the service/container list and stats always ran
+// unescalated, silently seeing nothing (or the wrong, rootless-only data) regardless
+// of which socket mode was actually selected. This is what made a rootful stack look
+// "running" at the stack-summary level (which was already escalation-aware) while its
+// service/container list and Stack Info modal showed stale/empty data.
+describe("superuser escalation (rootful Podman)", () => {
+  beforeEach(async () => {
+    const cockpitMod = await import("./cockpit");
+    cockpitMod.setRuntime("podman");
+    // containers.ts calls socketSuperuser() via its import binding (a real cross-module
+    // call, unlike isRootlessMode()'s intra-file use inside socketSuperuser itself) — so
+    // this spy is what actually takes effect here.
+    vi.spyOn(cockpitMod, "socketSuperuser").mockReturnValue("try");
+  });
+
+  it("listContainers passes superuser:'try' for the compose-backed path", () => {
+    mockSpawn.mockReturnValue(mockProcess("[]"));
+    listContainers("myapp");
+    const opts = mockSpawn.mock.calls[0][1] as { superuser?: string };
+    expect(opts.superuser).toBe("try");
+  });
+
+  it("listContainers passes superuser:'try' for the limited-backend (podman ps) fallback", async () => {
+    const cockpitMod = await import("./cockpit");
+    vi.spyOn(cockpitMod, "composeIsLimitedBackend").mockReturnValue(true);
+    mockSpawn.mockReturnValue(mockProcess("[]"));
+    const proc = listContainers("myapp");
+    await proc.catch(() => {});
+    const opts = mockSpawn.mock.calls[0][1] as { superuser?: string };
+    expect(opts.superuser).toBe("try");
+  });
+
+  it("getContainerStats passes superuser:'try'", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    getContainerStats(["abc123"]);
+    const opts = mockSpawn.mock.calls[0][1] as { superuser?: string };
+    expect(opts.superuser).toBe("try");
+  });
+});

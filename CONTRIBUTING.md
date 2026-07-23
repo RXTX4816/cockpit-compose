@@ -105,6 +105,23 @@ npm run build      # Production build (minified)
 
 All of these run automatically in CI. Your PR must pass all checks before merging.
 
+**Important — module resolution pitfall:** never have both `src/api/foo.ts` and `src/api/foo/`
+(a directory) at the same time. When both exist, esbuild resolves a bare import like
+`from "./foo"` to the **file**, silently shadowing the entire directory — even though
+`npm run typecheck` and `npm run lint` both pass cleanly, since TypeScript/ESLint check every
+file matched by `tsconfig.json`'s `include` glob regardless of whether it's actually reachable
+from the bundle's entry point. This bit us for a long time: `src/api/stacks.ts` was a leftover
+from before the API layer was split into `src/api/stacks/{query,lifecycle,prune,exec}.ts`, and
+was never deleted — every fix to the split files silently went nowhere because the old file kept
+winning module resolution. If you ever suspect a change "isn't taking effect" despite a clean
+build, verify what's *actually* in the bundle rather than trusting the source tree:
+
+```bash
+npx esbuild src/index.tsx --bundle --metafile=/tmp/meta.json --outfile=/tmp/out.js \
+  --minify --target=es2020 --jsx=automatic --loader:.tsx=tsx --loader:.ts=ts --loader:.svg=dataurl
+grep -o '"[^"]*your-file\.ts"' /tmp/meta.json   # confirms which file esbuild actually included
+```
+
 ## Commit Conventions
 
 This project uses semantic versioning driven by commit messages:

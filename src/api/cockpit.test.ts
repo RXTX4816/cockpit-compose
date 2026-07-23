@@ -86,12 +86,14 @@ describe("detectDockerMode()", () => {
     mockUser.mockResolvedValue({ id: 1000, name: "user", home: "/home/user" });
   });
 
-  it("sets rootless mode when user socket exists and DOCKER_HOST is unset", async () => {
+  // detectDockerMode() always probes both candidates (user socket, then system socket) —
+  // it no longer special-cases an ambient DOCKER_HOST env var, so the two stat calls are
+  // calls 1 and 2 in that order every time.
+  it("sets rootless mode when only the user socket exists", async () => {
     let call = 0;
     mockSpawn.mockImplementation(() => {
       call++;
-      if (call === 1) return mockProcess(""); // DOCKER_HOST empty
-      if (call === 2) return mockProcess("socket"); // user socket present
+      if (call === 1) return mockProcess("socket"); // user socket present
       return mockProcess("", "no such file"); // system socket absent
     });
     const { detectDockerMode, isRootlessMode, getDockerSocketPath } = await import("./cockpit");
@@ -104,8 +106,7 @@ describe("detectDockerMode()", () => {
     let call = 0;
     mockSpawn.mockImplementation(() => {
       call++;
-      if (call === 1) return mockProcess(""); // DOCKER_HOST empty
-      if (call === 2) return mockProcess("", "no such file"); // user socket absent
+      if (call === 1) return mockProcess("", "no such file"); // user socket absent
       return mockProcess("socket"); // system socket present
     });
     const { detectDockerMode, isRootlessMode, getDockerSocketPath } = await import("./cockpit");
@@ -114,21 +115,12 @@ describe("detectDockerMode()", () => {
     expect(getDockerSocketPath()).toBe("unix:///var/run/docker.sock");
   });
 
-  it("respects DOCKER_HOST already set in environment", async () => {
-    mockSpawn.mockImplementation(() => mockProcess("unix:///run/user/1000/docker.sock"));
-    const { detectDockerMode, isRootlessMode, getDockerSocketPath } = await import("./cockpit");
+  it("prefers rootless by default when both sockets exist", async () => {
+    mockSpawn.mockImplementation(() => mockProcess("socket"));
+    const { detectDockerMode, isRootlessMode, getSocketAvailability } = await import("./cockpit");
     await detectDockerMode();
+    expect(getSocketAvailability("docker")).toEqual({ rootless: true, rootful: true, rootfulNeedsAdminAccess: false });
     expect(isRootlessMode()).toBe(true);
-    expect(getDockerSocketPath()).toBe("unix:///run/user/1000/docker.sock");
-    // Should not call cockpit.user() or check sockets when DOCKER_HOST is set
-    expect(mockUser).not.toHaveBeenCalled();
-  });
-
-  it("marks non-user DOCKER_HOST as non-rootless", async () => {
-    mockSpawn.mockImplementation(() => mockProcess("unix:///var/run/docker.sock"));
-    const { detectDockerMode, isRootlessMode } = await import("./cockpit");
-    await detectDockerMode();
-    expect(isRootlessMode()).toBe(false);
   });
 
   it("leaves everything unset when neither socket exists", async () => {
@@ -137,6 +129,90 @@ describe("detectDockerMode()", () => {
     await detectDockerMode();
     expect(isRootlessMode()).toBe(false);
     expect(getDockerSocketPath()).toBeUndefined();
+  });
+});
+
+describe("setSocketMode() / getSocketMode()", () => {
+  const mockUser = vi.fn();
+
+  beforeEach(() => {
+    mockUser.mockReset();
+    vi.stubGlobal("cockpit", { spawn: mockSpawn, user: mockUser });
+    mockUser.mockResolvedValue({ id: 1000, name: "user", home: "/home/user" });
+    localStorage.clear();
+  });
+
+  it("sticks to the user's explicit choice even if the other mode is also available", async () => {
+    mockSpawn.mockImplementation(() => mockProcess("socket")); // both sockets present
+    const { detectDockerMode, setSocketMode, getSocketMode, isRootlessMode } = await import("./cockpit");
+    await detectDockerMode();
+    setSocketMode("docker", "rootful");
+    expect(getSocketMode("docker")).toBe("rootful");
+    expect(isRootlessMode()).toBe(false);
+  });
+
+  it("falls back to the default when the stored preference points at an undetected candidate", async () => {
+    mockSpawn.mockImplementation(() => mockProcess("", "no such file")); // system socket absent
+    mockSpawn.mockImplementationOnce(() => mockProcess("socket")); // user socket present
+    const { detectDockerMode, setSocketMode, getSocketMode } = await import("./cockpit");
+    setSocketMode("docker", "rootful"); // preference set before rootful was ever detected as available
+    await detectDockerMode();
+    expect(getSocketMode("docker")).toBe("rootless");
+  });
+
+  it("dispatches a change event so components without props can refresh", async () => {
+    const { setSocketMode, SOCKET_MODE_CHANGE_EVENT } = await import("./cockpit");
+    const handler = vi.fn();
+    window.addEventListener(SOCKET_MODE_CHANGE_EVENT, handler);
+    setSocketMode("docker", "rootful");
+    expect(handler).toHaveBeenCalledTimes(1);
+    window.removeEventListener(SOCKET_MODE_CHANGE_EVENT, handler);
+  });
+});
+
+describe("checkSocketHealth() / redetectSockets()", () => {
+  const mockUser = vi.fn();
+
+  beforeEach(() => {
+    mockUser.mockReset();
+    vi.stubGlobal("cockpit", { spawn: mockSpawn, user: mockUser });
+    mockUser.mockResolvedValue({ id: 1000, name: "user", home: "/home/user" });
+  });
+
+  it("reports unhealthy with a reason when the probe command fails", async () => {
+    mockSpawn
+      .mockImplementationOnce(() => mockProcess("", "no such file")) // user socket absent
+      .mockImplementationOnce(() => mockProcess("socket"))            // system socket present
+      .mockImplementationOnce(() => mockProcess("", "permission denied")); // health probe fails
+    const { detectDockerMode, checkSocketHealth } = await import("./cockpit");
+    await detectDockerMode();
+    const result = await checkSocketHealth("docker", "rootful");
+    expect(result).toEqual({ ok: false, reason: "permission denied" });
+  });
+
+  it("reports healthy when the probe command succeeds", async () => {
+    mockSpawn.mockImplementation(() => mockProcess("socket"));
+    const { detectDockerMode, checkSocketHealth } = await import("./cockpit");
+    await detectDockerMode();
+    const result = await checkSocketHealth("docker", "rootless");
+    expect(result).toEqual({ ok: true });
+  });
+
+  it("reports unavailable when the candidate was never detected", async () => {
+    const { checkSocketHealth } = await import("./cockpit");
+    const result = await checkSocketHealth("docker", "rootful");
+    expect(result.ok).toBe(false);
+  });
+
+  it("redetectSockets bypasses Podman's normal detect-once cache", async () => {
+    mockSpawn.mockResolvedValue("");
+    const { setRuntime, detectComposeCommand, redetectSockets } = await import("./cockpit");
+    setRuntime("podman");
+    await detectComposeCommand();
+    await detectComposeCommand(); // cached, no new user() calls
+    expect(mockUser).toHaveBeenCalledTimes(1);
+    await redetectSockets("podman");
+    expect(mockUser).toHaveBeenCalledTimes(2);
   });
 });
 
@@ -277,7 +353,7 @@ describe("detectPodmanSocket() via detectComposeCommand()", () => {
     expect(isRootlessMode()).toBe(false);
   });
 
-  it("leaves podman socket unset when no socket exists", async () => {
+  it("leaves podman socket unset when no socket exists, and poisons DOCKER_HOST so a delegated compose provider can't silently fall back to a different engine", async () => {
     mockUser.mockResolvedValue({ id: 1000 });
     mockSpawn
       .mockRejectedValueOnce(new Error("no such file")) // user socket absent
@@ -287,7 +363,12 @@ describe("detectPodmanSocket() via detectComposeCommand()", () => {
     setRuntime("podman");
     await detectComposeCommand();
     expect(getPodmanSocketPath()).toBeUndefined();
-    expect(dockerSpawnEnviron()).toEqual({});
+    // Never {} here: an empty environ would let a delegated external Docker Compose provider
+    // (docker-compose-plugin) silently fall back to its own default socket — a real, unrelated
+    // Docker engine, if one happens to be installed alongside Podman — instead of failing loudly.
+    expect(dockerSpawnEnviron()).toEqual({
+      environ: ["DOCKER_HOST=unix:///run/cockpit-compose-no-podman-socket-detected.sock"],
+    });
   });
 
   it("is idempotent — socket detection only runs once across multiple calls", async () => {
@@ -326,9 +407,8 @@ describe("dockerSpawnEnviron() runtime awareness", () => {
     let call = 0;
     mockSpawn.mockImplementation(() => {
       call++;
-      if (call === 1) return mockProcess("");       // DOCKER_HOST empty
-      if (call === 2) return mockProcess("socket"); // user docker socket present
-      return mockProcess("");
+      if (call === 1) return mockProcess("socket"); // user docker socket present
+      return mockProcess("", "no such file");       // system socket absent
     });
     mockUser.mockResolvedValue({ id: 1000 });
     const { detectDockerMode, dockerSpawnEnviron } = await import("./cockpit");
@@ -356,5 +436,63 @@ describe("dockerSpawnEnviron() runtime awareness", () => {
     const { detectComposeCommand, dockerSpawnEnviron } = await import("./cockpit");
     await detectComposeCommand(); // docker runtime, no rootless socket
     expect(dockerSpawnEnviron()).toEqual({});
+  });
+});
+
+describe("stackSuperuser()", () => {
+  const mockUser = vi.fn();
+
+  beforeEach(() => {
+    mockUser.mockReset();
+    vi.stubGlobal("cockpit", { spawn: mockSpawn, user: mockUser });
+  });
+
+  // Podman has no DOCKER_HOST-style knob that alone selects rootful vs rootless storage — which
+  // one a command hits is determined entirely by whether the process runs as root. So for Podman,
+  // file-ownership-based escalation must NEVER override an explicit rootless selection: doing so
+  // would silently run the command as root against the *rootful* engine instead (issue: "down"
+  // from rootless mode was removing the rootful stack because a root-owned compose file/dir
+  // triggered composeFileSuperuser's fallback despite rootless being explicitly selected).
+  it("never escalates for Podman rootless mode, even when the compose file is root-owned", async () => {
+    mockUser.mockResolvedValue({ id: 1000 });
+    let call = 0;
+    mockSpawn.mockImplementation(() => {
+      call++;
+      if (call === 1) return mockProcess("socket"); // user podman socket present → rootless podman selected
+      return mockProcess(""); // compose version succeeds; stackSuperuser shouldn't even stat the file
+    });
+    const { setRuntime, detectComposeCommand, stackSuperuser } = await import("./cockpit");
+    setRuntime("podman");
+    await detectComposeCommand();
+    expect(await stackSuperuser(["/root/owned/compose.yml"])).toBeUndefined();
+  });
+
+  it("always escalates for Podman rootful mode, regardless of compose file ownership", async () => {
+    mockUser.mockResolvedValue({ id: 1000 });
+    let call = 0;
+    mockSpawn.mockImplementation(() => {
+      call++;
+      if (call === 1) return mockProcess("", "no such file"); // user podman socket absent
+      if (call === 2) return mockProcess("socket");            // system podman socket present
+      return mockProcess("");                                  // compose version succeeds
+    });
+    const { setRuntime, detectComposeCommand, stackSuperuser } = await import("./cockpit");
+    setRuntime("podman");
+    await detectComposeCommand();
+    expect(await stackSuperuser(["/home/user/myapp/compose.yml"])).toBe("try");
+  });
+
+  it("still uses file-ownership escalation for Docker, where it's safe (DOCKER_HOST alone selects the engine)", async () => {
+    mockUser.mockResolvedValue({ id: 1000, name: "user", home: "/home/user" });
+    let call = 0;
+    mockSpawn.mockImplementation(() => {
+      call++;
+      if (call === 1) return mockProcess("socket"); // user docker socket present → rootless docker
+      if (call === 2 || call === 3) return mockProcess("0\n"); // dir/file owned by root
+      return mockProcess("");
+    });
+    const { detectDockerMode, stackSuperuser } = await import("./cockpit");
+    await detectDockerMode();
+    expect(await stackSuperuser(["/root/owned/compose.yml"])).toBe("try");
   });
 });

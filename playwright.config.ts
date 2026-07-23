@@ -11,4 +11,6 @@ export default createPlaywrightConfig('cockpit-compose', [
   { name: 'fedora-podman', port: 9096 },
   { name: 'fedora-docker', port: 9097 },
   { name: 'fedora-both',   port: 9098 },
+  { name: 'fedora-podman-rootful', port: 9099 },
+  { name: 'fedora-full',   port: 9100 },
 ]);
