@@ -48,8 +48,9 @@ Run these against the full matrix (batched per §"Managing resource usage" in
 | 7.1 | Docker rootless mode | `e2e/runtime-rootless.spec.ts` | ✅ partial (`rootless-compose-root.spec.ts`) / 🚧 |
 | 7.2 | Podman via `podman compose` external provider | `e2e/runtime-rootless.spec.ts` | 🚧 |
 | 7.3 | Podman via `podman-compose` (Python, no docker-compose) | `e2e/runtime-rootless.spec.ts` | 🚧 |
-| 7.4 | Podman root (system socket) | `e2e/runtime-rootless.spec.ts` | 🚧 |
+| 7.4 | Podman root (system socket), no rootless socket at all — issue [#242](https://github.com/RXTX4816/cockpit-compose/issues/242) regression: discovery + Stack Info container list under real Cockpit Administrative access | `e2e/runtime-rootless.spec.ts` (`fedora-podman-rootful` only) | ✅ |
 | 7.5 | Neither runtime present — error state | `e2e/runtime-unavailable.spec.ts` | 🚧 |
+| Rootless/Rootful socket-mode toggle (added alongside #242's fix) — switching modes when both sockets are detected, footer badge, stale-list refresh on switch | `e2e/runtime-rootless.spec.ts` or a dedicated spec | 🚧 (manually verified on `fedora-full`; not yet automated — needs a project with both sockets *and* admin access, see `loginWithAdminAccess` in `e2e/helpers/admin.ts`) |
 | superuser prompt | Compose file owned by another uid (`composeFileSuperuser()`, `src/api/cockpit.ts:185-215`) | `e2e/superuser-prompt.spec.ts` | 🚧 |
 | distro quirks | Debian cgroupfs pause/unpause workaround, Fedora SELinux `label=false`, pasta/nftables networking | covered implicitly by running Wave-1 lifecycle specs against the full matrix rather than a dedicated spec | 🚧 |
 

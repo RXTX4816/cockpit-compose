@@ -163,7 +163,7 @@ function scaleStackPodmanFallback(
           "--filter", `label=com.docker.compose.project=${project}`,
           "--filter", `label=com.docker.compose.service=${svc}`,
           "--format", "json"),
-        { err: "message", ...dockerSpawnEnviron() },
+        { superuser, err: "message", ...dockerSpawnEnviron() },
       );
       psProc.stream(d => { psRaw += d; });
       await psProc;

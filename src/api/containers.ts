@@ -1,4 +1,4 @@
-import { compose, cli, getIsPodman, dockerSpawnEnviron, composeIsLimitedBackend } from "./cockpit";
+import { compose, cli, getIsPodman, dockerSpawnEnviron, composeIsLimitedBackend, socketSuperuser } from "./cockpit";
 
 interface PodmanPort {
   host_ip?: string;
@@ -35,7 +35,7 @@ function listContainersPodmanFallback(project: string): CockpitProcess {
       let raw = "";
       const proc = cockpit.spawn(
         cli("ps", "-a", "--filter", `label=com.docker.compose.project=${project}`, "--format", "json"),
-        { err: "message", ...dockerSpawnEnviron() },
+        { superuser: socketSuperuser(), err: "message", ...dockerSpawnEnviron() },
       );
       proc.stream((d: string) => { raw += d; });
       await proc;
@@ -71,7 +71,7 @@ export function listContainers(project: string): CockpitProcess {
   if (composeIsLimitedBackend()) return listContainersPodmanFallback(project);
   return cockpit.spawn(
     compose("-p", project, "ps", "--all", "--format", "json"),
-    { err: "message", ...dockerSpawnEnviron() },
+    { superuser: socketSuperuser(), err: "message", ...dockerSpawnEnviron() },
   );
 }
 
@@ -83,6 +83,6 @@ export function getContainerStats(containerIds: string[]): CockpitProcess {
       `{"id":"{{.ID}}","name":"{{.Name}}","cpu":"${cpuField}","mem":"{{.MemUsage}}","memPerc":"{{.MemPerc}}","net":"{{.NetIO}}","block":"{{.BlockIO}}"}`,
       ...containerIds,
     ),
-    { err: "message", ...dockerSpawnEnviron() },
+    { superuser: socketSuperuser(), err: "message", ...dockerSpawnEnviron() },
   );
 }

@@ -1,6 +1,7 @@
 # VM Testing
 
-Automated QEMU VMs for testing cockpit-compose across three distros × three runtime scenarios.
+Automated QEMU VMs for testing cockpit-compose across three distros × three runtime scenarios,
+plus two extra Fedora-only scenarios for rootless/rootful-specific bugs.
 The VM harness is provided by [`@rxtx4816/cockpit-plugin-base-react`](https://github.com/RXTX4816/cockpit-plugin-base-react) and invoked via `npm run vm <command>`. Plugin-specific config (VM names, ports, distro packages) lives in `scripts/test-vm.config.sh` in this repo.
 
 The harness downloads official cloud images, provisions them with cloud-init, and mounts your local `src/` folder live into the VM — so `npm run watch` changes are visible in the browser without restarting anything.
@@ -12,13 +13,22 @@ The harness downloads official cloud images, provisions them with cloud-init, an
 | `podman` | podman + podman-compose + docker-compose (standalone) | §7.2 external provider, §7.3 Python compose |
 | `docker` | Docker CE + docker compose v2 plugin | All Docker scenarios |
 | `both` | Both runtimes side by side | Runtime toggle (§6.21), §4 side-by-side |
+| `podman-rootful` (Fedora only) | podman + podman-compose, **rootful socket only** — no rootless socket, no linger | Regression test for [issue #242](https://github.com/RXTX4816/cockpit-compose/issues/242) (empty project list under system-wide Podman) |
+| `full` (Fedora only) | Docker CE (rootful **and** rootless) + Podman (rootful **and** rootless), all four running at once | The Rootless/Rootful toggle itself — switching modes without switching runtime |
 
-VM identifiers are `<distro>-<scenario>`, e.g. `debian-podman`, `arch-both`.
+VM identifiers are `<distro>-<scenario>`, e.g. `debian-podman`, `arch-both`, `fedora-podman-rootful`, `fedora-full`.
 
 **Shortcuts** — expand to all matching VMs:
-- `arch` / `debian` / `fedora` → all three scenarios for that distro
+- `arch` / `debian` / `fedora` → all scenarios for that distro (`fedora` now includes `podman-rootful` and `full` too)
 - `podman` / `docker` / `both` → that scenario across all three distros
-- `all` → all 9 VMs
+- `all` → all VMs
+
+> **`fedora-full` is experimental.** Rootless Docker requires its own separate daemon
+> (`dockerd-rootless-setuptool.sh install`), unlike Podman where one binary serves both modes.
+> The cloud-init recipe follows [Docker's documented rootless install](https://docs.docker.com/engine/security/rootless/)
+> but hasn't been verified end-to-end by actually booting it. If first boot fails, check
+> `npm run vm logs fedora-full`, then SSH in and check `journalctl --user -u docker` as the
+> `test` user (rootless Docker's own logs) — and please report what you find.
 
 ## Prerequisites
 
@@ -79,6 +89,7 @@ Then open the URL and accept the self-signed certificate.
 | fedora-podman | https://localhost:9096 | `ssh -p 2226 test@localhost` |
 | fedora-docker | https://localhost:9097 | `ssh -p 2227 test@localhost` |
 | fedora-both | https://localhost:9098 | `ssh -p 2228 test@localhost` |
+| fedora-podman-rootful | https://localhost:9099 | `ssh -p 2229 test@localhost` |
 
 **Login:** `test` / `test` (your `~/.ssh/id_*.pub` is also injected automatically if found)
 
@@ -134,6 +145,55 @@ No file copying or VM restarts needed.
 **both scenario notes:**
 - Both runtimes installed; use the runtime toggle in the UI to switch between them
 - Tests testing guide §4 (side by side) and §6.21 (runtime toggle)
+
+**podman-rootful scenario notes (Fedora only):**
+- Same packages as `podman`, but the VM deliberately has **no rootless Podman socket** —
+  no `loginctl enable-linger`, no user systemd session started, no
+  `/run/user/<uid>/podman/podman.sock`. Only the system-wide `/run/podman/podman.sock` exists.
+- This reproduces [issue #242](https://github.com/RXTX4816/cockpit-compose/issues/242): a
+  Compose project started with `sudo podman compose up -d` (rootful) was invisible in
+  cockpit-compose's project list, because discovery ran unprivileged with no way to reach
+  the root-owned socket.
+- To test manually:
+  ```bash
+  npm run vm start fedora-podman-rootful
+  npm run vm wait fedora-podman-rootful
+  npm run vm ssh fedora-podman-rootful
+  # inside the VM:
+  cd ~/testcompose/gotify   # or any other pre-staged fixture under ~/testcompose
+  sudo podman compose up -d
+  ```
+  Then open https://localhost:9099, enable Cockpit "Administrative access", and confirm the
+  stack now appears in the Docker Compose page and can be managed (logs, exec, scale, etc.).
+- **Related fix**: this scenario also caught a second bug, since it's the first setup where a
+  Fedora rootful stack actually became visible. Fedora's `podman compose` delegates to the
+  standalone Python `podman-compose`, which records whatever path was passed to `-f` in the
+  `com.docker.compose.project.config_files` container label **without resolving it to an
+  absolute path** — e.g. a bare `docker-compose.yml` if you `cd`'d into the stack directory
+  first. Every subsequent action (`up`, `down`, `logs`, etc.) then failed with `missing files:
+  ['docker-compose.yml']`, since the plugin's own spawned commands don't share that directory
+  as their working directory. Fixed by resolving relative `config_files` entries against the
+  (always-absolute) `com.docker.compose.project.working_dir` label at discovery time —
+  see `groupPodmanContainers()` in `src/api/stacks/query.ts`.
+
+**full scenario notes (Fedora only, experimental):**
+- All four modes running simultaneously: Docker rootful (`systemctl enable --now docker`),
+  Docker rootless (`dockerd-rootless-setuptool.sh install`, running as the `test` user's own
+  systemd service), Podman rootful (`podman.socket`), Podman rootless (per-user socket).
+- Intended for exercising the Rootless/Rootful toggle itself — switch Docker or Podman modes
+  without needing to reprovision a different VM. See [Podman Compatibility](Podman-Compatibility#rootless-and-rootful-podman).
+- See the experimental-status callout above the scenario table before relying on this one.
+- **Known first-boot quirk**: on the first VM built this way, Podman's rootless user socket
+  came up enabled but not actually started (`systemctl --user is-active podman.socket` reported
+  `inactive`), and rootless Docker's own setup (`dockerd-rootless-setuptool.sh install`) hadn't
+  produced a usable `docker.service` in the user's systemd session either — only rootful
+  Docker and rootful Podman were confirmed working. If rootless mode doesn't show up as
+  available in the toggle, SSH in and check `systemctl --user status podman.socket` /
+  `systemctl --user status docker`, start them manually if needed, then click **Recheck**.
+- **Cockpit's Administrative access must be turned on** (in the Cockpit page header, not inside
+  the plugin) for anything rootful to work at all on this VM — see Troubleshooting.md's "Stacks
+  don't appear" section, causes 6–7, for what happens if you forget and how the plugin now
+  fails loudly instead of silently misbehaving.
 
 The rootful Podman socket (`/run/podman/podman.sock`) is enabled and
 `pasta` is configured as the default rootless network backend to avoid

@@ -38,11 +38,12 @@ sudo usermod -aG docker $USER
 newgrp docker
 ```
 
-If you use rootless Docker, set `DOCKER_HOST` in your shell startup file:
-
-```bash
-export DOCKER_HOST=unix:///run/user/$(id -u)/docker.sock
-```
+If you use rootless Docker, the plugin detects the per-user socket automatically — no `DOCKER_HOST`
+shell configuration needed. If both a rootless and a rootful socket are present and the wrong one
+is active, use the **Rootless / Rootful** toggle next to the runtime switch to pick explicitly (see
+[Podman Compatibility](Podman-Compatibility#rootless-and-rootful-podman) — the same toggle applies
+to Docker). Setting `DOCKER_HOST` in your own shell has no effect on the Cockpit bridge process and
+is not read by the plugin.
 
 ---
 
@@ -59,6 +60,29 @@ export DOCKER_HOST=unix:///run/user/$(id -u)/docker.sock
 3. **Compose project name mismatch.** The plugin uses the `COMPOSE_PROJECT_NAME` label that Docker attaches at `up` time. If the stack was started without the Compose CLI, it may not have this label.
 
 4. **Podman + `podman-compose` limitation.** The Python `podman-compose` does not support `compose ls`. The plugin falls back to `podman ps` label discovery, which may miss stacks started outside Cockpit Compose. Try bringing the stack down and back up from inside the plugin.
+
+5. **Wrong socket mode (rootless vs. rootful).** If you started a stack with `sudo podman compose up` (system-wide/rootful) but the plugin is using the rootless socket, or vice versa, it won't see it. Check the **Rootless / Rootful** toggle next to the runtime switch and pick the mode matching how you started the stack — see [Podman Compatibility](Podman-Compatibility#rootless-and-rootful-podman). Also make sure Cockpit's administrative access is enabled, since rootful discovery escalates via it.
+
+6. **Administrative access is off and the Rootless/Rootful toggle isn't showing at all.** If Podman's rootless socket genuinely isn't present (see cause 5) and the rootful one can't be *confirmed* because Cockpit's Administrative access isn't enabled yet, the toggle used to just disappear as if nothing were detected. It now instead shows a disabled **Rootful** option with a tooltip explaining this — turn on Administrative access (in the Cockpit page header, not inside this plugin), then click the small refresh icon next to the toggle to recheck.
+
+7. **`up` reports success but the stack still shows down (Podman mode, Docker also installed).** This was a real bug: when Podman's `compose` subcommand can't reach *any* confirmed Podman socket, it may delegate to an installed `docker-compose-plugin` binary, which — with no explicit socket to target — silently falls back to its own default, i.e. a completely separate Docker engine, if one happens to be installed alongside Podman. The command then genuinely succeeds, just against the wrong engine, so Podman-based discovery never sees it. Fixed: the plugin now always points Podman-mode compose commands at either a real, confirmed socket or a deliberately unreachable one, so this now fails loudly (visible in the Up/Down progress dialog) instead of silently succeeding on the wrong engine. If you hit this, it almost always means cause 6 above — Administrative access needs to be turned on.
+
+---
+
+## Stack shows "running" but its services/containers show stopped, or Stack Info is empty (rootful Podman)
+
+**Symptom:** The stack card correctly shows a running status, but expanding it or opening Stack
+Info shows services as stopped/exited, or no container details at all — even though the
+containers are genuinely running and producing logs.
+
+**Cause:** This was a real bug, fixed in a later release than the one that first fixed rootful
+discovery (issue [#242](https://github.com/RXTX4816/cockpit-compose/issues/242)): stack-level
+status and the service/container-level detail view are powered by two separate code paths, and
+only the first one was updated to escalate correctly for rootful Podman. If you see this,
+**update to the latest release** — no configuration change fixes it. The same underlying gap also
+made a `stop`/`down` issued while viewing Rootless mode *look* like it affected the Rootful stack
+too (it didn't — the service-level view just always displayed rootless data regardless of which
+mode was actually selected, which was misleading but harmless).
 
 ---
 
@@ -129,6 +153,10 @@ For system-wide (root) Podman:
 ```bash
 sudo systemctl enable --now podman.socket
 ```
+
+After enabling either socket, click the small refresh icon next to the **Rootless / Rootful**
+toggle (next to the runtime switch) to recheck — this re-detects the sockets and actively probes
+each one, so it also catches a socket that exists but whose daemon isn't actually responding.
 
 ---
 

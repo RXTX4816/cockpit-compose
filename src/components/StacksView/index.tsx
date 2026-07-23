@@ -419,6 +419,7 @@ export function StacksView({ onRuntimeChange, dockerMissing, layout = "poweruser
                   if (cancelled > 0) toast.warn(t("stacks.runtime_switch_cancelled_tasks", { count: cancelled }));
                   onRuntimeChange?.(r);
                 }}
+                onSocketModeChange={() => reset()}
                 suggestPodman={dockerMissing}
               />
             </div>

@@ -20,15 +20,45 @@ Switching runtimes also clears your current stack selection and cancels any [bac
 
 Everything else — the dashboard, modals, editors, log streaming, shell access — works identically.
 
-## Rootless Podman
+## Rootless and rootful Podman
 
-Rootless Podman uses a user-level socket. Enable it with:
+Rootless Podman uses a per-user socket:
 
 ```bash
 systemctl --user enable --now podman.socket
 ```
 
-The plugin detects the user socket automatically when Podman mode is active. No additional configuration is needed.
+Rootful (system-wide) Podman uses a single socket shared by all users, escalated via Cockpit's
+administrative access:
+
+```bash
+sudo systemctl enable --now podman.socket
+```
+
+The plugin probes for both sockets whenever you switch to Podman mode (or click **Recheck** — see
+below). If only one is present, it's used automatically. If **both** are present, a second toggle
+appears next to the Docker/Podman switch — **Rootless** / **Rootful** — showing which one is
+active and letting you pick explicitly:
+
+- The choice is saved and sticks even if the other mode later becomes available too — it does not
+  silently change back, the same way the Docker/Podman choice itself doesn't.
+- An option is greyed out with a tooltip explaining why if its socket isn't detected, or if a
+  **Recheck** (the small refresh icon) finds it unresponsive — useful when a socket file exists
+  but the daemon behind it is actually broken or misconfigured.
+- The footer shows a **Rootless** or **Rootful** badge reflecting whichever mode is currently
+  active, matching the Docker footer badge described in [Stacks Dashboard](Stacks-Dashboard).
+
+This replaces relying purely on automatic detection, which could previously pick the wrong socket
+silently on systems where both are present but one is broken.
+
+**Rootful mode requires Cockpit's Administrative access to be turned on** (top-right of the
+Cockpit page, not inside this plugin — click "Limited access" and confirm). This is a separate
+toggle from anything in this plugin, and it's easy to forget after a page reload or a fresh
+login. Without it, every rootful discovery/action call runs unprivileged, fails to reach the
+root-owned socket, and — depending on what else is installed — either fails with a clear
+"permission denied" error, or (if a second engine is also installed, see the delegation warning
+below) silently escalates nothing and the action may appear to do less than expected. If rootful
+mode looks broken, checking Administrative access is on is the first thing to try.
 
 When creating your first stack in rootless mode, the suggested compose root directory defaults to `<your home directory>/compose` instead of `/etc/docker/compose`, since `/etc` typically isn't writable without root — see [Creating Stacks](Creating-Stacks).
 
@@ -41,6 +71,14 @@ Podman mode works with two different compose providers:
 | **podman compose** (built-in) | `podman compose` | Recommended. Ships with Podman 5+. |
 | **podman-compose** (Python) | `podman-compose` | Standalone Python package. Works but with some limitations (see below). |
 | **docker-compose** (external) | `docker-compose` | Legacy v1 CLI used as a fallback by `podman compose`. |
+
+`podman compose` decides for itself which of these to delegate to, based on what's installed —
+this plugin doesn't control that choice. If Docker's own `docker-compose-plugin` happens to be
+installed alongside Podman (e.g. testing both side by side), `podman compose` will delegate to
+*that* real Docker Compose binary rather than its own native implementation or `podman-compose`.
+This is normally transparent — the plugin always tells it which socket to talk to — but it means
+the compose version shown in the footer under Podman mode can be the real Docker Compose plugin's
+version number, which is expected, not a bug.
 
 ## Known limitations
 

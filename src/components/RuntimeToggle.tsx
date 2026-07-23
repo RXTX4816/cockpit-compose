@@ -1,14 +1,29 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { ToggleGroup, ToggleGroupItem, Alert, Modal, ModalHeader, ModalBody, ModalFooter, Button } from "@patternfly/react-core";
-import { Tooltip } from "@rxtx4816/cockpit-plugin-base-react/components";
-import { CubeIcon } from "@patternfly/react-icons";
-import { setRuntime, detectComposeCommand, type Runtime } from "../api";
+import { ToggleGroup, ToggleGroupItem, Alert, Modal, ModalHeader, ModalBody, ModalFooter, Button, Spinner } from "@patternfly/react-core";
+import { CubeIcon, SyncAltIcon } from "@patternfly/react-icons";
+import {
+  setRuntime, detectComposeCommand, getSocketMode, setSocketMode, getSocketAvailability,
+  redetectSockets, checkSocketHealth, type Runtime, type SocketMode,
+} from "../api";
 
 interface Props {
   onRuntimeChange?: (runtime: Runtime) => void;
+  // Fired whenever the effective socket mode changes (explicit toggle click, or a recheck that
+  // resolves differently) — the stacks list has no polling of its own, so without this callback
+  // the dashboard keeps showing whatever was fetched under the previous mode until some other
+  // action happens to trigger a refresh.
+  onSocketModeChange?: () => void;
   suggestPodman?: boolean;
 }
+
+interface SocketAvailability {
+  rootless: boolean;
+  rootful: boolean;
+  rootfulNeedsAdminAccess: boolean;
+}
+
+type SocketHealth = Partial<Record<SocketMode, { ok: boolean; reason?: string }>>;
 
 function DockerIcon() {
   return (
@@ -22,7 +37,7 @@ function PodmanIcon() {
   return <CubeIcon aria-hidden="true" style={{ marginRight: 4, verticalAlign: "middle" }} />;
 }
 
-export function RuntimeToggle({ onRuntimeChange, suggestPodman }: Props) {
+export function RuntimeToggle({ onRuntimeChange, onSocketModeChange, suggestPodman }: Props) {
   const { t } = useTranslation();
   const [runtime, setRuntimeState] = useState<Runtime>(
     () => (localStorage.getItem("cockpit-compose:runtime") ?? "docker") as Runtime,
@@ -30,6 +45,40 @@ export function RuntimeToggle({ onRuntimeChange, suggestPodman }: Props) {
   const [detecting, setDetecting] = useState(false);
   const [notInstalled, setNotInstalled] = useState<Runtime | null>(null);
   const [showPodmanConfirm, setShowPodmanConfirm] = useState(() => suggestPodman ?? false);
+  const [socketMode, setSocketModeState] = useState<SocketMode | undefined>(() => getSocketMode(runtime));
+  const [availability, setAvailability] = useState<SocketAvailability>(() => getSocketAvailability(runtime));
+  const [health, setHealth] = useState<SocketHealth>({});
+  const [rechecking, setRechecking] = useState(false);
+
+  // Re-sync the socket-mode toggle whenever the active runtime changes (including on mount).
+  useEffect(() => {
+    setSocketModeState(getSocketMode(runtime));
+    setAvailability(getSocketAvailability(runtime));
+    setHealth({});
+  }, [runtime]);
+
+  const handleSocketModeChange = useCallback((mode: SocketMode) => {
+    if (mode === socketMode) return;
+    setSocketMode(runtime, mode);
+    setSocketModeState(mode);
+    onSocketModeChange?.();
+  }, [runtime, socketMode, onSocketModeChange]);
+
+  const handleRecheck = useCallback(async () => {
+    setRechecking(true);
+    await redetectSockets(runtime);
+    const avail = getSocketAvailability(runtime);
+    setAvailability(avail);
+    const results: SocketHealth = {};
+    if (avail.rootless) results.rootless = await checkSocketHealth(runtime, "rootless");
+    if (avail.rootful) results.rootful = await checkSocketHealth(runtime, "rootful");
+    setHealth(results);
+    const resolved = getSocketMode(runtime);
+    const changed = resolved !== socketMode;
+    setSocketModeState(resolved);
+    setRechecking(false);
+    if (changed) onSocketModeChange?.();
+  }, [runtime, socketMode, onSocketModeChange]);
 
   const handleChange = useCallback(async (newRuntime: Runtime) => {
     if (newRuntime === runtime || detecting) return;
@@ -58,10 +107,27 @@ export function RuntimeToggle({ onRuntimeChange, suggestPodman }: Props) {
 
   const runtimeLabel = notInstalled === "podman" ? "Podman" : "Docker";
 
+  const reasonFor = (mode: SocketMode): string | undefined => {
+    if (!availability[mode]) {
+      return mode === "rootful" && availability.rootfulNeedsAdminAccess
+        ? t("runtime.rootful_needs_admin_access")
+        : t("runtime.socket_not_detected");
+    }
+    const h = health[mode];
+    return h && !h.ok ? h.reason : undefined;
+  };
+  const isModeDisabled = (mode: SocketMode): boolean => !availability[mode] || health[mode]?.ok === false;
+
+  const hasSocketModeToggle = availability.rootless || availability.rootful || availability.rootfulNeedsAdminAccess;
+  const noSocketDetected = !detecting && socketMode === undefined;
+
   return (
     <>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.25rem" }}>
-        <Tooltip content={t("runtime.toggle_label")}>
+        {/* Native `title` attributes instead of the Tooltip component throughout this row: with
+            two adjacent ToggleGroups plus per-item tooltips, PatternFly's floating Tooltip
+            overlays ended up overlapping sibling buttons and intermittently swallowing clicks. */}
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }} title={t("runtime.toggle_label")}>
           <ToggleGroup aria-label={t("runtime.toggle_label")} isCompact>
             <ToggleGroupItem
               text={<><DockerIcon />{t("runtime.docker")}</>}
@@ -76,7 +142,43 @@ export function RuntimeToggle({ onRuntimeChange, suggestPodman }: Props) {
               isDisabled={detecting}
             />
           </ToggleGroup>
-        </Tooltip>
+          {hasSocketModeToggle && (
+            <>
+              <div
+                aria-hidden="true"
+                style={{ width: 1, alignSelf: "stretch", background: "var(--pf-t--global--border--color--default)" }}
+              />
+              <ToggleGroup aria-label={t("runtime.socket_mode_toggle_label")} isCompact>
+                <span title={reasonFor("rootless") ?? t("runtime.rootless_help")}>
+                  <ToggleGroupItem
+                    text={t("runtime.rootless")}
+                    isSelected={socketMode === "rootless"}
+                    isDisabled={isModeDisabled("rootless")}
+                    onChange={() => handleSocketModeChange("rootless")}
+                  />
+                </span>
+                <span title={reasonFor("rootful") ?? t("runtime.rootful_help")}>
+                  <ToggleGroupItem
+                    text={t("runtime.rootful")}
+                    isSelected={socketMode === "rootful"}
+                    isDisabled={isModeDisabled("rootful")}
+                    onChange={() => handleSocketModeChange("rootful")}
+                  />
+                </span>
+              </ToggleGroup>
+              <Button
+                variant="plain"
+                aria-label={t("runtime.recheck_sockets")}
+                title={t("runtime.recheck_sockets")}
+                onClick={() => void handleRecheck()}
+                isDisabled={rechecking}
+                style={{ padding: "0.15rem" }}
+              >
+                {rechecking ? <Spinner size="sm" /> : <SyncAltIcon />}
+              </Button>
+            </>
+          )}
+        </div>
         {notInstalled && (
           <Alert
             variant="warning"
@@ -84,6 +186,19 @@ export function RuntimeToggle({ onRuntimeChange, suggestPodman }: Props) {
             isPlain
             title={t("runtime.not_installed", { runtime: runtimeLabel })}
             style={{ fontSize: "0.75rem", padding: "0.1rem 0.25rem" }}
+          />
+        )}
+        {noSocketDetected && (
+          <Alert
+            variant="warning"
+            isInline
+            isPlain
+            title={
+              availability.rootfulNeedsAdminAccess
+                ? t("runtime.no_socket_needs_admin_access", { runtime: t(`runtime.${runtime}`) })
+                : t("runtime.no_socket_detected", { runtime: t(`runtime.${runtime}`) })
+            }
+            style={{ fontSize: "0.75rem", padding: "0.1rem 0.25rem", maxWidth: 320, textAlign: "right" }}
           />
         )}
       </div>

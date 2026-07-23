@@ -19,7 +19,7 @@ import {
   readComposeFile,
   getServicesFromCompose,
   composeRunStream,
-  composeFileSuperuser,
+  stackSuperuser,
   snapshotProjectContainerIds,
   forceRemoveOneoffContainers,
 } from "../api";
@@ -81,7 +81,7 @@ export function RunModal({ stack, onClose }: Props) {
     setStep("running");
     const files = splitConfigFiles(stack.ConfigFiles);
     const [su, preRunIds] = await Promise.all([
-      composeFileSuperuser(files),
+      stackSuperuser(files),
       snapshotProjectContainerIds(stack.Name),
     ]);
     preRunIdsRef.current = preRunIds;

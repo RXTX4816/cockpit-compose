@@ -19,7 +19,7 @@ import {
   readComposeFile,
   getServicesFromCompose,
   compose,
-  composeFileSuperuser,
+  stackSuperuser,
 } from "../api";
 import "./ExecModal.css";
 import { splitConfigFiles } from "../lib/configFiles";
@@ -101,7 +101,7 @@ export function ExecModal({ stack, onClose }: Props) {
     setConnectError(null);
     setStep("terminal");
 
-    const su = await composeFileSuperuser(splitConfigFiles(stack.ConfigFiles));
+    const su = await stackSuperuser(splitConfigFiles(stack.ConfigFiles));
 
     // Defer mounting until the div is in the DOM
     requestAnimationFrame(() => {

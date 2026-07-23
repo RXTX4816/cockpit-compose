@@ -69,6 +69,36 @@ describe("AppFooter", () => {
     expect(screen.queryByText("Rootless")).toBeNull();
   });
 
+  it("shows rootful badge when not rootless but a socket is configured", async () => {
+    mockIsRootlessMode.mockReturnValue(false);
+    mockGetDockerSocketPath.mockReturnValue("unix:///var/run/docker.sock");
+    const { AppFooter } = await import("./AppFooter");
+    render(<AppFooter runtime="docker" />);
+    expect(screen.getByText("Rootful")).toBeInTheDocument();
+  });
+
+  it("shows neither badge when no socket has been detected at all", async () => {
+    mockIsRootlessMode.mockReturnValue(false);
+    mockGetDockerSocketPath.mockReturnValue(undefined);
+    const { AppFooter } = await import("./AppFooter");
+    render(<AppFooter runtime="docker" />);
+    expect(screen.queryByText("Rootless")).toBeNull();
+    expect(screen.queryByText("Rootful")).toBeNull();
+  });
+
+  it("re-renders the badge when the socket-mode-change event fires", async () => {
+    const { SOCKET_MODE_CHANGE_EVENT } = await import("../api");
+    mockIsRootlessMode.mockReturnValue(false);
+    mockGetDockerSocketPath.mockReturnValue(undefined);
+    const { AppFooter } = await import("./AppFooter");
+    render(<AppFooter runtime="docker" />);
+    expect(screen.queryByText("Rootless")).toBeNull();
+
+    mockIsRootlessMode.mockReturnValue(true);
+    window.dispatchEvent(new Event(SOCKET_MODE_CHANGE_EVENT));
+    await waitFor(() => expect(screen.getByText("Rootless")).toBeInTheDocument());
+  });
+
   it("shows socket path as tooltip on version label (not standalone text)", async () => {
     mockGetDockerSocketPath.mockReturnValue("unix:///run/user/1000/docker.sock");
     const { AppFooter } = await import("./AppFooter");

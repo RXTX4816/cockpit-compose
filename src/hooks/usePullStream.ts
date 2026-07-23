@@ -1,4 +1,4 @@
-import { pullStack, composeFileSuperuser, readAllProfiles, isRootlessMode } from "../api";
+import { pullStack, stackSuperuser, readAllProfiles } from "../api";
 import { useAsyncStream } from "./useAsyncStream";
 
 export function usePullStream(stackName: string, configFiles: string[]) {
@@ -6,7 +6,7 @@ export function usePullStream(stackName: string, configFiles: string[]) {
 
   return useAsyncStream(
     launch => Promise.all([
-      isRootlessMode() ? Promise.resolve<"try" | undefined>(undefined) : composeFileSuperuser(configFiles),
+      stackSuperuser(configFiles),
       readAllProfiles(configFiles[0]),
     ]).then(([su, profiles]) => { launch(pullStack(stackName, configFiles, profiles, su)); }),
     [stackName, configFilesKey],

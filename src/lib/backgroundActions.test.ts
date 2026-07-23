@@ -12,6 +12,27 @@ beforeEach(() => {
   mockSpawn.mockReturnValue(mockProcess(""));
 });
 
+describe("stackSuperuser() escalation (background flow)", () => {
+  // Regression test: this file used to have its own duplicate copy of the superuser-resolution
+  // logic (a local `resolveSuperuser`) which fell back to file-ownership-based escalation for
+  // Podman's rootful mode — the opposite bug from the one fixed in stackSuperuser() itself, but
+  // from the same root cause (file ownership must never override an explicit Podman socket-mode
+  // selection). Now that every starter here delegates straight to the shared, already-tested
+  // stackSuperuser() instead of resolving its own copy, this just proves the value genuinely
+  // flows through end-to-end into the spawned command, rather than being silently dropped.
+  it("passes stackSuperuser()'s resolved value through to the spawned down command", async () => {
+    mockSpawn.mockImplementation(() => mockProcess("0\n")); // dir/file owned by root (uid 0)
+    const launch = vi.fn();
+    await buildDownStarter(stack)(launch);
+    expect(launch).toHaveBeenCalledOnce();
+    const spawnCallOptions = mockSpawn.mock.calls.find(call => (call[0] as string[]).includes("down"))?.[1] as
+      { superuser?: "try" } | undefined;
+    // Default test environment has no cockpit.user() available, so composeFileSuperuser (and
+    // therefore stackSuperuser, for the default docker runtime) fails safe to "try".
+    expect(spawnCallOptions?.superuser).toBe("try");
+  });
+});
+
 describe("buildUpStarter", () => {
   it("launches upStackStream with the given profiles once superuser resolves", async () => {
     const starter = buildUpStarter(stack, ["dev"]);

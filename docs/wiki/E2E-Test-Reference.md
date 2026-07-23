@@ -11,6 +11,7 @@ For the *backlog* of tests still to be written, see [E2E Test Inventory](E2E-Tes
 | `base.ts` | `baseData(page)` — logs in, dismisses the podman-only startup prompt if present, imports/scans the pre-staged compose directory. Retries the whole open→fill→submit sequence up to 5 times because rootless Podman's local component state gets reset for a few seconds after a runtime switch (see "Known flaky behavior" below). `dismissStartupPodmanPrompt(page)` — standalone, for specs that don't need a scan. `FIXTURE_STACKS` — names of every pre-staged fixture stack (kept in sync with `scripts/test-vm.config.sh`). |
 | `stacks.ts` | Composable stack actions: `downedCard`, `stackRow`, `upStack`, `downStack`, `openYamlEditor` (uses `force: true` on its click — see "Known flaky behavior"), `yamlEditorContent`, `ensureDown` (force a stack down first, self-healing against a previous run's leaked state), `withRunningStack` (runs a callback against a temporarily-up stack, always brings it back down in a `finally`, even on failure; calls `ensureDown` first). |
 | `runtime.ts` | `switchRuntime(page, 'docker'|'podman')`, `expectRootless(page, bool)` — runtime/rootless assertions. |
+| `admin.ts` | `loginWithAdminAccess(page, pluginName?)` — logs in and switches Cockpit to real Administrative access before navigating to the plugin. Use instead of the shared `pluginPage` fixture whenever a spec needs genuine superuser escalation (e.g. rootful Podman with no rootless socket available) — `pluginPage` navigates straight to the plugin's own iframe URL and never sees the outer Cockpit shell, so it can never reach the "Limited access" control at all. In these test VMs (passwordless sudo) clicking it grants admin access instantly, no password prompt. |
 
 **Design principle:** every test here asserts a real effect (file content, container/volume state, a status attribute) rather than only "is this element visible" — see the discussion in issue #227.
 
@@ -58,6 +59,20 @@ For the *backlog* of tests still to be written, see [E2E Test Inventory](E2E-Tes
 | Test | Asserts | VM scope |
 |---|---|---|
 | `Create Stack suggests the home directory when rootless and no stacks exist yet` | The Create dialog's directory field defaults to `/home/test/compose` under rootless Podman. Self-skips on Docker VMs (they run rootful here). | Podman-only |
+
+### `e2e/runtime-rootless.spec.ts`
+
+Regression coverage for [issue #242](https://github.com/RXTX4816/cockpit-compose/issues/242) — a rootful
+Compose stack (`sudo podman compose up`, no rootless socket present at all) was invisible in the
+dashboard because discovery ran unprivileged with no way to reach the root-owned socket, and even
+once that was fixed, a *second* bug (`src/api/containers.ts` had no escalation at all) meant the
+Stack Info modal's container list stayed empty even when the stack card correctly showed "running".
+Uses `loginWithAdminAccess` (not `pluginPage`) since this needs real Cockpit Administrative access,
+not just Podman's own passwordless sudo.
+
+| Test | Asserts | VM scope |
+|---|---|---|
+| `discovers a rootfully-started stack, shows it running, and loads real container info` | The `gotify` stack (started outside the plugin via `sudo podman compose up -d` during VM provisioning) appears with `data-status` of `running`/`partial`, and opening its Stack Info modal shows real container data (`.sim-no-containers` absent) with a visible "running" state — not just a correct stack-level badge with nothing underneath. | `fedora-podman-rootful` only (self-skips elsewhere — every other VM has a rootless socket that would mask this bug) |
 
 ### `e2e/logs.spec.ts`
 

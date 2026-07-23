@@ -28,9 +28,8 @@ import {
   readComposeFile,
   getServicesFromCompose,
   scaleStack,
-  composeFileSuperuser,
+  stackSuperuser,
   readAllProfiles,
-  isRootlessMode,
   parseJsonOutput,
   parsePortsFull,
 } from "../api";
@@ -117,7 +116,7 @@ export function ScaleModal({ stack, onClose, onSuccess }: Props) {
     setApplyError(null);
     try {
       const [su, profiles] = await Promise.all([
-        isRootlessMode() ? Promise.resolve<"try" | undefined>(undefined) : composeFileSuperuser(configFiles),
+        stackSuperuser(configFiles),
         readAllProfiles(configFiles[0]),
       ]);
       await scaleStack(stack.Name, configFiles, counts, profiles, su);
