@@ -4,8 +4,7 @@ import { PageSection, Label } from "@patternfly/react-core";
 import { Tooltip } from "@rxtx4816/cockpit-plugin-base-react/components";
 import { HelpPopover } from "./HelpPopover";
 import { composeVersion, containerVersion, isRootlessMode, getDockerSocketPath, getPodmanSocketPath, SOCKET_MODE_CHANGE_EVENT, type ComposeVersion, type Runtime } from "../api";
-// @ts-expect-error: ESM import assertion for JSON
-import pkg from "../../package.json" assert { type: "json" };
+import pkg from "../../package.json" with { type: "json" };
 
 interface Props {
   runtime: Runtime;
