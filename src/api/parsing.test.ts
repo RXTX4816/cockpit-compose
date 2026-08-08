@@ -8,6 +8,7 @@ import {
   parsePortsDetailed,
   parsePorts,
   getServicesFromCompose,
+  getImagesFromCompose,
   getServiceProfileMapFromCompose,
   getProjectNameFromCompose,
   getComposeProjectNameFromEnv,
@@ -212,6 +213,35 @@ describe("getServicesFromCompose", () => {
 
   it("returns empty array for empty string", () => {
     expect(getServicesFromCompose("")).toEqual([]);
+  });
+});
+
+describe("getImagesFromCompose", () => {
+  it("returns declared image values from valid YAML", () => {
+    const yaml = "services:\n  web:\n    image: nginx:alpine\n  db:\n    image: postgres:16\n";
+    expect(getImagesFromCompose(yaml)).toEqual(["nginx:alpine", "postgres:16"]);
+  });
+
+  it("dedupes repeated image values", () => {
+    const yaml = "services:\n  web:\n    image: nginx:alpine\n  web2:\n    image: nginx:alpine\n";
+    expect(getImagesFromCompose(yaml)).toEqual(["nginx:alpine"]);
+  });
+
+  it("omits services with no image key (build-only)", () => {
+    const yaml = "services:\n  web:\n    build: .\n";
+    expect(getImagesFromCompose(yaml)).toEqual([]);
+  });
+
+  it("returns empty array for malformed YAML", () => {
+    expect(getImagesFromCompose("{ unclosed:")).toEqual([]);
+  });
+
+  it("returns empty array when services key is absent", () => {
+    expect(getImagesFromCompose("version: '3'\n")).toEqual([]);
+  });
+
+  it("returns empty array for empty string", () => {
+    expect(getImagesFromCompose("")).toEqual([]);
   });
 });
 

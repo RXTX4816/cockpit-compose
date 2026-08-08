@@ -26,7 +26,10 @@ import {
   pruneContainers,
   pruneVolumes,
   pruneNetworks,
+  readComposeFile,
+  getImagesFromCompose,
 } from "../api";
+import { splitConfigFiles } from "../lib/configFiles";
 
 interface Selection {
   images: boolean;
@@ -74,13 +77,33 @@ function normalizeImageRef(ref: string): string {
   return ref;
 }
 
+// docker/podman ps only knows about images belonging to *existing* (running or stopped)
+// containers. A fully-down stack (compose down removed its containers entirely) has none,
+// so there's nothing left to introspect that way — fall back to the images declared in the
+// compose file(s) themselves, which is the only source of truth once containers are gone.
+async function findComposeDeclaredImages(configFiles: string[]): Promise<string[]> {
+  const images = new Set<string>();
+  for (const file of configFiles) {
+    try {
+      let content = "";
+      const proc = readComposeFile(file);
+      proc.stream((d: string) => { content += d; });
+      await proc;
+      for (const image of getImagesFromCompose(content)) images.add(image);
+    } catch { /* file unreadable — skip, other files may still resolve */ }
+  }
+  return [...images];
+}
+
 // Finds images belonging to the project's repos that no container (anywhere) currently uses.
-// Strategy: get image refs from project containers → extract repos → list all versions of
-// those repos → subtract any name that appears in a running-or-stopped container globally.
-// Both sides are normalized before comparison to handle short vs. fully-qualified name differences
-// between "docker ps {{.Image}}" and "docker images {{.Repository}}:{{.Tag}}".
-async function findUnusedProjectImages(project: string): Promise<{ name: string; display: string }[]> {
-  const imageRefs = await fetchLines(listProjectContainerImageRefs(project));
+// Strategy: get image refs from project containers (or, if the stack is fully down and has
+// none, from the compose file directly) → extract repos → list all versions of those repos →
+// subtract any name that appears in a running-or-stopped container globally. Both sides are
+// normalized before comparison to handle short vs. fully-qualified name differences between
+// "docker ps {{.Image}}" and "docker images {{.Repository}}:{{.Tag}}".
+async function findUnusedProjectImages(project: string, configFiles: string[]): Promise<{ name: string; display: string }[]> {
+  let imageRefs = await fetchLines(listProjectContainerImageRefs(project));
+  if (imageRefs.length === 0) imageRefs = await findComposeDeclaredImages(configFiles);
   if (imageRefs.length === 0) return [];
 
   // Strip tag/digest to get the repo name, deduplicate.
@@ -141,7 +164,7 @@ export function PruneModal({ stack, onClose, onSuccess }: Props) {
     setPreviewError(null);
     try {
       const [unusedImages, containers, volumes, allNetworks] = await Promise.all([
-        selection.images ? findUnusedProjectImages(stack.Name) : Promise.resolve([]),
+        selection.images ? findUnusedProjectImages(stack.Name, splitConfigFiles(stack.ConfigFiles)) : Promise.resolve([]),
         selection.containers ? fetchLines(listStoppedContainers(stack.Name)) : Promise.resolve([]),
         selection.volumes ? fetchLines(listDanglingVolumes(stack.Name)) : Promise.resolve([]),
         selection.networks ? fetchLines(listProjectNetworks(stack.Name)) : Promise.resolve([]),
@@ -169,7 +192,7 @@ export function PruneModal({ stack, onClose, onSuccess }: Props) {
     } finally {
       setLoadingPreview(false);
     }
-  }, [stack.Name, selection]);
+  }, [stack.Name, stack.ConfigFiles, selection]);
 
   const pruneAction = useCallback(async () => {
     const tasks: Promise<unknown>[] = [];

@@ -1,6 +1,6 @@
 import { test, expect } from '@rxtx4816/cockpit-plugin-base-react/e2e';
 import { baseData } from './helpers/base';
-import { downStack, ensureDown, stackRow, upStack } from './helpers/stacks';
+import { downedCard, downStack, ensureDown, stackRow, upStack } from './helpers/stacks';
 
 // `volumes-test` (db+app, db uses a named volume `pgdata` — see
 // scripts/test-vm.config.sh) is brought up then Stopped (not removed) so it
@@ -67,4 +67,35 @@ test('Prune removes real stopped containers, not just closes the dialog', async 
       await downStack(page, 'volumes-test').catch(() => {});
     }
   }
+});
+
+// Regression test for #247: the Down-Stack table previously had no Prune
+// action at all, so a fully-down stack's now-unused image (no container
+// anywhere references it once "Down (remove)" has run) was unreachable
+// through the UI — matching the exact gap called out in the comment above.
+// `gotify` uses a unique image (gotify/server) not shared with any other
+// fixture stack, so once it's down its image is unambiguously prunable.
+test('Down-Stack table Prune action removes a real unused image for a fully-down stack', async ({ pluginPage: page }) => {
+  test.setTimeout(120_000);
+  await baseData(page);
+
+  await ensureDown(page, 'gotify');
+  await upStack(page, 'gotify');
+  await downStack(page, 'gotify');
+
+  const card = downedCard(page, 'gotify');
+  await expect(card).toBeVisible();
+
+  await card.getByRole('button', { name: 'Prune' }).click();
+
+  const selectModal = page.getByRole('dialog', { name: /Prune resources — gotify/ });
+  await expect(selectModal).toBeVisible();
+  await selectModal.getByRole('button', { name: 'Preview' }).click();
+
+  const previewModal = page.getByRole('dialog', { name: /Confirm prune — gotify/ });
+  await expect(previewModal).toBeVisible();
+  // Real effect target: the actual now-unused image, not just a generic count.
+  await expect(previewModal.getByText('gotify/server', { exact: false })).toBeVisible({ timeout: 10000 });
+  await previewModal.getByRole('button', { name: 'Prune selected' }).click();
+  await expect(previewModal).not.toBeVisible({ timeout: 20000 });
 });

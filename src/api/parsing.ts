@@ -110,6 +110,21 @@ export function getProfilesFromCompose(composeContent: string): string[] {
   } catch { return []; }
 }
 
+export function getImagesFromCompose(composeContent: string): string[] {
+  try {
+    const compose = loadYaml(composeContent);
+    if (!compose || typeof compose !== "object" || !("services" in compose)) return [];
+    const services = (compose as Record<string, unknown>).services;
+    if (typeof services !== "object" || services === null) return [];
+    const images = new Set<string>();
+    for (const svc of Object.values(services)) {
+      const image = (svc as Record<string, unknown>)?.image;
+      if (typeof image === "string" && image.trim()) images.add(image.trim());
+    }
+    return [...images];
+  } catch { return []; }
+}
+
 export function getProjectNameFromCompose(composeContent: string): string | null {
   try {
     const compose = loadYaml(composeContent);

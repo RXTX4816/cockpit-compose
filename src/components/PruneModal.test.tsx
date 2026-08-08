@@ -18,6 +18,7 @@ vi.mock("../api", async (importOriginal) => {
     pruneContainers: vi.fn(),
     pruneVolumes: vi.fn(),
     pruneNetworks: vi.fn(),
+    readComposeFile: vi.fn(),
   };
 });
 
@@ -32,6 +33,7 @@ import {
   pruneContainers,
   pruneVolumes,
   pruneNetworks,
+  readComposeFile,
 } from "../api";
 
 const mockListProjectContainerImageRefs = vi.mocked(listProjectContainerImageRefs);
@@ -44,6 +46,7 @@ const mockListProjectNetworks = vi.mocked(listProjectNetworks);
 const mockPruneContainers = vi.mocked(pruneContainers);
 const mockPruneVolumes = vi.mocked(pruneVolumes);
 const mockPruneNetworks = vi.mocked(pruneNetworks);
+const mockReadComposeFile = vi.mocked(readComposeFile);
 
 const runningStack: ComposeStack = {
   Name: "gitea",
@@ -84,6 +87,7 @@ beforeEach(() => {
   mockPruneContainers.mockImplementation(() => mockProcess(""));
   mockPruneVolumes.mockImplementation(() => mockProcess(""));
   mockPruneNetworks.mockImplementation(() => mockProcess(""));
+  mockReadComposeFile.mockImplementation(() => mockProcess(""));
 });
 
 describe("PruneModal — select step", () => {
@@ -253,13 +257,38 @@ describe("PruneModal — preview step", () => {
     expect(screen.queryByText(/gitea:1\.26\.2/)).toBeNull();
   });
 
-  it("shows Nothing to remove when project has no containers (stack never started)", async () => {
+  it("shows Nothing to remove when project has no containers and no compose file (stack never started)", async () => {
     mockListProjectContainerImageRefs.mockImplementation(() => mockProcess(""));
     await goToPreview();
     await waitFor(() =>
       expect(screen.getByText(/Nothing to remove/i)).toBeInTheDocument()
     );
     expect(mockListImagesByRepo).not.toHaveBeenCalled();
+  });
+
+  // Regression coverage for #247: a fully-down stack (compose down removed its
+  // containers entirely) has nothing left for `docker ps` to introspect, so image
+  // discovery must fall back to reading the compose file's declared `image:` values.
+  it("falls back to the compose file's declared image when the project has no containers", async () => {
+    mockListProjectContainerImageRefs.mockImplementation(() => mockProcess(""));
+    mockReadComposeFile.mockImplementation(() =>
+      mockProcess("services:\n  gitea:\n    image: docker.gitea.com/gitea:1.26.2\n")
+    );
+    mockListImagesByRepo.mockImplementation(() =>
+      mockProcess("docker.gitea.com/gitea:1.26.2\t248MB\n")
+    );
+    mockListAllContainerImages.mockImplementation(() => mockProcess(""));
+    await goToPreview();
+    await waitFor(() =>
+      expect(screen.getByText(/gitea:1\.26\.2/)).toBeInTheDocument()
+    );
+    expect(mockReadComposeFile).toHaveBeenCalledWith("/srv/gitea/compose.yml");
+    expect(mockListImagesByRepo).toHaveBeenCalledWith("docker.gitea.com/gitea");
+  });
+
+  it("does not fall back to the compose file when the project still has containers", async () => {
+    await goToPreview();
+    expect(mockReadComposeFile).not.toHaveBeenCalled();
   });
 
   it("does NOT show stopped-stack warning for a running stack in preview", async () => {
