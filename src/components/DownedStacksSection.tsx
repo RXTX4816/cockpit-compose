@@ -25,6 +25,7 @@ import { CreateStackModal } from "./CreateStackModal";
 import { DeleteStackModal } from "./DeleteStackModal";
 import { RestoreModal } from "./RestoreModal";
 import { BackupModal } from "./BackupModal";
+import { PruneModal } from "./PruneModal";
 import { GlobalPruneModal } from "./GlobalPruneModal";
 import { BulkActionConfirmModal } from "./BulkActionConfirmModal";
 import { useBackgroundTasks } from "../hooks/useBackgroundTasks";
@@ -69,6 +70,7 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
   const [configFileOverrides, setConfigFileOverrides] = useState<Record<string, string[]>>({});
   const [restoreOpen, setRestoreOpen] = useState(false);
   const [pruneOpen, setPruneOpen] = useState(false);
+  const [pruneTarget, setPruneTarget] = useState<DownedStack | null>(null);
   const [backupTarget, setBackupTarget] = useState<DownedStack | null>(null);
   const [miniMenu, setMiniMenu] = useState<{ stack: DownedStack; x: number; y: number } | null>(null);
   const miniMenuRef = useRef<HTMLDivElement>(null);
@@ -471,6 +473,9 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
                     <button className="dss-mini-menu-item" onClick={() => { setBackupTarget(miniMenu.stack); setMiniMenu(null); }}>
                       <ArchiveIcon /> {t("actions.backup")}
                     </button>
+                    <button className="dss-mini-menu-item" onClick={() => { setPruneTarget(miniMenu.stack); setMiniMenu(null); }}>
+                      <BroomIcon /> {t("actions.prune")}
+                    </button>
                     <button className="dss-mini-menu-item dss-mini-menu-item--danger" onClick={() => { setDeleteTarget(miniMenu.stack); setMiniMenu(null); }}>
                       <TrashIcon /> {t("downed_section.delete_title")}
                     </button>
@@ -505,6 +510,9 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
                         <Tooltip content={t("actions.backup")}>
                           <Button variant="plain" size="sm" onClick={() => setBackupTarget(d)} aria-label={t("actions.backup")}><ArchiveIcon /></Button>
                         </Tooltip>
+                        <Tooltip content={t("actions.prune")}>
+                          <Button variant="plain" size="sm" onClick={() => setPruneTarget(d)} aria-label={t("actions.prune")}><BroomIcon /></Button>
+                        </Tooltip>
                         <Tooltip content={t("downed_section.delete_title")}>
                           <Button variant="plain" size="sm" onClick={() => setDeleteTarget(d)} aria-label={t("downed_section.delete_title")} className="dss-delete-btn"><TrashIcon /></Button>
                         </Tooltip>
@@ -536,6 +544,9 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
                       </Tooltip>
                       <Tooltip content={t("actions.backup")}>
                         <button className="ur-key" onClick={() => setBackupTarget(d)}>[bak]</button>
+                      </Tooltip>
+                      <Tooltip content={t("actions.prune")}>
+                        <button className="ur-key" onClick={() => setPruneTarget(d)}>[prune]</button>
                       </Tooltip>
                       <Tooltip content={t("downed_section.delete_title")}>
                         <button className="ur-key ur-key--down" onClick={() => setDeleteTarget(d)}>[del]</button>
@@ -593,6 +604,11 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
                                 <Tooltip content={t("actions.backup")}>
                                   <Button variant="plain" size="sm" onClick={() => setBackupTarget(d)} aria-label={t("actions.backup")}>
                                     <ArchiveIcon />
+                                  </Button>
+                                </Tooltip>
+                                <Tooltip content={t("actions.prune")}>
+                                  <Button variant="plain" size="sm" onClick={() => setPruneTarget(d)} aria-label={t("actions.prune")}>
+                                    <BroomIcon />
                                   </Button>
                                 </Tooltip>
                                 <Tooltip content={t("downed_section.delete_title")}>
@@ -687,6 +703,13 @@ export function DownedStacksSection({ stacks, manuallyDownedStacks, onRefresh, o
       {pruneOpen && (
         <GlobalPruneModal
           onClose={() => setPruneOpen(false)}
+          onSuccess={onRefresh}
+        />
+      )}
+      {pruneTarget && (
+        <PruneModal
+          stack={toSyntheticStack(pruneTarget)}
+          onClose={() => setPruneTarget(null)}
           onSuccess={onRefresh}
         />
       )}
