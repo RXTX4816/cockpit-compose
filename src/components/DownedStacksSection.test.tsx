@@ -55,6 +55,14 @@ vi.mock("./BackupModal", () => ({
     </div>
   ),
 }));
+vi.mock("./PruneModal", () => ({
+  PruneModal: ({ stack, onClose }: { stack: { Name: string }; onClose: () => void }) => (
+    <div data-testid="prune-modal">
+      PruneModal:{stack.Name}
+      <button onClick={onClose}>ClosePrune</button>
+    </div>
+  ),
+}));
 vi.mock("./RestoreModal", () => ({
   RestoreModal: ({ onClose, onRestored, defaultScanDir }: { onClose: () => void; onRestored: (d: { name: string; configFiles: string[] }) => void; defaultScanDir?: string }) => (
     <div data-testid="restore-modal" data-scandir={defaultScanDir}>
@@ -415,14 +423,13 @@ describe("DownedStacksSection — Down section content", () => {
     expect(screen.getByTestId("yaml-modal")).toBeInTheDocument();
   });
 
-  it("does not render Info or Prune buttons", () => {
+  it("does not render an Info button", () => {
     mockUseScan.mockReturnValue(defaultScanResult({
       downedStacks: [{ name: "myapp", configFiles: ["/etc/docker/compose/myapp/docker-compose.yml"] }],
       hasScanned: true,
     }));
     render(<DownedStacksSection {...defaultProps} />);
     expect(screen.queryByRole("button", { name: /Info/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Prune" })).not.toBeInTheDocument();
   });
 
   it("shows abbreviated file names when there are multiple configFiles", () => {
@@ -512,6 +519,28 @@ describe("DownedStacksSection — Down section content", () => {
     fireEvent.click(screen.getByRole("button", { name: /backup/i }));
     fireEvent.click(screen.getByRole("button", { name: "CloseBackup" }));
     expect(screen.queryByTestId("backup-modal")).not.toBeInTheDocument();
+  });
+
+  it("Prune button opens PruneModal for that stack", () => {
+    mockUseScan.mockReturnValue(defaultScanResult({
+      downedStacks: [{ name: "myapp", configFiles: ["/etc/docker/compose/myapp/docker-compose.yml"] }],
+      hasScanned: true,
+    }));
+    render(<DownedStacksSection {...defaultProps} />);
+    fireEvent.click(screen.getByRole("button", { name: "Prune" }));
+    expect(screen.getByTestId("prune-modal")).toBeInTheDocument();
+    expect(screen.getByTestId("prune-modal")).toHaveTextContent("PruneModal:myapp");
+  });
+
+  it("ClosePrune closes the PruneModal", () => {
+    mockUseScan.mockReturnValue(defaultScanResult({
+      downedStacks: [{ name: "myapp", configFiles: ["/etc/docker/compose/myapp/docker-compose.yml"] }],
+      hasScanned: true,
+    }));
+    render(<DownedStacksSection {...defaultProps} />);
+    fireEvent.click(screen.getByRole("button", { name: "Prune" }));
+    fireEvent.click(screen.getByRole("button", { name: "ClosePrune" }));
+    expect(screen.queryByTestId("prune-modal")).not.toBeInTheDocument();
   });
 });
 
