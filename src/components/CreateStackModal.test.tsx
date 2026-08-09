@@ -581,3 +581,72 @@ describe("CreateStackModal — create error", () => {
     });
   });
 });
+
+describe("CreateStackModal — compose schema warnings", () => {
+  it("valid but non-conforming YAML shows warnings (not errors) in the confirm dialog", async () => {
+    render(<CreateStackModal {...defaultProps} />);
+    await fillSetupAndAdvance("manual");
+    // Parses fine as YAML/JSON but has an unknown top-level property, which
+    // validateComposeSpec flags as a schema warning rather than a parse error.
+    fireEvent.change(screen.getByTestId("yaml-editor"), {
+      target: { value: "services:\n  web:\n    image: test:latest\nnot_a_real_key: true\n" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /Create/i }));
+    await waitFor(() => expect(screen.getByText(/Create with issues\?/i)).toBeInTheDocument());
+    expect(screen.getByText(/Warnings found/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Errors found/i)).not.toBeInTheDocument();
+    expect(mockCreateDirectory).not.toHaveBeenCalled();
+  });
+
+  it("Create Anyway proceeds despite warnings", async () => {
+    const onCreated = vi.fn();
+    render(<CreateStackModal {...defaultProps} onCreated={onCreated} />);
+    await fillSetupAndAdvance("manual");
+    fireEvent.change(screen.getByTestId("yaml-editor"), {
+      target: { value: "services:\n  web:\n    image: test:latest\nnot_a_real_key: true\n" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /Create/i }));
+    await waitFor(() => screen.getByText(/Create with issues\?/i));
+    await act(async () => {
+      fireEvent.click(screen.getByText("Create Anyway"));
+    });
+    await waitFor(() => expect(onCreated).toHaveBeenCalled());
+  });
+
+  it("closing the confirm dialog via its own onClose (Escape) dismisses it without creating", async () => {
+    render(<CreateStackModal {...defaultProps} />);
+    await fillSetupAndAdvance("manual");
+    fireEvent.change(screen.getByTestId("yaml-editor"), {
+      target: { value: "services:\n  web:\n    image: [unclosed" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /Create/i }));
+    const confirmDialog = await screen.findByRole("dialog", { name: "Confirm create", hidden: true });
+    fireEvent.keyDown(confirmDialog, { key: "Escape", code: "Escape" });
+    await waitFor(() => expect(screen.queryByText(/Create with issues\?/i)).not.toBeInTheDocument());
+    expect(mockCreateDirectory).not.toHaveBeenCalled();
+  });
+});
+
+describe("CreateStackModal — additional file content editing", () => {
+  it("editing an additional file's YAML content updates its stored content and is written on create", async () => {
+    const onCreated = vi.fn();
+    render(<CreateStackModal {...defaultProps} onCreated={onCreated} />);
+    await fillSetupAndAdvance("manual");
+    fireEvent.click(screen.getByRole("button", { name: /\+ Add file/i }));
+    fireEvent.change(screen.getByPlaceholderText("docker-compose.prod.yml"), {
+      target: { value: "docker-compose.prod.yml" },
+    });
+    const editors = screen.getAllByTestId("yaml-editor");
+    // editors[0] is the primary manual editor, editors[1] is the additional file's editor
+    fireEvent.change(editors[1], {
+      target: { value: "services:\n  extra:\n    image: extra:latest\n" },
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /^Create$/i }));
+    });
+    await waitFor(() => {
+      expect(mockReplace).toHaveBeenCalledWith("services:\n  extra:\n    image: extra:latest\n");
+      expect(onCreated).toHaveBeenCalled();
+    });
+  });
+});

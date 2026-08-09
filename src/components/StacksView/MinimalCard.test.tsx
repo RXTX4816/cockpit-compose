@@ -280,4 +280,32 @@ describe("MinimalCard", () => {
       expect(onToggleSelect).not.toHaveBeenCalled();
     });
   });
+
+  describe("remaining dropdown actions", () => {
+    it.each([
+      ["onExec", /^shell$/i],
+      ["onBackup", /^backup$/i],
+      ["onScale", /^scale$/i],
+      ["onEvents", /^events$/i],
+      ["onTop", /^top$/i],
+      ["onRun", /^run$/i],
+      ["onPrune", /^prune$/i],
+      ["onKill", /^kill$/i],
+    ] as const)("calls %s when its dropdown item is clicked", (propName, label) => {
+      render(<MinimalCard {...defaultProps} />);
+      fireEvent.click(screen.getByRole("button", { name: /more actions/i }));
+      fireEvent.click(screen.getByText(label));
+      expect(defaultProps[propName]).toHaveBeenCalled();
+    });
+
+    it("does not invoke doAction when clicking the disabled Restart/Pause items for a stopped stack", () => {
+      const doAction = vi.fn();
+      mockUseStackActions.mockReturnValue({ acting: false, actionError: null, doAction });
+      render(<MinimalCard {...defaultProps} stack={stoppedStack} />);
+      fireEvent.click(screen.getByRole("button", { name: /more actions/i }));
+      fireEvent.click(screen.getByText(/^restart$/i));
+      fireEvent.click(screen.getByText(/^pause$/i));
+      expect(doAction).not.toHaveBeenCalled();
+    });
+  });
 });

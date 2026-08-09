@@ -9,7 +9,7 @@ export default createVitestConfig({
       "src/test/**",
       "src/**/*.test.{ts,tsx}",
       "src/index.tsx",
-      "src/api/stacks/**",
+      "src/api/stacks/index.ts",
       "src/api/types.ts",
       "src/api/templates.ts",
       "src/api/index.ts",

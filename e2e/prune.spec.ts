@@ -99,3 +99,76 @@ test('Down-Stack table Prune action removes a real unused image for a fully-down
   await previewModal.getByRole('button', { name: 'Prune selected' }).click();
   await expect(previewModal).not.toBeVisible({ timeout: 20000 });
 });
+
+// `shared-image-a_prunetest` and `shared-image-b_prunetest` (testing guide
+// §6.16.3, see scripts/test-vm.config.sh) both use nginx:alpine — Prune must
+// not offer to remove an image while ANY stack still has a running container
+// using it, even if the stack being pruned itself is fully down.
+test('Prune does not offer to remove an image another stack is still using', async ({ pluginPage: page }) => {
+  test.setTimeout(90_000);
+  await baseData(page);
+
+  await ensureDown(page, 'shared-image-a_prunetest');
+  await ensureDown(page, 'shared-image-b_prunetest');
+  await upStack(page, 'shared-image-a_prunetest');
+  await upStack(page, 'shared-image-b_prunetest');
+
+  try {
+    // Down only stack A — its container is gone, but B's is still running
+    // and using the same nginx:alpine image.
+    await downStack(page, 'shared-image-a_prunetest');
+
+    const card = downedCard(page, 'shared-image-a_prunetest');
+    await card.getByRole('button', { name: 'Prune' }).click();
+    const selectModal = page.getByRole('dialog', { name: /Prune resources — shared-image-a_prunetest/ });
+    await expect(selectModal).toBeVisible();
+    await selectModal.getByRole('button', { name: 'Preview' }).click();
+
+    const previewModal = page.getByRole('dialog', { name: /Confirm prune — shared-image-a_prunetest/ });
+    await expect(previewModal).toBeVisible();
+    // Real effect: nginx:alpine must NOT appear as removable while stack B
+    // still has a container using it — not just a generic "nothing to prune".
+    await expect(previewModal.getByText('nginx:alpine', { exact: false })).toHaveCount(0);
+    await previewModal.getByRole('button', { name: 'Cancel', exact: true }).click().catch(() => {});
+    if (await previewModal.count()) await page.keyboard.press('Escape');
+  } finally {
+    await downStack(page, 'shared-image-b_prunetest').catch(() => {});
+  }
+});
+
+// `exited-containers_prunetest` (testing guide §6.16.6) exits immediately
+// (restart: "no"), giving Prune's Containers section a real stopped
+// container to list and remove by name.
+test('Prune removes a real one-shot exited container by name', async ({ pluginPage: page }) => {
+  test.setTimeout(60_000);
+  await baseData(page);
+  await ensureDown(page, 'exited-containers_prunetest');
+
+  // Not using the shared upStack() helper here: it asserts data-status
+  // becomes running|partial, but the `job` service (restart: "no") exits
+  // immediately, so the stack can settle straight into "stopped" before that
+  // assertion ever catches a transient running moment. docker/podman still
+  // tracks the exited container, so it stays in the running-stacks table
+  // regardless of which of these statuses it lands on.
+  await downedCard(page, 'exited-containers_prunetest').getByRole('button', { name: 'Up', exact: true }).click();
+  const confirm = page.getByRole('dialog', { name: /Confirm up.*exited-containers_prunetest/ });
+  await confirm.getByRole('button', { name: 'Up', exact: true }).click();
+  const progress = page.getByRole('dialog', { name: /^Up.*exited-containers_prunetest/ });
+  await progress.getByRole('button', { name: 'Close' }).click({ timeout: 30000 });
+
+  const row = stackRow(page, 'exited-containers_prunetest');
+  await expect(row).toBeVisible({ timeout: 15000 });
+  await row.getByRole('button', { name: 'More actions for exited-containers_prunetest' }).click();
+  await page.getByRole('menuitem', { name: 'Prune' }).click();
+
+  const selectModal = page.getByRole('dialog', { name: /Prune resources — exited-containers_prunetest/ });
+  await expect(selectModal).toBeVisible({ timeout: 10000 });
+  await selectModal.locator('#prune-containers').check();
+  await selectModal.getByRole('button', { name: 'Preview' }).click();
+
+  const previewModal = page.getByRole('dialog', { name: /Confirm prune — exited-containers_prunetest/ });
+  await expect(previewModal).toBeVisible();
+  await expect(previewModal.getByText('exited-containers_prunetest_job_1', { exact: false })).toBeVisible({ timeout: 10000 });
+  await previewModal.getByRole('button', { name: 'Prune selected' }).click();
+  await expect(previewModal).not.toBeVisible({ timeout: 20000 });
+});
