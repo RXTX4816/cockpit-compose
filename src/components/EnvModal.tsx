@@ -21,6 +21,7 @@ import { EnvEditor } from "./EnvEditor";
 import "./YamlModal.css";
 import "./EnvModal.css";
 import { splitConfigFiles } from "../lib/configFiles";
+import { hasDuplicateEnvKeys } from "../lib/envDuplicates";
 
 interface Props {
   stack: ComposeStack;
@@ -121,7 +122,13 @@ export function EnvModal({ stack, onClose }: Props) {
   };
 
   const handleSave = async () => {
-    if (viewMode === "table" && hasDuplicates) {
+    // Table mode already tracks this live via EnvTable's onDuplicatesChange,
+    // but that callback never runs while Raw mode is active — re-check every
+    // file's actual content directly here so a duplicate introduced purely in
+    // Raw mode still gets caught (issue #261), not just ones caught while
+    // Table mode happened to be mounted.
+    const anyDuplicates = hasDuplicates || Object.values(fileCache).some(f => hasDuplicateEnvKeys(f.content));
+    if (anyDuplicates) {
       setConfirmSave(true);
       return;
     }

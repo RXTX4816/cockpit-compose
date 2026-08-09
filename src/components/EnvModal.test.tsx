@@ -212,18 +212,38 @@ describe("EnvModal", () => {
     expect(screen.queryByTestId("env-editor")).toBeNull();
   });
 
-  it("saves raw editor content directly without duplicate check", async () => {
+  // Regression for #261: a duplicate key introduced purely in Raw mode used to
+  // save silently, since EnvTable's onDuplicatesChange (the only thing that
+  // set hasDuplicates) never ran while Raw mode was active. handleSave now
+  // also re-checks the actual saved content directly, independent of viewMode.
+  it("warns on duplicate keys introduced in raw mode, same as table mode", async () => {
     mockRead.mockResolvedValue("FOO=bar\n");
     const onClose = vi.fn();
     render(<EnvModal stack={stack} onClose={onClose} />);
     await waitFor(() => screen.getByTestId("env-editor"));
-    // Switch to raw mode first
     fireEvent.click(screen.getByRole("button", { name: /^Raw$/i }));
     await waitFor(() => screen.getByTestId("env-editor-raw"));
     fireEvent.change(screen.getByTestId("env-editor-raw"), { target: { value: "FOO=a\nFOO=b\n" } });
     fireEvent.click(screen.getByRole("button", { name: /^Save$/i }));
-    // Should save immediately without confirm dialog even though keys would be duplicate
+    await waitFor(() => expect(screen.getByText(/Duplicate keys found/i)).toBeInTheDocument());
+    expect(mockReplace).not.toHaveBeenCalled();
+    expect(onClose).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole("button", { name: /Save Anyway/i }));
     await waitFor(() => expect(mockReplace).toHaveBeenCalledWith("FOO=a\nFOO=b\n"));
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  it("saves raw editor content directly when there are no duplicate keys", async () => {
+    mockRead.mockResolvedValue("FOO=bar\n");
+    const onClose = vi.fn();
+    render(<EnvModal stack={stack} onClose={onClose} />);
+    await waitFor(() => screen.getByTestId("env-editor"));
+    fireEvent.click(screen.getByRole("button", { name: /^Raw$/i }));
+    await waitFor(() => screen.getByTestId("env-editor-raw"));
+    fireEvent.change(screen.getByTestId("env-editor-raw"), { target: { value: "FOO=a\nBAR=b\n" } });
+    fireEvent.click(screen.getByRole("button", { name: /^Save$/i }));
+    await waitFor(() => expect(mockReplace).toHaveBeenCalledWith("FOO=a\nBAR=b\n"));
     expect(onClose).toHaveBeenCalled();
   });
 
