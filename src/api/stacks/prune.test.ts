@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { mockSpawn } from "../../test/setup";
 import { mockProcess } from "../../test/helpers";
-import { listAllImages, listInUseImageIds, pruneImages } from "./prune";
+import { listAllImages, listInUseImageIds, pruneImages, removeImages, pruneContainers, pruneVolumes, pruneNetworks } from "./prune";
 
 beforeEach(() => { mockSpawn.mockReset(); });
 
@@ -54,5 +54,48 @@ describe("pruneImages", () => {
     pruneImages();
     const opts = mockSpawn.mock.calls[0][1] as { err: string };
     expect(opts.err).toBe("out");
+  });
+});
+
+describe("removeImages", () => {
+  it("runs rmi with every given image id", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    removeImages(["sha256:aaa", "sha256:bbb"]);
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args).toEqual(["docker", "rmi", "sha256:aaa", "sha256:bbb"]);
+  });
+
+  it("passes superuser through", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    removeImages(["sha256:aaa"], "try");
+    const opts = mockSpawn.mock.calls[0][1] as { superuser?: string };
+    expect(opts.superuser).toBe("try");
+  });
+});
+
+describe("pruneContainers", () => {
+  it("prunes containers scoped to the project label", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    pruneContainers("myapp");
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args).toEqual(["docker", "container", "prune", "-f", "--filter", "label=com.docker.compose.project=myapp"]);
+  });
+});
+
+describe("pruneVolumes", () => {
+  it("prunes volumes scoped to the project label", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    pruneVolumes("myapp");
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args).toEqual(["docker", "volume", "prune", "-f", "--filter", "label=com.docker.compose.project=myapp"]);
+  });
+});
+
+describe("pruneNetworks", () => {
+  it("prunes networks scoped to the project label", () => {
+    mockSpawn.mockReturnValue(mockProcess(""));
+    pruneNetworks("myapp");
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args).toEqual(["docker", "network", "prune", "-f", "--filter", "label=com.docker.compose.project=myapp"]);
   });
 });

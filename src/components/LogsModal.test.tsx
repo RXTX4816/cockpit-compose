@@ -162,6 +162,32 @@ describe("LogsModal", () => {
 
   // ── Service selector ──────────────────────────────────────────────────────
 
+  it("falls back to an empty path when the stack has no config files", () => {
+    const noConfigStack: ComposeStack = { ...stack, ConfigFiles: "" };
+    render(<LogsModal stack={noConfigStack} onClose={vi.fn()} />);
+    // readComposeFile is mocked, so if this doesn't throw and still renders
+    // the modal, the `configFiles[0] ?? ""` fallback was exercised safely.
+    expect(screen.getByText(/Logs — myapp/i)).toBeInTheDocument();
+  });
+
+  it("sorts out-of-order log lines by embedded timestamp", () => {
+    mockUseLogStream.mockReturnValue({
+      lines: [
+        "web-1 | 2024-01-01T00:00:05Z later message",
+        "web-1 | 2024-01-01T00:00:01Z earlier message",
+      ],
+      streaming: false,
+      paused: false,
+      pause: vi.fn(),
+      resume: vi.fn(),
+      restart: vi.fn(),
+      clear: vi.fn(),
+    });
+    render(<LogsModal stack={stack} onClose={vi.fn()} />);
+    const text = document.body.textContent ?? "";
+    expect(text.indexOf("earlier message")).toBeLessThan(text.indexOf("later message"));
+  });
+
   it("does not show service selector when no services are available", () => {
     mockGetServicesFromCompose.mockReturnValue([]);
     render(<LogsModal stack={stack} onClose={vi.fn()} />);
@@ -304,6 +330,76 @@ describe("LogsModal", () => {
     const errorChip = document.querySelector(".lm-level-chip") as HTMLElement;
     if (errorChip) fireEvent.click(errorChip);
     expect(screen.getAllByText(/Error/i).length).toBeGreaterThan(0);
+  });
+
+  it("filters to only error lines when Error chip is clicked", () => {
+    mockUseLogStream.mockReturnValue({
+      lines: [
+        "web-1 | 2024-01-01T00:00:00Z ERROR something broke",
+        "web-1 | 2024-01-01T00:00:01Z WARNING careful now",
+        "web-1 | 2024-01-01T00:00:02Z INFO all good",
+        "web-1 | 2024-01-01T00:00:03Z no level marker here",
+      ],
+      streaming: false,
+      paused: false,
+      pause: vi.fn(),
+      resume: vi.fn(),
+      restart: vi.fn(),
+      clear: vi.fn(),
+    });
+    render(<LogsModal stack={stack} onClose={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: "Error" }));
+    expect(screen.getByText(/something broke/i)).toBeInTheDocument();
+    expect(screen.queryByText(/careful now/i)).toBeNull();
+    expect(screen.queryByText(/all good/i)).toBeNull();
+    expect(screen.queryByText(/no level marker here/i)).toBeNull();
+  });
+
+  it("filters to error and warn lines when Warn chip is clicked", () => {
+    mockUseLogStream.mockReturnValue({
+      lines: [
+        "web-1 | 2024-01-01T00:00:00Z ERROR something broke",
+        "web-1 | 2024-01-01T00:00:01Z WARNING careful now",
+        "web-1 | 2024-01-01T00:00:02Z INFO all good",
+        "web-1 | 2024-01-01T00:00:03Z no level marker here",
+      ],
+      streaming: false,
+      paused: false,
+      pause: vi.fn(),
+      resume: vi.fn(),
+      restart: vi.fn(),
+      clear: vi.fn(),
+    });
+    render(<LogsModal stack={stack} onClose={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: "Warn" }));
+    expect(screen.getByText(/something broke/i)).toBeInTheDocument();
+    expect(screen.getByText(/careful now/i)).toBeInTheDocument();
+    expect(screen.queryByText(/all good/i)).toBeNull();
+    expect(screen.queryByText(/no level marker here/i)).toBeNull();
+  });
+
+  it("keeps unmarked and info-level lines visible when Info chip is clicked", () => {
+    // Note: the "info" branch in LogsModal's level filter falls through to
+    // `return true` for any non-null level, so it does not actually exclude
+    // error/warn lines — only the `!p.level` branch is level-filter-specific.
+    mockUseLogStream.mockReturnValue({
+      lines: [
+        "web-1 | 2024-01-01T00:00:00Z ERROR something broke",
+        "web-1 | 2024-01-01T00:00:02Z INFO all good",
+        "web-1 | 2024-01-01T00:00:03Z no level marker here",
+      ],
+      streaming: false,
+      paused: false,
+      pause: vi.fn(),
+      resume: vi.fn(),
+      restart: vi.fn(),
+      clear: vi.fn(),
+    });
+    render(<LogsModal stack={stack} onClose={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: "Info" }));
+    expect(screen.getByText(/all good/i)).toBeInTheDocument();
+    expect(screen.getByText(/no level marker here/i)).toBeInTheDocument();
+    expect(screen.getByText(/something broke/i)).toBeInTheDocument();
   });
 
   it("hides timestamps when timestamp toggle is clicked", () => {

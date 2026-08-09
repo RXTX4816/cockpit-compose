@@ -12,6 +12,7 @@ For the *backlog* of tests still to be written, see [E2E Test Inventory](E2E-Tes
 | `stacks.ts` | Composable stack actions: `downedCard`, `stackRow`, `upStack`, `downStack`, `openYamlEditor` (uses `force: true` on its click — see "Known flaky behavior"), `yamlEditorContent`, `ensureDown` (force a stack down first, self-healing against a previous run's leaked state), `withRunningStack` (runs a callback against a temporarily-up stack, always brings it back down in a `finally`, even on failure; calls `ensureDown` first). |
 | `runtime.ts` | `switchRuntime(page, 'docker'|'podman')`, `expectRootless(page, bool)` — runtime/rootless assertions. |
 | `admin.ts` | `loginWithAdminAccess(page, pluginName?)` — logs in and switches Cockpit to real Administrative access before navigating to the plugin. Use instead of the shared `pluginPage` fixture whenever a spec needs genuine superuser escalation (e.g. rootful Podman with no rootless socket available) — `pluginPage` navigates straight to the plugin's own iframe URL and never sees the outer Cockpit shell, so it can never reach the "Limited access" control at all. In these test VMs (passwordless sudo) clicking it grants admin access instantly, no password prompt. |
+| `vm.ts` | `sshExec(projectName, command)` — runs a command on the test VM over SSH, out-of-band from the app under test (e.g. restarting a container from "another terminal" to produce real events the UI can't trigger itself, like `events.spec.ts`). Uses `execFile` with an argv array, not an interpolated shell string — `$(...)` command substitution inside a double-quoted shell string still runs on the *local host*, not the remote VM, which silently ran every restart against the host's own (usually absent) podman/docker for an entire debugging session before this was caught. Maps project name → SSH port via the same `ALL_VMS`/`SSH_BASE` scheme as `scripts/test-vm.config.sh`. |
 
 **Design principle:** every test here asserts a real effect (file content, container/volume state, a status attribute) rather than only "is this element visible" — see the discussion in issue #227.
 
@@ -105,6 +106,52 @@ not just Podman's own passwordless sudo.
 | Test | Asserts | VM scope |
 |---|---|---|
 | `Create Stack (manual method) actually creates a compose file on disk` | Creating a stack via the Manual method (pre-filled stub YAML, no template/git dependency) results in a directory a fresh rescan can actually find on disk. Deletes the throwaway stack afterward so repeat runs stay clean. | Canonical |
+
+### `e2e/events.spec.ts`
+
+| Test | Asserts | VM scope |
+|---|---|---|
+| `Events modal streams real container lifecycle events, not just a static table` | EventsModal auto-starts streaming on mount (`useEffect(() => start(), [])`) — there is no manual "Stream events" click needed in the normal open flow, only visible again after Stop. Restarting `gotify` out-of-band over SSH (`helpers/vm.ts sshExec`, since the row underneath the modal's backdrop can't be clicked) produces a real "start" action row in the table, not a fabricated one. Stop/Clear empties it back out. | Canonical |
+
+### `e2e/run-command.spec.ts`
+
+| Test | Asserts | VM scope |
+|---|---|---|
+| `Run command executes a real one-off command and streams its actual output` | Running `echo <marker>` against `multi`'s `worker` service in the default "args" mode produces the real marker in the output and a "Command complete" status. | Canonical |
+| `Run command with --entrypoint override replaces the entrypoint instead of appending arguments` | With "Override entrypoint" checked, `/bin/echo <marker>` runs as the container's entrypoint (not appended as args to the default one) and the marker appears in the output. | Canonical |
+
+### `e2e/pull-images.spec.ts`
+
+| Test | Asserts | VM scope |
+|---|---|---|
+| `Pull images warns about the unpinned tag, then actually re-pulls the image` | `gotify`'s implicit `:latest` tag (`image: gotify/server`, no explicit tag) triggers the unpinned-image warning in the confirm dialog; confirming actually re-pulls (real progress output, "Pull complete" status), not just closes the dialog. | Canonical |
+| `Run in Background sends the pull to the background task queue instead of blocking the modal` | Clicking "Run in Background" closes the modal immediately and the task genuinely appears (then completes) in the Background Tasks panel. | Canonical |
+
+### `e2e/stack-info.spec.ts`
+
+| Test | Asserts | VM scope |
+|---|---|---|
+| `Stack Info shows real services, images, volumes, and networks — not empty placeholders` | Real service names/status, real image repos, the real named volume (`volumes-test_pgdata`), and the real default network (`volumes-test_default`) all appear — none of the "No X found" empty states. **Found and fixed a real bug**: `listNetworkConnectedProjects` broke the whole Networks section on Podman 6.0.1 (see `src/api/stacks/query.ts` and the Notes section of [E2E Test Inventory](E2E-Test-Inventory#notes)). Closes the modal at the end — otherwise `withRunningStack`'s teardown Down click lands on a row still covered by the modal's backdrop and hangs. | Canonical |
+
+### `e2e/env-editor.spec.ts`
+
+| Test | Asserts | VM scope |
+|---|---|---|
+| `Env file editor reads real values, edits and saves them, and the change persists to disk` | Real `.env` content on open (not a blank form); editing `DEBUG` and saving actually persists to disk, confirmed by reopening. Row lookups use each row's live `.inputValue()` (`rowByKey` helper) rather than a CSS `input[value="..."]` attribute selector — React sets a controlled input's value via the DOM property, not the HTML attribute, so attribute selectors only ever match a row's very first render. | Canonical |
+| `Env file editor warns on a duplicate key added via Table mode instead of silently saving it` | Adding a second `APP_ENV` row via Table mode's "Add variable" triggers the "Save with issues?" duplicate-key warning; canceling leaves the file untouched. **Found a real doc/behavior gap**: `docs/testing.md` §6.15 describes this warning firing for a duplicate added "in raw mode" too, but `EnvModal.tsx` only computes `hasDuplicates` via `EnvTable`'s callback, which never runs while the Raw editor is mounted — a raw-mode-only duplicate silently saves with no warning. | Canonical |
+
+### `e2e/downed-stacks-bulk.spec.ts`
+
+| Test | Asserts | VM scope |
+|---|---|---|
+| `Bulk Up on selected downed stacks actually starts every selected stack, not just the first` | Selecting `gotify` + `env-test` and confirming a bulk Up (which runs as background tasks per [Bulk-Actions.md](Bulk-Actions)) results in *both* stacks actually running, not just the confirm dialog closing. The first row's checkbox needs `{ force: true }` — per [Bulk-Actions.md](Bulk-Actions#selecting-stacks) it's CSS-hidden until hover/focus or at least one stack is already selected. | Canonical |
+| `Select all toggles every visible downed stack and shows an indeterminate state for a partial selection` | A partial selection leaves "Select all" unchecked (not indeterminate-rendered-as-checked); toggling it selects/deselects every downed stack's real checkbox state. | Canonical |
+
+### `e2e/ports.spec.ts`
+
+| Test | Asserts | VM scope |
+|---|---|---|
+| `An external-bound port badge is clickable and calls window.open with the real host:port URL` | `gotify`'s `8080:80` (bound to `0.0.0.0`, classified "external") is clickable and calls `window.open()` with a URL containing the real host port. Captures the `window.open` call directly (monkey-patched before the click) rather than letting a real popup navigate — the container port isn't necessarily reachable from inside the guest VM's own browser, and a failed navigation lands on a `chrome-error://` page before Playwright can observe the originally-requested URL. **Found a real doc/behavior mismatch**: `docs/wiki/Stacks-Dashboard.md` describes port clicks going through an external-link confirmation modal first, but the real code (`StatsCell.tsx`/`PrettyCard.tsx`/`UnixRow.tsx`) calls `window.open()` directly — that modal only exists for `ContainerTable.tsx`'s per-service changelog link. | Canonical |
 
 ### `e2e/adversarial.spec.ts`
 

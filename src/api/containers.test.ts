@@ -90,6 +90,54 @@ describe("getContainerStats", () => {
     const formatArg = args.find(a => a.includes("{{.CPUPerc}}"));
     expect(formatArg).toBeDefined();
   });
+
+  it("uses podman's {{.CPU}} field instead of {{.CPUPerc}} in podman mode", async () => {
+    const cockpitMod = await import("./cockpit");
+    cockpitMod.setRuntime("podman");
+    const { getContainerStats: stats } = await import("./containers");
+    mockSpawn.mockReturnValue(mockProcess(""));
+    stats(["abc"]);
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    const formatArg = args.find(a => a.includes("{{.CPU}}"));
+    expect(formatArg).toBeDefined();
+    expect(args.find(a => a.includes("{{.CPUPerc}}"))).toBeUndefined();
+  });
+});
+
+describe("listContainers [podman ports/oneoff edge cases]", () => {
+  it("excludes one-off run containers (com.docker.compose.oneoff=True)", async () => {
+    const { listContainers: lc } = await import("./containers");
+    const cockpitMod = await import("./cockpit");
+    cockpitMod.setRuntime("podman");
+    vi.spyOn(cockpitMod, "composeIsLimitedBackend").mockReturnValue(true);
+    mockSpawn.mockReturnValue(mockProcess(JSON.stringify([
+      { Id: "c1", Image: "busybox", State: "exited", Status: "Exited", Labels: { "com.docker.compose.oneoff": "True", "com.docker.compose.project": "myapp" } },
+      { Id: "c2", Image: "nginx", State: "running", Status: "Up", Labels: { "com.docker.compose.project": "myapp" } },
+    ])));
+    let received = "";
+    const proc = lc("myapp");
+    proc.stream(d => { received += d; });
+    await proc;
+    const result = JSON.parse(received) as { ID: string }[];
+    expect(result).toHaveLength(1);
+    expect(result[0].ID).toBe("c2");
+  });
+
+  it("renders an empty Ports string when no ports are published", async () => {
+    const { listContainers: lc } = await import("./containers");
+    const cockpitMod = await import("./cockpit");
+    cockpitMod.setRuntime("podman");
+    vi.spyOn(cockpitMod, "composeIsLimitedBackend").mockReturnValue(true);
+    mockSpawn.mockReturnValue(mockProcess(JSON.stringify([
+      { Id: "c1", Image: "busybox", State: "running", Status: "Up", Ports: null, Labels: {} },
+    ])));
+    let received = "";
+    const proc = lc("myapp");
+    proc.stream(d => { received += d; });
+    await proc;
+    const result = JSON.parse(received) as { Ports: string }[];
+    expect(result[0].Ports).toBe("");
+  });
 });
 
 // Regression: these three spawns had no superuser escalation at all — for a rootful
