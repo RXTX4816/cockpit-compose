@@ -298,12 +298,34 @@ export function listProjectNetworks(project: string): CockpitProcess {
   );
 }
 
+// Podman's `ps --format {{index .Labels "..."}}` Go template errors on at
+// least Podman 6.0.1 ("cannot index slice/array with type string") — its ps
+// JSON's Labels field doesn't round-trip through text/template indexing the
+// way Docker's does. Go through --format json and read the label in JS
+// instead, avoiding the template entirely (same approach already used for
+// every other podman-specific fallback in this file).
+function listNetworkConnectedProjectsPodman(networkName: string): CockpitProcess {
+  return makeFakeProcess(async () => {
+    let raw = "";
+    const proc = cockpit.spawn(
+      cli("ps", "--filter", `network=${networkName}`, "--format", "json"),
+      { superuser: socketSuperuser(), err: "message", ...dockerSpawnEnviron() },
+    );
+    proc.stream(d => { raw += d; });
+    await proc;
+    interface PsEntry { Labels?: Record<string, string> }
+    const containers = JSON.parse(raw) as PsEntry[];
+    return containers
+      .map(c => c.Labels?.["com.docker.compose.project"] ?? "")
+      .filter(Boolean)
+      .join("\n");
+  });
+}
+
 export function listNetworkConnectedProjects(networkName: string): CockpitProcess {
-  const labelTpl = getIsPodman()
-    ? `{{index .Labels "com.docker.compose.project"}}`
-    : `{{.Label "com.docker.compose.project"}}`;
+  if (getIsPodman()) return listNetworkConnectedProjectsPodman(networkName);
   return cockpit.spawn(
-    cli("ps", "--filter", `network=${networkName}`, "--format", labelTpl),
+    cli("ps", "--filter", `network=${networkName}`, "--format", `{{.Label "com.docker.compose.project"}}`),
     { superuser: socketSuperuser(), err: "message", ...dockerSpawnEnviron() },
   );
 }

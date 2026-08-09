@@ -1,5 +1,14 @@
-import { describe, it, expect } from "vitest";
-import { groupPodmanContainers } from "./query";
+import { describe, it, expect, beforeEach } from "vitest";
+import { mockSpawn } from "../../test/setup";
+import { mockProcess } from "../../test/helpers";
+import { setRuntime } from "../cockpit";
+import { groupPodmanContainers, listNetworkConnectedProjects } from "./query";
+
+beforeEach(() => {
+  mockSpawn.mockReset();
+  mockSpawn.mockReturnValue(mockProcess(""));
+  setRuntime("docker");
+});
 
 describe("groupPodmanContainers", () => {
   it("groups single-container project", () => {
@@ -130,5 +139,33 @@ describe("groupPodmanContainers", () => {
       },
     ]);
     expect(result[0].ConfigFiles).toBe("/home/test/testcompose/myapp/docker-compose.yml");
+  });
+});
+
+// Regression for #259: `ps --format {{index .Labels "..."}}` errors on Podman
+// 6.0.1 ("cannot index slice/array with type string"), which broke Stack
+// Info's entire Networks section. Go through --format json + JS parsing for
+// the podman branch instead, matching every other podman fallback in this file.
+describe("listNetworkConnectedProjects", () => {
+  it("docker mode: uses the --format .Label syntax", () => {
+    listNetworkConnectedProjects("mynet");
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args.join(" ")).toContain("network=mynet");
+    expect(args.join(" ")).toContain(".Label");
+  });
+
+  it("podman mode: uses --format json (not the Go template) and parses labels in JS", async () => {
+    setRuntime("podman");
+    mockSpawn.mockReturnValue(mockProcess(JSON.stringify([
+      { Labels: { "com.docker.compose.project": "myapp" } },
+      { Labels: { "com.docker.compose.project": "otherapp" } },
+      { Labels: {} },
+    ])));
+    const out = await listNetworkConnectedProjects("mynet");
+    expect(out).toBe("myapp\notherapp");
+    const args = mockSpawn.mock.calls[0][0] as string[];
+    expect(args.join(" ")).toContain("network=mynet");
+    expect(args).toContain("json");
+    expect(args.join(" ")).not.toContain("index .Labels");
   });
 });
