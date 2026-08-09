@@ -57,7 +57,7 @@ Each stack appears as a collapsible row. The row shows a summary when collapsed 
 | **Status label** | Running, Partial, Stopped, Paused, or Unknown |
 | **Health badge** | ✓ Healthy, ⚠ Partial, or Unhealthy — reflects the aggregate health of all services |
 | **Service count** | Number of services defined in the compose file |
-| **Ports** | Exposed ports shown as blue `host:container` badges. Ports that resolve to a reachable URL are clickable — clicking opens an external-link confirmation and then opens the service in a new browser tab. Localhost-bound ports are only clickable when Cockpit itself runs on localhost. |
+| **Ports** | Exposed ports shown as blue `host:container` badges. Ports that resolve to a reachable URL are clickable — clicking opens the service directly in a new browser tab (no confirmation prompt). Localhost-bound ports are only clickable when Cockpit itself runs on localhost. |
 | **CPU %** | Real-time CPU usage across all containers in the stack |
 | **Memory** | Real-time memory usage across all containers in the stack |
 

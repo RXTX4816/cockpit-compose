@@ -1062,10 +1062,9 @@ two or three times to accumulate more stopped containers.
 
 **Steps:**
 1. In the stack row, the port `8080` is shown as a clickable link.
-2. Click the port → external link modal warns about leaving the page → click Continue.
-3. Browser opens `http://localhost:8080`.
-4. **Localhost-only port** (e.g. `127.0.0.1:8080:80`): link has a lock/localhost tooltip.
-5. **All-interfaces port** (e.g. `0.0.0.0:8080:80`): link has a globe/external tooltip.
+2. Click the port → browser opens `http://localhost:8080` directly in a new tab, no confirmation prompt.
+3. **Localhost-only port** (e.g. `127.0.0.1:8080:80`): link has a lock/localhost tooltip.
+4. **All-interfaces port** (e.g. `0.0.0.0:8080:80`): link has a globe/external tooltip.
 
 ---
 
