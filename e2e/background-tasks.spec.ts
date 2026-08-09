@@ -43,6 +43,29 @@ test('Run in Background actually starts the stack, tracked through Pending → R
 // consistently enough to pin down within this pass — worth a focused
 // follow-up with devtools attached rather than more blind selector changes.
 
+test('Remove on a finished task actually drops it from the panel, not just hides it', async ({ pluginPage: page }) => {
+  test.setTimeout(60_000);
+  await baseData(page);
+  await ensureDown(page, 'gotify');
+
+  await downedCard(page, 'gotify').getByRole('button', { name: 'Up', exact: true }).click();
+  await page.getByRole('dialog', { name: /Confirm up.*gotify/ }).getByRole('button', { name: 'Up', exact: true }).click();
+  const progress = page.getByRole('dialog', { name: /^Up.*gotify/ });
+  await progress.getByRole('button', { name: 'Run in Background' }).click();
+
+  await page.getByRole('button', { name: 'Background tasks' }).click();
+  const panel = page.locator('.btd-panel');
+  const taskRow = panel.locator('li', { hasText: 'gotify' });
+  await expect(taskRow).toBeVisible({ timeout: 10000 });
+  await expect(taskRow.getByText('Complete', { exact: true })).toBeVisible({ timeout: 30000 });
+
+  await taskRow.getByRole('button', { name: 'Remove' }).click();
+  // Real effect: the task is gone from the list, not merely visually collapsed —
+  // an empty-state message takes its place since gotify was the only task.
+  await expect(taskRow).toHaveCount(0, { timeout: 10000 });
+  await expect(panel.getByText('No background tasks', { exact: true })).toBeVisible();
+});
+
 test('Stop on a running background task actually terminates the underlying process', async ({ pluginPage: page }) => {
   test.setTimeout(60_000);
   await baseData(page);
