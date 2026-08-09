@@ -63,8 +63,8 @@ Run these against the full matrix (batched per §"Managing resource usage" in
 | 6.16.2-6.16.6 | Prune edge cases (shared image across stacks still in use, exited one-shot container removal by name) | `e2e/prune.spec.ts` (additional cases) | ✅ |
 | 6.16.7 | Dangling named volume | `e2e/prune.spec.ts` | ❓ appears unreachable via the current UI — see `e2e/prune.spec.ts`'s header comment and [E2E Test Reference](E2E-Test-Reference.md) before attempting; worth raising as a product question first |
 | 6.18 | Backup & restore (archive create, restore into new dir, restored stack starts) | `e2e/backup-restore.spec.ts` | ✅ (found & documented a UX asymmetry vs BackupModal — see Notes) |
-| 6.14 (malformed) | Save rejects invalid YAML with error details | `e2e/yaml-editor.spec.ts` (additional case) | 🚧 |
-| 6.23 | Clickable external links in Stack Info show warning modal before navigating | `e2e/stack-info.spec.ts` (additional case) | 🚧 |
+| 6.14 (malformed) | Save rejects invalid YAML with error details | `e2e/yaml-editor.spec.ts` (additional case) | ✅ (see Notes for a known flake under cumulative session load) |
+| 6.23 | Clickable external links show a warning modal before navigating | `e2e/stacks.spec.ts` (additional case) | ✅ — not in StackInfoModal (its port badges call `window.open()` directly, no confirmation, see #260/`ports.spec.ts`); the real warning-modal flow is `ContainerTable`'s per-service image link inside an expanded row, covered here instead |
 | healthcheck / restart-policy / named-network / crash-loop / long-logs fixture stacks (pre-staged, §5) | Status badge & info correctness for each fixture | folded into 6.1/6.13 specs as parametrized cases | 🚧 |
 
 ## Wave 4 — Features absent from this inventory entirely
@@ -76,12 +76,12 @@ scenarios).
 
 | Feature | Doc | Spec (planned) | Status |
 |---|---|---|---|
-| Background Tasks (queue, states, Stop, real container-state completion) | [Background-Tasks.md](Background-Tasks) | `e2e/background-tasks.spec.ts` | ✅ partial (Pending→Running→Complete against real container state, Stop terminates the underlying process) / 🚧 Remove, log-view-through-panel (cut, see spec header comment), runtime-switch cancellation race |
-| Bulk Actions on running stacks (per-layout selection, select-all indeterminate, per-action confirm) | [Bulk-Actions.md](Bulk-Actions) | `e2e/bulk-actions.spec.ts` | ✅ partial / 🚧 multi-layout selection-control variants, runtime-switch-clears-selection |
+| Background Tasks (queue, states, Stop/Remove, real container-state completion) | [Background-Tasks.md](Background-Tasks) | `e2e/background-tasks.spec.ts` | ✅ partial (Pending→Running→Complete against real container state, Stop terminates the underlying process, Remove actually drops the task) / 🚧 log-view-through-panel (cut, see spec header comment), runtime-switch cancellation race (needs `arch-both` — Docker+Podman both present — deferred to Wave 2, `arch-podman` alone can't exercise a real runtime switch) |
+| Bulk Actions on running stacks (per-layout selection, select-all indeterminate, per-action confirm) | [Bulk-Actions.md](Bulk-Actions) | `e2e/bulk-actions.spec.ts` | ✅ partial (Power User checkbox, Minimal card-click, Unix bracket-toggle all covered) / 🚧 Pretty layout, runtime-switch-clears-selection (same `arch-both` dependency as above, deferred to Wave 2) |
 | Process Viewer / Top (`docker compose top` equivalent) | [Process-Viewer.md](Process-Viewer) | `e2e/process-viewer.spec.ts` | ✅ |
 | Keyboard shortcuts (U/D/L/E/I) | [Stacks-Dashboard.md](Stacks-Dashboard#keyboard-shortcuts) | fold into `e2e/stacks.spec.ts` | ✅ |
 | Layout selector (4 layouts) | [Stacks-Dashboard.md](Stacks-Dashboard#layout-options) | fold into `e2e/stacks.spec.ts` | ✅ |
-| Status filter chips + auto-refresh degrade/Retry | [Stacks-Dashboard.md](Stacks-Dashboard) | fold into `e2e/stacks.spec.ts` | ✅ partial (filter chips) / 🚧 auto-refresh degrade/Retry |
+| Status filter chips + auto-refresh degrade/Retry | [Stacks-Dashboard.md](Stacks-Dashboard) | fold into `e2e/stacks.spec.ts` | ✅ (auto-refresh degrade/Retry verified against a real broken `podman` binary on the VM, not a mock — see Notes) |
 
 ## Notes
 
@@ -121,6 +121,30 @@ scenarios).
     editor is mounted, so a raw-mode-only duplicate silently saves with no warning.
     `e2e/env-editor.spec.ts` exercises the real (Table-mode) path where the check
     genuinely runs and documents the Raw-mode gap.
+- **Second pass on Wave 3/4 remainder findings**:
+  - `e2e/yaml-editor.spec.ts`'s malformed-YAML test joins the same
+    host-load flake class noted above: passes reliably in isolation but can
+    time out waiting for the "Save with issues?" confirm dialog when run
+    after many prior edits to the same fixture (`gotify`) in a long-lived
+    VM session — every failure screenshot shows the correct final state
+    already rendered, consistent with CodeMirror's linter work piling up
+    under cumulative session load rather than a real app bug. A settle wait
+    after typing and generous timeouts reduce but don't eliminate it.
+  - §6.23's external-link warning modal doesn't live where the inventory
+    originally assumed (StackInfoModal) — that modal's own port badges are
+    the same direct-`window.open()` behavior #260 already covers. The real
+    `ExternalLinkModal`-backed warning flow is `ContainerTable`'s per-service
+    image name link, rendered inside an expanded stack row in the Power
+    User/Pretty/Unix layouts — moved to `e2e/stacks.spec.ts` accordingly.
+  - The auto-refresh degrade/Retry test breaks the VM's real `podman` binary
+    (`sudo mv` it aside via SSH, always restored in a `finally`) rather than
+    mocking a network error — the app's poll failure, the "Failed to load
+    stacks" alert, and the Retry recovery are all exercised against a
+    genuinely broken runtime.
+  - Both the Background Tasks and Bulk Actions runtime-switch-race scenarios
+    need a VM with both Docker and Podman installed to exercise a real
+    runtime switch (`arch-podman` only has Podman) — deferred to Wave 2's
+    multi-VM matrix rather than faked on the wrong VM.
 - **Wave 3/4 additional findings** (this pass):
   - `RestoreModal`'s target directory field is the PARENT directory (the app
     appends the stack name itself), same convention as Create Stack — the first

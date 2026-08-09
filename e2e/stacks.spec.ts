@@ -1,6 +1,7 @@
 import { test, expect } from '@rxtx4816/cockpit-plugin-base-react/e2e';
 import { baseData, dismissStartupPodmanPrompt } from './helpers/base';
 import { downedCard, downStack, ensureDown, stackRow, upStack, withRunningStack } from './helpers/stacks';
+import { sshExec } from './helpers/vm';
 
 test('Compose Stacks heading is visible', async ({ pluginPage: page }) => {
   await dismissStartupPodmanPrompt(page);
@@ -98,4 +99,70 @@ test('Layout selector switches between all four layouts and the dashboard stays 
     // assertions depend on) survives the layout switch.
     await expect(stackRow(page, 'gotify')).toHaveAttribute('data-status', /running|partial/, { timeout: 10000 });
   }
+});
+
+// Regression coverage for docs/testing.md §6.23. This does NOT live in
+// StackInfoModal — that modal's own port badges call window.open() directly
+// with no confirmation (see #260/e2e/ports.spec.ts). The real warning-modal
+// flow is ContainerTable's per-service image name link (rendered inside an
+// expanded stack row in the Power User/Pretty/Unix layouts), which opens
+// ExternalLinkModal before navigating to the image's changelog/registry page.
+test('Expanded row\'s image link shows a real warning modal with the actual destination before navigating', async ({ pluginPage: page }) => {
+  test.setTimeout(60_000);
+  await baseData(page);
+
+  await withRunningStack(page, 'gotify', async () => {
+    const row = stackRow(page, 'gotify');
+    await row.locator('#toggle-gotify').click();
+    const expanded = page.locator('#expand-gotify');
+    await expect(expanded).toBeVisible({ timeout: 10000 });
+
+    const imageLink = expanded.getByRole('button', { name: 'gotify', exact: true });
+    await expect(imageLink).toBeVisible({ timeout: 10000 });
+    await imageLink.click();
+
+    const warning = page.getByRole('dialog', { name: 'External link warning' });
+    await expect(warning).toBeVisible({ timeout: 10000 });
+    // Real effect: the actual destination URL is shown, not a generic notice.
+    await expect(warning.getByText('hub.docker.com', { exact: false })).toBeVisible();
+    await expect(warning.getByText('gotify', { exact: false })).toBeVisible();
+
+    await warning.getByRole('button', { name: 'Cancel', exact: true }).click();
+    await expect(warning).not.toBeVisible();
+  });
+});
+
+// Simulates a real poll failure (docs/wiki/Stacks-Dashboard.md's degrade/Retry
+// behavior) by breaking the actual `podman` binary the app's listStacks poll
+// shells out to — not a mocked network error, the real CLI call really fails.
+// Always restored in `finally` even if an assertion throws, since this
+// otherwise leaves the VM's podman broken for every subsequent test.
+test('A real poll failure shows the load-failed alert, and Retry recovers once the runtime is fixed', async ({ pluginPage: page }) => {
+  test.setTimeout(60_000);
+  await baseData(page);
+  await expect(page.locator('.dss-stack-name').first()).toBeVisible();
+
+  await sshExec('arch-podman', 'sudo mv /usr/bin/podman /usr/bin/podman.e2e-disabled');
+  try {
+    // No manual refresh control exists for the main poll — the 500ms
+    // auto-refresh interval (src/components/StacksView/index.tsx) will hit
+    // the broken binary on its own within a couple of ticks.
+    const alert = page.getByText('Failed to load stacks', { exact: false });
+    await expect(alert).toBeVisible({ timeout: 15000 });
+    const retry = page.getByRole('button', { name: 'Retry', exact: true });
+    await expect(retry).toBeVisible();
+
+    // Retrying while still broken must not clear the alert — it's a real
+    // re-check, not an optimistic dismiss.
+    await retry.click();
+    await expect(alert).toBeVisible({ timeout: 10000 });
+  } finally {
+    await sshExec('arch-podman', 'sudo mv /usr/bin/podman.e2e-disabled /usr/bin/podman');
+  }
+
+  // Real effect: fixing the runtime and retrying actually recovers — the
+  // alert clears and real stack data reloads, not just a UI reset.
+  await page.getByRole('button', { name: 'Retry', exact: true }).click();
+  await expect(page.getByText('Failed to load stacks', { exact: false })).not.toBeVisible({ timeout: 15000 });
+  await expect(page.locator('.dss-stack-name').first()).toBeVisible({ timeout: 10000 });
 });

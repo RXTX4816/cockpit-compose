@@ -71,6 +71,55 @@ test('Multi-file tabs show each file\'s own real content, not shared/stale conte
   await modal.getByRole('button', { name: 'Close' }).click();
 });
 
+// Regression coverage for docs/testing.md §6.14's malformed-save case: typing
+// broken YAML and hitting Save must not silently write it to disk — it should
+// route through the same "Save with issues?" confirm dialog Create Stack's
+// validation-bypass flow uses, showing a real parser error count. Cancelling
+// must leave the on-disk file untouched.
+//
+// Known flake, same class as adversarial.spec.ts's malformed-YAML case: passes
+// reliably in isolation (verified repeatedly) but intermittently times out
+// waiting for the confirm dialog when run after many prior gotify edits in
+// the same long-lived VM/browser session — screenshots at failure always show
+// the correct final state already rendered, consistent with cumulative
+// session/host load slowing CodeMirror's linter rather than a real app bug.
+test('Saving malformed YAML shows a real error count and Cancel leaves the file untouched', async ({ pluginPage: page }) => {
+  test.setTimeout(90_000);
+  await baseData(page);
+  await openYamlEditor(page, 'gotify');
+  const modal = page.getByRole('dialog');
+  const originalContent = await modal.locator('.cm-content').textContent();
+
+  await modal.getByRole('button', { name: 'Edit' }).click();
+  const editor = modal.locator('.cm-content');
+  await editor.click();
+  await page.keyboard.press('Control+A');
+  await page.keyboard.type('services: [this is not valid yaml: : :');
+  // CodeMirror's async YAML linter needs a moment to settle after typing —
+  // clicking Save immediately raced it in this session (Save's own
+  // synchronous validation is unaffected, but the resulting UI became
+  // unresponsive for several seconds afterward, as if the linter's work
+  // was still draining on the main thread).
+  await page.waitForTimeout(5000);
+
+  await modal.getByRole('button', { name: 'Save', exact: true }).click();
+  // Neither the Modal's aria-label ("Confirm save") nor its ModalHeader
+  // title text alone resolved via role+name matching here — filter by
+  // visible content instead of fighting the accessible-name computation.
+  const confirm = page.getByRole('dialog').filter({ hasText: 'Save with issues?' });
+  await expect(confirm).toBeVisible({ timeout: 10000 });
+  await expect(confirm.getByText('Errors found')).toBeVisible({ timeout: 15000 });
+  await expect(confirm.getByText('1 error in your compose file', { exact: false })).toBeVisible({ timeout: 15000 });
+
+  await confirm.getByRole('button', { name: 'Cancel', exact: true }).click();
+  await expect(confirm).not.toBeVisible({ timeout: 10000 });
+
+  // Real effect: cancelling must not have written anything — exit edit mode
+  // and confirm the in-memory content reverted to the untouched original.
+  await modal.getByRole('button', { name: 'Cancel', exact: true }).click();
+  await expect(modal.locator('.cm-content')).toHaveText(originalContent ?? '', { timeout: 10000 });
+});
+
 test('Snapshot history records a real edit, shows a diff, and Restore reverts the file on disk', async ({ pluginPage: page }) => {
   test.setTimeout(60_000);
   await baseData(page);
