@@ -30,12 +30,12 @@ make this practical (`baseData`, `stacks.ts`, `runtime.ts`).
 | 6.13 | Stack info (services/images/volumes/networks tabs, shared networks) | `e2e/stack-info.spec.ts` | ✅ (found & fixed a real bug — see Notes) / 🚧 shared-networks case still open |
 | 6.14 | Edit YAML (multi-file tabs, add/delete file, import, snapshot history/diff/restore) | `e2e/yaml-editor.spec.ts` | ✅ partial / 🚧 multi-file + snapshots |
 | 6.15 | Edit env file (table/raw modes, duplicate-key warning, add file) | `e2e/env-editor.spec.ts` | ✅ (found a real doc/behavior mismatch — see Notes) |
-| 6.16.1 | Prune — basic flow (containers; volumes appears unreachable via UI, see reference doc) | `e2e/prune.spec.ts` | ✅ |
+| 6.16.1 | Prune — basic flow (containers; volumes appears unreachable via UI, see reference doc) | `e2e/prune.spec.ts` | ⚠️ image/shared-image prune tests pass; container-prune tests marked `test.fixme` on Podman pending issue [#274](https://github.com/RXTX4816/cockpit-compose/issues/274) — see Notes |
 | 6.17 | Scale services (increase replicas, port-conflict warning) | `e2e/scale.spec.ts` | ✅ |
 | 6.19 | Create stack (template method, validation bypass) | `e2e/create-stack.spec.ts` | ✅ (manual method only — template/git method still 🚧) |
 | downed-stacks bulk actions (select-all + bulk Up, commit 85fe38d) | Bulk select/Up on downed stacks table | `e2e/downed-stacks-bulk.spec.ts` | ✅ |
 | 6.22 | Ports — clickable link, localhost-only vs all-interfaces tooltip | `e2e/ports.spec.ts` | ✅ (external-bind case; found a doc/behavior mismatch — see Notes) / 🚧 localhost/specific-bind cases |
-| adversarial | Malformed YAML, nonexistent scan directory, scan-depth bounds | `e2e/adversarial.spec.ts` | ⚠️ (depth/nonexistent-dir confirmed clean; malformed-YAML logic verified correct but has an unresolved host-contention-triggered flake) |
+| adversarial | Malformed YAML, nonexistent scan directory, scan-depth bounds | `e2e/adversarial.spec.ts` | ✅ all 3 fixed and stable (3/3 × 2 full-file runs) — see Notes, these were real test bugs, not flakes |
 
 ## Wave 2 — Runtime/engine-specific, full 9-VM matrix
 
@@ -48,10 +48,11 @@ Run these against the full matrix (batched per §"Managing resource usage" in
 | 7.1 | Docker rootless mode | `e2e/runtime-rootless.spec.ts` | ✅ partial (`rootless-compose-root.spec.ts`) / 🚧 |
 | 7.2 | Podman via `podman compose` external provider | (every spec that runs against `arch-podman`) | ✅ — on `arch-podman`, `podman compose`'s "external compose provider" genuinely *is* `/usr/bin/podman-compose` (verified via SSH: `podman compose version` prints the "Executing external compose provider" banner naming that exact binary); every Wave 1/3/4 spec already run against this VM exercises this path, no dedicated spec needed |
 | 7.3 | Podman via `podman-compose` (Python, no docker-compose) | (every spec that runs against `arch-podman`) | ✅ — same finding as 7.2: `arch-podman` has no `docker-compose` at all and its `podman-compose` is confirmed genuine Python (`/usr/bin/podman-compose` is `#!/usr/bin/python`, reports `podman-compose version 1.6.0`), so 7.2 and 7.3 are literally the same code path on this VM, both already covered by the existing suite |
-| 7.4 | Podman root (system socket), no rootless socket at all — issue [#242](https://github.com/RXTX4816/cockpit-compose/issues/242) regression: discovery + Stack Info container list under real Cockpit Administrative access | `e2e/runtime-rootless.spec.ts` (`fedora-podman-rootful` only) | ✅ |
+| 7.4 | Podman root (system socket), no rootless socket at all — issue [#242](https://github.com/RXTX4816/cockpit-compose/issues/242) regression: discovery + Stack Info container list under real Cockpit Administrative access, and that the two agree on state *at the same moment* after a real transition (Troubleshooting.md's status-agreement regression) | `e2e/runtime-rootless.spec.ts` (`fedora-podman-rootful` only) | ✅ |
 | 7.5 | Neither runtime present — error state | `e2e/runtime-unavailable.spec.ts` | ✅ (`arch-docker`; hides both `docker` and the standalone `docker-compose` legacy binary via SSH — hiding `docker` alone isn't enough, `detectComposeCommand()` falls back to it) |
 | Rootless/Rootful socket-mode toggle (added alongside #242's fix) — switching modes when both sockets are detected, footer badge, stale-list refresh on switch | `e2e/socket-mode-toggle.spec.ts` | ✅ (`fedora-full` only, via `loginWithAdminAccess` — Rootful stays disabled without real admin access) |
 | superuser prompt | Compose file owned by another uid (`composeFileSuperuser()`, `src/api/cockpit.ts:185-215`) | `e2e/superuser-prompt.spec.ts` | ✅ (`fedora-full` only — the one VM with a genuine rootless Docker socket; see spec header comment for why a stricter-permissions fixture was tried and reverted) |
+| Recheck button vs. a socket that exists but doesn't respond (`checkSocketHealth()`, `docs/wiki/Troubleshooting.md`) | none | 🚧 not attempted — the only way to produce this state is mutating a shared VM's live `systemd --user` socket/service, which isn't reproducible and would need a full VM reset afterward; needs a dedicated VM image provisioned with a genuinely broken/stub socket baked into cloud-init instead of a live hack, out of scope for this pass |
 | distro quirks | Debian cgroupfs pause/unpause workaround, Fedora SELinux `label=false`, pasta/nftables networking | covered implicitly by running Wave-1 lifecycle specs against the full matrix rather than a dedicated spec | ✅ partial — `e2e/stacks.spec.ts` + `stack-lifecycle.spec.ts` run clean on `debian-podman` (4/4 + 9/9) and `debian-docker` (13/13); `fedora-podman` 12/13 (1 known host-load flake, passed alone); `fedora-docker` 4/13 — the other 9 failures are **not** distro-quirk test gaps, they're issue [#272](https://github.com/RXTX4816/cockpit-compose/issues/272) (a real app-level race, also reproduces on `arch-docker`, not Fedora-specific) / 🚧 `debian-both`, `fedora-both` |
 
 ## Wave 3 — Edge cases / error states
@@ -61,7 +62,7 @@ Run these against the full matrix (batched per §"Managing resource usage" in
 | 5.3 / 6.4 | Multi-service stack with profiles | covered by 6.4 above | 🚧 |
 | 5.4 / 6.14 | Multi-file compose (extra compose file) | covered by 6.14 above | 🚧 |
 | 6.16.2-6.16.6 | Prune edge cases (shared image across stacks still in use, exited one-shot container removal by name) | `e2e/prune.spec.ts` (additional cases) | ✅ |
-| 6.16.7 | Dangling named volume | `e2e/prune.spec.ts` | ❓ appears unreachable via the current UI — see `e2e/prune.spec.ts`'s header comment and [E2E Test Reference](E2E-Test-Reference.md) before attempting; worth raising as a product question first |
+| 6.16.7 | Dangling named volume | `e2e/prune.spec.ts` | ❓ the earlier "unreachable via the current UI" finding turned out to rest on a false premise specific to Podman — see issue [#274](https://github.com/RXTX4816/cockpit-compose/issues/274) and `e2e/prune.spec.ts`'s header comment; revisit once #274 is fixed before deciding whether this is still a product question |
 | 6.18 | Backup & restore (archive create, restore into new dir, restored stack starts) | `e2e/backup-restore.spec.ts` | ✅ (found & documented a UX asymmetry vs BackupModal — see Notes) |
 | 6.14 (malformed) | Save rejects invalid YAML with error details | `e2e/yaml-editor.spec.ts` (additional case) | ✅ (see Notes for a known flake under cumulative session load) |
 | 6.23 | Clickable external links show a warning modal before navigating | `e2e/stacks.spec.ts` (additional case) | ✅ — not in StackInfoModal (its port badges call `window.open()` directly, no confirmation, see #260/`ports.spec.ts`); the real warning-modal flow is `ContainerTable`'s per-service image link inside an expanded row, covered here instead |
@@ -85,21 +86,51 @@ scenarios).
 
 ## Notes
 
-- **Known intermittent flakes surfaced during a full-suite regression pass**
-  (`e2e/adversarial.spec.ts`'s 3 tests, `e2e/backup-restore.spec.ts`,
-  `e2e/prune.spec.ts`'s `volumes-test` case): after several hours of continuous
-  VM use, these occasionally fail on `force: true` clicks racing a React
-  re-render (the target element gets replaced mid-retry, e.g.
-  `openYamlEditor`'s "Edit compose file" button) or on an async-disabled
-  button not re-enabling within its timeout (`RestoreModal`'s Restore button).
-  Confirmed NOT tied to the #259/#260/#261 merge: `e2e/stack-info.spec.ts`,
-  which directly exercises the #259 fix, passes cleanly and repeatably on the
-  same rebuilt VM. Each of the 5 passed individually earlier in this same pass
-  when run in isolation right after being written — this is the same
-  host-load/UI-timing flake class already called out for `adversarial.spec.ts`
-  in the table above and for the Background Tasks log-modal interaction (see
-  Wave 4 notes below), not a logic regression. Worth a focused pass with
-  devtools attached rather than more blind selector/timeout changes.
+- **The 5 "flaky" specs, actually debugged with a trace/screenshot pass** — of
+  the 5 specs previously tagged as an unresolved host-contention flake class,
+  4 turned out to be real, deterministic bugs (in the tests, and in one case
+  the app), not timing flakes at all:
+  - `e2e/adversarial.spec.ts`'s malformed-YAML test used
+    `page.getByRole('dialog', { name: 'Confirm save' })` — the modal's real
+    accessible name is its `ModalHeader` title ("Save with issues?"), which
+    takes ARIA precedence over the `aria-label` prop. Fixed to filter by
+    visible content instead. A second, separate bug in the same test: after
+    canceling the confirm dialog, it called `openYamlEditor()` again to
+    verify the on-disk content — but Cancel only exits edit mode, it doesn't
+    close the modal, so the second open raced the first modal's own
+    backdrop. Fixed to assert directly on the still-open modal instead of
+    closing and reopening.
+  - `e2e/adversarial.spec.ts`'s other two tests (nonexistent scan dir,
+    scan-depth bounds) never called `dismissStartupPodmanPrompt()` — on a
+    podman-only VM the auto-suggest-Podman modal blocks the Import button
+    they immediately try to click. Fixed by adding the missing call.
+  - `e2e/backup-restore.spec.ts`: a prior run's restored stack directory
+    (`e2e-restored-gotify`) was never fully deleted — `downStack()` only
+    runs `compose down`, and the app's own "Delete compose file" action only
+    removes the `.yml` (not gotify's bind-mounted `data/` subdirectory), so
+    the directory survived either cleanup path and permanently disabled
+    `RestoreModal`'s Restore button on the next run (`targetExists` stays
+    true, requiring an overwrite-confirm checkbox neither run handled). Fixed
+    afterEach/setup to `rm -rf` the directory via SSH — the only way to
+    guarantee it's actually gone. Also now cleans up accumulated
+    `.bak.tar.gz` archives, which had grown to 8+ from repeated runs.
+  - `e2e/prune.spec.ts`'s `volumes-test` case surfaced a **real app bug**:
+    see issue [#274](https://github.com/RXTX4816/cockpit-compose/issues/274)
+    — `podman container prune` is a silent no-op on containers that belong
+    to a pod, which every podman-compose stack's containers are. The test's
+    old assertion (row disappears from the running list) was based on a
+    false assumption; the row actually stays "stopped" forever since the
+    containers never get removed. This is what the §6.16.7 dangling-volume
+    "unreachable" note above was built on — also revisit once #274 is fixed.
+    Both affected tests now assert the *correct* behavior (real container
+    removal, verified via Stack Info) and are marked `test.fixme` on Podman
+    referencing #274, so they'll auto-pass once fixed rather than needing a
+    rewrite. The sibling image-prune tests in the same file are unaffected
+    (different underlying command, no pod involvement).
+  - The only genuine remaining flakiness: `e2e/backup-restore.spec.ts`'s
+    final "Up" step occasionally needs more than 20s when run right after
+    several other heavy tests in the same batch (passes reliably alone) —
+    ordinary host-load timing, not a logic bug.
 - **Real bugs found and fixed while writing Wave 1 specs this pass** (proof this
   approach works — writing the test against actual app behavior, not assumptions,
   surfaces genuine issues):
