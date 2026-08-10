@@ -1,5 +1,5 @@
 import { test, expect } from '@rxtx4816/cockpit-plugin-base-react/e2e';
-import { baseData } from './helpers/base';
+import { baseData, dismissStartupPodmanPrompt } from './helpers/base';
 import { openYamlEditor, yamlEditorContent } from './helpers/stacks';
 
 // These tests deliberately feed the app bad or unexpected input — the goal
@@ -35,7 +35,11 @@ test('Saving malformed YAML warns instead of silently corrupting the compose fil
   // doesn't hard-block, it opens a "Save with issues?" confirm dialog first.
   // Under VM load the dialog shell and its Alert content can each take a
   // while to paint, so both checks need more than Playwright's default 5s.
-  const confirm = page.getByRole('dialog', { name: 'Confirm save' });
+  // Note: the modal's aria-label is "Confirm save", but its ModalHeader's
+  // aria-labelledby takes ARIA precedence for the accessible name — filter
+  // by visible content instead of fighting that (see yaml-editor.spec.ts's
+  // malformed-YAML test for the same finding).
+  const confirm = page.getByRole('dialog').filter({ hasText: 'Save with issues?' });
   await expect(confirm).toBeVisible({ timeout: 15000 });
   // .first() — both the alert heading and its body text contain "error".
   await expect(confirm.getByText(/error/i).first()).toBeVisible({ timeout: 10000 });
@@ -43,16 +47,18 @@ test('Saving malformed YAML warns instead of silently corrupting the compose fil
   // Back out instead of forcing the save — the original file must be untouched.
   await confirm.getByRole('button', { name: 'Cancel' }).click();
   await expect(confirm).not.toBeVisible();
+  // This "Cancel" only exits edit mode (back to read-only) — the modal
+  // itself stays open, so asserting on it directly here (rather than
+  // closing and reopening via openYamlEditor) avoids racing a second
+  // "Edit compose file" click against this modal's own still-visible backdrop.
   await page.getByRole('dialog').getByRole('button', { name: 'Cancel' }).click();
-
-  // Reopen fresh and confirm the on-disk content was never touched.
-  await openYamlEditor(page, 'gotify');
   await expect(yamlEditorContent(page)).toContainText('gotify');
   await expect(yamlEditorContent(page)).not.toContainText('this is not valid yaml');
   await page.getByRole('dialog').getByRole('button', { name: 'Close' }).click();
 });
 
 test('Scanning a directory that does not exist fails gracefully instead of crashing', async ({ pluginPage: page }) => {
+  await dismissStartupPodmanPrompt(page);
   await page.getByRole('button', { name: 'Import', exact: true }).click();
   const scanInput = page.getByLabel('Compose directory');
   await scanInput.waitFor();
@@ -69,6 +75,7 @@ test('Scanning a directory that does not exist fails gracefully instead of crash
 });
 
 test('Scan-depth stepper clamps at its documented bounds (1-5) instead of going out of range', async ({ pluginPage: page }) => {
+  await dismissStartupPodmanPrompt(page);
   await page.getByRole('button', { name: 'Import', exact: true }).click();
   await page.getByLabel('Compose directory').waitFor();
 

@@ -7,28 +7,31 @@ import { downedCard, downStack, ensureDown, stackRow, upStack } from './helpers/
 // stays in the running-stacks list with its per-stack Prune action, matching
 // testing guide §6.16.1.
 //
-// NOTE on volume pruning specifically (§6.16.7 "dangling named volume"):
-// this scenario looks unreachable through the current UI. Volume detection
-// (src/api/stacks.ts listDanglingVolumes()) runs a plain
-// `docker volume ls --filter dangling=true` — Docker's own definition,
-// which only counts a volume as dangling once *no container at all*
-// (running or stopped) references it. But the per-stack Prune action only
-// exists on a row in the *running* stacks list, and that row disappears
-// (moves to the downed-stacks section, which has no Prune action) the
-// moment the stack's container count hits zero — verified live: pruning
-// volumes-test's stopped containers via this same modal made the row
-// vanish immediately, before a second Prune pass to target the now-truly-
-// dangling volume could ever be reached. In other words, by the time a
-// volume qualifies as prunable, the UI no longer offers a way to prune it
-// for that stack. Flagged as a product question, not fixed here — see
-// docs/wiki/E2E-Test-Reference.md's "Known flaky behavior" section.
+// NOTE on volume pruning specifically (§6.16.7 "dangling named volume"): an
+// earlier pass's assumption here — that pruning volumes-test's stopped
+// containers makes the row disappear immediately, leaving no UI path to
+// reach the now-dangling volume — turned out to rest on a false premise on
+// Podman: see issue #274. Prune Containers is a silent no-op there (the
+// `podman container prune` command it shells out to categorically ignores
+// containers that belong to a pod, which every podman-compose stack's
+// containers are), so the row never actually loses its containers and never
+// moves to the downed section at all. Whether the dangling-volume UI gap
+// is real on Docker (where no pod concept exists) is still untested —
+// worth revisiting once #274 is fixed and Podman's Prune Containers can be
+// trusted to reflect what it claims to do.
 test.afterEach(async ({ pluginPage: page }) => {
   if (await stackRow(page, 'volumes-test').count()) {
     await downStack(page, 'volumes-test').catch(() => {});
   }
 });
 
-test('Prune removes real stopped containers, not just closes the dialog', async ({ pluginPage: page }) => {
+test('Prune removes real stopped containers, not just closes the dialog', async ({ pluginPage: page }, testInfo) => {
+  // Genuinely broken on Podman — see #274 (podman container prune is a
+  // silent no-op on pod-member containers, which every podman-compose
+  // stack's containers are). Kept asserting the *correct* behavior rather
+  // than weakened to match the bug, so this starts passing again the moment
+  // #274 is fixed instead of needing to be rewritten.
+  test.fixme(testInfo.project.name.includes('podman'), 'podman container prune is a no-op on pod-member containers — see #274');
   // See logs.spec.ts for why: Up alone can eat most of the default 30s.
   test.setTimeout(120_000);
   await baseData(page);
@@ -54,14 +57,29 @@ test('Prune removes real stopped containers, not just closes the dialog', async 
 
     const previewModal = page.getByRole('dialog', { name: /Confirm prune — volumes-test/ });
     await expect(previewModal).toBeVisible();
-    // Real effect target: the stopped db container listed by name, not just a generic count.
-    await expect(previewModal.getByText('volumes-test-db-1', { exact: false })).toBeVisible({ timeout: 10000 });
+    // Real effect target: the stopped db container listed by name, not just a
+    // generic count. Podman container names use underscores as the
+    // service/index separators (project name's own hyphen is untouched).
+    await expect(previewModal.getByText('volumes-test_db_1', { exact: false })).toBeVisible({ timeout: 10000 });
     await previewModal.getByRole('button', { name: 'Prune selected' }).click();
     await expect(previewModal).not.toBeVisible({ timeout: 20000 });
 
-    // Real effect check: the stack now has zero containers, so it drops out
-    // of the running-stacks list entirely (moves to the downed section).
-    await expect(row).toHaveCount(0, { timeout: 15000 });
+    // Real effect check: the stack itself does NOT drop out of the
+    // running-stacks list — `compose ls` (podman and docker alike) still
+    // lists a known project even with zero containers, so it stays visible
+    // here as "stopped". Its "N services" count also doesn't change (that
+    // reflects the compose *file's* defined services, not live container
+    // count). (Earlier versions of this test assumed the row would
+    // disappear, or that the services count would drop to 0 — both verified
+    // false against the real DOM/app behavior.) Stack Info is the one place
+    // that actually reflects live container state, so that's what proves
+    // the containers are really gone.
+    await expect(row).toHaveAttribute('data-status', 'stopped', { timeout: 15000 });
+    await row.getByRole('button', { name: 'Stack info' }).click();
+    const infoModal = page.getByRole('dialog', { name: /Info — volumes-test/ });
+    await expect(infoModal).toBeVisible();
+    await expect(infoModal.locator('.sim-no-containers')).toBeVisible({ timeout: 10000 });
+    await infoModal.getByRole('button', { name: 'Close' }).click();
   } finally {
     if (await row.count()) {
       await downStack(page, 'volumes-test').catch(() => {});
@@ -139,7 +157,13 @@ test('Prune does not offer to remove an image another stack is still using', asy
 // `exited-containers_prunetest` (testing guide §6.16.6) exits immediately
 // (restart: "no"), giving Prune's Containers section a real stopped
 // container to list and remove by name.
-test('Prune removes a real one-shot exited container by name', async ({ pluginPage: page }) => {
+test('Prune removes a real one-shot exited container by name', async ({ pluginPage: page }, testInfo) => {
+  // Genuinely broken on Podman — see #274 (podman container prune is a
+  // silent no-op on pod-member containers, which every podman-compose
+  // stack's containers are). This test previously only checked the preview
+  // modal and that "Prune selected" closed it, never that the container was
+  // actually gone afterward — which is exactly how #274 went unnoticed.
+  test.fixme(testInfo.project.name.includes('podman'), 'podman container prune is a no-op on pod-member containers — see #274');
   test.setTimeout(60_000);
   await baseData(page);
   await ensureDown(page, 'exited-containers_prunetest');
@@ -171,4 +195,11 @@ test('Prune removes a real one-shot exited container by name', async ({ pluginPa
   await expect(previewModal.getByText('exited-containers_prunetest_job_1', { exact: false })).toBeVisible({ timeout: 10000 });
   await previewModal.getByRole('button', { name: 'Prune selected' }).click();
   await expect(previewModal).not.toBeVisible({ timeout: 20000 });
+
+  // Real effect: the container is actually gone, not just the modal closed.
+  await row.getByRole('button', { name: 'Stack info' }).click();
+  const infoModal = page.getByRole('dialog', { name: /Info — exited-containers_prunetest/ });
+  await expect(infoModal).toBeVisible();
+  await expect(infoModal.locator('.sim-no-containers')).toBeVisible({ timeout: 10000 });
+  await infoModal.getByRole('button', { name: 'Close' }).click();
 });

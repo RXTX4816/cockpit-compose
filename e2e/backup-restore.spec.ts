@@ -1,20 +1,39 @@
 import { test, expect } from '@rxtx4816/cockpit-plugin-base-react/e2e';
 import { baseData } from './helpers/base';
 import { downStack, downedCard, ensureDown, stackRow } from './helpers/stacks';
+import { sshExec } from './helpers/vm';
 
 const BACKUP_DIR = '/home/test/testcompose';
 const RESTORE_NAME = 'e2e-restored-gotify';
 
 // `gotify` (see scripts/test-vm.config.sh) is a simple single-service fixture
 // safe to back up and restore under a new name/directory.
-test.afterEach(async ({ pluginPage: page }) => {
+//
+// Teardown must delete the restored *directory*, not just stop the stack —
+// downStack() only runs `compose down`, and the app's own "Delete compose
+// file" action only removes the .yml (not gotify's bind-mounted `data/`
+// subdirectory), so the directory itself survives either cleanup path. A
+// prior run's leftover directory made RestoreModal's `targetExists` check
+// trip on the next run, permanently disabling its Restore button (it
+// requires an overwrite-confirm checkbox neither this test nor the
+// unsuspecting next run handled) — a real self-inflicted state leak, not a
+// flake. `rm -rf` via SSH is the only way to guarantee it's actually gone.
+test.afterEach(async ({ pluginPage: page }, testInfo) => {
   if (await stackRow(page, RESTORE_NAME).count()) {
     await downStack(page, RESTORE_NAME).catch(() => {});
   }
+  await sshExec(testInfo.project.name, `rm -rf ${BACKUP_DIR}/${RESTORE_NAME}`).catch(() => {});
+  // Each run creates a real timestamped .bak.tar.gz in BACKUP_DIR — left
+  // uncleaned across many runs, RestoreModal's archive list (and Rescan)
+  // just keeps growing for no test benefit.
+  await sshExec(testInfo.project.name, `rm -f ${BACKUP_DIR}/gotify-*.bak.tar.gz`).catch(() => {});
 });
 
-test('Backup creates a real archive on disk, and Restore recreates a runnable stack from it', async ({ pluginPage: page }) => {
+test('Backup creates a real archive on disk, and Restore recreates a runnable stack from it', async ({ pluginPage: page }, testInfo) => {
   test.setTimeout(90_000);
+  // Self-heal against a previous interrupted run's leaked restore directory
+  // (see afterEach's comment) before assuming the target path is free.
+  await sshExec(testInfo.project.name, `rm -rf ${BACKUP_DIR}/${RESTORE_NAME}`).catch(() => {});
   await baseData(page);
   await ensureDown(page, 'gotify');
 
