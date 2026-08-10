@@ -90,3 +90,42 @@ test('Stop on a running background task actually terminates the underlying proce
     await expect(taskRow.getByText('Stopped', { exact: true })).toBeVisible({ timeout: 10000 });
   }
 });
+
+// Needs a real runtime switch (arch-podman alone has no Docker to switch to),
+// so this only runs where both are actually installed.
+test('Switching runtime cancels a still-pending background task with a toast, and it never runs against the new runtime', async ({ pluginPage: page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'arch-both', 'needs both Docker and Podman installed to exercise a real runtime switch');
+  test.setTimeout(60_000);
+  await baseData(page);
+  await ensureDown(page, 'gotify');
+  await ensureDown(page, 'multi');
+
+  // Queue two Up tasks back-to-back — only one runs at a time
+  // (docs/wiki/Background-Tasks.md), so the second stays Pending while the
+  // first is still Running. `multi` (2 services) goes first specifically
+  // because it's slower than single-service `gotify` to come up, leaving a
+  // wider window for gotify to still be genuinely Pending when we switch.
+  await downedCard(page, 'multi').getByRole('button', { name: 'Up', exact: true }).click();
+  await page.getByRole('dialog', { name: /Confirm up.*multi/ }).getByRole('button', { name: 'Up', exact: true }).click();
+  await page.getByRole('dialog', { name: /^Up.*multi/ }).getByRole('button', { name: 'Run in Background' }).click();
+
+  await downedCard(page, 'gotify').getByRole('button', { name: 'Up', exact: true }).click();
+  await page.getByRole('dialog', { name: /Confirm up.*gotify/ }).getByRole('button', { name: 'Up', exact: true }).click();
+  await page.getByRole('dialog', { name: /^Up.*gotify/ }).getByRole('button', { name: 'Run in Background' }).click();
+
+  await page.getByRole('button', { name: 'Podman', exact: true }).click();
+  await page.getByRole('dialog', { name: 'Switch to Podman' }).getByRole('button', { name: 'Continue', exact: true }).click();
+
+  // Real effect: a toast reports the cancellation, and the pending task is
+  // actually gone from the panel — not just marked, genuinely removed so it
+  // can never fire its command against the newly-active Podman runtime.
+  await expect(page.getByText('Cancelled 1 pending background task', { exact: false })).toBeVisible({ timeout: 10000 });
+  await page.getByRole('button', { name: 'Background tasks' }).click();
+  const gotifyTask = page.locator('.btd-panel').locator('li', { hasText: 'gotify' });
+  await expect(gotifyTask).toHaveCount(0, { timeout: 10000 });
+
+  // gotify never actually started under either runtime — clean up only multi.
+  await baseData(page);
+  if (await stackRow(page, 'multi').count()) await downStack(page, 'multi').catch(() => {});
+  await page.getByRole('button', { name: 'Docker', exact: true }).click();
+});
