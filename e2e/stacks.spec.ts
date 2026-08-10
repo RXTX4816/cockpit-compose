@@ -137,12 +137,18 @@ test('Expanded row\'s image link shows a real warning modal with the actual dest
 // shells out to — not a mocked network error, the real CLI call really fails.
 // Always restored in `finally` even if an assertion throws, since this
 // otherwise leaves the VM's podman broken for every subsequent test.
-test('A real poll failure shows the load-failed alert, and Retry recovers once the runtime is fixed', async ({ pluginPage: page }) => {
+test('A real poll failure shows the load-failed alert, and Retry recovers once the runtime is fixed', async ({ pluginPage: page }, testInfo) => {
   test.setTimeout(60_000);
   await baseData(page);
   await expect(page.locator('.dss-stack-name').first()).toBeVisible();
 
-  await sshExec('arch-podman', 'sudo mv /usr/bin/podman /usr/bin/podman.e2e-disabled');
+  // Break whichever runtime is actually active on this VM/project — podman
+  // on podman-only VMs (baseData's dismissStartupPodmanPrompt already
+  // switched to it), docker everywhere else.
+  const runtime = await page.getByRole('button', { name: 'Podman', exact: true }).getAttribute('aria-pressed') === 'true'
+    ? 'podman' : 'docker';
+  const vm = testInfo.project.name;
+  await sshExec(vm, `sudo mv /usr/bin/${runtime} /usr/bin/${runtime}.e2e-disabled`);
   try {
     // No manual refresh control exists for the main poll — the 500ms
     // auto-refresh interval (src/components/StacksView/index.tsx) will hit
@@ -157,7 +163,7 @@ test('A real poll failure shows the load-failed alert, and Retry recovers once t
     await retry.click();
     await expect(alert).toBeVisible({ timeout: 10000 });
   } finally {
-    await sshExec('arch-podman', 'sudo mv /usr/bin/podman.e2e-disabled /usr/bin/podman');
+    await sshExec(vm, `sudo mv /usr/bin/${runtime}.e2e-disabled /usr/bin/${runtime}`);
   }
 
   // Real effect: fixing the runtime and retrying actually recovers — the
