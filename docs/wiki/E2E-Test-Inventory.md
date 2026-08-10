@@ -44,7 +44,7 @@ Run these against the full matrix (batched per §"Managing resource usage" in
 
 | Testing guide § | Scenario | Spec (planned) | Status |
 |---|---|---|---|
-| 6.20, 6.21 | Footer + runtime toggle (Docker↔Podman switch, rootless badge, socket path, "not installed" revert) | `e2e/runtime-toggle.spec.ts` | 🚧 |
+| 6.20, 6.21 | Footer + runtime toggle (Docker↔Podman switch, rootless badge, socket path, "not installed" revert) | `e2e/runtime-toggle.spec.ts` | ✅ (`arch-both`; "not installed" case breaks the real `podman` binary via SSH, always restored) |
 | 7.1 | Docker rootless mode | `e2e/runtime-rootless.spec.ts` | ✅ partial (`rootless-compose-root.spec.ts`) / 🚧 |
 | 7.2 | Podman via `podman compose` external provider | `e2e/runtime-rootless.spec.ts` | 🚧 |
 | 7.3 | Podman via `podman-compose` (Python, no docker-compose) | `e2e/runtime-rootless.spec.ts` | 🚧 |
@@ -76,8 +76,8 @@ scenarios).
 
 | Feature | Doc | Spec (planned) | Status |
 |---|---|---|---|
-| Background Tasks (queue, states, Stop/Remove, real container-state completion) | [Background-Tasks.md](Background-Tasks) | `e2e/background-tasks.spec.ts` | ✅ partial (Pending→Running→Complete against real container state, Stop terminates the underlying process, Remove actually drops the task) / 🚧 log-view-through-panel (cut, see spec header comment), runtime-switch cancellation race (needs `arch-both` — Docker+Podman both present — deferred to Wave 2, `arch-podman` alone can't exercise a real runtime switch) |
-| Bulk Actions on running stacks (per-layout selection, select-all indeterminate, per-action confirm) | [Bulk-Actions.md](Bulk-Actions) | `e2e/bulk-actions.spec.ts` | ✅ partial (Power User checkbox, Minimal card-click, Unix bracket-toggle all covered) / 🚧 Pretty layout, runtime-switch-clears-selection (same `arch-both` dependency as above, deferred to Wave 2) |
+| Background Tasks (queue, states, Stop/Remove, real container-state completion, runtime-switch cancellation) | [Background-Tasks.md](Background-Tasks) | `e2e/background-tasks.spec.ts` | ✅ (Pending→Running→Complete against real container state, Stop terminates the underlying process, Remove actually drops the task, runtime-switch cancellation race verified on `arch-both`) / 🚧 log-view-through-panel (cut, see spec header comment) |
+| Bulk Actions on running stacks (per-layout selection, select-all indeterminate, per-action confirm, runtime-switch clears selection) | [Bulk-Actions.md](Bulk-Actions) | `e2e/bulk-actions.spec.ts` | ✅ (Power User checkbox, Minimal card-click, Unix bracket-toggle, runtime-switch-clears-selection all covered) / 🚧 Pretty layout |
 | Process Viewer / Top (`docker compose top` equivalent) | [Process-Viewer.md](Process-Viewer) | `e2e/process-viewer.spec.ts` | ✅ |
 | Keyboard shortcuts (U/D/L/E/I) | [Stacks-Dashboard.md](Stacks-Dashboard#keyboard-shortcuts) | fold into `e2e/stacks.spec.ts` | ✅ |
 | Layout selector (4 layouts) | [Stacks-Dashboard.md](Stacks-Dashboard#layout-options) | fold into `e2e/stacks.spec.ts` | ✅ |
@@ -121,6 +121,30 @@ scenarios).
     editor is mounted, so a raw-mode-only duplicate silently saves with no warning.
     `e2e/env-editor.spec.ts` exercises the real (Table-mode) path where the check
     genuinely runs and documents the Raw-mode gap.
+- **`arch-both` findings (Wave 2, first pass)**:
+  - This VM's Docker only exposes a **Rootful** socket — no rootless Docker
+    at all. `bulk-actions.spec.ts`'s four pre-existing Docker-default tests
+    (`Bulk Down`, `Minimal layout`, `Unix layout`, `Select all`) need real
+    Cockpit Administrative access to bring a stack up under a rootful
+    socket, which the shared `pluginPage` fixture doesn't provide (only
+    `loginWithAdminAccess`, used by `runtime-rootless.spec.ts`'s rootful
+    spec, does). Scoped away from `arch-both` with `test.skip` in a
+    `test.describe` block rather than silently left failing — a real gap,
+    not fixed in this pass, worth a dedicated admin-access variant.
+  - `gotify`'s `./data` bind mount on this shared VM had been left
+    root-owned by an earlier Docker run (Docker's daemon runs as root) —
+    rootless Podman then can't write its sqlite db ("attempt to write a
+    readonly database"), so the container exits immediately with the app
+    correctly reporting it as stopped. Not an app bug — fixed the ownership
+    on the VM directly (`sudo chown -R test:test`) and switched the
+    Podman-side runtime-switch tests to `env-test` (no bind mount) to avoid
+    depending on that VM-specific fixup persisting.
+  - Confirmed while chasing the above: `podman compose` on `arch-both`
+    delegates to `/usr/lib/docker/cli-plugins/docker-compose` (Docker's own
+    compose-v2 plugin, reporting itself as "Podman Compose: 5.3.1") rather
+    than the `podman-compose` (Python) provider `arch-podman` uses — a
+    legitimate difference in what "the podman external provider" means
+    per-distro/install, not a misconfiguration.
 - **Second pass on Wave 3/4 remainder findings**:
   - `e2e/yaml-editor.spec.ts`'s malformed-YAML test joins the same
     host-load flake class noted above: passes reliably in isolation but can
@@ -142,9 +166,9 @@ scenarios).
     stacks" alert, and the Retry recovery are all exercised against a
     genuinely broken runtime.
   - Both the Background Tasks and Bulk Actions runtime-switch-race scenarios
-    need a VM with both Docker and Podman installed to exercise a real
-    runtime switch (`arch-podman` only has Podman) — deferred to Wave 2's
-    multi-VM matrix rather than faked on the wrong VM.
+    needed a VM with both Docker and Podman installed to exercise a real
+    runtime switch (`arch-podman` only has Podman) — completed against
+    `arch-both` as part of Wave 2 instead, see the `arch-both` findings above.
 - **Wave 3/4 additional findings** (this pass):
   - `RestoreModal`'s target directory field is the PARENT directory (the app
     appends the stack name itself), same convention as Create Stack — the first
