@@ -46,13 +46,13 @@ Run these against the full matrix (batched per §"Managing resource usage" in
 |---|---|---|---|
 | 6.20, 6.21 | Footer + runtime toggle (Docker↔Podman switch, rootless badge, socket path, "not installed" revert) | `e2e/runtime-toggle.spec.ts` | ✅ (`arch-both`; "not installed" case breaks the real `podman` binary via SSH, always restored) |
 | 7.1 | Docker rootless mode | `e2e/runtime-rootless.spec.ts` | ✅ partial (`rootless-compose-root.spec.ts`) / 🚧 |
-| 7.2 | Podman via `podman compose` external provider | `e2e/runtime-rootless.spec.ts` | 🚧 |
-| 7.3 | Podman via `podman-compose` (Python, no docker-compose) | `e2e/runtime-rootless.spec.ts` | 🚧 |
+| 7.2 | Podman via `podman compose` external provider | (every spec that runs against `arch-podman`) | ✅ — on `arch-podman`, `podman compose`'s "external compose provider" genuinely *is* `/usr/bin/podman-compose` (verified via SSH: `podman compose version` prints the "Executing external compose provider" banner naming that exact binary); every Wave 1/3/4 spec already run against this VM exercises this path, no dedicated spec needed |
+| 7.3 | Podman via `podman-compose` (Python, no docker-compose) | (every spec that runs against `arch-podman`) | ✅ — same finding as 7.2: `arch-podman` has no `docker-compose` at all and its `podman-compose` is confirmed genuine Python (`/usr/bin/podman-compose` is `#!/usr/bin/python`, reports `podman-compose version 1.6.0`), so 7.2 and 7.3 are literally the same code path on this VM, both already covered by the existing suite |
 | 7.4 | Podman root (system socket), no rootless socket at all — issue [#242](https://github.com/RXTX4816/cockpit-compose/issues/242) regression: discovery + Stack Info container list under real Cockpit Administrative access | `e2e/runtime-rootless.spec.ts` (`fedora-podman-rootful` only) | ✅ |
-| 7.5 | Neither runtime present — error state | `e2e/runtime-unavailable.spec.ts` | 🚧 |
-| Rootless/Rootful socket-mode toggle (added alongside #242's fix) — switching modes when both sockets are detected, footer badge, stale-list refresh on switch | `e2e/runtime-rootless.spec.ts` or a dedicated spec | 🚧 (manually verified on `fedora-full`; not yet automated — needs a project with both sockets *and* admin access, see `loginWithAdminAccess` in `e2e/helpers/admin.ts`) |
-| superuser prompt | Compose file owned by another uid (`composeFileSuperuser()`, `src/api/cockpit.ts:185-215`) | `e2e/superuser-prompt.spec.ts` | 🚧 |
-| distro quirks | Debian cgroupfs pause/unpause workaround, Fedora SELinux `label=false`, pasta/nftables networking | covered implicitly by running Wave-1 lifecycle specs against the full matrix rather than a dedicated spec | 🚧 |
+| 7.5 | Neither runtime present — error state | `e2e/runtime-unavailable.spec.ts` | ✅ (`arch-docker`; hides both `docker` and the standalone `docker-compose` legacy binary via SSH — hiding `docker` alone isn't enough, `detectComposeCommand()` falls back to it) |
+| Rootless/Rootful socket-mode toggle (added alongside #242's fix) — switching modes when both sockets are detected, footer badge, stale-list refresh on switch | `e2e/socket-mode-toggle.spec.ts` | ✅ (`fedora-full` only, via `loginWithAdminAccess` — Rootful stays disabled without real admin access) |
+| superuser prompt | Compose file owned by another uid (`composeFileSuperuser()`, `src/api/cockpit.ts:185-215`) | `e2e/superuser-prompt.spec.ts` | ✅ (`fedora-full` only — the one VM with a genuine rootless Docker socket; see spec header comment for why a stricter-permissions fixture was tried and reverted) |
+| distro quirks | Debian cgroupfs pause/unpause workaround, Fedora SELinux `label=false`, pasta/nftables networking | covered implicitly by running Wave-1 lifecycle specs against the full matrix rather than a dedicated spec | ✅ partial — `e2e/stacks.spec.ts` + `stack-lifecycle.spec.ts` run clean on `debian-podman` (4/4 + 9/9) and `debian-docker` (13/13); `fedora-podman` 12/13 (1 known host-load flake, passed alone); `fedora-docker` 4/13 — the other 9 failures are **not** distro-quirk test gaps, they're issue [#272](https://github.com/RXTX4816/cockpit-compose/issues/272) (a real app-level race, also reproduces on `arch-docker`, not Fedora-specific) / 🚧 `debian-both`, `fedora-both` |
 
 ## Wave 3 — Edge cases / error states
 
@@ -145,6 +145,35 @@ scenarios).
     than the `podman-compose` (Python) provider `arch-podman` uses — a
     legitimate difference in what "the podman external provider" means
     per-distro/install, not a misconfiguration.
+  - Attempted a dedicated admin-access variant of the four skipped tests
+    (`loginWithAdminAccess` + Bulk Down under Rootful Docker): the
+    underlying escalation capability is already proven working elsewhere
+    (`e2e/superuser-prompt.spec.ts` on `fedora-full`), but on `arch-both`
+    specifically the very first "Up" click after `loginWithAdminAccess`
+    only ever registered as a hover (the row's tooltip appeared, no confirm
+    dialog) — combined with a "Cockpit admin mode mismatch" banner
+    (`DownedStacksSection.tsx`'s intentional warning for scanning inside the
+    admin user's own home directory, not a bug) muddying the picture. Left
+    unfixed rather than shipping a test that doesn't reliably pass — the
+    gap documented above stands; a real follow-up should probably scan a
+    directory outside the admin user's home to sidestep the mismatch banner
+    entirely before re-attempting.
+- **Issue [#272](https://github.com/RXTX4816/cockpit-compose/issues/272)** (found running the distro-quirks matrix on `fedora-docker`):
+  clicking **Close** on the Up progress modal the instant it becomes
+  clickable can silently discard a still-finishing `docker compose up` —
+  the modal shows the full success log through "Started" but the
+  container never actually exists (`docker ps -a` empty, zero `docker
+  events` activity). Rigorously reproduced with matched-timing
+  before/after comparisons (3 runs each) on `fedora-docker` and
+  `arch-docker`; does **not** reproduce on `debian-docker` or
+  `arch-podman` despite `arch-docker`/`debian-docker` having *identical*
+  Docker and Compose versions — ruled out cgroup driver and
+  version as the differentiator. Root cause not confirmed (best working
+  theory: a `cockpit.spawn` channel-close timing race, not something
+  fixable from this repo alone) — filed with the full repro rather than
+  guessing further. This is *why* `fedora-docker` only passed 4/13 in the
+  distro matrix above: the other 9 failures are all this same bug hitting
+  `upStack()`'s Close click, not per-test gaps.
 - **Second pass on Wave 3/4 remainder findings**:
   - `e2e/yaml-editor.spec.ts`'s malformed-YAML test joins the same
     host-load flake class noted above: passes reliably in isolation but can
