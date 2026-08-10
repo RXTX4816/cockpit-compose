@@ -15,20 +15,20 @@ make this practical (`baseData`, `stacks.ts`, `runtime.ts`).
 
 | Testing guide § | Scenario | Spec (planned) | Status |
 |---|---|---|---|
-| 6.1 | Stack listing & status badges (running/stopped/partial/paused) | `e2e/stacks.spec.ts` | ✅ partial / 🚧 status transitions |
-| 6.2 | Import / discover downed stacks, depth setting, runtime-switch clears path | `e2e/stacks.spec.ts` | ✅ partial / 🚧 depth + runtime-switch |
+| 6.1 | Stack listing & status badges (running/stopped/partial/paused) | `e2e/stacks.spec.ts` | ✅ (status transitions covered) |
+| 6.2 | Import / discover downed stacks, depth setting, runtime-switch clears path | `e2e/stacks.spec.ts`, `e2e/runtime-toggle.spec.ts` | ✅ runtime-switch clears path covered / 🚧 depth *setting's effect on what's found* still untested (only its clamping bounds are, via `adversarial.spec.ts`) |
 | 6.3 | Start (Up) — simple | `e2e/stack-lifecycle.spec.ts` | ✅ |
-| 6.4 | Start (Up) — with profiles | `e2e/stack-lifecycle.spec.ts` | 🚧 |
-| 6.5 | Stop / Restart | `e2e/stack-lifecycle.spec.ts` | 🚧 |
+| 6.4 | Start (Up) — with profiles | `e2e/stack-lifecycle.spec.ts` | ✅ |
+| 6.5 | Stop / Restart | `e2e/stack-lifecycle.spec.ts` | ✅ |
 | 6.6 | Down (remove containers) | `e2e/stack-lifecycle.spec.ts` | ✅ |
-| 6.7 | Kill | `e2e/stack-lifecycle.spec.ts` | 🚧 |
+| 6.7 | Kill | `e2e/stack-lifecycle.spec.ts` | ✅ |
 | 6.8 | Logs (filter, search, pause/continue, clear, refresh) | `e2e/logs.spec.ts` | ✅ |
 | 6.9 | Events (stream, table rows, stop, clear) | `e2e/events.spec.ts` | ✅ (streaming start/stop + real restart events land in the table; note: EventsModal auto-starts on mount, no manual "Stream events" click needed) |
 | 6.10 | Exec / shell into a running container | `e2e/exec.spec.ts` | ✅ |
 | 6.11 | Run command (one-off, --rm) | `e2e/run-command.spec.ts` | ✅ (args mode + --entrypoint override mode) |
 | 6.12 | Pull images (progress, unpinned warning, cancel) | `e2e/pull-images.spec.ts` | ✅ (unpinned warning + real re-pull + Run in Background) |
 | 6.13 | Stack info (services/images/volumes/networks tabs, shared networks) | `e2e/stack-info.spec.ts` | ✅ (found & fixed a real bug — see Notes) / 🚧 shared-networks case still open |
-| 6.14 | Edit YAML (multi-file tabs, add/delete file, import, snapshot history/diff/restore) | `e2e/yaml-editor.spec.ts` | ✅ partial / 🚧 multi-file + snapshots |
+| 6.14 | Edit YAML (multi-file tabs, add/delete file, import, snapshot history/diff/restore) | `e2e/yaml-editor.spec.ts` | ✅ (multi-file tabs + snapshot history/diff/restore covered) / 🚧 add/delete file specifically (attempted, cut for click reliability — see spec comment) |
 | 6.15 | Edit env file (table/raw modes, duplicate-key warning, add file) | `e2e/env-editor.spec.ts` | ✅ (found a real doc/behavior mismatch — see Notes) |
 | 6.16.1 | Prune — basic flow (containers; volumes appears unreachable via UI, see reference doc) | `e2e/prune.spec.ts` | ⚠️ image/shared-image prune tests pass; container-prune tests marked `test.fixme` on Podman pending issue [#274](https://github.com/RXTX4816/cockpit-compose/issues/274) — see Notes |
 | 6.17 | Scale services (increase replicas, port-conflict warning) | `e2e/scale.spec.ts` | ✅ |
@@ -59,8 +59,8 @@ Run these against the full matrix (batched per §"Managing resource usage" in
 
 | Testing guide § | Scenario | Spec (planned) | Status |
 |---|---|---|---|
-| 5.3 / 6.4 | Multi-service stack with profiles | covered by 6.4 above | 🚧 |
-| 5.4 / 6.14 | Multi-file compose (extra compose file) | covered by 6.14 above | 🚧 |
+| 5.3 / 6.4 | Multi-service stack with profiles | covered by 6.4 above | ✅ |
+| 5.4 / 6.14 | Multi-file compose (extra compose file) | covered by 6.14 above | ✅ |
 | 6.16.2-6.16.6 | Prune edge cases (shared image across stacks still in use, exited one-shot container removal by name) | `e2e/prune.spec.ts` (additional cases) | ✅ |
 | 6.16.7 | Dangling named volume | `e2e/prune.spec.ts` | ❓ the earlier "unreachable via the current UI" finding turned out to rest on a false premise specific to Podman — see issue [#274](https://github.com/RXTX4816/cockpit-compose/issues/274) and `e2e/prune.spec.ts`'s header comment; revisit once #274 is fixed before deciding whether this is still a product question |
 | 6.18 | Backup & restore (archive create, restore into new dir, restored stack starts) | `e2e/backup-restore.spec.ts` | ✅ (found & documented a UX asymmetry vs BackupModal — see Notes) |
