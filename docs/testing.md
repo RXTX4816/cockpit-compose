@@ -1146,3 +1146,34 @@ All features work identically to rootful Docker.
 | Stack list empty after runtime switch | Stacks not yet started under new runtime | Start test stacks under the new runtime; use Import to discover stopped ones |
 | `podman system reset` wipes all images and containers | Podman | Only use for clean-state testing — non-reversible |
 | Exec / shell garbled output | Podman without PTY | App automatically adds `-T` flag for Podman |
+
+---
+
+## 9. E2E Coverage — Planned, Not Yet Implemented
+
+Full detail lives in [`docs/wiki/E2E-Test-Inventory.md`](wiki/E2E-Test-Inventory.md#wave-5--planned-not-yet-implemented)
+("Wave 5") — this section is a pointer/summary so it's discoverable from the manual
+testing guide too, not just the wiki. **These must be implemented in a future
+session**; none of them have automated coverage today, found via a systematic
+cross-check of every component and every documented sub-flow against the actual
+`e2e/*.spec.ts` assertions:
+
+- Global image prune (`GlobalPruneModal` — the host-wide "Prune images" button, distinct from per-stack Prune)
+- Pause / Unpause a running stack
+- Scale's port-conflict warning (existing test deliberately avoids triggering it)
+- Command history autocomplete, shared by the Exec and Run Command modals
+- YAML editor's "Import an existing file" flow (distinct from "Add new file", which is covered)
+- Backup archive deletion
+- Restore's "Target already exists" overwrite-confirm checkbox, and archive "Name conflict" handling
+- "Find best match" fuzzy directory-scan (downed-stacks scan bar and Create Stack's directory field)
+- Selective container recreation after editing a compose file and re-Up'ing (only the changed service should restart)
+- Run Command's "Remove container when done" unchecked (container should persist after exit)
+
+Two **open, unfixed app bugs** found and filed while writing other specs this pass
+also need dedicated regression tests once fixed — the existing specs that touch
+their modals currently work around them (real click → programmatic/CSS click)
+specifically so the underlying feature stays tested, which means neither bug
+today has a test that actually fails because of it:
+
+- Issue [#277](https://github.com/RXTX4816/cockpit-compose/issues/277) — nested "Add compose file" modal loses ARIA accessibility (stuck `aria-hidden="true"`) after typing in its Filename input.
+- Issue [#283](https://github.com/RXTX4816/cockpit-compose/issues/283) — Background Tasks drawer header intercepts real mouse clicks meant for the log modal's Close button.
