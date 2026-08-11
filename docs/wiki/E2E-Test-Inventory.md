@@ -53,7 +53,7 @@ Run these against the full matrix (batched per §"Managing resource usage" in
 | Rootless/Rootful socket-mode toggle (added alongside #242's fix) — switching modes when both sockets are detected, footer badge, stale-list refresh on switch | `e2e/socket-mode-toggle.spec.ts` | ✅ (`fedora-full` only, via `loginWithAdminAccess` — Rootful stays disabled without real admin access) |
 | superuser prompt | Compose file owned by another uid (`composeFileSuperuser()`, `src/api/cockpit.ts:185-215`) | `e2e/superuser-prompt.spec.ts` | ✅ (`fedora-full` only — the one VM with a genuine rootless Docker socket; see spec header comment for why a stricter-permissions fixture was tried and reverted) |
 | Recheck button vs. a socket that exists but doesn't respond (`checkSocketHealth()`, `docs/wiki/Troubleshooting.md`) | none | 🚧 not attempted — the only way to produce this state is mutating a shared VM's live `systemd --user` socket/service, which isn't reproducible and would need a full VM reset afterward; needs a dedicated VM image provisioned with a genuinely broken/stub socket baked into cloud-init instead of a live hack, out of scope for this pass |
-| distro quirks | Debian cgroupfs pause/unpause workaround, Fedora SELinux `label=false`, pasta/nftables networking | covered implicitly by running Wave-1 lifecycle specs against the full matrix rather than a dedicated spec | ✅ partial — `e2e/stacks.spec.ts` + `stack-lifecycle.spec.ts` run clean on `debian-podman` (4/4 + 9/9) and `debian-docker` (13/13); `fedora-podman` 12/13 (1 known host-load flake, passed alone); `fedora-docker` 4/13 — the other 9 failures are **not** distro-quirk test gaps, they're issue [#272](https://github.com/RXTX4816/cockpit-compose/issues/272) (a real app-level race, also reproduces on `arch-docker`, not Fedora-specific) / 🚧 `debian-both`, `fedora-both` |
+| distro quirks | Debian cgroupfs pause/unpause workaround, Fedora SELinux `label=false`, pasta/nftables networking | covered implicitly by running Wave-1 lifecycle specs against the full matrix rather than a dedicated spec | ✅ partial — `e2e/stacks.spec.ts` + `stack-lifecycle.spec.ts` run clean on `debian-podman` (4/4 + 9/9), `debian-docker` (13/13), and `debian-both` (14/14, both fresh-start and rebuilt); `fedora-podman` 12/13 (1 known host-load flake, passed alone); `fedora-docker` 4/13 — the other 9 failures are **not** distro-quirk test gaps, they're issue [#272](https://github.com/RXTX4816/cockpit-compose/issues/272) (a real app-level race, also reproduces on `arch-docker`, not Fedora-specific) / 🚧 `fedora-both` — every automated Up attempt stalls silently (confirm dialog and progress-modal clicks all report success, but zero dockerd activity ever happens and the row never leaves the undiscovered "Down" list), reproduces consistently across multiple clean VM rebuilds and both parallel and serial runs, but a manual Up through a real browser session on the same VM works fine — looks like an automation/timing-specific issue rather than a real app bug, not yet root-caused; see Notes |
 
 ## Wave 3 — Edge cases / error states
 
@@ -265,6 +265,25 @@ scenarios).
     needed a VM with both Docker and Podman installed to exercise a real
     runtime switch (`arch-podman` only has Podman) — completed against
     `arch-both` as part of Wave 2 instead, see the `arch-both` findings above.
+- **`fedora-both` Up-flow stall, unresolved** (this pass): every automated Up
+  attempt against `gotify` (via `upStack()` or an inlined equivalent) freezes
+  right after the "Up" button click — the confirm dialog and progress modal's
+  "Close" button clicks all report success with no thrown errors, but a
+  frame-by-frame video capture shows literally zero visible UI change for the
+  test's entire duration, and `journalctl -u docker` on the VM shows zero
+  dockerd activity during the attempt. Ruled out: stale VM disk state (fresh
+  `vm rebuild` reproduces it identically), host resource contention (stopping
+  4 other running VMs first didn't help), worker parallelism races
+  (`--workers=1` reproduces it too, in fact slightly worse), rootful-Docker
+  permission gaps (confirmed `docker compose up`/`down` both work fine
+  unprivileged over plain SSH), and leftover container/network name conflicts
+  (confirmed clean `docker ps -a` before each attempt). A manual Up through a
+  real (non-Playwright) browser session against the same VM instance worked
+  correctly. `debian-both` — identical scenario config, same test files —
+  passes 14/14 cleanly on both a fresh start and a full rebuild. Left
+  unresolved as a real, reproducible-but-unexplained gap for a future session
+  with interactive browser debugging tools (breakpoints/devtools), rather than
+  continuing to guess blindly.
 - **Wave 3/4 additional findings** (this pass):
   - `RestoreModal`'s target directory field is the PARENT directory (the app
     appends the stack name itself), same convention as Create Stack — the first
