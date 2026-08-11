@@ -27,8 +27,8 @@ make this practical (`baseData`, `stacks.ts`, `runtime.ts`).
 | 6.10 | Exec / shell into a running container | `e2e/exec.spec.ts` | ✅ |
 | 6.11 | Run command (one-off, --rm) | `e2e/run-command.spec.ts` | ✅ (args mode + --entrypoint override mode) |
 | 6.12 | Pull images (progress, unpinned warning, cancel) | `e2e/pull-images.spec.ts` | ✅ (unpinned warning + real re-pull + Run in Background) |
-| 6.13 | Stack info (services/images/volumes/networks tabs, shared networks) | `e2e/stack-info.spec.ts` | ✅ (found & fixed a real bug — see Notes) / 🚧 shared-networks case still open |
-| 6.14 | Edit YAML (multi-file tabs, add/delete file, import, snapshot history/diff/restore) | `e2e/yaml-editor.spec.ts` | ✅ (multi-file tabs + snapshot history/diff/restore covered) / 🚧 add/delete file specifically (attempted, cut for click reliability — see spec comment) |
+| 6.13 | Stack info (services/images/volumes/networks tabs, shared networks) | `e2e/stack-info.spec.ts` | ✅ (found & fixed a real bug — see Notes; shared-networks case covered by connecting a real container to another project's network via SSH) |
+| 6.14 | Edit YAML (multi-file tabs, add/delete file, import, snapshot history/diff/restore) | `e2e/yaml-editor.spec.ts` | ✅ (add/delete file found & documented a real accessibility bug — see Notes and issue [#277](https://github.com/RXTX4816/cockpit-compose/issues/277)) |
 | 6.15 | Edit env file (table/raw modes, duplicate-key warning, add file) | `e2e/env-editor.spec.ts` | ✅ (found a real doc/behavior mismatch — see Notes) |
 | 6.16.1 | Prune — basic flow (containers; volumes appears unreachable via UI, see reference doc) | `e2e/prune.spec.ts` | ⚠️ image/shared-image prune tests pass; container-prune tests marked `test.fixme` on Podman pending issue [#274](https://github.com/RXTX4816/cockpit-compose/issues/274) — see Notes |
 | 6.17 | Scale services (increase replicas, port-conflict warning) | `e2e/scale.spec.ts` | ✅ |
@@ -152,6 +152,17 @@ scenarios).
     editor is mounted, so a raw-mode-only duplicate silently saves with no warning.
     `e2e/env-editor.spec.ts` exercises the real (Table-mode) path where the check
     genuinely runs and documents the Raw-mode gap.
+  - `e2e/yaml-editor.spec.ts`'s add/delete-file case (previously cut for "unreliable"
+    Create-file clicks) turned out to have a real, reproducible cause: typing into
+    the nested "Add compose file" modal's Filename input gets both that modal's and
+    the outer `YamlModal`'s backdrop stuck at `aria-hidden="true"` — a PatternFly
+    focus-trap bug in modal-in-modal nesting. Functionally harmless to mouse/keyboard
+    users (a plain click still creates the file for real) but breaks accessible-name
+    resolution for everything inside both modals from that point on — a genuine a11y
+    regression for screen reader users. Filed as issue
+    [#277](https://github.com/RXTX4816/cockpit-compose/issues/277); the spec works
+    around it with a CSS-based click instead of `getByRole` and still verifies the
+    real effect (file genuinely created/removed on disk via SSH, not just tab count).
 - **`arch-both` findings (Wave 2, first pass)**:
   - This VM's Docker only exposes a **Rootful** socket — no rootless Docker
     at all. `bulk-actions.spec.ts`'s four pre-existing Docker-default tests

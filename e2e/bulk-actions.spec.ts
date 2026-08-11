@@ -95,6 +95,38 @@ test.describe('Docker-default selection behavior', () => {
     await expect(bulkBar.getByText('1 selected', { exact: false })).toBeVisible();
   });
 
+  test('Pretty layout selects stacks by clicking the card itself, not a checkbox', async ({ pluginPage: page }) => {
+    test.setTimeout(60_000);
+    await baseData(page);
+    await ensureDown(page, 'gotify');
+    await ensureDown(page, 'env-test');
+    await upStack(page, 'gotify');
+    await upStack(page, 'env-test');
+
+    await page.getByRole('button', { name: 'Change layout' }).click();
+    await page.getByRole('button', { name: 'Pretty', exact: true }).click();
+
+    // PrettyCard sets no accessible role/name of its own (unlike
+    // MinimalCard) — data-stack-name is the only reliable locator.
+    const gotifyCard = page.locator('.pc-card[data-stack-name="gotify"]');
+    const envCard = page.locator('.pc-card[data-stack-name="env-test"]');
+    await expect(gotifyCard).toBeVisible({ timeout: 10000 });
+    await gotifyCard.click();
+    await expect(gotifyCard).toHaveAttribute('aria-pressed', 'true');
+
+    const bulkBar = page.getByTestId('sv-bulk-bar');
+    await expect(bulkBar).toBeVisible();
+    await expect(bulkBar.getByText('1 selected', { exact: false })).toBeVisible();
+
+    await envCard.click();
+    await expect(bulkBar.getByText('2 selected', { exact: false })).toBeVisible();
+
+    // Clicking again deselects — real toggle, not a one-way flag.
+    await gotifyCard.click();
+    await expect(gotifyCard).toHaveAttribute('aria-pressed', 'false');
+    await expect(bulkBar.getByText('1 selected', { exact: false })).toBeVisible();
+  });
+
   test('Unix layout selects stacks via the [ ]/[x] bracket toggle', async ({ pluginPage: page }) => {
     test.setTimeout(90_000);
     await baseData(page);
