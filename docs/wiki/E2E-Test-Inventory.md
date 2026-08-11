@@ -32,7 +32,7 @@ make this practical (`baseData`, `stacks.ts`, `runtime.ts`).
 | 6.15 | Edit env file (table/raw modes, duplicate-key warning, add file) | `e2e/env-editor.spec.ts` | ✅ (found a real doc/behavior mismatch — see Notes) |
 | 6.16.1 | Prune — basic flow (containers; volumes appears unreachable via UI, see reference doc) | `e2e/prune.spec.ts` | ⚠️ image/shared-image prune tests pass; container-prune tests marked `test.fixme` on Podman pending issue [#274](https://github.com/RXTX4816/cockpit-compose/issues/274) — see Notes |
 | 6.17 | Scale services (increase replicas, port-conflict warning) | `e2e/scale.spec.ts` | ✅ |
-| 6.19 | Create stack (template method, validation bypass) | `e2e/create-stack.spec.ts` | ✅ (manual method only — template/git method still 🚧) |
+| 6.19 | Create stack (manual/template/git-URL methods, validation bypass) | `e2e/create-stack.spec.ts` | ✅ (all three methods + validation bypass covered; git-URL clones a real public repo — see Notes for the fixture choice and required VM package, and issue [#277](https://github.com/RXTX4816/cockpit-compose/issues/277) for a related intermittent flake) |
 | downed-stacks bulk actions (select-all + bulk Up, commit 85fe38d) | Bulk select/Up on downed stacks table | `e2e/downed-stacks-bulk.spec.ts` | ✅ |
 | 6.22 | Ports — clickable link, localhost-only vs all-interfaces tooltip | `e2e/ports.spec.ts` | ✅ (external-bind case; found a doc/behavior mismatch — see Notes) / 🚧 localhost/specific-bind cases |
 | adversarial | Malformed YAML, nonexistent scan directory, scan-depth bounds | `e2e/adversarial.spec.ts` | ✅ all 3 fixed and stable (3/3 × 2 full-file runs) — see Notes, these were real test bugs, not flakes |
@@ -163,6 +163,16 @@ scenarios).
     [#277](https://github.com/RXTX4816/cockpit-compose/issues/277); the spec works
     around it with a CSS-based click instead of `getByRole` and still verifies the
     real effect (file genuinely created/removed on disk via SSH, not just tab count).
+  - Create Stack's git-URL method needed a real `git` binary on the VM — none of the
+    scenarios installed one (`fetchComposeFromGit` shells out to `git clone`). Added
+    `git` unconditionally to `extra_packages()` in `scripts/test-vm.config.sh` for
+    every VM. The test clones `coollabsio/coolify` (a widely-used, actively-maintained
+    public repo with a real `docker-compose.yml` at its default branch's root) rather
+    than a fixture hosted in this project, to keep it pointed at a genuine external
+    git host. The same intermittent #277-class flake (stuck `aria-hidden` after
+    filling a modal's TextInput) was also observed on this file's pre-existing
+    manual-method and validation tests (not introduced by this change) — noted inline
+    in the spec.
 - **`arch-both` findings (Wave 2, first pass)**:
   - This VM's Docker only exposes a **Rootful** socket — no rootless Docker
     at all. `bulk-actions.spec.ts`'s four pre-existing Docker-default tests
