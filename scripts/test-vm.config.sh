@@ -22,6 +22,9 @@ extra_packages() {
   local vm="${2:-}"
   local scenario="${vm#*-}"
 
+  # git — needed by every scenario for Create Stack's "From Git URL" method
+  printf 'git\n'
+
   # Podman packages
   if [[ "$scenario" == "podman" || "$scenario" == "both" || "$scenario" == "podman-rootful" || "$scenario" == "full" ]]; then
     # passt is the Podman rootless network backend; not needed for Docker-only VMs
