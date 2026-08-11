@@ -1,6 +1,7 @@
 import { test, expect } from '@rxtx4816/cockpit-plugin-base-react/e2e';
 import { baseData } from './helpers/base';
 import { openYamlEditor, yamlEditorContent } from './helpers/stacks';
+import { sshExec } from './helpers/vm';
 
 test.describe('basic editor behavior (gotify, pre-opened in edit mode)', () => {
   test.beforeEach(async ({ pluginPage: page }) => {
@@ -67,6 +68,65 @@ test('Multi-file tabs show each file\'s own real content, not shared/stale conte
 
   await modal.getByRole('tab', { name: /overrides\.yml/ }).click();
   await expect(modal.locator('.cm-content')).toContainText('NGINX_HOST');
+
+  await modal.getByRole('button', { name: 'Close' }).click();
+});
+
+// A previous attempt at this scenario (see the header comment above) found
+// the "Create file" button unreliable to click. Root-caused this session:
+// typing into the nested "Add compose file" modal's filename field gets its
+// own backdrop (and the outer YamlModal's) stuck at aria-hidden="true" —
+// visually and functionally the modal keeps working fine (a plain mouse
+// click still creates the file for real), but Playwright's (and a real
+// screen reader's) accessible-name resolution can no longer see anything
+// inside it, so getByRole never resolves. This is a real PatternFly
+// focus-trap bug in modal-in-modal nesting, filed as #277 — not fixed here,
+// worked around below with a CSS-based click for the one button affected.
+test('Add file creates a real new compose file; Delete file removes it from disk', async ({ pluginPage: page }, testInfo) => {
+  test.setTimeout(60_000);
+  const vm = testInfo.project.name;
+  const EXTRA_PATH = '/home/test/testcompose/env-test/extra.yml';
+  await sshExec(vm, `rm -f ${EXTRA_PATH}`).catch(() => {});
+
+  await baseData(page);
+  await openYamlEditor(page, 'env-test');
+  const modal = page.getByRole('dialog');
+  await expect(modal.locator('[role="tab"]')).toHaveCount(1);
+
+  await modal.getByRole('button', { name: 'Add', exact: true }).click();
+  const addModal = page.getByRole('dialog').filter({ hasText: 'Add compose file' });
+  await expect(addModal).toBeVisible({ timeout: 10000 });
+  await addModal.locator('#ym-new-filename').fill('extra.yml');
+
+  // #277 workaround: after the fill above, addModal is no longer resolvable
+  // via role/name (see comment above) — target the primary footer button by
+  // CSS instead of by accessible role.
+  await page.locator('.pf-v6-c-modal-box').filter({ hasText: 'Add compose file' })
+    .locator('.pf-v6-c-button.pf-m-primary').click();
+  await expect(page.locator('.pf-v6-c-modal-box').filter({ hasText: 'Add compose file' })).toHaveCount(0, { timeout: 15000 });
+
+  // Real effect: a second tab for the real new file exists, and it's the
+  // one now active/showing its (stub) content — not just a UI state flag.
+  await expect(modal.locator('[role="tab"]')).toHaveCount(2, { timeout: 10000 });
+  await expect(modal.getByRole('tab', { name: /extra\.yml/ })).toBeVisible();
+
+  // Real effect: the file genuinely exists on disk, independent of the app.
+  const lsOut = await sshExec(vm, `test -f ${EXTRA_PATH} && echo EXISTS`);
+  expect(lsOut.trim()).toBe('EXISTS');
+
+  // --- Delete it again ---
+  await modal.getByRole('tab', { name: /extra\.yml/ }).click(); // ensure its tab is active
+  const deleteBtn = modal.locator('.ym-delete-file-btn');
+  await deleteBtn.click();
+  const deleteConfirm = page.getByRole('dialog').filter({ hasText: 'Delete extra.yml?' });
+  await expect(deleteConfirm).toBeVisible({ timeout: 10000 });
+  await deleteConfirm.getByRole('button', { name: 'Delete file', exact: true }).click();
+  await expect(deleteConfirm).not.toBeVisible({ timeout: 10000 });
+
+  // Real effect: back to one tab, and the file is genuinely gone from disk.
+  await expect(modal.locator('[role="tab"]')).toHaveCount(1, { timeout: 10000 });
+  const lsAfter = await sshExec(vm, `test -f ${EXTRA_PATH} && echo EXISTS || echo GONE`);
+  expect(lsAfter.trim()).toBe('GONE');
 
   await modal.getByRole('button', { name: 'Close' }).click();
 });

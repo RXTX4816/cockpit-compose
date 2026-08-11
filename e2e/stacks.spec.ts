@@ -172,3 +172,41 @@ test('A real poll failure shows the load-failed alert, and Retry recovers once t
   await expect(page.getByText('Failed to load stacks', { exact: false })).not.toBeVisible({ timeout: 15000 });
   await expect(page.locator('.dss-stack-name').first()).toBeVisible({ timeout: 10000 });
 });
+
+// Regression coverage for §6.2's scan depth *setting* (distinct from its
+// clamping bounds, already covered by adversarial.spec.ts): a compose file
+// nested below the scan root must be invisible at the default depth (2) and
+// appear once depth is actually raised to reach it — proving the stepper
+// genuinely changes what `find -maxdepth` returns, not just a cosmetic
+// number. The discovered stack's name comes from its compose file's
+// *immediate parent directory* (useDownedStacksScan.ts's directory-name
+// fallback), not the top-level wrapper folder — OUTER/INNER below reflects
+// that, naming the fixture after what the scan will actually derive.
+test('Scan depth setting actually changes which compose files are found, not just clamps', async ({ pluginPage: page }, testInfo) => {
+  test.setTimeout(60_000);
+  const vm = testInfo.project.name;
+  const OUTER = 'e2e-depth-outer';
+  const INNER = 'e2e-depth-inner';
+  await sshExec(vm, `mkdir -p /home/test/testcompose/${OUTER}/${INNER} && printf 'services:\\n  app:\\n    image: nginx:alpine\\n' > /home/test/testcompose/${OUTER}/${INNER}/docker-compose.yml`);
+
+  try {
+    // baseData() already scans COMPOSE_DIR at the default depth (2) and
+    // retries the whole open-fill-submit sequence against rootless Podman's
+    // flaky panel-state resets (see its own doc comment) — more robust than
+    // a one-shot manual fill+Enter for this test's purposes.
+    await baseData(page);
+    const depthValue = page.locator('.dss-stepper-value');
+    await expect(depthValue).toHaveText('2');
+    await expect(page.locator(`#dss-name-${INNER}`)).toHaveCount(0);
+
+    // Raise to depth 3 (0=root, 1=OUTER, 2=INNER, 3=the file itself) and
+    // rescan — the nested file must now actually be discovered.
+    const plus = page.getByRole('button', { name: 'Increase scan depth' });
+    await plus.click();
+    await expect(depthValue).toHaveText('3');
+    await page.getByRole('button', { name: 'Scan', exact: true }).click();
+    await expect(page.locator(`#dss-name-${INNER}`)).toBeVisible({ timeout: 15000 });
+  } finally {
+    await sshExec(vm, `rm -rf /home/test/testcompose/${OUTER}`);
+  }
+});
