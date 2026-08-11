@@ -77,7 +77,7 @@ scenarios).
 
 | Feature | Doc | Spec (planned) | Status |
 |---|---|---|---|
-| Background Tasks (queue, states, Stop/Remove, real container-state completion, runtime-switch cancellation) | [Background-Tasks.md](Background-Tasks) | `e2e/background-tasks.spec.ts` | ✅ (Pending→Running→Complete against real container state, Stop terminates the underlying process, Remove actually drops the task, runtime-switch cancellation race verified on `arch-both`) / 🚧 log-view-through-panel (cut, see spec header comment) |
+| Background Tasks (queue, states, Stop/Remove, real container-state completion, runtime-switch cancellation, log view) | [Background-Tasks.md](Background-Tasks) | `e2e/background-tasks.spec.ts` | ✅ (Pending→Running→Complete against real container state, Stop terminates the underlying process, Remove actually drops the task, runtime-switch cancellation race verified on `arch-both`, log-view-through-panel found a real z-index bug — see issue [#283](https://github.com/RXTX4816/cockpit-compose/issues/283) and Notes) |
 | Bulk Actions on running stacks (per-layout selection, select-all indeterminate, per-action confirm, runtime-switch clears selection) | [Bulk-Actions.md](Bulk-Actions) | `e2e/bulk-actions.spec.ts` | ✅ (Power User checkbox, Minimal card-click, Unix bracket-toggle, runtime-switch-clears-selection all covered) / 🚧 Pretty layout |
 | Process Viewer / Top (`docker compose top` equivalent) | [Process-Viewer.md](Process-Viewer) | `e2e/process-viewer.spec.ts` | ✅ |
 | Keyboard shortcuts (U/D/L/E/I) | [Stacks-Dashboard.md](Stacks-Dashboard#keyboard-shortcuts) | fold into `e2e/stacks.spec.ts` | ✅ |
@@ -294,11 +294,17 @@ scenarios).
     between the two modals, documented in `e2e/backup-restore.spec.ts` but not
     changed (no product decision requested for this pass).
   - Background Tasks: clicking a finished task to view its captured log
-    (`BackgroundTaskLogModal`) was manually verified to show real captured
-    output, but automating it reliably while the drawer stays open behind the
-    modal proved fragile (drawer intercepting clicks, ambiguous "Close"
-    targets) — cut from `e2e/background-tasks.spec.ts` this pass, see its
-    header comment.
+    (`BackgroundTaskLogModal`) — the earlier "fragile" flakiness was two real,
+    separate causes, both root-caused and fixed in a later pass: (1) a
+    leftover task from an earlier failed debugging run made the task-row
+    locator match a stale row instead of the fresh one under test, looking
+    like a real race but wasn't — fixed by clearing leftover `gotify` tasks
+    at the start of the test; (2) a genuine app bug — the still-open drawer's
+    own header physically overlaps and intercepts pointer events meant for
+    the log modal's footer "Close" button (both use the same z-index token),
+    so a real mouse click there silently does nothing for a real user too.
+    Filed as issue [#283](https://github.com/RXTX4816/cockpit-compose/issues/283);
+    the spec works around it with a programmatic click.
 - The "check config didn't break" principle from issue #227 has no literal
   Caddyfile-equivalent in this app (no reverse-proxy feature exists). It's applied
   here as: after YAML/env edits, assert file content really changed via a re-scan or
