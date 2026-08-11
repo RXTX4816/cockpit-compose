@@ -28,7 +28,11 @@ extra_packages() {
   # Podman packages
   if [[ "$scenario" == "podman" || "$scenario" == "both" || "$scenario" == "podman-rootful" || "$scenario" == "full" ]]; then
     # passt is the Podman rootless network backend; not needed for Docker-only VMs
-    printf 'passt\npodman\npodman-compose\n'
+    # fuse-overlayfs — rootless Podman's overlay storage falls back to it when
+    # the backing filesystem doesn't support native overlay directly (e.g. the
+    # Arch cloud image's root fs is btrfs); without it, rootless podman fails
+    # outright with "kernel does not support overlay fs ... over btrfs".
+    printf 'passt\npodman\npodman-compose\nfuse-overlayfs\n'
     # docker-compose as external podman compose provider (both scenario, arch/debian only)
     if [[ "$scenario" == "both" ]]; then
       case "$distro" in
@@ -62,6 +66,21 @@ extra_runcmd() {
   - chown test:test /home/test
   - chown -R test:test /home/test/testcompose /home/test/podmancompose
 YAML
+
+  # Arch is rolling-release and the harness disables package_upgrade (only
+  # package_update, i.e. `pacman -Sy` without `-u`, runs before `packages:` is
+  # installed) — as the base image ages relative to the live repos, freshly
+  # installed packages (e.g. podman) can end up linked against a newer ABI
+  # than already-baked-in dependencies still on disk (e.g. shadow/libsubid),
+  # a classic Arch "partial upgrade" breakage. Symptom seen: podman fails
+  # immediately with "error while loading shared libraries: libsubid.so.6:
+  # cannot open shared object file". Full upgrade here, after packages are
+  # already installed, resolves it the same way a manual `pacman -Syu` did.
+  if [[ "$distro" == "arch" ]]; then
+    cat <<YAML
+  - pacman -Syu --noconfirm
+YAML
+  fi
 
   # ── Podman setup ──────────────────────────────────────────────────────────────
   if [[ "$scenario" == "podman" || "$scenario" == "both" || "$scenario" == "podman-rootful" || "$scenario" == "full" ]]; then
@@ -206,6 +225,23 @@ YAML
     cat <<YAML
   - systemctl start "user@\$(id -u test).service" || true
   - su - test -c 'systemctl --user start podman.socket' || true
+YAML
+  fi
+
+  # The `pacman -Syu` above (see its comment) can pull in a newer kernel
+  # package, but the VM keeps running whatever kernel it already booted —
+  # its modules on disk get replaced by the new kernel version's, so they no
+  # longer match the *running* kernel. Symptom seen: netavark's rootless
+  # bridge creation failing with "Netlink error: Operation not supported"
+  # (a kernel networking module the running kernel can no longer load).
+  # Reboot last, after every other setup step, so the new kernel/modules are
+  # actually active before cockpit-compose ever tries to start a container.
+  # cloud-init reruns on the new boot but recognizes this instance was
+  # already provisioned and skips straight to done — confirmed by `vm wait`
+  # completing normally afterward.
+  if [[ "$distro" == "arch" ]]; then
+    cat <<YAML
+  - reboot
 YAML
   fi
 }
@@ -589,5 +625,21 @@ pre_staged_files() {
             - pgdata_prunetest:/var/lib/postgresql/data
       volumes:
         pgdata_prunetest:
+  # For 6.22's localhost/specific-bind port cases (src/api/parsing.ts's
+  # getBindType): 127.0.0.1 is classified "localhost", any other address
+  # (even another loopback one, like 127.0.0.2) is "specific" — no real
+  # non-loopback network config needed to exercise both branches.
+  - path: /home/test/testcompose/port-binds/docker-compose.yml
+    permissions: '0644'
+    content: |
+      services:
+        localhost-only:
+          image: nginx:alpine
+          ports:
+            - "127.0.0.1:8100:80"
+        specific-bind:
+          image: nginx:alpine
+          ports:
+            - "127.0.0.2:8101:80"
 YAML
 }

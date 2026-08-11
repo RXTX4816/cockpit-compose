@@ -34,7 +34,7 @@ make this practical (`baseData`, `stacks.ts`, `runtime.ts`).
 | 6.17 | Scale services (increase replicas, port-conflict warning) | `e2e/scale.spec.ts` | ✅ |
 | 6.19 | Create stack (manual/template/git-URL methods, validation bypass) | `e2e/create-stack.spec.ts` | ✅ (all three methods + validation bypass covered; git-URL clones a real public repo — see Notes for the fixture choice and required VM package, and issue [#277](https://github.com/RXTX4816/cockpit-compose/issues/277) for a related intermittent flake) |
 | downed-stacks bulk actions (select-all + bulk Up, commit 85fe38d) | Bulk select/Up on downed stacks table | `e2e/downed-stacks-bulk.spec.ts` | ✅ |
-| 6.22 | Ports — clickable link, localhost-only vs all-interfaces tooltip | `e2e/ports.spec.ts` | ✅ (external-bind case; found a doc/behavior mismatch — see Notes) / 🚧 localhost/specific-bind cases |
+| 6.22 | Ports — clickable link, localhost-only vs all-interfaces tooltip | `e2e/ports.spec.ts` | ✅ (external, localhost, and specific-bind cases all covered; found a doc/behavior mismatch — see Notes; the localhost/specific-bind fixture also surfaced and fixed real arch-podman VM infra bugs — see Notes) |
 | adversarial | Malformed YAML, nonexistent scan directory, scan-depth bounds | `e2e/adversarial.spec.ts` | ✅ all 3 fixed and stable (3/3 × 2 full-file runs) — see Notes, these were real test bugs, not flakes |
 
 ## Wave 2 — Runtime/engine-specific, full 9-VM matrix
@@ -173,6 +173,21 @@ scenarios).
     filling a modal's TextInput) was also observed on this file's pre-existing
     manual-method and validation tests (not introduced by this change) — noted inline
     in the spec.
+  - Ports' localhost/specific-bind cases (a new `port-binds` fixture:
+    `127.0.0.1:8100->80` and `127.0.0.2:8101->80`, both loopback so no real
+    non-loopback network config is needed) hit a cascade of real, pre-existing
+    `arch-podman` VM infra bugs on a fresh rebuild, unrelated to the app: (1) the
+    harness's `package_upgrade: false` plus Arch being rolling-release meant a
+    freshly-installed `podman` could end up linked against a newer `libsubid` ABI
+    than the base image's `shadow` package already had on disk — fixed with a
+    `pacman -Syu --noconfirm` runcmd step for Arch; (2) rootless Podman's overlay
+    storage doesn't work directly over the base image's btrfs root fs — fixed by
+    adding `fuse-overlayfs` to every podman-scenario VM's packages; (3) upgrading
+    the kernel via (1) without rebooting left netavark trying to create a bridge
+    against stale, mismatched kernel modules ("Netlink error: Operation not
+    supported") — fixed with a `reboot` as the last Arch runcmd step, after every
+    other setup command, so the new kernel is actually active before any test
+    ever starts a container. All three fixes are in `scripts/test-vm.config.sh`.
 - **`arch-both` findings (Wave 2, first pass)**:
   - This VM's Docker only exposes a **Rootful** socket — no rootless Docker
     at all. `bulk-actions.spec.ts`'s four pre-existing Docker-default tests
