@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { loginWithAdminAccess } from './helpers/admin';
-import { dismissStartupPodmanPrompt } from './helpers/base';
-import { stackRow } from './helpers/stacks';
+import { baseData, dismissStartupPodmanPrompt } from './helpers/base';
+import { downStack, downedCard, ensureDown, stackRow } from './helpers/stacks';
 
 /**
  * Regression coverage for issue #242 and the follow-on rootful-Podman bugs found while
@@ -81,5 +81,46 @@ test.describe('rootful Podman (no rootless socket)', () => {
     // Restore for any subsequent run of the spec above.
     await row.getByRole('button', { name: 'Start', exact: true }).click();
     await expect(row).toHaveAttribute('data-status', /running|partial/, { timeout: 15000 });
+  });
+});
+
+// Regression coverage for docs/testing.md §7.1: Docker rootless mode.
+// `fedora-full` is the one VM with a genuine per-user Docker socket
+// (`/run/user/<uid>/docker.sock` — see scripts/test-vm.config.sh's
+// dockerd-rootless-setuptool.sh setup); every other project either has no
+// rootless Docker at all or defaults to Podman.
+test.describe('Docker rootless (fedora-full)', () => {
+  test('Docker mode shows the Rootless badge, and a full Up/Down lifecycle actually works', async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== 'fedora-full', 'needs a VM with a genuine rootless Docker socket — only fedora-full has one configured');
+    // Rootless Docker's per-container network setup (rootlesskit/slirp4netns)
+    // adds real, variable startup latency beyond rootful — observed this
+    // occasionally outlasting a 20s post-Up status wait even though the
+    // progress modal itself already reported success. Generous budget here
+    // rather than a tight one, consistent with how this suite treats other
+    // real (not test-bug) timing variance.
+    test.setTimeout(90_000);
+
+    // This file's `page` fixture (plain @playwright/test, not the plugin
+    // base's `pluginPage`) starts unnavigated — loginWithAdminAccess gets us
+    // to the plugin the same way the other two tests in this file do; the
+    // admin escalation itself isn't needed here, just the navigation.
+    await loginWithAdminAccess(page);
+    await baseData(page);
+    await expect(page.getByRole('button', { name: 'Docker', exact: true })).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('.cc-footer').getByText('Rootless', { exact: true })).toBeVisible({ timeout: 10000 });
+
+    // ensureDown covers every starting state (running, stopped, or not yet
+    // discovered) uniformly. Not using the shared upStack() helper here: its
+    // built-in 20s post-Up status wait occasionally isn't enough for
+    // rootless Docker's real, variable per-container network setup latency
+    // (rootlesskit/slirp4netns) — give it the wider budget this test.setTimeout
+    // above already allows for instead.
+    await ensureDown(page, 'gotify');
+    await downedCard(page, 'gotify').getByRole('button', { name: 'Up', exact: true }).click();
+    await page.getByRole('dialog', { name: /Confirm up.*gotify/ }).getByRole('button', { name: 'Up', exact: true }).click();
+    await page.getByRole('dialog', { name: /^Up.*gotify/ }).getByRole('button', { name: 'Close' }).click({ timeout: 30000 });
+    await expect(stackRow(page, 'gotify')).toHaveAttribute('data-status', /running|partial/, { timeout: 60000 });
+
+    await downStack(page, 'gotify');
   });
 });
