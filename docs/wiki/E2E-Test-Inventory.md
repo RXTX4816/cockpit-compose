@@ -84,6 +84,50 @@ scenarios).
 | Layout selector (4 layouts) | [Stacks-Dashboard.md](Stacks-Dashboard#layout-options) | fold into `e2e/stacks.spec.ts` | ✅ |
 | Status filter chips + auto-refresh degrade/Retry | [Stacks-Dashboard.md](Stacks-Dashboard) | fold into `e2e/stacks.spec.ts` | ✅ (auto-refresh degrade/Retry verified against a real broken `podman` binary on the VM, not a mock — see Notes) |
 
+## Wave 5 — Planned, not yet implemented
+
+Found via a final systematic audit (cross-referencing every `src/components/*.tsx`
+against every `e2e/*.spec.ts`, and every documented sub-flow in `docs/wiki/*.md`
+against actual test assertions, not just "a spec file with this feature's name
+exists"). **These must be implemented in a future session** — none of them have
+any automated coverage today, and several are entirely undocumented gaps (not
+previously tracked anywhere, including Waves 1-4 above). Each row states why the
+existing specs don't already cover it, so the next pass doesn't have to
+re-derive that.
+
+| Feature | Doc | Why it's not covered today | Planned spec |
+|---|---|---|---|
+| Global image prune (`GlobalPruneModal` — the "Prune images" toolbar button, distinct from per-stack Prune) | [Prune-Resources.md#global-image-prune-all-stacks](Prune-Resources#global-image-prune-all-stacks) | `e2e/prune.spec.ts`'s 4 tests are all the per-stack Prune flow (row-level ⋮ menu). The host-wide button never gets clicked anywhere in the suite. | `e2e/prune.spec.ts` (new test) — pull/create a dangling image (e.g. re-pull a `:latest`-tagged stack under a different digest), open the global prune modal, confirm the checkbox gate, and verify the dangling image is genuinely gone via `docker/podman images` over SSH afterward. |
+| Pause / Unpause a running stack | [Managing-Stacks.md#pause--unpause](Managing-Stacks#pause--unpause) | No spec clicks the Pause button anywhere; `zero` hits for "Pause"/"Unpause" across `e2e/*.spec.ts` outside of the unrelated Logs stream pause/continue feature. | Fold into `e2e/stack-lifecycle.spec.ts` — Pause a running stack, confirm containers show `Paused` via a real `docker/podman ps` state (not just the status badge), confirm the app itself remains responsive/read-only appropriately, then Unpause and confirm it resumes. |
+| Scale's port-conflict warning | [Scaling-Services.md](Scaling-Services) | `e2e/scale.spec.ts`'s one test explicitly scales a service *without* published host ports specifically to avoid this path (see its own comment) — the warning UI (`scale_modal.port_conflict_*`) has never been exercised. | `e2e/scale.spec.ts` (new test) — scale a service that *does* publish a host port to 2+ replicas, confirm the inline warning icon and the modal-level alert both appear listing the real conflicting service, and that scaling is still allowed (not blocked) since Compose handles this by only binding the first replica's port. |
+| Command history (`HistoryDatalist`, shared by Exec and Run Command) | [Running-Commands.md](Running-Commands), [Shell-Access.md](Shell-Access) | Zero mentions of "history" in `e2e/exec.spec.ts` or `e2e/run-command.spec.ts`. Only tests that a command runs, never that a previously-run command is remembered and re-offered. | Fold into both `e2e/exec.spec.ts` and `e2e/run-command.spec.ts` — run a command once, reopen the modal, confirm the same command appears in the native `<datalist>` autocomplete (real browser autofill, not just that history state exists in memory). |
+| YAML editor "Import" (an existing on-disk file not yet tracked, distinct from "Add" which creates a new one) | [Editing-Configuration.md#importing-an-existing-file](Editing-Configuration#importing-an-existing-file) | `e2e/yaml-editor.spec.ts` only tests Add (create-new). The `multi-file` fixture's second file is pre-staged via cloud-init, not imported through the UI at test time, so the Import button/flow itself is never exercised. | `e2e/yaml-editor.spec.ts` (new test) — place an extra `.yml` file on disk via SSH first (not tracked by the stack's `ConfigFiles`), click Import in the tab bar, select it from the scanned list, confirm it becomes a real new tab with real content — and that it's genuinely the same file (edits persist to the same path), not a copy. |
+| Backup archive deletion | [Backup-and-Restore.md#deleting-a-backup](Backup-and-Restore#deleting-a-backup) | `e2e/backup-restore.spec.ts`'s one test covers create + restore only; nothing clicks Delete on an archive. | `e2e/backup-restore.spec.ts` (new test) — create a backup, delete it via the UI, confirm the `.bak.tar.gz` file is genuinely gone from disk via SSH, not just removed from the list. |
+| Restore's "Target already exists" overwrite-confirm checkbox, and "Name conflict" archive-name handling | [Backup-and-Restore.md#target-already-exists](Backup-and-Restore#target-already-exists), [Backup-and-Restore.md#name-conflict](Backup-and-Restore#name-conflict) | The existing restore test always targets a fresh directory. A prior session's leftover-directory bug (see Notes below) hit this path *accidentally* and was cleaned up rather than turned into an intentional test. | `e2e/backup-restore.spec.ts` (new tests) — (1) restore into a directory that already has a compose file, confirm the overwrite-confirm checkbox gates the Restore button and the target is genuinely overwritten only after checking it; (2) create two backups with colliding auto-filled names, confirm the real conflict-resolution behavior (suffix, error, or overwrite-prompt — whichever the app actually does; verify against the code, not assumed). |
+| "Find best match" fuzzy directory-scan (`actions.find_best_match`, in both the downed-stacks scan bar and Create Stack's directory field) | [Importing-Stacks.md](Importing-Stacks) | Zero hits for "Find best match" across `e2e/*.spec.ts`. | New test (likely `e2e/stacks.spec.ts` or a new `e2e/find-best-match.spec.ts`) — with a compose directory typed that's close-but-not-exact to a real one on disk (or ambiguous), click Find best match, confirm it resolves to the real matching directory and a subsequent scan actually finds the stacks there — not just that the input field's value changes. |
+| Selective container recreation after editing a compose file then re-Up (Docker/Podman compare and recreate only changed services) | [Editing-Configuration.md#applying-configuration-changes](Editing-Configuration#applying-configuration-changes) | No test edits a compose file, brings the stack back Up, and checks that *only* the changed service's container is recreated (different container ID/start time) while an unrelated sibling service's container is left untouched. Currently only incidentally touched in `e2e/backup-restore.spec.ts` for an unrelated purpose. | Fold into `e2e/yaml-editor.spec.ts` or `e2e/stack-lifecycle.spec.ts` — on a multi-service running stack, edit one service's image tag, Up again, confirm (via real container IDs/start timestamps over SSH) that only the edited service's container is new and the other service's container survived unchanged. |
+| Run Command's "Remove container when done" unchecked (container persists after the command exits) | [Running-Commands.md](Running-Commands) | Both existing `run-command.spec.ts` tests leave this checked (the default); neither confirms what happens when it's unchecked. | Fold into `e2e/run-command.spec.ts` — uncheck "Remove container when done", run a command, confirm the one-off container genuinely still exists (exited, not removed) afterward via SSH. |
+
+### Open, unfixed app bugs found this pass — need real regression tests, not workarounds
+
+Two real app bugs were found and filed while writing other Wave 4/5 specs (issues
+[#277](https://github.com/RXTX4816/cockpit-compose/issues/277) and
+[#283](https://github.com/RXTX4816/cockpit-compose/issues/283)), both still open
+and unfixed. The existing specs that touch the affected modals (`e2e/yaml-editor.spec.ts`'s
+add/delete-file test, `e2e/background-tasks.spec.ts`'s log-view test) **work around**
+these bugs — using a CSS-based or programmatic click instead of a real simulated
+mouse click — specifically so the test still exercises the real underlying feature
+(the file genuinely gets created, the log genuinely gets shown) without being blocked
+by the separate UI bug. That means **neither bug currently has a test that fails
+because of it** — the workarounds silently paper over them. Once each bug is
+actually fixed, a dedicated regression test should be added (or the workaround
+reverted to a plain `.click()`) so a regression would be caught automatically:
+
+| Bug | Issue | Regression test needed |
+|---|---|---|
+| Nested "Add compose file" modal loses ARIA accessibility (`aria-hidden="true"` stuck on both modal backdrops) after typing in its Filename input | [#277](https://github.com/RXTX4816/cockpit-compose/issues/277) | A test that fills the Filename field and then asserts `page.getByRole('dialog', { name: 'Add compose file' })` (or the "Create file" button) is still resolvable/visible via role — this should currently **fail** (proving the bug), and should be added as its own case once fixed, rather than folded into the existing add-file test which deliberately routes around it. |
+| Background Tasks drawer header intercepts pointer events over the log modal's footer "Close" button (both share the same z-index token) | [#283](https://github.com/RXTX4816/cockpit-compose/issues/283) | A test that does a plain `.click()` (real simulated mouse click, not `element.evaluate(el => el.click())`) on the log modal's Close button while the drawer is still open, and asserts the modal actually closes — this should currently **fail** (proving the bug) via a Playwright actionability timeout/"intercepts pointer events" error, and should replace the programmatic-click workaround in `e2e/background-tasks.spec.ts` once fixed. |
+
 ## Notes
 
 - **The 5 "flaky" specs, actually debugged with a trace/screenshot pass** — of
