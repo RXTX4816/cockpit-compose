@@ -58,8 +58,10 @@ interface UnixRowProps {
   onBackup: () => void;
   onScale: () => void;
   onActingChange: (delta: 1 | -1) => void;
+  onRefresh: () => void;
   isSelected?: boolean;
   onToggleSelect?: () => void;
+  globalActing?: boolean;
 }
 
 const STATUS_LABEL: Record<string, { text: string; cls: string }> = {
@@ -72,8 +74,8 @@ const STATUS_LABEL: Record<string, { text: string; cls: string }> = {
 
 export function UnixRow({
   stack, expanded, onToggle, onLogs, onYaml, onInfo, onDown, onKill, onUp, onPull,
-  onEvents, onTop, onExec, onRun, onPrune, onBackup, onScale, onActingChange,
-  isSelected = false, onToggleSelect,
+  onEvents, onTop, onExec, onRun, onPrune, onBackup, onScale, onActingChange, onRefresh,
+  isSelected = false, onToggleSelect, globalActing = false,
 }: UnixRowProps) {
   const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -96,7 +98,16 @@ export function UnixRow({
   const afterAction = useCallback(async () => {
     clearContainers();
     await loadContainers();
-  }, [clearContainers, loadContainers]);
+    // Refresh the page-level stack list immediately rather than waiting for its own poll
+    // (which can now be backed off several seconds on constrained hardware) — otherwise a
+    // finished action looks stuck until the next scheduled tick happens to land.
+    onRefresh();
+  }, [clearContainers, loadContainers, onRefresh]);
+
+  const afterServiceAction = useCallback(async () => {
+    await loadContainers();
+    onRefresh();
+  }, [loadContainers, onRefresh]);
 
   const handleToggle = () => {
     onToggle();
@@ -104,7 +115,7 @@ export function UnixRow({
   };
 
   useEffect(() => { void loadContainers(); }, [loadContainers]);
-  useAutoRefresh(loadContainers, acting ? 500 : 3000, false);
+  useAutoRefresh(loadContainers, acting ? 500 : 3000, globalActing && !acting && !actingService);
 
   const sl = STATUS_LABEL[status] ?? STATUS_LABEL.unknown;
   const isUp = status === "running" || status === "partial" || status === "paused";
@@ -246,9 +257,9 @@ export function UnixRow({
                   containers={containers}
                   actions={{
                     actingService,
-                    onStart: s => { void doServiceAction("start", s, loadContainers); },
-                    onStop: s => { void doServiceAction("stop", s, loadContainers); },
-                    onRestart: s => { void doServiceAction("restart", s, loadContainers); },
+                    onStart: s => { void doServiceAction("start", s, afterServiceAction); },
+                    onStop: s => { void doServiceAction("stop", s, afterServiceAction); },
+                    onRestart: s => { void doServiceAction("restart", s, afterServiceAction); },
                     onLogs: s => setLogsService(s),
                   }}
                 />

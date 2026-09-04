@@ -1,14 +1,88 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { mockSpawn } from "../test/setup";
-import { mockProcess } from "../test/helpers";
+import { mockSpawn, mockHttp } from "../test/setup";
+import { mockProcess, mockHttpClient } from "../test/helpers";
 import { listContainers, getContainerStats } from "./containers";
 
-beforeEach(() => { mockSpawn.mockReset(); vi.resetModules(); });
+beforeEach(() => { mockSpawn.mockReset(); mockHttp.mockReset(); vi.resetModules(); });
+
+describe("listContainers [engine HTTP API]", () => {
+  it("uses the HTTP path when the engine socket is available, skipping the CLI entirely", async () => {
+    const cockpitMod = await import("./cockpit");
+    vi.spyOn(cockpitMod, "getDockerSocketPath").mockReturnValue("unix:///var/run/docker.sock");
+    mockHttp.mockReturnValue(mockHttpClient({
+      "/containers/json": JSON.stringify([
+        {
+          Id: "abc123",
+          Names: ["/myapp_web_1"],
+          Image: "nginx",
+          State: "running",
+          Status: "Up 5 minutes",
+          Ports: [{ IP: "0.0.0.0", PrivatePort: 80, PublicPort: 8080, Type: "tcp" }],
+          Labels: { "com.docker.compose.service": "web", "com.docker.compose.project": "myapp" },
+        },
+      ]),
+    }));
+
+    const { listContainers: lc } = await import("./containers");
+    let received = "";
+    const proc = lc("myapp");
+    proc.stream(d => { received += d; });
+    await proc;
+
+    const result = JSON.parse(received) as { ID: string; Name: string; Service: string; Ports: string }[];
+    expect(result).toHaveLength(1);
+    expect(result[0].ID).toBe("abc123");
+    expect(result[0].Name).toBe("myapp_web_1");
+    expect(result[0].Service).toBe("web");
+    expect(result[0].Ports).toBe("0.0.0.0:8080->80/tcp");
+    expect(mockSpawn).not.toHaveBeenCalled();
+  });
+
+  it("excludes one-off containers and omits unpublished ports over the HTTP path", async () => {
+    const cockpitMod = await import("./cockpit");
+    vi.spyOn(cockpitMod, "getDockerSocketPath").mockReturnValue("unix:///var/run/docker.sock");
+    mockHttp.mockReturnValue(mockHttpClient({
+      "/containers/json": JSON.stringify([
+        { Id: "c1", Image: "busybox", State: "exited", Status: "Exited", Labels: { "com.docker.compose.oneoff": "true", "com.docker.compose.project": "myapp" } },
+        { Id: "c2", Image: "nginx", State: "running", Status: "Up", Ports: [{ PrivatePort: 80, Type: "tcp" }], Labels: { "com.docker.compose.project": "myapp" } },
+      ]),
+    }));
+
+    const { listContainers: lc } = await import("./containers");
+    let received = "";
+    const proc = lc("myapp");
+    proc.stream(d => { received += d; });
+    await proc;
+
+    const result = JSON.parse(received) as { ID: string; Ports: string }[];
+    expect(result).toHaveLength(1);
+    expect(result[0].ID).toBe("c2");
+    expect(result[0].Ports).toBe("");
+  });
+
+  it("falls back to the CLI when the HTTP request fails", async () => {
+    const cockpitMod = await import("./cockpit");
+    vi.spyOn(cockpitMod, "getDockerSocketPath").mockReturnValue("unix:///var/run/docker.sock");
+    const failingClient = mockHttpClient();
+    vi.spyOn(failingClient, "get").mockRejectedValue(new Error("connection refused"));
+    mockHttp.mockReturnValue(failingClient);
+    mockSpawn.mockImplementation(() => mockProcess("[]"));
+
+    const { listContainers: lc } = await import("./containers");
+    const proc = lc("myapp");
+    await proc;
+
+    expect(mockSpawn).toHaveBeenCalledTimes(1);
+  });
+});
 
 describe("listContainers [docker]", () => {
-  it("spawns compose ps --all --format json for the project", () => {
+  it("spawns compose ps --all --format json for the project", async () => {
     mockSpawn.mockReturnValue(mockProcess("[]"));
-    listContainers("myapp");
+    // listContainers() tries the engine HTTP API first (mocked to fail by default in this
+    // suite — see test/setup.ts), then falls back to the CLI spawn asserted on below; that
+    // fallback happens asynchronously, so the spawn call must be awaited before inspecting it.
+    await listContainers("myapp").catch(() => {});
     const args = mockSpawn.mock.calls[0][0] as string[];
     expect(args).toContain("-p");
     expect(args).toContain("myapp");
@@ -110,7 +184,11 @@ describe("listContainers [podman ports/oneoff edge cases]", () => {
     const cockpitMod = await import("./cockpit");
     cockpitMod.setRuntime("podman");
     vi.spyOn(cockpitMod, "composeIsLimitedBackend").mockReturnValue(true);
-    mockSpawn.mockReturnValue(mockProcess(JSON.stringify([
+    // Lazy: proc must be created at spawn-call time (not now), so its data-delivery microtask
+    // fires after proc.stream() is registered below — listContainers() now takes an extra
+    // async hop (the HTTP attempt) before reaching this CLI spawn, so an eagerly-created
+    // mockProcess would already have resolved with no stream callback registered yet.
+    mockSpawn.mockImplementation(() => mockProcess(JSON.stringify([
       { Id: "c1", Image: "busybox", State: "exited", Status: "Exited", Labels: { "com.docker.compose.oneoff": "True", "com.docker.compose.project": "myapp" } },
       { Id: "c2", Image: "nginx", State: "running", Status: "Up", Labels: { "com.docker.compose.project": "myapp" } },
     ])));
@@ -128,7 +206,7 @@ describe("listContainers [podman ports/oneoff edge cases]", () => {
     const cockpitMod = await import("./cockpit");
     cockpitMod.setRuntime("podman");
     vi.spyOn(cockpitMod, "composeIsLimitedBackend").mockReturnValue(true);
-    mockSpawn.mockReturnValue(mockProcess(JSON.stringify([
+    mockSpawn.mockImplementation(() => mockProcess(JSON.stringify([
       { Id: "c1", Image: "busybox", State: "running", Status: "Up", Ports: null, Labels: {} },
     ])));
     let received = "";
@@ -156,9 +234,9 @@ describe("superuser escalation (rootful Podman)", () => {
     vi.spyOn(cockpitMod, "socketSuperuser").mockReturnValue("try");
   });
 
-  it("listContainers passes superuser:'try' for the compose-backed path", () => {
+  it("listContainers passes superuser:'try' for the compose-backed path", async () => {
     mockSpawn.mockReturnValue(mockProcess("[]"));
-    listContainers("myapp");
+    await listContainers("myapp").catch(() => {});
     const opts = mockSpawn.mock.calls[0][1] as { superuser?: string };
     expect(opts.superuser).toBe("try");
   });

@@ -104,4 +104,42 @@ describe("useContainerStats", () => {
     expect(mockSpawn.mock.calls.length).toBeGreaterThan(callsBefore);
     vi.useRealTimers();
   });
+
+  it("does not overlap polls when a call is slower than the 10s interval (#289)", async () => {
+    // Regression test: this hook used to poll via a raw setInterval with no in-flight guard,
+    // the same pileup-prone pattern already fixed elsewhere for this issue. It now goes
+    // through useAutoRefresh, which must keep at most one call in flight. Each load() does up
+    // to 2 spawns (listContainers, then getContainerStats) — calls 1-2 are the quick initial
+    // mount load; call 3 (the second poll's listContainers) is made to hang.
+    vi.useFakeTimers();
+    let resolveHang: ((v: string) => void) | undefined;
+    let callCount = 0;
+    mockSpawn.mockImplementation(() => {
+      callCount++;
+      if (callCount === 3) {
+        let streamCb: ((d: string) => void) | undefined;
+        const p = new Promise<string>(resolve => { resolveHang = resolve; });
+        return Object.assign(p.then(v => { streamCb?.(v); return v; }), {
+          stream: (cb: (d: string) => void) => { streamCb = cb; },
+          close: vi.fn(),
+        });
+      }
+      return mockProcess(callCount % 2 === 1 ? runningContainersJson : statsJson);
+    });
+
+    renderHook(() => useContainerStats("myapp", "running"));
+    await act(async () => { await vi.advanceTimersByTimeAsync(0); }); // let the initial load settle
+    expect(callCount).toBe(2);
+
+    await act(async () => { await vi.advanceTimersByTimeAsync(10000); });
+    expect(callCount).toBe(3);
+
+    // Advance well past several would-be intervals while that poll is still pending — with
+    // the old setInterval behavior this would fire several additional overlapping calls.
+    await act(async () => { await vi.advanceTimersByTimeAsync(30000); });
+    expect(callCount).toBe(3);
+
+    await act(async () => { resolveHang?.(runningContainersJson); await Promise.resolve(); });
+    vi.useRealTimers();
+  });
 });

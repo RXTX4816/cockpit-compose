@@ -1,5 +1,6 @@
 import { compose, cli, getIsPodman, dockerSpawnEnviron, composeIsLimitedBackend, socketSuperuser } from "../cockpit";
 import { fileFlags, makeFakeProcess, type PodmanPsContainer, type PodmanPsForImages, type PodmanImageInspect, type PodmanVolumeJson } from "./internal";
+import { engineHttpGetJson, drainProcess } from "../engineHttp";
 
 // podman-compose (Python) is known to record whatever path was passed on the CLI in the
 // com.docker.compose.project.config_files label, without resolving it to an absolute path
@@ -77,10 +78,33 @@ function listPodmanStacks(): CockpitProcess {
   }) as unknown as CockpitProcess;
 }
 
-export function listStacks(): CockpitProcess {
+// Pure read, so it's tried over the engine's REST API first — same rationale as
+// listContainers() in ../containers.ts. groupPodmanContainers() only needs each container's
+// State and Labels, which the raw Engine API JSON already provides in matching shape, so the
+// same grouping logic already proven for the podman CLI fallback works unchanged for both
+// engines here. Falls back to the exact CLI behavior below on any failure.
+async function listStacksHttp(): Promise<string> {
+  const containers = await engineHttpGetJson<PodmanPsContainer[]>("/containers/json", {
+    all: "true",
+    filters: JSON.stringify({ label: ["com.docker.compose.project"] }),
+  });
+  return JSON.stringify(groupPodmanContainers(containers));
+}
+
+function listStacksCli(): CockpitProcess {
   if (getIsPodman()) return listPodmanStacks();
   return cockpit.spawn(compose("ls", "--all", "--format", "json"), {
     superuser: socketSuperuser(), err: "message", ...dockerSpawnEnviron(),
+  });
+}
+
+export function listStacks(): CockpitProcess {
+  return makeFakeProcess(async () => {
+    try {
+      return await listStacksHttp();
+    } catch {
+      return await drainProcess(listStacksCli());
+    }
   });
 }
 

@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { listContainers, getContainerStats, parsePortsFull, parseJsonOutput, parseDockerBytes } from "../api";
 import type { ComposeContainer, ContainerStats, ParsedPort, StackStatus } from "../api";
+import { useAutoRefresh } from "./useAutoRefresh";
 
 const BIND_PRIORITY: Record<ParsedPort["bindType"], number> = { external: 3, specific: 2, localhost: 1 };
 
@@ -60,13 +61,8 @@ export function useContainerStats(stackName: string, status: StackStatus) {
     }
   }, [stackName, status]);
 
-  useEffect(() => {
-    void load();
-    if (status === "running" || status === "partial") {
-      const t = setInterval(() => void load(), 10000);
-      return () => clearInterval(t);
-    }
-  }, [load, status]);
+  useEffect(() => { void load(); }, [load]);
+  useAutoRefresh(load, 10000, !(status === "running" || status === "partial"));
 
   return { ports, stats };
 }

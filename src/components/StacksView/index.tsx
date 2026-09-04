@@ -198,7 +198,7 @@ export function StacksView({ onRuntimeChange, dockerMissing, layout = "poweruser
   const { sharedNetworks: downSharedNetworks, loading: downNetworksLoading } =
     useSharedNetworks(downTarget?.Name ?? "", downTarget !== null);
 
-  useAutoRefresh(refresh, error ? 2000 : 500, activeOps > 0);
+  useAutoRefresh(refresh, error ? 6000 : 1500, activeOps > 0);
 
   // Keyboard shortcuts: U=up, D=down, L=logs, E=edit, I=info
   useKeyboardShortcuts(
@@ -504,8 +504,10 @@ export function StacksView({ onRuntimeChange, dockerMissing, layout = "poweruser
               onBackup={() => modals.open("backup", stack)}
               onScale={() => modals.open("scale", stack)}
               onActingChange={onActingChange}
+              onRefresh={refresh}
               isSelected={selected.has(stack.Name)}
               onToggleSelect={() => toggleSelect(stack.Name)}
+              globalActing={activeOps > 0}
             />
           ))}
         </div>
@@ -532,8 +534,10 @@ export function StacksView({ onRuntimeChange, dockerMissing, layout = "poweruser
               onBackup={() => modals.open("backup", stack)}
               onScale={() => modals.open("scale", stack)}
               onActingChange={onActingChange}
+              onRefresh={refresh}
               isSelected={selected.has(stack.Name)}
               onToggleSelect={() => toggleSelect(stack.Name)}
+              globalActing={activeOps > 0}
             />
           ))}
         </div>
@@ -570,8 +574,10 @@ export function StacksView({ onRuntimeChange, dockerMissing, layout = "poweruser
               onBackup={() => modals.open("backup", stack)}
               onScale={() => modals.open("scale", stack)}
               onActingChange={onActingChange}
+              onRefresh={refresh}
               isSelected={selected.has(stack.Name)}
               onToggleSelect={() => toggleSelect(stack.Name)}
+              globalActing={activeOps > 0}
             />
           ))}
         </div>
@@ -598,9 +604,11 @@ export function StacksView({ onRuntimeChange, dockerMissing, layout = "poweruser
               onBackup={() => modals.open("backup", stack)}
               onScale={() => modals.open("scale", stack)}
               onActingChange={onActingChange}
+              onRefresh={refresh}
               isSelected={selected.has(stack.Name)}
               onToggleSelect={() => toggleSelect(stack.Name)}
               anySelected={selected.size > 0}
+              globalActing={activeOps > 0}
             />
           ))}
         </DataList>

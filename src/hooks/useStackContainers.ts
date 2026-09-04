@@ -9,6 +9,14 @@ import {
 } from "../api";
 
 
+// Service names are re-derived from the compose file(s) on every poll, but those files
+// virtually never change while a stack is sitting on the page — so re-reading (and
+// re-spawning a process) for them on every tick is wasted work, disproportionately costly
+// on constrained hardware. Cache them for a while instead of forever: long enough to avoid
+// re-reading on every poll, short enough to still pick up changes made outside this app
+// (another tool, an external edit) within a bounded time.
+const SERVICE_NAMES_TTL_MS = 30_000;
+
 async function readServiceNames(configFiles: string[]): Promise<string[]> {
   const seen = new Set<string>();
   const result: string[] = [];
@@ -28,6 +36,7 @@ export function useStackContainers(stackName: string, configFiles: string[], sta
   const [containers, setContainers] = useState<ComposeContainer[]>([]);
   const [loading, setLoading] = useState(false);
   const cachedServiceNamesRef = useRef<string[]>([]);
+  const serviceNamesReadAtRef = useRef(0);
   const prevStatusRef = useRef<StackStatus>("unknown");
   const hasDataRef = useRef(false);
   const hasContainersRef = useRef(false);
@@ -42,6 +51,24 @@ export function useStackContainers(stackName: string, configFiles: string[], sta
   }, [status]);
 
   const configFilesKey = configFiles.join(",");
+
+  // The caller's config files can change (e.g. a stack's compose file list is edited)
+  // independent of the TTL above — force a fresh read the next time that happens.
+  useEffect(() => {
+    serviceNamesReadAtRef.current = 0;
+  }, [configFilesKey]);
+
+  const getServiceNames = useCallback(async (): Promise<string[]> => {
+    const isFresh = cachedServiceNamesRef.current.length > 0
+      && Date.now() - serviceNamesReadAtRef.current < SERVICE_NAMES_TTL_MS;
+    if (isFresh) return cachedServiceNamesRef.current;
+    const names = await readServiceNames(configFiles);
+    cachedServiceNamesRef.current = names;
+    serviceNamesReadAtRef.current = Date.now();
+    return names;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [configFilesKey]);
+
   const load = useCallback(async () => {
     if (!hasDataRef.current && !hasContainersRef.current) setLoading(true);
     try {
@@ -51,8 +78,7 @@ export function useStackContainers(stackName: string, configFiles: string[], sta
       await proc;
       const running = parseJsonOutput<ComposeContainer>(raw);
 
-      const serviceNames = await readServiceNames(configFiles);
-      cachedServiceNamesRef.current = serviceNames;
+      const serviceNames = await getServiceNames();
 
       hasDataRef.current = true;
       const next = serviceNames.flatMap(name => {
@@ -63,8 +89,7 @@ export function useStackContainers(stackName: string, configFiles: string[], sta
       setContainers(next);
     } catch {
       try {
-        const serviceNames = await readServiceNames(configFiles);
-        cachedServiceNamesRef.current = serviceNames;
+        const serviceNames = await getServiceNames();
         const fallback = serviceNames.map(name => ({
           ID: "", Name: name, Image: "", State: "down", Status: "down", Ports: "", Service: name,
         }));
@@ -82,7 +107,7 @@ export function useStackContainers(stackName: string, configFiles: string[], sta
       setLoading(false);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stackName, configFilesKey]);
+  }, [stackName, configFilesKey, getServiceNames]);
 
   const clear = useCallback(() => { hasDataRef.current = false; hasContainersRef.current = false; setContainers([]); }, []);
 

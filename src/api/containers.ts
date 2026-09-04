@@ -1,4 +1,7 @@
 import { compose, cli, getIsPodman, dockerSpawnEnviron, composeIsLimitedBackend, socketSuperuser } from "./cockpit";
+import { engineHttpGetJson, drainProcess } from "./engineHttp";
+import { type EngineContainerJson, engineContainerName, enginePortsToString, isOneoffContainer } from "./engineJson";
+import { makeFakeProcess } from "./stacks/internal";
 
 interface PodmanPort {
   host_ip?: string;
@@ -67,12 +70,47 @@ function listContainersPodmanFallback(project: string): CockpitProcess {
   }) as unknown as CockpitProcess;
 }
 
-export function listContainers(project: string): CockpitProcess {
+// Pure read, so it's tried over the engine's REST API first — skips the per-poll cost of
+// spawning a whole new process (and, for compose specifically, a Python interpreter) just to
+// list containers that already exist. Falls back to the exact CLI behavior below on any
+// failure (old engine version, socket unavailable, unexpected response), so this can never be
+// less reliable than the CLI path — only sometimes faster.
+async function listContainersHttp(project: string): Promise<string> {
+  const items = await engineHttpGetJson<EngineContainerJson[]>("/containers/json", {
+    all: "true",
+    filters: JSON.stringify({ label: [`com.docker.compose.project=${project}`] }),
+  });
+  // Exclude one-off run containers (compose run --rm); they carry
+  // com.docker.compose.oneoff=True and would inflate service replica counts.
+  const filtered = items.filter(c => !isOneoffContainer(c));
+  return JSON.stringify(filtered.map(c => ({
+    ID: c.Id,
+    Name: engineContainerName(c),
+    Image: c.Image,
+    State: c.State,
+    Status: c.Status,
+    Health: "",
+    Ports: enginePortsToString(c.Ports),
+    Service: c.Labels?.["com.docker.compose.service"] ?? "",
+  })));
+}
+
+function listContainersCli(project: string): CockpitProcess {
   if (composeIsLimitedBackend()) return listContainersPodmanFallback(project);
   return cockpit.spawn(
     compose("-p", project, "ps", "--all", "--format", "json"),
     { superuser: socketSuperuser(), err: "message", ...dockerSpawnEnviron() },
   );
+}
+
+export function listContainers(project: string): CockpitProcess {
+  return makeFakeProcess(async () => {
+    try {
+      return await listContainersHttp(project);
+    } catch {
+      return await drainProcess(listContainersCli(project));
+    }
+  });
 }
 
 export function getContainerStats(containerIds: string[]): CockpitProcess {

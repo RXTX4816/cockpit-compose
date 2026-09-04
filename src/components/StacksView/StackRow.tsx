@@ -79,12 +79,14 @@ interface StackRowProps {
   onBackup: () => void;
   onScale: () => void;
   onActingChange: (delta: 1 | -1) => void;
+  onRefresh: () => void;
   isSelected?: boolean;
   onToggleSelect?: () => void;
   anySelected?: boolean;
+  globalActing?: boolean;
 }
 
-export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, onDown, onKill, onUp, onPull, onEvents, onTop, onExec, onRun, onPrune, onBackup, onScale, onActingChange, isSelected = false, onToggleSelect, anySelected = false }: StackRowProps) {
+export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, onDown, onKill, onUp, onPull, onEvents, onTop, onExec, onRun, onPrune, onBackup, onScale, onActingChange, onRefresh, isSelected = false, onToggleSelect, anySelected = false, globalActing = false }: StackRowProps) {
   const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [confirmStopOpen, setConfirmStopOpen] = useState(false);
@@ -102,7 +104,10 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
   const status = effectiveStatus(baseStatus, containers);
 
   useEffect(() => { void loadContainers(); }, [loadContainers]);
-  useAutoRefresh(loadContainers, acting ? 500 : 3000, false);
+  // Pause this row's own polling while some *other* action is in flight elsewhere on the
+  // page (bulk op, another row) — but never while this row's own action is what's running,
+  // since the faster 500ms interval above exists specifically to show that action's progress.
+  useAutoRefresh(loadContainers, acting ? 500 : 3000, globalActing && !acting && !actingService);
 
   const handleToggle = () => {
     onToggle();
@@ -114,7 +119,16 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
   const afterAction = useCallback(async () => {
     clearContainers();
     if (expanded) await loadContainers();
-  }, [clearContainers, expanded, loadContainers]);
+    // Refresh the page-level stack list immediately rather than waiting for its own poll
+    // (which can now be backed off several seconds on constrained hardware) — otherwise a
+    // finished action looks stuck until the next scheduled tick happens to land.
+    onRefresh();
+  }, [clearContainers, expanded, loadContainers, onRefresh]);
+
+  const afterServiceAction = useCallback(async () => {
+    await loadContainers();
+    onRefresh();
+  }, [loadContainers, onRefresh]);
 
   const healthSummary = stackHealthSummary(containers);
 
@@ -371,9 +385,9 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
               containers={containers}
               actions={{
                 actingService,
-                onStart: s => { void doServiceAction("start", s, loadContainers); },
-                onStop: s => { void doServiceAction("stop", s, loadContainers); },
-                onRestart: s => { void doServiceAction("restart", s, loadContainers); },
+                onStart: s => { void doServiceAction("start", s, afterServiceAction); },
+                onStop: s => { void doServiceAction("stop", s, afterServiceAction); },
+                onRestart: s => { void doServiceAction("restart", s, afterServiceAction); },
                 onLogs: s => setLogsService(s),
               }}
             />

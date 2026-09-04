@@ -25,9 +25,11 @@ vi.mock("../LogsModal", () => ({
 import { useStackActions } from "../../hooks/useStackActions";
 import { useServiceActions } from "../../hooks/useServiceActions";
 import { useStackContainers } from "../../hooks/useStackContainers";
+import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 const mockUseStackActions = vi.mocked(useStackActions);
 const mockUseServiceActions = vi.mocked(useServiceActions);
 const mockUseStackContainers = vi.mocked(useStackContainers);
+const mockUseAutoRefresh = vi.mocked(useAutoRefresh);
 
 const stack: ComposeStack = { Name: "myapp", Status: "running(2)", ConfigFiles: "/myapp/compose.yml" };
 const stoppedStack: ComposeStack = { Name: "myapp", Status: "exit(0)", ConfigFiles: "/myapp/compose.yml" };
@@ -55,6 +57,7 @@ const defaultProps = {
   onBackup: vi.fn(),
   onScale: vi.fn(),
   onActingChange: vi.fn(),
+  onRefresh: vi.fn(),
 };
 
 beforeEach(() => {
@@ -306,6 +309,30 @@ describe("MinimalCard", () => {
       fireEvent.click(screen.getByText(/^restart$/i));
       fireEvent.click(screen.getByText(/^pause$/i));
       expect(doAction).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("container polling pause (#289)", () => {
+    it("does not pause polling by default (no other action in flight)", () => {
+      render(<MinimalCard {...defaultProps} />);
+      expect(mockUseAutoRefresh).toHaveBeenLastCalledWith(expect.any(Function), 3000, false);
+    });
+
+    it("pauses polling while another action is in flight elsewhere on the page", () => {
+      render(<MinimalCard {...defaultProps} globalActing />);
+      expect(mockUseAutoRefresh).toHaveBeenLastCalledWith(expect.any(Function), 3000, true);
+    });
+
+    it("does not pause polling for this row's own stack action, even while globalActing", () => {
+      mockUseStackActions.mockReturnValue({ acting: true, actionError: null, doAction: vi.fn() });
+      render(<MinimalCard {...defaultProps} globalActing />);
+      expect(mockUseAutoRefresh).toHaveBeenLastCalledWith(expect.any(Function), 500, false);
+    });
+
+    it("does not pause polling for this row's own service action, even while globalActing", () => {
+      mockUseServiceActions.mockReturnValue({ actingService: "web", doServiceAction: vi.fn() });
+      render(<MinimalCard {...defaultProps} globalActing />);
+      expect(mockUseAutoRefresh).toHaveBeenLastCalledWith(expect.any(Function), 3000, false);
     });
   });
 });

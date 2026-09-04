@@ -66,8 +66,10 @@ interface PrettyCardProps {
   onBackup: () => void;
   onScale: () => void;
   onActingChange: (delta: 1 | -1) => void;
+  onRefresh: () => void;
   isSelected?: boolean;
   onToggleSelect?: () => void;
+  globalActing?: boolean;
 }
 
 const STATUS_BORDER: Record<string, string> = {
@@ -88,8 +90,8 @@ const STATUS_GLOW: Record<string, string> = {
 
 export function PrettyCard({
   stack, expanded, onToggle, onLogs, onYaml, onInfo, onDown, onKill, onUp, onPull,
-  onEvents, onTop, onExec, onRun, onPrune, onBackup, onScale, onActingChange,
-  isSelected = false, onToggleSelect,
+  onEvents, onTop, onExec, onRun, onPrune, onBackup, onScale, onActingChange, onRefresh,
+  isSelected = false, onToggleSelect, globalActing = false,
 }: PrettyCardProps) {
   const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -113,7 +115,16 @@ export function PrettyCard({
   const afterAction = useCallback(async () => {
     clearContainers();
     await loadContainers();
-  }, [clearContainers, loadContainers]);
+    // Refresh the page-level stack list immediately rather than waiting for its own poll
+    // (which can now be backed off several seconds on constrained hardware) — otherwise a
+    // finished action looks stuck until the next scheduled tick happens to land.
+    onRefresh();
+  }, [clearContainers, loadContainers, onRefresh]);
+
+  const afterServiceAction = useCallback(async () => {
+    await loadContainers();
+    onRefresh();
+  }, [loadContainers, onRefresh]);
 
   const handleToggle = () => {
     onToggle();
@@ -129,7 +140,7 @@ export function PrettyCard({
     : undefined;
 
   useEffect(() => { void loadContainers(); }, [loadContainers]);
-  useAutoRefresh(loadContainers, acting ? 500 : 3000, false);
+  useAutoRefresh(loadContainers, acting ? 500 : 3000, globalActing && !acting && !actingService);
 
   const isRunning = status === "running" || status === "partial";
   const cpuPct = stats?.cpu ?? 0;
@@ -336,7 +347,7 @@ export function PrettyCard({
                                 <button
                                   className="pc-svc-btn"
                                   aria-label={t("service_actions.stop")}
-                                  onClick={() => void doServiceAction("stop", svc, loadContainers)}
+                                  onClick={() => void doServiceAction("stop", svc, afterServiceAction)}
                                   disabled={acting}
                                 >
                                   <BanIcon />
@@ -347,7 +358,7 @@ export function PrettyCard({
                                 <button
                                   className="pc-svc-btn"
                                   aria-label={t("service_actions.start")}
-                                  onClick={() => void doServiceAction("start", svc, loadContainers)}
+                                  onClick={() => void doServiceAction("start", svc, afterServiceAction)}
                                   disabled={acting}
                                 >
                                   <PlayIcon />
@@ -358,7 +369,7 @@ export function PrettyCard({
                               <button
                                 className="pc-svc-btn"
                                 aria-label={t("service_actions.restart")}
-                                onClick={() => void doServiceAction("restart", svc, loadContainers)}
+                                onClick={() => void doServiceAction("restart", svc, afterServiceAction)}
                                 disabled={acting}
                               >
                                 <RedoAltIcon />
