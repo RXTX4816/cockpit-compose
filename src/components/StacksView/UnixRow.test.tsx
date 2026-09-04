@@ -29,10 +29,12 @@ import { useStackActions } from "../../hooks/useStackActions";
 import { useServiceActions } from "../../hooks/useServiceActions";
 import { useStackContainers } from "../../hooks/useStackContainers";
 import { useContainerStats } from "../../hooks/useContainerStats";
+import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 const mockUseStackActions = vi.mocked(useStackActions);
 const mockUseServiceActions = vi.mocked(useServiceActions);
 const mockUseStackContainers = vi.mocked(useStackContainers);
 const mockUseContainerStats = vi.mocked(useContainerStats);
+const mockUseAutoRefresh = vi.mocked(useAutoRefresh);
 
 async function click(element: Element) {
   await act(async () => {
@@ -63,6 +65,7 @@ const defaultProps = {
   onBackup: vi.fn(),
   onScale: vi.fn(),
   onActingChange: vi.fn(),
+  onRefresh: vi.fn(),
 };
 
 beforeEach(() => {
@@ -315,6 +318,30 @@ describe("UnixRow", () => {
 
       rerender(<UnixRow {...defaultProps} onToggleSelect={onToggleSelect} isSelected={true} />);
       expect(screen.getByText("[x]")).toBeInTheDocument();
+    });
+  });
+
+  describe("container polling pause (#289)", () => {
+    it("does not pause polling by default (no other action in flight)", () => {
+      render(<UnixRow {...defaultProps} />);
+      expect(mockUseAutoRefresh).toHaveBeenLastCalledWith(expect.any(Function), 3000, false);
+    });
+
+    it("pauses polling while another action is in flight elsewhere on the page", () => {
+      render(<UnixRow {...defaultProps} globalActing />);
+      expect(mockUseAutoRefresh).toHaveBeenLastCalledWith(expect.any(Function), 3000, true);
+    });
+
+    it("does not pause polling for this row's own stack action, even while globalActing", () => {
+      mockUseStackActions.mockReturnValue({ acting: true, actionError: null, doAction: vi.fn() });
+      render(<UnixRow {...defaultProps} globalActing />);
+      expect(mockUseAutoRefresh).toHaveBeenLastCalledWith(expect.any(Function), 500, false);
+    });
+
+    it("does not pause polling for this row's own service action, even while globalActing", () => {
+      mockUseServiceActions.mockReturnValue({ actingService: "web", doServiceAction: vi.fn() });
+      render(<UnixRow {...defaultProps} globalActing />);
+      expect(mockUseAutoRefresh).toHaveBeenLastCalledWith(expect.any(Function), 3000, false);
     });
   });
 });

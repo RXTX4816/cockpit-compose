@@ -6,17 +6,27 @@ import type { ComposeStack } from "../../api";
 vi.mock("../../hooks/useStackActions", () => ({
   useStackActions: vi.fn(),
 }));
+vi.mock("../../hooks/useServiceActions", () => ({
+  useServiceActions: vi.fn(),
+}));
 vi.mock("../../hooks/useStackContainers", () => ({
   useStackContainers: vi.fn(),
+}));
+vi.mock("../../hooks/useAutoRefresh", () => ({
+  useAutoRefresh: vi.fn(),
 }));
 vi.mock("./StatsCell", () => ({
   StatsCell: () => <span>StatsCell</span>,
 }));
 
 import { useStackActions } from "../../hooks/useStackActions";
+import { useServiceActions } from "../../hooks/useServiceActions";
 import { useStackContainers } from "../../hooks/useStackContainers";
+import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 const mockUseStackActions = vi.mocked(useStackActions);
+const mockUseServiceActions = vi.mocked(useServiceActions);
 const mockUseStackContainers = vi.mocked(useStackContainers);
+const mockUseAutoRefresh = vi.mocked(useAutoRefresh);
 
 const stack: ComposeStack = {
   Name: "myapp",
@@ -49,11 +59,13 @@ const defaultProps = {
   onBackup: vi.fn(),
   onScale: vi.fn(),
   onActingChange: vi.fn(),
+  onRefresh: vi.fn(),
 };
 
 beforeEach(() => {
   vi.clearAllMocks();
   mockUseStackActions.mockReturnValue({ acting: false, actionError: null, doAction: vi.fn() });
+  mockUseServiceActions.mockReturnValue({ actingService: null, doServiceAction: vi.fn() });
   mockUseStackContainers.mockReturnValue({
     containers: [],
     loading: false,
@@ -165,6 +177,26 @@ describe("StackRow", () => {
     const dialog = screen.getByRole("dialog");
     fireEvent.click(within(dialog).getByRole("button", { name: /^Stop$/i }));
     expect(doAction).toHaveBeenCalledWith("stop", expect.any(Function));
+  });
+
+  it("calls onRefresh once the stop action's success callback runs (#289)", async () => {
+    // Regression: completing a stack action used to only reload this row's own container
+    // list, never the page-level stack list — so the top-level status badge only updated on
+    // the next scheduled poll, which can now be several seconds out on slow hardware, making
+    // a finished action look stuck. The success callback passed to doAction must also call
+    // onRefresh so the page-level list updates immediately.
+    const doAction = vi.fn();
+    mockUseStackActions.mockReturnValue({ acting: false, actionError: null, doAction });
+    const onRefresh = vi.fn();
+    render(<StackRow {...defaultProps} onRefresh={onRefresh} />);
+    fireEvent.click(screen.getByRole("button", { name: /^Stop$/i }));
+    const dialog = screen.getByRole("dialog");
+    fireEvent.click(within(dialog).getByRole("button", { name: /^Stop$/i }));
+
+    const afterAction = doAction.mock.calls[0][1] as () => Promise<void>;
+    expect(onRefresh).not.toHaveBeenCalled();
+    await act(async () => { await afterAction(); });
+    expect(onRefresh).toHaveBeenCalledOnce();
   });
 
   it("calls doAction with start when Start button clicked on a down stack", () => {
@@ -435,6 +467,30 @@ describe("StackRow", () => {
     it("omits the visible modifier class when nothing is selected", () => {
       const { container } = render(<StackRow {...defaultProps} onToggleSelect={vi.fn()} anySelected={false} />);
       expect(container.querySelector(".sr-check--visible")).not.toBeInTheDocument();
+    });
+  });
+
+  describe("container polling pause (#289)", () => {
+    it("does not pause polling by default (no other action in flight)", () => {
+      render(<StackRow {...defaultProps} />);
+      expect(mockUseAutoRefresh).toHaveBeenLastCalledWith(expect.any(Function), 3000, false);
+    });
+
+    it("pauses polling while another action is in flight elsewhere on the page", () => {
+      render(<StackRow {...defaultProps} globalActing />);
+      expect(mockUseAutoRefresh).toHaveBeenLastCalledWith(expect.any(Function), 3000, true);
+    });
+
+    it("does not pause polling for this row's own stack action, even while globalActing", () => {
+      mockUseStackActions.mockReturnValue({ acting: true, actionError: null, doAction: vi.fn() });
+      render(<StackRow {...defaultProps} globalActing />);
+      expect(mockUseAutoRefresh).toHaveBeenLastCalledWith(expect.any(Function), 500, false);
+    });
+
+    it("does not pause polling for this row's own service action, even while globalActing", () => {
+      mockUseServiceActions.mockReturnValue({ actingService: "web", doServiceAction: vi.fn() });
+      render(<StackRow {...defaultProps} globalActing />);
+      expect(mockUseAutoRefresh).toHaveBeenLastCalledWith(expect.any(Function), 3000, false);
     });
   });
 });

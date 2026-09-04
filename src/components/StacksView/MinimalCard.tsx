@@ -67,8 +67,10 @@ interface MinimalCardProps {
   onBackup: () => void;
   onScale: () => void;
   onActingChange: (delta: 1 | -1) => void;
+  onRefresh: () => void;
   isSelected?: boolean;
   onToggleSelect?: () => void;
+  globalActing?: boolean;
 }
 
 const STATUS_VARS: Record<string, { bg: string; border: string }> = {
@@ -81,8 +83,8 @@ const STATUS_VARS: Record<string, { bg: string; border: string }> = {
 
 export function MinimalCard({
   stack, onLogs, onYaml, onInfo, onDown, onKill, onUp, onPull,
-  onEvents, onTop, onExec, onRun, onPrune, onBackup, onScale, onActingChange,
-  isSelected = false, onToggleSelect,
+  onEvents, onTop, onExec, onRun, onPrune, onBackup, onScale, onActingChange, onRefresh,
+  isSelected = false, onToggleSelect, globalActing = false,
 }: MinimalCardProps) {
   const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -106,10 +108,19 @@ export function MinimalCard({
   const afterAction = useCallback(async () => {
     clearContainers();
     await loadContainers();
-  }, [clearContainers, loadContainers]);
+    // Refresh the page-level stack list immediately rather than waiting for its own poll
+    // (which can now be backed off several seconds on constrained hardware) — otherwise a
+    // finished action looks stuck until the next scheduled tick happens to land.
+    onRefresh();
+  }, [clearContainers, loadContainers, onRefresh]);
+
+  const afterServiceAction = useCallback(async () => {
+    await loadContainers();
+    onRefresh();
+  }, [loadContainers, onRefresh]);
 
   useEffect(() => { void loadContainers(); }, [loadContainers]);
-  useAutoRefresh(loadContainers, acting ? 500 : 3000, false);
+  useAutoRefresh(loadContainers, acting ? 500 : 3000, globalActing && !acting && !actingService);
 
   const clearOpenTimer = () => {
     if (openTimerRef.current !== null) {
@@ -304,9 +315,9 @@ export function MinimalCard({
                 containers={containers}
                 actions={{
                   actingService,
-                  onStart: s => { void doServiceAction("start", s, loadContainers); },
-                  onStop: s => { void doServiceAction("stop", s, loadContainers); },
-                  onRestart: s => { void doServiceAction("restart", s, loadContainers); },
+                  onStart: s => { void doServiceAction("start", s, afterServiceAction); },
+                  onStop: s => { void doServiceAction("stop", s, afterServiceAction); },
+                  onRestart: s => { void doServiceAction("restart", s, afterServiceAction); },
                   onLogs: s => setLogsService(s),
                 }}
               />

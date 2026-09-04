@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
 import { useStackContainers } from "./useStackContainers";
 import { mockSpawn } from "../test/setup";
@@ -161,5 +161,51 @@ services:
     void act(() => { void result.current.load(); });
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.containers).toHaveLength(2);
+  });
+
+  describe("service name caching (#289)", () => {
+    afterEach(() => { vi.restoreAllMocks(); });
+
+    it("does not re-read the compose file on a poll shortly after the previous read", async () => {
+      mockSpawn
+        .mockImplementationOnce(lazy(runningContainersJson))
+        .mockImplementationOnce(lazy(composeYaml));
+
+      const { result } = renderHook(() =>
+        useStackContainers("myapp", ["/path/compose.yml"], "running"),
+      );
+      void act(() => { void result.current.load(); });
+      await waitFor(() => expect(result.current.containers).toHaveLength(2));
+      expect(mockSpawn).toHaveBeenCalledTimes(2);
+
+      // Second poll, immediately after — only the container list should be spawned;
+      // the compose file read should be served from cache, no extra process spawned.
+      mockSpawn.mockImplementationOnce(lazy(runningContainersJson));
+      void act(() => { void result.current.load(); });
+      await waitFor(() => expect(result.current.containers).toHaveLength(2));
+      expect(mockSpawn).toHaveBeenCalledTimes(3);
+    });
+
+    it("re-reads the compose file again once the cache expires", async () => {
+      mockSpawn
+        .mockImplementationOnce(lazy(runningContainersJson))
+        .mockImplementationOnce(lazy(composeYaml));
+
+      const { result } = renderHook(() =>
+        useStackContainers("myapp", ["/path/compose.yml"], "running"),
+      );
+      void act(() => { void result.current.load(); });
+      await waitFor(() => expect(result.current.containers).toHaveLength(2));
+      expect(mockSpawn).toHaveBeenCalledTimes(2);
+
+      const realNow = Date.now();
+      vi.spyOn(Date, "now").mockReturnValue(realNow + 31_000);
+
+      mockSpawn
+        .mockImplementationOnce(lazy(runningContainersJson))
+        .mockImplementationOnce(lazy(composeYaml));
+      void act(() => { void result.current.load(); });
+      await waitFor(() => expect(mockSpawn).toHaveBeenCalledTimes(4));
+    });
   });
 });

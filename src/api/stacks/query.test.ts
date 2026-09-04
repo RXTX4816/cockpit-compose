@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { mockSpawn } from "../../test/setup";
-import { mockProcess } from "../../test/helpers";
+import { mockSpawn, mockHttp } from "../../test/setup";
+import { mockProcess, mockHttpClient } from "../../test/helpers";
 import { setRuntime, detectComposeCommand } from "../cockpit";
 import {
   groupPodmanContainers, listStacks, readRunningServiceNames, streamLogs, streamEvents,
@@ -13,6 +13,7 @@ import {
 beforeEach(() => {
   mockSpawn.mockReset();
   mockSpawn.mockReturnValue(mockProcess(""));
+  mockHttp.mockReset();
   setRuntime("docker");
 });
 
@@ -31,16 +32,51 @@ async function forcePodmanLimitedBackend(): Promise<void> {
   vi.stubGlobal("cockpit", { spawn: mockSpawn });
 }
 
+describe("listStacks [engine HTTP API]", () => {
+  it("uses the HTTP path when the engine socket is available, skipping the CLI entirely", async () => {
+    const cockpitMod = await import("../cockpit");
+    vi.spyOn(cockpitMod, "getDockerSocketPath").mockReturnValue("unix:///var/run/docker.sock");
+    mockHttp.mockReturnValue(mockHttpClient({
+      "/containers/json": JSON.stringify([
+        { State: "running", Labels: { "com.docker.compose.project": "myapp", "com.docker.compose.project.config_files": "/myapp/compose.yml" } },
+        { State: "exited", Labels: { "com.docker.compose.project": "myapp", "com.docker.compose.project.config_files": "/myapp/compose.yml" } },
+      ]),
+    }));
+
+    const out = await listStacks();
+    expect(JSON.parse(out as unknown as string)).toEqual([
+      { Name: "myapp", Status: "exited(1), running(1)", ConfigFiles: "/myapp/compose.yml" },
+    ]);
+    expect(mockSpawn).not.toHaveBeenCalled();
+  });
+
+  it("falls back to the CLI when the HTTP request fails", async () => {
+    const cockpitMod = await import("../cockpit");
+    vi.spyOn(cockpitMod, "getDockerSocketPath").mockReturnValue("unix:///var/run/docker.sock");
+    const failingClient = mockHttpClient();
+    vi.spyOn(failingClient, "get").mockRejectedValue(new Error("connection refused"));
+    mockHttp.mockReturnValue(failingClient);
+
+    await listStacks().catch(() => {});
+    expect(mockSpawn).toHaveBeenCalledTimes(1);
+  });
+});
+
 describe("listStacks", () => {
-  it("docker mode: runs compose ls", () => {
-    listStacks();
+  it("docker mode: runs compose ls", async () => {
+    // listStacks() tries the engine HTTP API first (mocked to fail by default — see
+    // test/setup.ts), then falls back to the CLI spawn asserted on below, asynchronously.
+    await listStacks().catch(() => {});
     const args = mockSpawn.mock.calls[0][0] as string[];
     expect(args).toEqual(["docker", "compose", "ls", "--all", "--format", "json"]);
   });
 
   it("podman mode: falls back to podman ps + groupPodmanContainers, resolving to grouped JSON", async () => {
     setRuntime("podman");
-    mockSpawn.mockReturnValue(mockProcess(JSON.stringify([
+    // Lazy: listStacks() tries the engine HTTP API first (an extra async hop before this CLI
+    // spawn), so an eagerly-created mockProcess would resolve before proc.stream() is
+    // registered — see the same fix in containers.test.ts.
+    mockSpawn.mockImplementation(() => mockProcess(JSON.stringify([
       { State: "running", Labels: { "com.docker.compose.project": "myapp", "com.docker.compose.project.config_files": "/myapp/compose.yml" } },
     ])));
     const out = await listStacks();
