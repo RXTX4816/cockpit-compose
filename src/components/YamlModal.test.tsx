@@ -72,46 +72,46 @@ beforeEach(() => {
 
 describe("YamlModal", () => {
   it("renders modal title with stack name", async () => {
-    mockSpawn.mockReturnValue(mockProcess(composeContent));
+    mockSpawn.mockImplementation(() => mockProcess(composeContent));
     render(<YamlModal stack={stack} onClose={vi.fn()} />);
     expect(screen.getByText(/myapp — compose file/i)).toBeInTheDocument();
     await act(async () => {});
   });
 
   it("shows spinner while loading", async () => {
-    mockSpawn.mockReturnValue(mockProcess(composeContent));
+    mockSpawn.mockImplementation(() => mockProcess(composeContent));
     render(<YamlModal stack={stack} onClose={vi.fn()} />);
     expect(screen.getByRole("progressbar")).toBeInTheDocument();
     await act(async () => {});
   });
 
   it("displays compose file content after loading", async () => {
-    mockSpawn.mockReturnValue(mockProcess(composeContent));
+    mockSpawn.mockImplementation(() => mockProcess(composeContent));
     render(<YamlModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => expect(screen.queryByRole("progressbar")).toBeNull());
     expect(screen.getByTestId("yaml-editor")).toBeInTheDocument();
   });
 
   it("shows config file path", async () => {
-    mockSpawn.mockReturnValue(mockProcess(composeContent));
+    mockSpawn.mockImplementation(() => mockProcess(composeContent));
     render(<YamlModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => expect(screen.getByText("/path/compose.yml")).toBeInTheDocument());
   });
 
   it("shows error alert when compose file cannot be read", async () => {
-    mockSpawn.mockReturnValue(mockProcess("", "file not found"));
+    mockSpawn.mockImplementation(() => mockProcess("", "file not found"));
     render(<YamlModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => expect(screen.getByText(/Could not read file/i)).toBeInTheDocument());
   });
 
   it("shows Edit button when not in edit mode", async () => {
-    mockSpawn.mockReturnValue(mockProcess(composeContent));
+    mockSpawn.mockImplementation(() => mockProcess(composeContent));
     render(<YamlModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => expect(screen.getByRole("button", { name: /Edit/i })).toBeInTheDocument());
   });
 
   it("enters edit mode and shows Save/Cancel buttons on Edit click", async () => {
-    mockSpawn.mockReturnValue(mockProcess(composeContent));
+    mockSpawn.mockImplementation(() => mockProcess(composeContent));
     render(<YamlModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => screen.getByRole("button", { name: /Edit/i }));
     fireEvent.click(screen.getByRole("button", { name: /Edit/i }));
@@ -120,7 +120,7 @@ describe("YamlModal", () => {
   });
 
   it("Cancel reverts to read mode", async () => {
-    mockSpawn.mockReturnValue(mockProcess(composeContent));
+    mockSpawn.mockImplementation(() => mockProcess(composeContent));
     render(<YamlModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => screen.getByRole("button", { name: /Edit/i }));
     fireEvent.click(screen.getByRole("button", { name: /Edit/i }));
@@ -135,7 +135,7 @@ describe("YamlModal", () => {
       restore: vi.fn(),
       remove: vi.fn(),
     });
-    mockSpawn.mockReturnValue(mockProcess(composeContent));
+    mockSpawn.mockImplementation(() => mockProcess(composeContent));
     render(<YamlModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => expect(screen.getByRole("button", { name: /History/i })).toBeInTheDocument());
   });
@@ -147,7 +147,7 @@ describe("YamlModal", () => {
       restore: vi.fn(),
       remove: vi.fn(),
     });
-    mockSpawn.mockReturnValue(mockProcess(composeContent));
+    mockSpawn.mockImplementation(() => mockProcess(composeContent));
     render(<YamlModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => screen.getByRole("button", { name: /History/i }));
     fireEvent.click(screen.getByRole("button", { name: /History/i }));
@@ -165,7 +165,7 @@ describe("YamlModal", () => {
       restore,
       remove: vi.fn(),
     });
-    mockSpawn.mockReturnValue(mockProcess(composeContent));
+    mockSpawn.mockImplementation(() => mockProcess(composeContent));
     render(<YamlModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => screen.getByRole("button", { name: /History/i }));
     fireEvent.click(screen.getByRole("button", { name: /History/i }));
@@ -182,7 +182,7 @@ describe("YamlModal", () => {
       restore: vi.fn(),
       remove,
     });
-    mockSpawn.mockReturnValue(mockProcess(composeContent));
+    mockSpawn.mockImplementation(() => mockProcess(composeContent));
     render(<YamlModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => screen.getByRole("button", { name: /History/i }));
     fireEvent.click(screen.getByRole("button", { name: /History/i }));
@@ -191,7 +191,7 @@ describe("YamlModal", () => {
   });
 
   it("Lock button while editing returns to read mode without resetting content", async () => {
-    mockSpawn.mockReturnValue(mockProcess(composeContent));
+    mockSpawn.mockImplementation(() => mockProcess(composeContent));
     render(<YamlModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => screen.getByRole("button", { name: /Edit/i }));
     fireEvent.click(screen.getByRole("button", { name: /Edit/i }));
@@ -201,17 +201,23 @@ describe("YamlModal", () => {
   });
 
   it("Save with no changes exits editing without saving", async () => {
-    mockSpawn.mockReturnValue(mockProcess(composeContent));
+    mockSpawn.mockImplementation(() => mockProcess(composeContent));
+    // readComposeFile() now tries cockpit.file() first (this test's default mock has no
+    // `read`, so it falls back to the mockSpawn-based `cat` above) — that's an expected read,
+    // not a save, so assert on the write side (replace) specifically rather than on
+    // cockpit.file() having been called at all.
+    const replace = vi.fn().mockResolvedValue(undefined);
+    mockCockpitFile.mockReturnValue({ replace });
     render(<YamlModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => screen.getByRole("button", { name: /Edit/i }));
     fireEvent.click(screen.getByRole("button", { name: /Edit/i }));
     fireEvent.click(screen.getByRole("button", { name: /Save/i }));
     await waitFor(() => expect(screen.queryByRole("button", { name: /Save/i })).toBeNull());
-    expect(mockCockpitFile).not.toHaveBeenCalled();
+    expect(replace).not.toHaveBeenCalled();
   });
 
   it("Save with changes saves the file", async () => {
-    mockSpawn.mockReturnValue(mockProcess(composeContent));
+    mockSpawn.mockImplementation(() => mockProcess(composeContent));
     render(<YamlModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => screen.getByRole("button", { name: /Edit/i }));
     fireEvent.click(screen.getByRole("button", { name: /Edit/i }));
@@ -222,7 +228,7 @@ describe("YamlModal", () => {
   });
 
   it("Save with invalid YAML shows confirm modal with errors", async () => {
-    mockSpawn.mockReturnValue(mockProcess(composeContent));
+    mockSpawn.mockImplementation(() => mockProcess(composeContent));
     render(<YamlModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => screen.getByRole("button", { name: /Edit/i }));
     fireEvent.click(screen.getByRole("button", { name: /Edit/i }));
@@ -233,7 +239,7 @@ describe("YamlModal", () => {
   });
 
   it("Confirm Save Anyway button saves despite errors", async () => {
-    mockSpawn.mockReturnValue(mockProcess(composeContent));
+    mockSpawn.mockImplementation(() => mockProcess(composeContent));
     render(<YamlModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => screen.getByRole("button", { name: /Edit/i }));
     fireEvent.click(screen.getByRole("button", { name: /Edit/i }));
@@ -248,7 +254,7 @@ describe("YamlModal", () => {
   });
 
   it("Confirm Save Cancel dismisses the confirm modal", async () => {
-    mockSpawn.mockReturnValue(mockProcess(composeContent));
+    mockSpawn.mockImplementation(() => mockProcess(composeContent));
     render(<YamlModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => screen.getByRole("button", { name: /Edit/i }));
     fireEvent.click(screen.getByRole("button", { name: /Edit/i }));
@@ -263,13 +269,13 @@ describe("YamlModal", () => {
   });
 
   it("shows Env file button after loading", async () => {
-    mockSpawn.mockReturnValue(mockProcess(composeContent));
+    mockSpawn.mockImplementation(() => mockProcess(composeContent));
     render(<YamlModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => expect(screen.getByRole("button", { name: /Env file/i })).toBeInTheDocument());
   });
 
   it("clicking Env file button opens the env modal", async () => {
-    mockSpawn.mockReturnValue(mockProcess(composeContent));
+    mockSpawn.mockImplementation(() => mockProcess(composeContent));
     render(<YamlModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => screen.getByRole("button", { name: /Env file/i }));
     fireEvent.click(screen.getByRole("button", { name: /Env file/i }));
@@ -279,13 +285,13 @@ describe("YamlModal", () => {
 
 describe("YamlModal — add file", () => {
   it("shows Add file button after loading", async () => {
-    mockSpawn.mockReturnValue(mockProcess(composeContent));
+    mockSpawn.mockImplementation(() => mockProcess(composeContent));
     render(<YamlModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => expect(screen.getByRole("button", { name: /^Add$/i })).toBeInTheDocument());
   });
 
   it("clicking Add file opens sub-modal", async () => {
-    mockSpawn.mockReturnValue(mockProcess(composeContent));
+    mockSpawn.mockImplementation(() => mockProcess(composeContent));
     render(<YamlModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => screen.getByRole("button", { name: /^Add$/i }));
     fireEvent.click(screen.getByRole("button", { name: /^Add$/i }));
@@ -294,7 +300,7 @@ describe("YamlModal — add file", () => {
   });
 
   it("Create file with empty name shows error", async () => {
-    mockSpawn.mockReturnValue(mockProcess(composeContent));
+    mockSpawn.mockImplementation(() => mockProcess(composeContent));
     render(<YamlModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => screen.getByRole("button", { name: /^Add$/i }));
     fireEvent.click(screen.getByRole("button", { name: /^Add$/i }));
@@ -303,7 +309,7 @@ describe("YamlModal — add file", () => {
   });
 
   it("Create file with invalid extension shows error", async () => {
-    mockSpawn.mockReturnValue(mockProcess(composeContent));
+    mockSpawn.mockImplementation(() => mockProcess(composeContent));
     render(<YamlModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => screen.getByRole("button", { name: /^Add$/i }));
     fireEvent.click(screen.getByRole("button", { name: /^Add$/i }));
@@ -314,7 +320,7 @@ describe("YamlModal — add file", () => {
   });
 
   it("Create file with path separator shows error", async () => {
-    mockSpawn.mockReturnValue(mockProcess(composeContent));
+    mockSpawn.mockImplementation(() => mockProcess(composeContent));
     render(<YamlModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => screen.getByRole("button", { name: /^Add$/i }));
     fireEvent.click(screen.getByRole("button", { name: /^Add$/i }));
@@ -326,7 +332,7 @@ describe("YamlModal — add file", () => {
   it("Create file with valid name writes file and calls onFileAdded", async () => {
     const mockReplace = vi.fn().mockResolvedValue(undefined);
     mockCockpitFile.mockReturnValue({ replace: mockReplace });
-    mockSpawn.mockReturnValue(mockProcess(composeContent));
+    mockSpawn.mockImplementation(() => mockProcess(composeContent));
     const onFileAdded = vi.fn();
     render(<YamlModal stack={stack} onClose={vi.fn()} onFileAdded={onFileAdded} />);
     await waitFor(() => screen.getByRole("button", { name: /^Add$/i }));
@@ -343,7 +349,7 @@ describe("YamlModal — add file", () => {
   });
 
   it("after creation the add-file sub-modal closes", async () => {
-    mockSpawn.mockReturnValue(mockProcess(composeContent));
+    mockSpawn.mockImplementation(() => mockProcess(composeContent));
     render(<YamlModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => screen.getByRole("button", { name: /^Add$/i }));
     fireEvent.click(screen.getByRole("button", { name: /^Add$/i }));
@@ -357,21 +363,21 @@ describe("YamlModal — add file", () => {
 
 describe("YamlModal — delete file", () => {
   it("Delete file button is not shown on the primary tab", async () => {
-    mockSpawn.mockReturnValue(mockProcess(composeContent));
+    mockSpawn.mockImplementation(() => mockProcess(composeContent));
     render(<YamlModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => expect(screen.getByRole("button", { name: /^Add$/i })).toBeInTheDocument());
     expect(screen.queryByRole("button", { name: /Delete file/i })).toBeNull();
   });
 
   it("Delete file button is not shown on primary tab of multi-file stack", async () => {
-    mockSpawn.mockReturnValue(mockProcess(composeContent));
+    mockSpawn.mockImplementation(() => mockProcess(composeContent));
     render(<YamlModal stack={multiFileStack} onClose={vi.fn()} />);
     await waitFor(() => expect(screen.getByRole("button", { name: /^Add$/i })).toBeInTheDocument());
     expect(screen.queryByRole("button", { name: /Delete file/i })).toBeNull();
   });
 
   it("Delete file button is shown on a child tab", async () => {
-    mockSpawn.mockReturnValue(mockProcess(composeContent));
+    mockSpawn.mockImplementation(() => mockProcess(composeContent));
     render(<YamlModal stack={multiFileStack} onClose={vi.fn()} />);
     await waitFor(() => screen.getByRole("button", { name: /^Add$/i }));
     fireEvent.click(screen.getByRole("tab", { name: /prod\.yml/i }));
@@ -379,7 +385,7 @@ describe("YamlModal — delete file", () => {
   });
 
   it("clicking Delete file opens confirm dialog with filename", async () => {
-    mockSpawn.mockReturnValue(mockProcess(composeContent));
+    mockSpawn.mockImplementation(() => mockProcess(composeContent));
     render(<YamlModal stack={multiFileStack} onClose={vi.fn()} />);
     await waitFor(() => screen.getByRole("button", { name: /^Add$/i }));
     fireEvent.click(screen.getByRole("tab", { name: /prod\.yml/i }));
@@ -389,7 +395,7 @@ describe("YamlModal — delete file", () => {
   });
 
   it("Cancel on delete confirm closes the dialog", async () => {
-    mockSpawn.mockReturnValue(mockProcess(composeContent));
+    mockSpawn.mockImplementation(() => mockProcess(composeContent));
     render(<YamlModal stack={multiFileStack} onClose={vi.fn()} />);
     await waitFor(() => screen.getByRole("button", { name: /^Add$/i }));
     fireEvent.click(screen.getByRole("tab", { name: /prod\.yml/i }));
@@ -402,7 +408,7 @@ describe("YamlModal — delete file", () => {
   });
 
   it("confirming delete calls removeFile and onFileRemoved", async () => {
-    mockSpawn.mockReturnValue(mockProcess(composeContent));
+    mockSpawn.mockImplementation(() => mockProcess(composeContent));
     const onFileRemoved = vi.fn();
     render(<YamlModal stack={multiFileStack} onClose={vi.fn()} onFileRemoved={onFileRemoved} />);
     await waitFor(() => screen.getByRole("button", { name: /^Add$/i }));
@@ -424,13 +430,13 @@ describe("YamlModal — delete file", () => {
 
 describe("YamlModal — import file", () => {
   it("shows Import file button after loading", async () => {
-    mockSpawn.mockReturnValue(mockProcess(composeContent));
+    mockSpawn.mockImplementation(() => mockProcess(composeContent));
     render(<YamlModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => expect(screen.getByRole("button", { name: /^Import$/i })).toBeInTheDocument());
   });
 
   it("clicking Import file opens modal and shows available files after scan", async () => {
-    mockSpawn.mockReturnValue(mockProcess(composeContent));
+    mockSpawn.mockImplementation(() => mockProcess(composeContent));
     // mockImplementation creates a fresh CockpitProcess on each call so queueMicrotask
     // fires AFTER proc.stream(cb) is set, not before (mockReturnValue would pre-create
     // the process and fire the microtask before the Import button is even clicked)
@@ -446,7 +452,7 @@ describe("YamlModal — import file", () => {
   });
 
   it("filters files already in configFiles — only extras selectable", async () => {
-    mockSpawn.mockReturnValue(mockProcess(composeContent));
+    mockSpawn.mockImplementation(() => mockProcess(composeContent));
     // compose.yml is in configFiles; extra.yml is not — only extra.yml should be selectable
     mockListYamlFilesInDir.mockImplementation(() => mockProcess("/path/compose.yml\n/path/extra.yml\n"));
     const onFileAdded = vi.fn();
@@ -461,7 +467,7 @@ describe("YamlModal — import file", () => {
   });
 
   it("shows 'no files' message when directory has no additional YAMLs", async () => {
-    mockSpawn.mockReturnValue(mockProcess(composeContent));
+    mockSpawn.mockImplementation(() => mockProcess(composeContent));
     mockListYamlFilesInDir.mockImplementation(() => mockProcess("/path/compose.yml\n"));
     render(<YamlModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => screen.getByRole("button", { name: /^Import$/i }));
@@ -470,7 +476,7 @@ describe("YamlModal — import file", () => {
   });
 
   it("clicking Import adds the file and calls onFileAdded", async () => {
-    mockSpawn.mockReturnValue(mockProcess(composeContent));
+    mockSpawn.mockImplementation(() => mockProcess(composeContent));
     mockListYamlFilesInDir.mockImplementation(() => mockProcess("/path/staging.yml\n"));
     const onFileAdded = vi.fn();
     render(<YamlModal stack={stack} onClose={vi.fn()} onFileAdded={onFileAdded} />);
@@ -486,7 +492,7 @@ describe("YamlModal — import file", () => {
 
 describe("YamlModal — modal close (X button) handlers", () => {
   it("X button on add-file sub-modal closes it", async () => {
-    mockSpawn.mockReturnValue(mockProcess(composeContent));
+    mockSpawn.mockImplementation(() => mockProcess(composeContent));
     render(<YamlModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => screen.getByRole("button", { name: /^Add$/i }));
     fireEvent.click(screen.getByRole("button", { name: /^Add$/i }));
@@ -499,7 +505,7 @@ describe("YamlModal — modal close (X button) handlers", () => {
   });
 
   it("Cancel button on add-file sub-modal closes it", async () => {
-    mockSpawn.mockReturnValue(mockProcess(composeContent));
+    mockSpawn.mockImplementation(() => mockProcess(composeContent));
     render(<YamlModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => screen.getByRole("button", { name: /^Add$/i }));
     fireEvent.click(screen.getByRole("button", { name: /^Add$/i }));
@@ -510,7 +516,7 @@ describe("YamlModal — modal close (X button) handlers", () => {
   });
 
   it("X button on delete-confirm sub-modal closes it", async () => {
-    mockSpawn.mockReturnValue(mockProcess(composeContent));
+    mockSpawn.mockImplementation(() => mockProcess(composeContent));
     render(<YamlModal stack={multiFileStack} onClose={vi.fn()} />);
     await waitFor(() => screen.getByRole("button", { name: /^Add$/i }));
     fireEvent.click(screen.getByRole("tab", { name: /prod\.yml/i }));
@@ -524,7 +530,7 @@ describe("YamlModal — modal close (X button) handlers", () => {
   });
 
   it("X button on confirm-save sub-modal closes it", async () => {
-    mockSpawn.mockReturnValue(mockProcess(composeContent));
+    mockSpawn.mockImplementation(() => mockProcess(composeContent));
     render(<YamlModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => screen.getByRole("button", { name: /^Edit$/i }));
     // Open edit mode and trigger diagnostics warning then try to save

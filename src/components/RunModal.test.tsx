@@ -27,14 +27,14 @@ beforeEach(() => {
 describe("RunModal", () => {
   describe("config step", () => {
     it("renders modal title with stack name", async () => {
-      mockSpawn.mockReturnValue(mockProcess(""));
+      mockSpawn.mockImplementation(() => mockProcess(""));
       render(<RunModal stack={stack} onClose={vi.fn()} />);
       expect(screen.getByText(/Run — myapp/i)).toBeInTheDocument();
       await act(async () => {});
     });
 
     it("shows service field, command field, --rm checkbox, and Run button", async () => {
-      mockSpawn.mockReturnValue(mockProcess(""));
+      mockSpawn.mockImplementation(() => mockProcess(""));
       render(<RunModal stack={stack} onClose={vi.fn()} />);
       expect(screen.getByLabelText(/Command/i)).toBeInTheDocument();
       expect(screen.getByRole("checkbox", { name: /remove container/i })).toBeInTheDocument();
@@ -44,7 +44,7 @@ describe("RunModal", () => {
     });
 
     it("--rm checkbox is checked by default", async () => {
-      mockSpawn.mockReturnValue(mockProcess(""));
+      mockSpawn.mockImplementation(() => mockProcess(""));
       render(<RunModal stack={stack} onClose={vi.fn()} />);
       const checkbox = screen.getByRole("checkbox", { name: /remove container/i }) as HTMLInputElement;
       expect(checkbox.checked).toBe(true);
@@ -52,7 +52,7 @@ describe("RunModal", () => {
     });
 
     it("override entrypoint checkbox is unchecked by default and shows args help text", async () => {
-      mockSpawn.mockReturnValue(mockProcess(""));
+      mockSpawn.mockImplementation(() => mockProcess(""));
       render(<RunModal stack={stack} onClose={vi.fn()} />);
       const checkbox = screen.getByRole("checkbox", { name: /override entrypoint/i }) as HTMLInputElement;
       expect(checkbox.checked).toBe(false);
@@ -61,7 +61,7 @@ describe("RunModal", () => {
     });
 
     it("toggling override entrypoint shows override help text", async () => {
-      mockSpawn.mockReturnValue(mockProcess(""));
+      mockSpawn.mockImplementation(() => mockProcess(""));
       render(<RunModal stack={stack} onClose={vi.fn()} />);
       fireEvent.click(screen.getByRole("checkbox", { name: /override entrypoint/i }));
       expect(screen.getByText(/replaces the image's entrypoint entirely/i)).toBeInTheDocument();
@@ -69,21 +69,21 @@ describe("RunModal", () => {
     });
 
     it("populates service selector from compose YAML", async () => {
-      mockSpawn.mockReturnValue(mockProcess(composeYaml));
+      mockSpawn.mockImplementation(() => mockProcess(composeYaml));
       render(<RunModal stack={stack} onClose={vi.fn()} />);
       await waitFor(() => expect(screen.getByRole("option", { name: "web" })).toBeInTheDocument());
       expect(screen.getByRole("option", { name: "db" })).toBeInTheDocument();
     });
 
     it("Run button is disabled when command is empty", async () => {
-      mockSpawn.mockReturnValue(mockProcess(composeYaml));
+      mockSpawn.mockImplementation(() => mockProcess(composeYaml));
       render(<RunModal stack={stack} onClose={vi.fn()} />);
       await waitFor(() => screen.getByRole("option", { name: "web" }));
       expect(screen.getByRole("button", { name: /^Run$/i })).toBeDisabled();
     });
 
     it("Run button is enabled once service and command are filled", async () => {
-      mockSpawn.mockReturnValue(mockProcess(composeYaml));
+      mockSpawn.mockImplementation(() => mockProcess(composeYaml));
       render(<RunModal stack={stack} onClose={vi.fn()} />);
       await waitFor(() => screen.getByRole("option", { name: "web" }));
       await act(async () => {
@@ -93,7 +93,7 @@ describe("RunModal", () => {
     });
 
     it("calls onClose when Cancel clicked", async () => {
-      mockSpawn.mockReturnValue(mockProcess(""));
+      mockSpawn.mockImplementation(() => mockProcess(""));
       const onClose = vi.fn();
       render(<RunModal stack={stack} onClose={onClose} />);
       fireEvent.click(screen.getByRole("button", { name: /Cancel/i }));
@@ -103,14 +103,14 @@ describe("RunModal", () => {
 
     it("uses first ConfigFile from comma-separated list", async () => {
       const multiStack: ComposeStack = { ...stack, ConfigFiles: "/a.yml, /b.yml" };
-      mockSpawn.mockReturnValue(mockProcess(""));
+      mockSpawn.mockImplementation(() => mockProcess(""));
       render(<RunModal stack={multiStack} onClose={vi.fn()} />);
       await act(async () => {});
       expect(mockSpawn.mock.calls[0][0]).toContain("/a.yml");
     });
 
     it("changing service selection updates the selected service", async () => {
-      mockSpawn.mockReturnValue(mockProcess(composeYaml));
+      mockSpawn.mockImplementation(() => mockProcess(composeYaml));
       render(<RunModal stack={stack} onClose={vi.fn()} />);
       await waitFor(() => screen.getByRole("option", { name: "db" }));
       fireEvent.change(screen.getByRole("combobox", { name: /service/i }), { target: { value: "db" } });
@@ -119,7 +119,7 @@ describe("RunModal", () => {
     });
 
     it("shows text input for service when no services found in compose file", async () => {
-      mockSpawn.mockReturnValue(mockProcess("services: {}"));
+      mockSpawn.mockImplementation(() => mockProcess("services: {}"));
       render(<RunModal stack={stack} onClose={vi.fn()} />);
       await waitFor(() => expect(screen.getByRole("textbox", { name: /service/i })).toBeInTheDocument());
       fireEvent.change(screen.getByRole("textbox", { name: /service/i }), { target: { value: "myservice" } });
@@ -140,8 +140,8 @@ describe("RunModal", () => {
     // before streamCb is set, so the stream callback never fires.
     async function clickRun(onClose = vi.fn(), runOutput = "", runError?: string) {
       mockSpawn
-        .mockReturnValueOnce(mockProcess(composeYaml))
-        .mockReturnValueOnce(mockProcess("")) // snapshotProjectContainerIds
+        .mockImplementationOnce(() => mockProcess(composeYaml))
+        .mockImplementationOnce(() => mockProcess("")) // snapshotProjectContainerIds
         .mockImplementationOnce(() => mockProcess(runOutput, runError));
       render(<RunModal stack={stack} onClose={onClose} />);
       await waitFor(() => screen.getByRole("option", { name: "web" }));
@@ -195,9 +195,9 @@ describe("RunModal", () => {
   describe("compose run command", () => {
     async function triggerRun(rm: boolean) {
       mockSpawn
-        .mockReturnValueOnce(mockProcess(composeYaml))
-        .mockReturnValueOnce(mockProcess("")) // snapshotProjectContainerIds
-        .mockReturnValueOnce(mockProcess(""));
+        .mockImplementationOnce(() => mockProcess(composeYaml))
+        .mockImplementationOnce(() => mockProcess("")) // snapshotProjectContainerIds
+        .mockImplementationOnce(() => mockProcess(""));
       render(<RunModal stack={stack} onClose={vi.fn()} />);
       await waitFor(() => screen.getByRole("option", { name: "web" }));
       if (!rm) {
@@ -213,9 +213,9 @@ describe("RunModal", () => {
 
     async function triggerRunOverrideEntrypoint(cmd: string) {
       mockSpawn
-        .mockReturnValueOnce(mockProcess(composeYaml))
-        .mockReturnValueOnce(mockProcess("")) // snapshotProjectContainerIds
-        .mockReturnValueOnce(mockProcess(""));
+        .mockImplementationOnce(() => mockProcess(composeYaml))
+        .mockImplementationOnce(() => mockProcess("")) // snapshotProjectContainerIds
+        .mockImplementationOnce(() => mockProcess(""));
       render(<RunModal stack={stack} onClose={vi.fn()} />);
       await waitFor(() => screen.getByRole("option", { name: "web" }));
       await act(async () => { fireEvent.click(screen.getByRole("checkbox", { name: /override entrypoint/i })); });
@@ -281,7 +281,7 @@ describe("RunModal", () => {
 
   describe("command history", () => {
     it("wires the command field to a datalist for browser-native suggestions", async () => {
-      mockSpawn.mockReturnValue(mockProcess(""));
+      mockSpawn.mockImplementation(() => mockProcess(""));
       render(<RunModal stack={stack} onClose={vi.fn()} />);
       const input = screen.getByLabelText(/Command/i) as HTMLInputElement;
       expect(input.getAttribute("list")).toBeTruthy();
@@ -290,8 +290,8 @@ describe("RunModal", () => {
 
     it("records the command on Run, and it appears as a suggestion in a freshly mounted modal", async () => {
       mockSpawn
-        .mockReturnValueOnce(mockProcess(composeYaml))
-        .mockReturnValueOnce(mockProcess(""))
+        .mockImplementationOnce(() => mockProcess(composeYaml))
+        .mockImplementationOnce(() => mockProcess(""))
         .mockImplementationOnce(() => mockProcess(""));
       const { unmount } = render(<RunModal stack={stack} onClose={vi.fn()} />);
       await waitFor(() => screen.getByRole("option", { name: "web" }));
@@ -304,7 +304,7 @@ describe("RunModal", () => {
       await act(async () => {});
       unmount();
 
-      mockSpawn.mockReturnValue(mockProcess(""));
+      mockSpawn.mockImplementation(() => mockProcess(""));
       render(<RunModal stack={stack} onClose={vi.fn()} />);
       const input = screen.getByLabelText(/Command/i);
       const listId = input.getAttribute("list")!;

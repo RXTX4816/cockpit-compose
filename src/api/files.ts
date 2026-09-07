@@ -9,9 +9,28 @@ import {
   type TarCreateResult,
 } from "@rxtx4816/cockpit-plugin-base-react/lib/tar";
 import { readFile, writeFile } from "@rxtx4816/cockpit-plugin-base-react/lib/cockpit-fs";
+import { makeFakeProcess } from "./stacks/internal";
 
+// Reads via Cockpit's own file channel (cockpit.file()) rather than spawning `cat` — this is
+// read far more often than it changes (every stack-list/container poll used to re-spawn it),
+// and cockpit.file() skips the process-spawn cost entirely. Falls back to the exact previous
+// `cat`-based behavior on any failure, so this can't be less reliable than before. Preserves
+// the original contract of rejecting (rather than resolving null) when the file is missing,
+// since every existing caller already handles that via try/catch.
 export function readComposeFile(path: string): CockpitProcess {
-  return cockpit.spawn(["cat", path], { err: "message" });
+  return makeFakeProcess(async () => {
+    try {
+      const content = await readFile(path);
+      if (content === null) throw new Error(`cockpit.file: ${path}: No such file or directory`);
+      return content;
+    } catch {
+      let content = "";
+      const proc = cockpit.spawn(["cat", path], { err: "message" });
+      proc.stream((d: string) => { content += d; });
+      await proc;
+      return content;
+    }
+  });
 }
 
 export async function readAllProfiles(configFile: string): Promise<string[]> {

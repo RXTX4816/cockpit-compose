@@ -66,14 +66,14 @@ beforeEach(() => {
 
 describe("ExecModal", () => {
   it("renders modal title with stack name", async () => {
-    mockSpawn.mockReturnValue(mockProcess(""));
+    mockSpawn.mockImplementation(() => mockProcess(""));
     render(<ExecModal stack={stack} onClose={vi.fn()} />);
     expect(screen.getByText(/Shell — myapp/i)).toBeInTheDocument();
     await act(async () => {});
   });
 
   it("shows config step by default", async () => {
-    mockSpawn.mockReturnValue(mockProcess(""));
+    mockSpawn.mockImplementation(() => mockProcess(""));
     render(<ExecModal stack={stack} onClose={vi.fn()} />);
     expect(screen.getByLabelText(/Command/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Open shell/i })).toBeInTheDocument();
@@ -81,14 +81,14 @@ describe("ExecModal", () => {
   });
 
   it("populates service selector from compose YAML", async () => {
-    mockSpawn.mockReturnValue(mockProcess(composeYaml));
+    mockSpawn.mockImplementation(() => mockProcess(composeYaml));
     render(<ExecModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => expect(screen.getByRole("option", { name: "web" })).toBeInTheDocument());
     expect(screen.getByRole("option", { name: "db" })).toBeInTheDocument();
   });
 
   it("defaults shell to /bin/sh", async () => {
-    mockSpawn.mockReturnValue(mockProcess(""));
+    mockSpawn.mockImplementation(() => mockProcess(""));
     render(<ExecModal stack={stack} onClose={vi.fn()} />);
     const shellInput = screen.getByLabelText(/Command/i) as HTMLInputElement & { value: string };
     expect(shellInput.value).toBe("/bin/sh");
@@ -96,7 +96,7 @@ describe("ExecModal", () => {
   });
 
   it("Open shell button is disabled when service is empty", async () => {
-    mockSpawn.mockReturnValue(mockProcess(""));
+    mockSpawn.mockImplementation(() => mockProcess(""));
     render(<ExecModal stack={stack} onClose={vi.fn()} />);
     // No services loaded (file returned nothing) and no manual input
     const btn = screen.getByRole("button", { name: /Open shell/i });
@@ -105,7 +105,7 @@ describe("ExecModal", () => {
   });
 
   it("shows terminal step after clicking Open shell", async () => {
-    mockSpawn.mockReturnValue(mockProcess(composeYaml));
+    mockSpawn.mockImplementation(() => mockProcess(composeYaml));
     render(<ExecModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => screen.getByRole("option", { name: "web" }));
     fireEvent.click(screen.getByRole("button", { name: /Open shell/i }));
@@ -113,7 +113,7 @@ describe("ExecModal", () => {
   });
 
   it("calls onClose when Cancel clicked on config step", async () => {
-    mockSpawn.mockReturnValue(mockProcess(""));
+    mockSpawn.mockImplementation(() => mockProcess(""));
     const onClose = vi.fn();
     render(<ExecModal stack={stack} onClose={onClose} />);
     fireEvent.click(screen.getByRole("button", { name: /Cancel/i }));
@@ -122,7 +122,7 @@ describe("ExecModal", () => {
   });
 
   it("service select onChange updates selected service", async () => {
-    mockSpawn.mockReturnValue(mockProcess(composeYaml));
+    mockSpawn.mockImplementation(() => mockProcess(composeYaml));
     render(<ExecModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => screen.getByRole("option", { name: "web" }));
     const select = screen.getByRole("combobox", { name: /service/i });
@@ -132,7 +132,7 @@ describe("ExecModal", () => {
   });
 
   it("service TextInput onChange updates selected service when no services loaded", async () => {
-    mockSpawn.mockReturnValue(mockProcess(""));
+    mockSpawn.mockImplementation(() => mockProcess(""));
     render(<ExecModal stack={stack} onClose={vi.fn()} />);
     await act(async () => {});
     const input = screen.getByPlaceholderText(/service name/i);
@@ -141,7 +141,7 @@ describe("ExecModal", () => {
   });
 
   it("command TextInput onChange updates shell value", async () => {
-    mockSpawn.mockReturnValue(mockProcess(""));
+    mockSpawn.mockImplementation(() => mockProcess(""));
     render(<ExecModal stack={stack} onClose={vi.fn()} />);
     await act(async () => {});
     const cmdInput = screen.getByPlaceholderText(/\/bin\/sh/i);
@@ -150,7 +150,7 @@ describe("ExecModal", () => {
   });
 
   it("user TextInput onChange updates user value", async () => {
-    mockSpawn.mockReturnValue(mockProcess(""));
+    mockSpawn.mockImplementation(() => mockProcess(""));
     render(<ExecModal stack={stack} onClose={vi.fn()} />);
     await act(async () => {});
     const userInput = screen.getByPlaceholderText(/root/i);
@@ -160,7 +160,7 @@ describe("ExecModal", () => {
 
   it("launchTerminal sets up channel and terminal when requestAnimationFrame fires", async () => {
     vi.stubGlobal("requestAnimationFrame", (fn: (time: number) => void) => { fn(0); return 0; });
-    mockSpawn.mockReturnValue(mockProcess(composeYaml));
+    mockSpawn.mockImplementation(() => mockProcess(composeYaml));
     const mockCockpit = { spawn: mockSpawn, channel: vi.fn().mockReturnValue(mockChannel) };
     vi.stubGlobal("cockpit", mockCockpit);
     render(<ExecModal stack={stack} onClose={vi.fn()} />);
@@ -177,7 +177,7 @@ describe("ExecModal", () => {
     vi.stubGlobal("requestAnimationFrame", (fn: (time: number) => void) => { fn(0); return 0; });
     const mockCockpit = { spawn: mockSpawn, channel: vi.fn().mockReturnValue(mockChannel) };
     vi.stubGlobal("cockpit", mockCockpit);
-    mockSpawn.mockReturnValue(mockProcess(composeYaml));
+    mockSpawn.mockImplementation(() => mockProcess(composeYaml));
     render(<ExecModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => screen.getByRole("option", { name: "web" }));
     await act(async () => {
@@ -199,7 +199,7 @@ describe("ExecModal", () => {
     vi.stubGlobal("requestAnimationFrame", (fn: (time: number) => void) => { fn(0); return 0; });
     const mockCockpit = { spawn: mockSpawn, channel: vi.fn().mockReturnValue(mockChannel) };
     vi.stubGlobal("cockpit", mockCockpit);
-    mockSpawn.mockReturnValue(mockProcess(composeYaml));
+    mockSpawn.mockImplementation(() => mockProcess(composeYaml));
     render(<ExecModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => screen.getByRole("option", { name: "web" }));
     await act(async () => {
@@ -220,7 +220,7 @@ describe("ExecModal", () => {
     vi.stubGlobal("requestAnimationFrame", (fn: (time: number) => void) => { fn(0); return 0; });
     const mockCockpit = { spawn: mockSpawn, channel: vi.fn().mockReturnValue(mockChannel) };
     vi.stubGlobal("cockpit", mockCockpit);
-    mockSpawn.mockReturnValue(mockProcess(composeYaml));
+    mockSpawn.mockImplementation(() => mockProcess(composeYaml));
     render(<ExecModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => screen.getByRole("option", { name: "web" }));
     await act(async () => {
@@ -238,7 +238,7 @@ describe("ExecModal", () => {
     vi.stubGlobal("requestAnimationFrame", (fn: (time: number) => void) => { fn(0); return 0; });
     const mockCockpit = { spawn: mockSpawn, channel: vi.fn().mockReturnValue(mockChannel) };
     vi.stubGlobal("cockpit", mockCockpit);
-    mockSpawn.mockReturnValue(mockProcess(composeYaml));
+    mockSpawn.mockImplementation(() => mockProcess(composeYaml));
     render(<ExecModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => screen.getByRole("option", { name: "web" }));
     await act(async () => {
@@ -257,7 +257,7 @@ describe("ExecModal", () => {
     vi.stubGlobal("requestAnimationFrame", (fn: (time: number) => void) => { fn(0); return 0; });
     const mockCockpit = { spawn: mockSpawn, channel: vi.fn().mockReturnValue(mockChannel) };
     vi.stubGlobal("cockpit", mockCockpit);
-    mockSpawn.mockReturnValue(mockProcess(composeYaml));
+    mockSpawn.mockImplementation(() => mockProcess(composeYaml));
     render(<ExecModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => screen.getByRole("option", { name: "web" }));
     await act(async () => {
@@ -273,7 +273,7 @@ describe("ExecModal", () => {
   });
 
   it("cockpit-style event does nothing when terminal is not yet active", async () => {
-    mockSpawn.mockReturnValue(mockProcess(""));
+    mockSpawn.mockImplementation(() => mockProcess(""));
     render(<ExecModal stack={stack} onClose={vi.fn()} />);
     await act(async () => {});
     await act(async () => {
@@ -287,7 +287,7 @@ describe("ExecModal", () => {
     vi.stubGlobal("requestAnimationFrame", (fn: (time: number) => void) => { fn(0); return 0; });
     const mockCockpit = { spawn: mockSpawn, channel: vi.fn().mockReturnValue(mockChannel) };
     vi.stubGlobal("cockpit", mockCockpit);
-    mockSpawn.mockReturnValue(mockProcess(composeYaml));
+    mockSpawn.mockImplementation(() => mockProcess(composeYaml));
     render(<ExecModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => screen.getByRole("option", { name: "web" }));
     await act(async () => {
@@ -305,7 +305,7 @@ describe("ExecModal", () => {
   });
 
   it("launchTerminal returns early when selected service is empty", async () => {
-    mockSpawn.mockReturnValue(mockProcess(""));
+    mockSpawn.mockImplementation(() => mockProcess(""));
     render(<ExecModal stack={stack} onClose={vi.fn()} />);
     await act(async () => {});
     // Button is disabled (no service), but fireEvent bypasses disabled state in jsdom
@@ -319,7 +319,7 @@ describe("ExecModal", () => {
     vi.stubGlobal("requestAnimationFrame", (fn: (time: number) => void) => { fn(0); return 0; });
     const mockCockpit = { spawn: mockSpawn, channel: vi.fn().mockReturnValue(mockChannel) };
     vi.stubGlobal("cockpit", mockCockpit);
-    mockSpawn.mockReturnValue(mockProcess(composeYaml));
+    mockSpawn.mockImplementation(() => mockProcess(composeYaml));
     render(<ExecModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => screen.getByRole("option", { name: "web" }));
     const userInput = screen.getByPlaceholderText(/root/i);
@@ -339,7 +339,7 @@ describe("ExecModal", () => {
     vi.stubGlobal("requestAnimationFrame", (fn: (time: number) => void) => { fn(0); return 0; });
     const mockCockpit = { spawn: mockSpawn, channel: vi.fn().mockReturnValue(mockChannel) };
     vi.stubGlobal("cockpit", mockCockpit);
-    mockSpawn.mockReturnValue(mockProcess(composeYaml));
+    mockSpawn.mockImplementation(() => mockProcess(composeYaml));
     render(<ExecModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => screen.getByRole("option", { name: "web" }));
     fireEvent.change(screen.getByLabelText(/Command/i), { target: { value: '/app/mybin "an arg with spaces"' } });
@@ -359,7 +359,7 @@ describe("ExecModal", () => {
     vi.stubGlobal("requestAnimationFrame", (fn: (time: number) => void) => { fn(0); return 0; });
     const mockCockpit = { spawn: mockSpawn, channel: vi.fn().mockReturnValue(mockChannel) };
     vi.stubGlobal("cockpit", mockCockpit);
-    mockSpawn.mockReturnValue(mockProcess(composeYaml));
+    mockSpawn.mockImplementation(() => mockProcess(composeYaml));
     render(<ExecModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => screen.getByRole("option", { name: "web" }));
     await act(async () => {
@@ -381,7 +381,7 @@ describe("ExecModal", () => {
     vi.stubGlobal("requestAnimationFrame", (fn: (time: number) => void) => { fn(0); return 0; });
     const mockCockpit = { spawn: mockSpawn, channel: vi.fn().mockReturnValue(mockChannel) };
     vi.stubGlobal("cockpit", mockCockpit);
-    mockSpawn.mockReturnValue(mockProcess(composeYaml));
+    mockSpawn.mockImplementation(() => mockProcess(composeYaml));
     render(<ExecModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => screen.getByRole("option", { name: "web" }));
     await act(async () => {
@@ -415,7 +415,7 @@ describe("ExecModal", () => {
     });
 
     it("wires the command field to a datalist for browser-native suggestions", async () => {
-      mockSpawn.mockReturnValue(mockProcess(""));
+      mockSpawn.mockImplementation(() => mockProcess(""));
       render(<ExecModal stack={stack} onClose={vi.fn()} />);
       const input = screen.getByLabelText(/Command/i) as HTMLInputElement;
       expect(input.getAttribute("list")).toBeTruthy();
@@ -425,7 +425,7 @@ describe("ExecModal", () => {
     it("records the command on launch, and it appears as a suggestion in a freshly mounted modal", async () => {
       vi.stubGlobal("requestAnimationFrame", (fn: (time: number) => void) => { fn(0); return 0; });
       vi.stubGlobal("cockpit", { spawn: mockSpawn, channel: vi.fn().mockReturnValue(mockChannel) });
-      mockSpawn.mockReturnValue(mockProcess(composeYaml));
+      mockSpawn.mockImplementation(() => mockProcess(composeYaml));
       const { unmount } = render(<ExecModal stack={stack} onClose={vi.fn()} />);
       await waitFor(() => screen.getByRole("option", { name: "web" }));
       fireEvent.change(screen.getByLabelText(/Command/i), { target: { value: "/bin/bash" } });
@@ -434,7 +434,7 @@ describe("ExecModal", () => {
       });
       unmount();
 
-      mockSpawn.mockReturnValue(mockProcess(""));
+      mockSpawn.mockImplementation(() => mockProcess(""));
       render(<ExecModal stack={stack} onClose={vi.fn()} />);
       const input = screen.getByLabelText(/Command/i);
       const listId = input.getAttribute("list")!;

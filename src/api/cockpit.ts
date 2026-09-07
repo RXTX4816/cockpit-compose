@@ -171,11 +171,34 @@ export async function redetectSockets(runtime: Runtime): Promise<void> {
 // socket file exists, but that the daemon/storage behind it responds. Rootful candidates are
 // probed with superuser "try" (mirrors how real commands escalate); if Cockpit's admin-access
 // bridge isn't enabled, this degrades to an unprivileged attempt and reports the real failure.
+//
+// Tried over the socket's own REST API first (GET /version — cheap, and every engine that
+// implements this compat layer serves it) rather than spawning a whole CLI process just to
+// confirm the daemon responds; this runs once per candidate at startup, not on a poll, but
+// process-spawn + bridge dispatch overhead is disproportionately expensive on slow hardware
+// even for a one-off check. Falls back to the exact previous CLI probe (which also supplies a
+// human-readable failure reason) on any failure — this can't be less reliable than before, and
+// this specific runtime/mode combination isn't necessarily the currently *active* selection
+// (the caller may be probing an alternate mode the user hasn't switched to), so this can't
+// reuse the "current selection" HTTP client the polling paths use — it targets this candidate
+// directly.
 export async function checkSocketHealth(runtime: Runtime, mode: SocketMode): Promise<{ ok: boolean; reason?: string }> {
   const candidate = socketInfo[runtime][mode];
   if (!candidate) return { ok: false, reason: "socket not detected" };
 
   const superuser: "try" | undefined = mode === "rootful" ? "try" : undefined;
+
+  const socketPath = candidate.path.replace(/^unix:\/\//, "");
+  try {
+    const http = cockpit.http(socketPath, { superuser });
+    try {
+      await http.get("/version");
+      return { ok: true };
+    } finally {
+      http.close();
+    }
+  } catch { /* fall through to the CLI probe below */ }
+
   const probeArgs = runtime === "podman" ? ["podman", "ps"] : ["docker", "version", "--format", "{{.Server.Version}}"];
   try {
     await cockpit.spawn(probeArgs, { superuser, err: "message", environ: candidate.environ });

@@ -10,16 +10,39 @@ const mockCockpitFile = vi.fn().mockReturnValue(mockFileHandle);
 beforeEach(() => {
   mockSpawn.mockReset();
   mockReplace.mockReset().mockResolvedValue(undefined);
-  mockRead.mockReset();
+  // Fails by default so existing cat-spawn-based tests (which only configure mockSpawn) keep
+  // exercising the fallback path unaffected — readComposeFile() now tries cockpit.file() first.
+  mockRead.mockReset().mockRejectedValue(new Error("cockpit.file not mocked in this test"));
   mockCockpitFile.mockReset().mockReturnValue(mockFileHandle);
   vi.stubGlobal("cockpit", { spawn: mockSpawn, file: mockCockpitFile });
 });
 
 describe("readComposeFile", () => {
-  it("spawns cat on the given path", async () => {
+  it("reads via cockpit.file() and skips spawning entirely on success", async () => {
     const { readComposeFile } = await import("./files");
-    mockSpawn.mockReturnValue(mockProcess("content"));
-    readComposeFile("/path/compose.yml");
+    mockRead.mockResolvedValue("content");
+    const content = await readComposeFile("/path/compose.yml");
+    expect(content).toBe("content");
+    expect(mockCockpitFile).toHaveBeenCalledWith("/path/compose.yml", undefined);
+    expect(mockSpawn).not.toHaveBeenCalled();
+  });
+
+  it("rejects (does not resolve empty) when cockpit.file() reports the file missing", async () => {
+    const { readComposeFile } = await import("./files");
+    mockRead.mockResolvedValue(null); // cockpit.file()'s read() resolves null on ENOENT
+    // Lazy: readComposeFile() takes an async hop (the cockpit.file() attempt) before this
+    // fallback spawn, so an eagerly-created mockProcess would resolve before proc.stream() is
+    // registered — see the identical fix already applied elsewhere for this same race.
+    mockSpawn.mockImplementation(() => mockProcess("", "No such file or directory"));
+    await expect(readComposeFile("/path/missing.yml")).rejects.toThrow();
+  });
+
+  it("falls back to spawning cat when cockpit.file() fails", async () => {
+    const { readComposeFile } = await import("./files");
+    mockRead.mockRejectedValue(new Error("access denied"));
+    mockSpawn.mockImplementation(() => mockProcess("content"));
+    const content = await readComposeFile("/path/compose.yml");
+    expect(content).toBe("content");
     const args = mockSpawn.mock.calls[0][0] as string[];
     expect(args).toEqual(["cat", "/path/compose.yml"]);
   });
@@ -263,21 +286,21 @@ describe("createBackupArchive", () => {
 describe("readAllProfiles", () => {
   it("returns profiles parsed from the compose file", async () => {
     const { readAllProfiles } = await import("./files");
-    mockSpawn.mockReturnValue(mockProcess("services:\n  svc:\n    image: alpine\n    profiles: [dev]\n"));
+    mockSpawn.mockImplementation(() => mockProcess("services:\n  svc:\n    image: alpine\n    profiles: [dev]\n"));
     const profiles = await readAllProfiles("/path/compose.yml");
     expect(profiles).toEqual(["dev"]);
   });
 
   it("returns empty array when spawn rejects", async () => {
     const { readAllProfiles } = await import("./files");
-    mockSpawn.mockReturnValue(mockProcess("", "permission denied"));
+    mockSpawn.mockImplementation(() => mockProcess("", "permission denied"));
     const profiles = await readAllProfiles("/path/compose.yml");
     expect(profiles).toEqual([]);
   });
 
   it("returns empty array when compose file has no profiles", async () => {
     const { readAllProfiles } = await import("./files");
-    mockSpawn.mockReturnValue(mockProcess("services:\n  web:\n    image: nginx\n"));
+    mockSpawn.mockImplementation(() => mockProcess("services:\n  web:\n    image: nginx\n"));
     const profiles = await readAllProfiles("/path/compose.yml");
     expect(profiles).toEqual([]);
   });
