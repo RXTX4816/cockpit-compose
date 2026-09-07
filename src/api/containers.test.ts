@@ -147,6 +147,35 @@ describe("getContainerStats [engine HTTP API]", () => {
     expect(mockSpawn).toHaveBeenCalledTimes(1);
   });
 
+  it("falls back to the CLI for Podman's real stats shape, not a wrong CPU% (verified live against a real podman.sock)", async () => {
+    // Podman's compat /containers/{id}/stats?stream=false does NOT provide a real second CPU
+    // sample the way Docker's does — precpu_stats always comes back with total_usage: 0 and no
+    // system_cpu_usage key at all, confirmed by sampling a real running container 3 times, 2s
+    // apart, over a live podman.sock. Plugging that into the delta formula wouldn't throw
+    // (cpu_stats.system_cpu_usage alone is a valid positive number) — it would silently
+    // compute cumulative average CPU since container start, not current CPU%. This must fall
+    // back to the CLI instead of returning that wrong number.
+    const cockpitMod = await import("./cockpit");
+    cockpitMod.setRuntime("podman");
+    vi.spyOn(cockpitMod, "getIsPodman").mockReturnValue(true);
+    vi.spyOn(cockpitMod, "getPodmanSocketPath").mockReturnValue("unix:///run/user/1000/podman/podman.sock");
+    mockHttp.mockReturnValue(mockHttpClient({
+      "/containers/abc123/stats": JSON.stringify({
+        name: "long-logs_web_1",
+        cpu_stats: { cpu_usage: { total_usage: 1343621000 }, system_cpu_usage: 17315571000 },
+        precpu_stats: { cpu_usage: { total_usage: 0 } }, // no system_cpu_usage key — real podman shape
+        memory_stats: { usage: 25436160, limit: 1007079424 }, // no stats.cache key — also real podman shape
+      }),
+    }));
+    mockSpawn.mockImplementation(() => mockProcess("[]"));
+
+    const { getContainerStats: stats } = await import("./containers");
+    const proc = stats(["abc123"]);
+    await proc;
+
+    expect(mockSpawn).toHaveBeenCalledTimes(1);
+  });
+
   it("falls back to the CLI when the HTTP request fails outright", async () => {
     const cockpitMod = await import("./cockpit");
     vi.spyOn(cockpitMod, "getDockerSocketPath").mockReturnValue("unix:///var/run/docker.sock");

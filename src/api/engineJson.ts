@@ -64,13 +64,22 @@ export interface EngineContainerStatsJson {
 }
 
 // Docker's own CPU% formula (matches what `docker stats`/`CLI --format {{.CPUPerc}}` shows):
-// (cpu_delta / system_delta) * number_of_cpus * 100. Throws on a degenerate sample (e.g.
-// system_delta <= 0, which can happen on the very first sample after a container starts, or
-// if a runtime's compat stats endpoint doesn't populate these fields the way Docker's does)
-// rather than returning a nonsensical percentage — callers fall back to the CLI in that case.
+// (cpu_delta / system_delta) * number_of_cpus * 100. This only works when precpu_stats is a
+// real, slightly-earlier second sample — true for Docker's own daemon, confirmed *not* true
+// for Podman's compat endpoint: verified live against a real podman.sock that `precpu_stats`
+// always comes back as total_usage=0 with system_cpu_usage omitted entirely, never an actual
+// second sample, however long the container has been running. Silently plugging that into the
+// formula wouldn't crash — cpu_stats.system_cpu_usage alone is still a valid, non-zero number
+// — it would just quietly compute the wrong thing: cumulative average CPU use since container
+// start, not the current instantaneous CPU%. So precpu_stats.system_cpu_usage being absent is
+// treated as a hard signal this sample can't yield a real percentage, same as a non-positive
+// delta — callers fall back to the CLI in both cases, which is correct for Podman.
 export function engineCpuPercent(s: EngineContainerStatsJson): number {
+  if (s.precpu_stats.system_cpu_usage === undefined) {
+    throw new Error("engineCpuPercent: precpu_stats has no system_cpu_usage — not a real second sample");
+  }
   const cpuDelta = s.cpu_stats.cpu_usage.total_usage - s.precpu_stats.cpu_usage.total_usage;
-  const systemDelta = (s.cpu_stats.system_cpu_usage ?? 0) - (s.precpu_stats.system_cpu_usage ?? 0);
+  const systemDelta = (s.cpu_stats.system_cpu_usage ?? 0) - s.precpu_stats.system_cpu_usage;
   if (systemDelta <= 0 || cpuDelta < 0) {
     throw new Error("engineCpuPercent: degenerate stats sample (no usable delta)");
   }
