@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { mockSpawn } from "../test/setup";
-import { mockProcess } from "../test/helpers";
+import { mockProcess, mockHttpClient } from "../test/helpers";
 
 beforeEach(() => {
   mockSpawn.mockReset();
@@ -190,12 +190,27 @@ describe("checkSocketHealth() / redetectSockets()", () => {
     expect(result).toEqual({ ok: false, reason: "permission denied" });
   });
 
-  it("reports healthy when the probe command succeeds", async () => {
+  it("reports healthy when the CLI probe succeeds (no cockpit.http available)", async () => {
     mockSpawn.mockImplementation(() => mockProcess("socket"));
     const { detectDockerMode, checkSocketHealth } = await import("./cockpit");
     await detectDockerMode();
     const result = await checkSocketHealth("docker", "rootless");
     expect(result).toEqual({ ok: true });
+  });
+
+  it("reports healthy via GET /version over the socket, without spawning a CLI probe at all", async () => {
+    const mockHttp = vi.fn(() => mockHttpClient({ "/version": '{"Version":"24.0.0"}' }));
+    mockSpawn.mockImplementation(() => mockProcess("socket")); // only used for socket detection
+    vi.stubGlobal("cockpit", { spawn: mockSpawn, user: mockUser, http: mockHttp });
+    const { detectDockerMode, checkSocketHealth } = await import("./cockpit");
+    await detectDockerMode();
+    const spawnCallsAfterDetection = mockSpawn.mock.calls.length;
+
+    const result = await checkSocketHealth("docker", "rootless");
+
+    expect(result).toEqual({ ok: true });
+    expect(mockHttp).toHaveBeenCalledWith("/run/user/1000/docker.sock", { superuser: undefined });
+    expect(mockSpawn.mock.calls.length).toBe(spawnCallsAfterDetection); // no additional spawn for the probe
   });
 
   it("reports unavailable when the candidate was never detected", async () => {

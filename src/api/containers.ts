@@ -1,6 +1,10 @@
 import { compose, cli, getIsPodman, dockerSpawnEnviron, composeIsLimitedBackend, socketSuperuser } from "./cockpit";
 import { engineHttpGetJson, drainProcess } from "./engineHttp";
-import { type EngineContainerJson, engineContainerName, enginePortsToString, isOneoffContainer } from "./engineJson";
+import {
+  type EngineContainerJson, type EngineContainerStatsJson,
+  engineContainerName, enginePortsToString, isOneoffContainer,
+  engineCpuPercent, engineMemoryUsageBytes,
+} from "./engineJson";
 import { makeFakeProcess } from "./stacks/internal";
 
 interface PodmanPort {
@@ -113,7 +117,32 @@ export function listContainers(project: string): CockpitProcess {
   });
 }
 
-export function getContainerStats(containerIds: string[]): CockpitProcess {
+// Pure read, tried over the engine's REST API first — same rationale as listContainers().
+// Unlike the CLI's `docker stats id1 id2 ...` (one call for every container), the Engine API
+// has no batch form: one GET /containers/{id}/stats per container, run in parallel. That's
+// still a clear win here since process-spawn overhead — not the number of HTTP round trips —
+// dominates the cost on constrained hardware. Any single container's stats failing to parse
+// (or the whole batch failing) falls back to the exact previous CLI behavior.
+async function getContainerStatsHttp(containerIds: string[]): Promise<string> {
+  const results = await Promise.all(containerIds.map(async id => {
+    const s = await engineHttpGetJson<EngineContainerStatsJson>(`/containers/${id}/stats`, { stream: "false" });
+    const cpuPercent = engineCpuPercent(s);
+    const usage = engineMemoryUsageBytes(s);
+    const limit = s.memory_stats.limit ?? 0;
+    return {
+      id,
+      name: (s.name ?? "").replace(/^\//, ""),
+      cpu: `${cpuPercent.toFixed(2)}%`,
+      mem: `${usage}B / ${limit}B`,
+      memPerc: limit > 0 ? `${((usage / limit) * 100).toFixed(2)}%` : "0.00%",
+      net: "",
+      block: "",
+    };
+  }));
+  return JSON.stringify(results);
+}
+
+function getContainerStatsCli(containerIds: string[]): CockpitProcess {
   const cpuField = getIsPodman() ? "{{.CPU}}" : "{{.CPUPerc}}";
   return cockpit.spawn(
     cli("stats", "--no-stream",
@@ -123,4 +152,14 @@ export function getContainerStats(containerIds: string[]): CockpitProcess {
     ),
     { superuser: socketSuperuser(), err: "message", ...dockerSpawnEnviron() },
   );
+}
+
+export function getContainerStats(containerIds: string[]): CockpitProcess {
+  return makeFakeProcess(async () => {
+    try {
+      return await getContainerStatsHttp(containerIds);
+    } catch {
+      return await drainProcess(getContainerStatsCli(containerIds));
+    }
+  });
 }
