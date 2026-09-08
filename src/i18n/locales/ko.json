@@ -95,7 +95,8 @@
     "rootless_help_title": "루트리스 모드",
     "rootless_help_body": "Docker 또는 Podman이 루트리스 모드에서 실행 중입니다 — 컨테이너는 root가 아닌 사용자로 실행됩니다. 이는 보안을 향상시키지만 권한 포트(<1024) 바인딩, 시스템 경로 접근 또는 특정 네트워크 드라이버 사용과 같은 일부 기능이 제한될 수 있습니다.",
     "help": "도움말",
-    "feedback": "피드백 / 버그 보고"
+    "feedback": "피드백 / 버그 보고",
+    "source": "소스 코드"
   },
   "runtime": {
     "docker": "Docker",

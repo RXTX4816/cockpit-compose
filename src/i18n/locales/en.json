@@ -101,7 +101,8 @@
     "rootful_help_title": "Rootful mode",
     "rootful_help_body": "Docker or Podman is running in rootful (system-wide) mode — containers run as root. Actions are escalated via Cockpit's administrative access when needed.",
     "help": "Help",
-    "feedback": "Feedback / Report bug"
+    "feedback": "Feedback / Report bug",
+    "source": "Source code"
   },
   "runtime": {
     "docker": "Docker",

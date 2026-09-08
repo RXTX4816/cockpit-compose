@@ -5,7 +5,7 @@ pkgrel=1
 pkgdesc="Docker Compose management plugin for Cockpit"
 arch=('any')
 url="https://github.com/RXTX4816/cockpit-compose"
-license=('MIT')
+license=('AGPL-3.0-only' 'MIT' 'BSD-3-Clause' '0BSD' 'OFL-1.1')
 depends=('cockpit')
 optdepends=('docker: container runtime with Compose plugin')
 source=("${pkgname}-${pkgver}.tar.gz::${url}/releases/download/v${pkgver}/${pkgname}-${pkgver}.tar.gz")
@@ -19,4 +19,8 @@ package() {
     install -m 0644 "${pkgname}/index.html"    "${pkgdir}/usr/share/cockpit/${pkgname}/"
     install -m 0644 "${pkgname}/README.md"     "${pkgdir}/usr/share/cockpit/${pkgname}/"
     cp -r "${pkgname}/assets"                  "${pkgdir}/usr/share/cockpit/${pkgname}/"
+
+    install -Dm644 "${pkgname}/LICENSE" "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+    install -Dm644 "${pkgname}/THIRD-PARTY-NOTICES.txt" \
+        "${pkgdir}/usr/share/licenses/${pkgname}/THIRD-PARTY-NOTICES.txt"
 }

@@ -95,7 +95,8 @@
     "rootless_help_title": "Rootless-tila",
     "rootless_help_body": "Docker tai Podman toimii rootless-tilassa — kontit toimivat käyttäjänäsi, ei rootina. Tämä parantaa tietoturvaa, mutta saattaa rajoittaa joitakin ominaisuuksia, kuten etuoikeutettujen porttien (<1024) sitomista, järjestelmäpolkuihin pääsyä tai tiettyjen verkkoajureiden käyttöä.",
     "help": "Ohje",
-    "feedback": "Palaute / Ilmoita virheestä"
+    "feedback": "Palaute / Ilmoita virheestä",
+    "source": "Lähdekoodi"
   },
   "runtime": {
     "docker": "Docker",

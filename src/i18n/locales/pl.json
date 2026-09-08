@@ -97,7 +97,8 @@
     "rootless_help_title": "Tryb rootless",
     "rootless_help_body": "Docker lub Podman działa w trybie rootless — kontenery działają jako Twój użytkownik, nie jako root. Poprawia to bezpieczeństwo, ale może ograniczać niektóre funkcje, takie jak wiązanie uprzywilejowanych portów (<1024), dostęp do ścieżek systemowych lub korzystanie z określonych sterowników sieciowych.",
     "help": "Pomoc",
-    "feedback": "Opinia / Zgłoś błąd"
+    "feedback": "Opinia / Zgłoś błąd",
+    "source": "Kod źródłowy"
   },
   "runtime": {
     "docker": "Docker",

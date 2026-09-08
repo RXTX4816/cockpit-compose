@@ -14,6 +14,8 @@ src/main.js
 src/main.css
 src/*.map
 src/assets/
+THIRD-PARTY-NOTICES.txt
+third-party-notices.json
 *.tar.gz
 *.tar.gz.sha256
 

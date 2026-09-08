@@ -2,7 +2,7 @@ Name:           cockpit-compose
 Version:        %{version}
 Release:        1%{?dist}
 Summary:        Docker Compose management plugin for Cockpit
-License:        MIT
+License:        AGPL-3.0-only AND MIT AND BSD-3-Clause AND 0BSD AND OFL-1.1
 URL:            https://github.com/RXTX4816/cockpit-compose
 Source0:        cockpit-compose-%{version}.tar.gz
 BuildArch:      noarch
@@ -28,7 +28,8 @@ install -m 0644 index.html    %{buildroot}%{_datadir}/cockpit/cockpit-compose/
 cp -r assets                  %{buildroot}%{_datadir}/cockpit/cockpit-compose/
 
 %files
-%doc README.md
+%license LICENSE
+%doc README.md THIRD-PARTY-NOTICES.txt
 %{_datadir}/cockpit/cockpit-compose/
 
 %changelog

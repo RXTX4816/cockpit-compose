@@ -136,14 +136,16 @@ describe("AppFooter", () => {
     });
   });
 
-  it("renders help and feedback links", async () => {
+  it("renders help, feedback and source-code links", async () => {
     const { AppFooter } = await import("./AppFooter");
     render(<AppFooter runtime="docker" />);
     const links = document.querySelectorAll("a");
-    expect(links.length).toBeGreaterThanOrEqual(2);
+    expect(links.length).toBeGreaterThanOrEqual(3);
     const hrefs = Array.from(links).map(a => a.getAttribute("href") ?? "");
     expect(hrefs.some(h => h.includes("wiki"))).toBe(true);
     expect(hrefs.some(h => h.includes("issues"))).toBe(true);
+    // AGPL §13: the running plugin must offer its Corresponding Source.
+    expect(hrefs).toContain("https://github.com/RXTX4816/cockpit-compose");
   });
 
   it("opens links in a new tab (target=_blank)", async () => {

@@ -95,7 +95,8 @@
     "rootless_help_title": "Mode tanpa root",
     "rootless_help_body": "Docker atau Podman berjalan dalam mode tanpa root — kontainer berjalan sebagai pengguna Anda, bukan root. Ini meningkatkan keamanan tetapi mungkin membatasi beberapa fitur seperti mengikat port istimewa (<1024), mengakses jalur sistem, atau menggunakan driver jaringan tertentu.",
     "help": "Bantuan",
-    "feedback": "Masukan / Laporkan bug"
+    "feedback": "Masukan / Laporkan bug",
+    "source": "Kode sumber"
   },
   "runtime": {
     "docker": "Docker",
