@@ -30,7 +30,7 @@
     "@patternfly/react-core": "^6.6.1",
     "@playwright/test": "^1.61.1",
     "@rxtx4816/cockpit-plugin-base-react": "^2.0.0",
-    "@testing-library/jest-dom": "^7.0.0",
+    "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.3",
