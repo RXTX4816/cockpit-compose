@@ -95,7 +95,8 @@
     "rootless_help_title": "Rootless-Modus",
     "rootless_help_body": "Docker oder Podman läuft im Rootless-Modus — Container laufen als Ihr Benutzer, nicht als root. Dies verbessert die Sicherheit, kann aber einige Funktionen einschränken, wie das Binden privilegierter Ports (<1024), den Zugriff auf Systempfade oder die Verwendung bestimmter Netzwerktreiber.",
     "help": "Hilfe",
-    "feedback": "Feedback / Fehler melden"
+    "feedback": "Feedback / Fehler melden",
+    "source": "Quellcode"
   },
   "runtime": {
     "docker": "Docker",

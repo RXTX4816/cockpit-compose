@@ -190,4 +190,13 @@ This repository has GitHub secret scanning and push protection enabled — do no
 
 ## License
 
-MIT
+[AGPL-3.0-only](LICENSE) © 2025–2026 RXTX4816.
+
+Free and open-source software (copyleft). If you distribute a modified version —
+or run one as a service that users reach over a network — you must make your
+modified source available under the same license (AGPL §13). Earlier releases
+were under the MIT License; see [LICENSE-HISTORY.md](LICENSE-HISTORY.md).
+
+Bundled third-party components and their licenses are listed in
+[THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt), which is generated at build
+time and installed alongside the plugin.

@@ -110,6 +110,7 @@ export function AppFooter({ runtime }: Props) {
         <div style={{ display: "flex", flexDirection: "row", gap: 16, justifyContent: "center" }}>
           <a href="https://github.com/RXTX4816/cockpit-compose/wiki" target="_blank" rel="noopener noreferrer" style={{ color: "#0071c1", textDecoration: "none" }}>{t("footer.help")}</a>
           <a href="https://github.com/RXTX4816/cockpit-compose/issues/new/choose" target="_blank" rel="noopener noreferrer" style={{ color: "#0071c1", textDecoration: "none" }}>{t("footer.feedback")}</a>
+          <a href="https://github.com/RXTX4816/cockpit-compose" target="_blank" rel="noopener noreferrer" style={{ color: "#0071c1", textDecoration: "none" }}>{t("footer.source")}</a>
         </div>
       </div>
     </PageSection>

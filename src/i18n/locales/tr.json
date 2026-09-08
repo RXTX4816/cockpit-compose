@@ -95,7 +95,8 @@
     "rootless_help_title": "Rootless modu",
     "rootless_help_body": "Docker veya Podman rootless modda çalışıyor — konteynerler root olarak değil, sizin kullanıcınız olarak çalışıyor. Bu güvenliği artırır ancak ayrıcalıklı bağlantı noktaları (<1024) bağlama, sistem yollarına erişim veya belirli ağ sürücülerini kullanma gibi bazı özellikleri kısıtlayabilir.",
     "help": "Yardım",
-    "feedback": "Geri Bildirim / Hata Bildir"
+    "feedback": "Geri Bildirim / Hata Bildir",
+    "source": "Kaynak kodu"
   },
   "runtime": {
     "docker": "Docker",

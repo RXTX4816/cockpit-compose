@@ -95,7 +95,8 @@
     "rootless_help_title": "Rootless-modus",
     "rootless_help_body": "Docker of Podman wordt uitgevoerd in rootless-modus — containers draaien als uw gebruiker, niet als root. Dit verbetert de beveiliging, maar kan sommige functies beperken zoals het binden van geprivilegieerde poorten (<1024), toegang tot systeempaden of het gebruik van bepaalde netwerkstuurprogramma's.",
     "help": "Hulp",
-    "feedback": "Feedback / Bug melden"
+    "feedback": "Feedback / Bug melden",
+    "source": "Broncode"
   },
   "runtime": {
     "docker": "Docker",

@@ -95,7 +95,8 @@
     "rootless_help_title": "Rootless-läge",
     "rootless_help_body": "Docker eller Podman körs i rootless-läge — containers körs som din användare, inte root. Detta förbättrar säkerheten men kan begränsa vissa funktioner som att binda privilegierade portar (<1024), komma åt systemsökvägar eller använda vissa nätverksdrivrutiner.",
     "help": "Hjälp",
-    "feedback": "Feedback / Rapportera bugg"
+    "feedback": "Feedback / Rapportera bugg",
+    "source": "Källkod"
   },
   "runtime": {
     "docker": "Docker",

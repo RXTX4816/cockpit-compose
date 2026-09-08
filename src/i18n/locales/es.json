@@ -95,7 +95,8 @@
     "rootless_help_title": "Modo sin root",
     "rootless_help_body": "Docker o Podman está ejecutándose en modo sin root — los contenedores se ejecutan como tu usuario, no como root. Esto mejora la seguridad pero puede limitar algunas funciones como enlazar puertos privilegiados (<1024), acceder a rutas del sistema o usar ciertos controladores de red.",
     "help": "Ayuda",
-    "feedback": "Comentarios / Reportar error"
+    "feedback": "Comentarios / Reportar error",
+    "source": "Código fuente"
   },
   "runtime": {
     "docker": "Docker",

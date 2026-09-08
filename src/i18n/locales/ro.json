@@ -95,7 +95,8 @@
     "rootless_help_title": "Modul fără root",
     "rootless_help_body": "Docker sau Podman rulează în modul fără root — containerele rulează ca utilizatorul dvs., nu ca root. Aceasta îmbunătățește securitatea, dar poate limita unele funcții precum legarea porturilor privilegiate (<1024), accesul la căile de sistem sau utilizarea anumitor drivere de rețea.",
     "help": "Ajutor",
-    "feedback": "Feedback / Raportare eroare"
+    "feedback": "Feedback / Raportare eroare",
+    "source": "Cod sursă"
   },
   "runtime": {
     "docker": "Docker",

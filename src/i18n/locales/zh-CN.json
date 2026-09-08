@@ -95,7 +95,8 @@
     "rootless_help_title": "无根模式",
     "rootless_help_body": "Docker 或 Podman 正在无根模式下运行 — 容器以您的用户身份运行，而非 root。这提高了安全性，但可能限制某些功能，例如绑定特权端口（<1024）、访问系统路径或使用某些网络驱动程序。",
     "help": "帮助",
-    "feedback": "反馈 / 报告问题"
+    "feedback": "反馈 / 报告问题",
+    "source": "源代码"
   },
   "runtime": {
     "docker": "Docker",

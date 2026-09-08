@@ -95,7 +95,8 @@
     "rootless_help_title": "Rootless režim",
     "rootless_help_body": "Docker nebo Podman běží v rootless režimu — kontejnery běží jako váš uživatel, ne jako root. Zlepšuje to bezpečnost, ale může omezit některé funkce, jako je vazba privilegovaných portů (<1024), přístup k systémovým cestám nebo použití určitých síťových ovladačů.",
     "help": "Nápověda",
-    "feedback": "Zpětná vazba / Nahlásit chybu"
+    "feedback": "Zpětná vazba / Nahlásit chybu",
+    "source": "Zdrojový kód"
   },
   "runtime": {
     "docker": "Docker",
