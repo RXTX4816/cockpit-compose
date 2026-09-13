@@ -7,7 +7,6 @@
 // A real build overwrites it; see scripts/build.mjs.
 
 import { mkdir, writeFile } from "node:fs/promises";
-import { existsSync } from "node:fs";
 import { dirname } from "node:path";
 
 export const NOTICES_PATH = "src/generated/third-party-notices.json";
@@ -22,10 +21,17 @@ const PLACEHOLDER = {
 };
 
 export async function ensureNotices(path = NOTICES_PATH) {
-  if (existsSync(path)) return false;
   await mkdir(dirname(path), { recursive: true });
-  await writeFile(path, JSON.stringify(PLACEHOLDER, null, 2) + "\n");
-  return true;
+  try {
+    // "wx" fails if the file exists, so the check and the write are one atomic step —
+    // a real generated file is never clobbered, and concurrent callers (a build and a
+    // watch, say) can't race between an existence check and the write.
+    await writeFile(path, JSON.stringify(PLACEHOLDER, null, 2) + "\n", { flag: "wx" });
+    return true;
+  } catch (err) {
+    if (err.code === "EEXIST") return false;
+    throw err;
+  }
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
