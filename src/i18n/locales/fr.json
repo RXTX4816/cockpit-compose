@@ -17,7 +17,8 @@
     "unknown": "inconnu",
     "continue": "Continuer",
     "copy": "Copier",
-    "copied": "Copié !"
+    "copied": "Copié !",
+    "pull_policy_label": "politique de récupération : {{policy}}"
   },
   "stacks": {
     "title": "Piles Compose",

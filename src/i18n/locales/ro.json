@@ -17,7 +17,8 @@
     "unknown": "necunoscut",
     "continue": "Continuare",
     "copy": "Copiere",
-    "copied": "Copiat!"
+    "copied": "Copiat!",
+    "pull_policy_label": "politică de descărcare: {{policy}}"
   },
   "stacks": {
     "title": "Stive Compose",

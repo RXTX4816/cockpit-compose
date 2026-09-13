@@ -17,7 +17,8 @@
     "unknown": "უცნობი",
     "continue": "გაგრძელება",
     "copy": "კოპირება",
-    "copied": "დაკოპირდა!"
+    "copied": "დაკოპირდა!",
+    "pull_policy_label": "გადმოწერის პოლიტიკა: {{policy}}"
   },
   "stacks": {
     "title": "Compose სტეკები",

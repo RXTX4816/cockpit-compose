@@ -17,7 +17,8 @@
     "unknown": "unbekannt",
     "continue": "Weiter",
     "copy": "Kopieren",
-    "copied": "Kopiert!"
+    "copied": "Kopiert!",
+    "pull_policy_label": "Pull-Richtlinie: {{policy}}"
   },
   "stacks": {
     "title": "Compose-Stacks",

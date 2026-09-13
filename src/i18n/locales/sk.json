@@ -17,7 +17,8 @@
     "unknown": "neznáme",
     "continue": "Pokračovať",
     "copy": "Kopírovať",
-    "copied": "Skopírované!"
+    "copied": "Skopírované!",
+    "pull_policy_label": "zásada sťahovania: {{policy}}"
   },
   "stacks": {
     "title": "Compose zásobníky",

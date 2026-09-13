@@ -17,7 +17,8 @@
     "unknown": "tuntematon",
     "continue": "Jatka",
     "copy": "Kopioi",
-    "copied": "Kopioitu!"
+    "copied": "Kopioitu!",
+    "pull_policy_label": "noutokäytäntö: {{policy}}"
   },
   "stacks": {
     "title": "Compose-pinot",

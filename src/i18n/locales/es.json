@@ -17,7 +17,8 @@
     "unknown": "desconocido",
     "continue": "Continuar",
     "copy": "Copiar",
-    "copied": "¡Copiado!"
+    "copied": "¡Copiado!",
+    "pull_policy_label": "política de descarga: {{policy}}"
   },
   "stacks": {
     "title": "Pilas de Compose",

@@ -17,7 +17,8 @@
     "unknown": "未知",
     "continue": "繼續",
     "copy": "複製",
-    "copied": "已複製！"
+    "copied": "已複製！",
+    "pull_policy_label": "提取策略：{{policy}}"
   },
   "stacks": {
     "title": "Compose 堆疊",

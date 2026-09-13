@@ -17,7 +17,8 @@
     "unknown": "onbekend",
     "continue": "Doorgaan",
     "copy": "Kopiëren",
-    "copied": "Gekopieerd!"
+    "copied": "Gekopieerd!",
+    "pull_policy_label": "pullbeleid: {{policy}}"
   },
   "stacks": {
     "title": "Compose-stacks",

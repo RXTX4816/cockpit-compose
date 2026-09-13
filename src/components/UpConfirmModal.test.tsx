@@ -136,3 +136,25 @@ describe("UpConfirmModal", () => {
     expect(onConfirm).toHaveBeenCalledWith([]);
   });
 });
+
+// #287: same pull_policy awareness as PullConfirmModal — the "may pull a newer
+// version" half of this dialog's warning only applies to services whose policy
+// actually permits a fetch.
+describe("UpConfirmModal — pull_policy awareness", () => {
+  const withCompose = (yaml: string) => {
+    mockReadComposeFile.mockImplementation(() => mockProcess(yaml));
+    render(<UpConfirmModal stack={stack} onConfirm={vi.fn()} onClose={vi.fn()} />);
+  };
+
+  it("shows a compose 5.5.0 refresh window next to the service", async () => {
+    withCompose("services:\n  web:\n    image: nginx:latest\n    pull_policy: every_12h\n");
+    expect(await screen.findByText("pull policy: every_12h")).toBeInTheDocument();
+    expect(screen.getByText(/unpinned/)).toBeInTheDocument();
+  });
+
+  it("does not warn about an unpinned image pinned in practice by pull_policy: never", async () => {
+    withCompose("services:\n  web:\n    image: nginx:latest\n    pull_policy: never\n");
+    await screen.findByText("nginx:latest");
+    expect(screen.queryByText(/unpinned/)).toBeNull();
+  });
+});
