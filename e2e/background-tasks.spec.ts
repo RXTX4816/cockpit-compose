@@ -41,9 +41,10 @@ test('Run in Background actually starts the stack, tracked through Pending → R
 //    this test enqueues — looked exactly like a real race, wasn't one.
 //    Cleared explicitly below.
 // 2. A genuine app bug: the still-open drawer's own header physically
-//    overlaps and intercepts pointer events meant for the log modal's
-//    footer "Close" button (same z-index token on both) — filed as issue
-//    #283, worked around below with a programmatic click.
+//    overlapped and intercepted pointer events meant for the log modal's
+//    footer "Close" button (same z-index token on both) — issue #283, since
+//    fixed by dropping the drawer below the modal backdrop. The Close click
+//    below is a real mouse click again, which is what regression-tests it.
 test('Clicking a finished task shows its real captured log output', async ({ pluginPage: page }) => {
   test.setTimeout(60_000);
   await baseData(page);
@@ -84,17 +85,12 @@ test('Clicking a finished task shows its real captured log output', async ({ plu
   // (gotify's real startup log line), not an empty placeholder.
   await expect(logModal.getByText(/gotify|listening|http/i).first()).toBeVisible({ timeout: 10000 });
 
-  // Real, separate bug found here (not #277's aria-hidden class): the
-  // background tasks drawer panel (.btd-panel) and the log modal share the
-  // same z-index token (--pf-t--global--z-index--xl), so the still-open
-  // drawer's own header physically overlaps and intercepts pointer events
-  // meant for the modal's footer "Close" button — Playwright's actionability
-  // check reports the drawer's <h1> as the element actually receiving clicks
-  // at that point. A real mouse click in this state would hit the wrong
-  // element too. Dispatching the click in-page instead of via simulated
-  // mouse coordinates exercises the same real onClick handler without
-  // depending on the (buggy) visual stacking order.
-  await page.locator('.btd-log-footer button').evaluate((el: HTMLElement) => el.click());
+  // A real simulated mouse click, deliberately: this is the regression test for
+  // #283. The drawer used to share the modal box's z-index tier, so its <h1>
+  // header intercepted clicks aimed here and Playwright's actionability check
+  // failed on it. If the drawer ever climbs back above the modal, this line is
+  // what catches it — a programmatic .click() would not.
+  await page.locator('.btd-log-footer button').click();
   await expect(logModal).not.toBeVisible();
 
   // Real effect: closing the log modal leaves the drawer itself intact and
