@@ -2,8 +2,9 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { mockSpawn } from "../../test/setup";
 import { mockProcess } from "../../test/helpers";
 import { listAllImages, listInUseImageIds, pruneImages, removeImages, pruneContainers, pruneVolumes, pruneNetworks } from "./prune";
+import { setRuntime } from "../cockpit";
 
-beforeEach(() => { mockSpawn.mockReset(); });
+beforeEach(() => { mockSpawn.mockReset(); setRuntime("docker"); });
 
 describe("listAllImages", () => {
   it("lists every image host-wide (including dangling) with full ids", () => {
@@ -79,6 +80,52 @@ describe("pruneContainers", () => {
     pruneContainers("myapp");
     const args = mockSpawn.mock.calls[0][0] as string[];
     expect(args).toEqual(["docker", "container", "prune", "-f", "--filter", "label=com.docker.compose.project=myapp"]);
+  });
+
+  // #274: podman container prune silently skips containers that belong to a pod, which is
+  // every podman-compose stack's containers, so it must not be used on podman at all.
+  it("on podman, lists the exited containers and removes them directly", async () => {
+    setRuntime("podman");
+    mockSpawn
+      .mockImplementationOnce(() => mockProcess("abc123\ndef456\n"))
+      .mockImplementationOnce(() => mockProcess(""));
+
+    await pruneContainers("myapp");
+
+    const psArgs = mockSpawn.mock.calls[0][0] as string[];
+    expect(psArgs).toEqual([
+      "podman", "ps", "-a",
+      "--filter", "status=exited",
+      "--filter", "label=com.docker.compose.project=myapp",
+      "--format", "{{.ID}}",
+    ]);
+    expect(mockSpawn.mock.calls[1][0]).toEqual(["podman", "rm", "abc123", "def456"]);
+    expect(mockSpawn).not.toHaveBeenCalledWith(
+      expect.arrayContaining(["prune"]),
+      expect.anything(),
+    );
+  });
+
+  it("on podman, does not run rm when nothing matches", async () => {
+    setRuntime("podman");
+    mockSpawn.mockImplementationOnce(() => mockProcess("\n"));
+
+    await pruneContainers("myapp");
+
+    expect(mockSpawn).toHaveBeenCalledTimes(1);
+  });
+
+  it("on podman, passes superuser through to both calls", async () => {
+    setRuntime("podman");
+    mockSpawn
+      .mockImplementationOnce(() => mockProcess("abc123\n"))
+      .mockImplementationOnce(() => mockProcess(""));
+
+    await pruneContainers("myapp", "try");
+
+    for (const call of mockSpawn.mock.calls) {
+      expect((call[1] as { superuser?: string }).superuser).toBe("try");
+    }
   });
 });
 
