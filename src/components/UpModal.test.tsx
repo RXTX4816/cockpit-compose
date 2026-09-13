@@ -113,6 +113,48 @@ describe("UpModal", () => {
     expect(onClose).toHaveBeenCalledWith(true);
   });
 
+  // #272: closing a finished run must not touch the channel. On some VMs that call
+  // was observed discarding the still-settling `compose up`, leaving zero containers
+  // behind a log that had already printed "Started".
+  it("does not cancel the stream when Close is clicked after success", () => {
+    const cancel = vi.fn();
+    mockUseUpStream.mockReturnValue({ lines: [], done: true, failed: false, errorMsg: "", cancel });
+    render(<UpModal stack={stack} onClose={vi.fn()} />);
+    const closeButtons = screen.getAllByRole("button", { name: /Close/i });
+    fireEvent.click(closeButtons[closeButtons.length - 1]);
+    expect(cancel).not.toHaveBeenCalled();
+  });
+
+  it("does not cancel the stream when Close is clicked after failure", () => {
+    const cancel = vi.fn();
+    mockUseUpStream.mockReturnValue({ lines: [], done: true, failed: true, errorMsg: "boom", cancel });
+    render(<UpModal stack={stack} onClose={vi.fn()} />);
+    const closeButtons = screen.getAllByRole("button", { name: /Close/i });
+    fireEvent.click(closeButtons[closeButtons.length - 1]);
+    expect(cancel).not.toHaveBeenCalled();
+  });
+
+  it("still cancels when the modal X is used while the run is in flight", () => {
+    const cancel = vi.fn();
+    const onClose = vi.fn();
+    mockUseUpStream.mockReturnValue({ lines: [], done: false, failed: false, errorMsg: "", cancel });
+    render(<UpModal stack={stack} onClose={onClose} />);
+    // The modal's own X, not the footer Cancel button.
+    fireEvent.click(screen.getAllByRole("button", { name: /Close/i })[0]);
+    expect(cancel).toHaveBeenCalledOnce();
+    expect(onClose).toHaveBeenCalledWith(false);
+  });
+
+  it("still cancels when handing a running job to the background", () => {
+    const cancel = vi.fn();
+    mockUseUpStream.mockReturnValue({ lines: [], done: false, failed: false, errorMsg: "", cancel });
+    render(<UpModal stack={stack} onClose={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: /Run in Background/i }));
+    // The background task relaunches with its own process, so this channel must go.
+    expect(cancel).toHaveBeenCalledOnce();
+    expect(mockEnqueue).toHaveBeenCalled();
+  });
+
   it("calls onClose(false) when Close clicked after failure", () => {
     const cancel = vi.fn();
     const onClose = vi.fn();
