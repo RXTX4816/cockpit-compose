@@ -96,7 +96,19 @@
     "rootless_help_body": "Docker oder Podman läuft im Rootless-Modus — Container laufen als Ihr Benutzer, nicht als root. Dies verbessert die Sicherheit, kann aber einige Funktionen einschränken, wie das Binden privilegierter Ports (<1024), den Zugriff auf Systempfade oder die Verwendung bestimmter Netzwerktreiber.",
     "help": "Hilfe",
     "feedback": "Feedback / Fehler melden",
-    "source": "Quellcode"
+    "source": "Quellcode",
+    "licenses": "Open-Source-Lizenzen"
+  },
+  "notices": {
+    "title": "Open-Source-Lizenzen",
+    "aria_label": "Open-Source-Lizenzen",
+    "intro": "{{product}} ist unter {{license}} lizenziert.",
+    "source_link": "Quellcode abrufen",
+    "summary": "Es bündelt die folgenden {{count}} Open-Source-Pakete. Die Lizenz und der Copyright-Hinweis jedes Pakets sind unten vollständig wiedergegeben.",
+    "licenses_used": "Lizenzen",
+    "filter_placeholder": "Nach Name, Lizenz oder Herausgeber filtern",
+    "no_matches": "Keine Pakete entsprechen diesem Filter",
+    "no_text": "Mit diesem Paket wurde kein Lizenztext ausgeliefert — siehe die Paket-Homepage oben."
   },
   "runtime": {
     "docker": "Docker",

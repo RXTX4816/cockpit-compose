@@ -1,10 +1,16 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { PageSection, Label } from "@patternfly/react-core";
-import { Tooltip } from "@rxtx4816/cockpit-plugin-base-react/components";
+import { Tooltip, ThirdPartyNoticesModal, type NoticesData } from "@rxtx4816/cockpit-plugin-base-react/components";
 import { HelpPopover } from "./HelpPopover";
 import { composeVersion, containerVersion, isRootlessMode, getDockerSocketPath, getPodmanSocketPath, SOCKET_MODE_CHANGE_EVENT, type ComposeVersion, type Runtime } from "../api";
 import pkg from "../../package.json" with { type: "json" };
+// Generated at build time from the esbuild metafile — see scripts/build.mjs. Cockpit
+// serves main.js to the browser, so the bundled packages' licenses have to be reachable
+// from the UI, not only from THIRD-PARTY-NOTICES.txt on the server's disk.
+import notices from "../generated/third-party-notices.json" with { type: "json" };
+
+const SOURCE_URL = "https://github.com/RXTX4816/cockpit-compose";
 
 interface Props {
   runtime: Runtime;
@@ -14,6 +20,7 @@ export function AppFooter({ runtime }: Props) {
   const { t } = useTranslation();
   const [version, setVersion] = useState<ComposeVersion | null>(null);
   const [dockerVer, setDockerVer] = useState<string | null>(null);
+  const [noticesOpen, setNoticesOpen] = useState(false);
   const [, forceRefresh] = useState(0);
 
   // The socket-mode toggle lives in RuntimeToggle, a sibling elsewhere in the tree — listen
@@ -110,9 +117,24 @@ export function AppFooter({ runtime }: Props) {
         <div style={{ display: "flex", flexDirection: "row", gap: 16, justifyContent: "center" }}>
           <a href="https://github.com/RXTX4816/cockpit-compose/wiki" target="_blank" rel="noopener noreferrer" style={{ color: "#0071c1", textDecoration: "none" }}>{t("footer.help")}</a>
           <a href="https://github.com/RXTX4816/cockpit-compose/issues/new/choose" target="_blank" rel="noopener noreferrer" style={{ color: "#0071c1", textDecoration: "none" }}>{t("footer.feedback")}</a>
-          <a href="https://github.com/RXTX4816/cockpit-compose" target="_blank" rel="noopener noreferrer" style={{ color: "#0071c1", textDecoration: "none" }}>{t("footer.source")}</a>
+          <a href={SOURCE_URL} target="_blank" rel="noopener noreferrer" style={{ color: "#0071c1", textDecoration: "none" }}>{t("footer.source")}</a>
+          <button
+            type="button"
+            onClick={() => setNoticesOpen(true)}
+            style={{ color: "#0071c1", background: "none", border: "none", padding: 0, font: "inherit", cursor: "pointer" }}
+          >
+            {t("footer.licenses")}
+          </button>
         </div>
       </div>
+      <ThirdPartyNoticesModal
+        isOpen={noticesOpen}
+        onClose={() => setNoticesOpen(false)}
+        notices={notices as NoticesData}
+        productName="cockpit-compose"
+        licenseName={pkg.license}
+        sourceUrl={SOURCE_URL}
+      />
     </PageSection>
   );
 }

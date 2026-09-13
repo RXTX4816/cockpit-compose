@@ -13,6 +13,7 @@
   "scripts": {
     "build": "node scripts/build.mjs && node scripts/i18n-coverage.mjs",
     "watch": "node scripts/watch.mjs",
+    "pretypecheck": "node scripts/ensure-notices.mjs",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src/",
     "test": "NODE_OPTIONS='--max-old-space-size=8192 --disable-warning=ExperimentalWarning' vitest run",
@@ -29,7 +30,7 @@
   "devDependencies": {
     "@patternfly/react-core": "^6.6.1",
     "@playwright/test": "^1.61.1",
-    "@rxtx4816/cockpit-plugin-base-react": "^2.0.0",
+    "@rxtx4816/cockpit-plugin-base-react": "^2.1.0",
     "@testing-library/jest-dom": "^7.0.0",
     "@testing-library/react": "^16.3.3",
     "@types/react": "^19.2.18",

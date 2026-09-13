@@ -96,7 +96,19 @@
     "rootless_help_body": "Docker tai Podman toimii rootless-tilassa — kontit toimivat käyttäjänäsi, ei rootina. Tämä parantaa tietoturvaa, mutta saattaa rajoittaa joitakin ominaisuuksia, kuten etuoikeutettujen porttien (<1024) sitomista, järjestelmäpolkuihin pääsyä tai tiettyjen verkkoajureiden käyttöä.",
     "help": "Ohje",
     "feedback": "Palaute / Ilmoita virheestä",
-    "source": "Lähdekoodi"
+    "source": "Lähdekoodi",
+    "licenses": "Avoimen lähdekoodin lisenssit"
+  },
+  "notices": {
+    "title": "Avoimen lähdekoodin lisenssit",
+    "aria_label": "Avoimen lähdekoodin lisenssit",
+    "intro": "{{product}} on lisensoitu lisenssillä {{license}}.",
+    "source_link": "Hae lähdekoodi",
+    "summary": "Se sisältää seuraavat {{count}} avoimen lähdekoodin pakettia. Kunkin paketin lisenssi ja tekijänoikeusilmoitus on toistettu kokonaisuudessaan alla.",
+    "licenses_used": "Lisenssit",
+    "filter_placeholder": "Suodata nimen, lisenssin tai julkaisijan mukaan",
+    "no_matches": "Mikään paketti ei vastaa tätä suodatinta",
+    "no_text": "Tämän paketin mukana ei toimitettu lisenssitekstiä — katso paketin kotisivu yllä."
   },
   "runtime": {
     "docker": "Docker",

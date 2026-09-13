@@ -96,7 +96,19 @@
     "rootless_help_body": "Docker sau Podman rulează în modul fără root — containerele rulează ca utilizatorul dvs., nu ca root. Aceasta îmbunătățește securitatea, dar poate limita unele funcții precum legarea porturilor privilegiate (<1024), accesul la căile de sistem sau utilizarea anumitor drivere de rețea.",
     "help": "Ajutor",
     "feedback": "Feedback / Raportare eroare",
-    "source": "Cod sursă"
+    "source": "Cod sursă",
+    "licenses": "Licențe open source"
+  },
+  "notices": {
+    "title": "Licențe open source",
+    "aria_label": "Licențe open source",
+    "intro": "{{product}} este licențiat sub {{license}}.",
+    "source_link": "Obține codul sursă",
+    "summary": "Include următoarele {{count}} pachete open source. Licența și nota de copyright ale fiecărui pachet sunt reproduse integral mai jos.",
+    "licenses_used": "Licențe",
+    "filter_placeholder": "Filtrează după nume, licență sau editor",
+    "no_matches": "Niciun pachet nu corespunde acestui filtru",
+    "no_text": "Acest pachet nu include textul licenței — vezi pagina pachetului de mai sus."
   },
   "runtime": {
     "docker": "Docker",

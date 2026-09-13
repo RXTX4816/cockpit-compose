@@ -96,7 +96,19 @@
     "rootless_help_body": "Docker alebo Podman beží v rootless režime — kontajnery bežia ako váš používateľ, nie ako root. Zlepšuje to bezpečnosť, ale môže obmedzovať niektoré funkcie, ako je viazanie privilegovaných portov (<1024), prístup k systémovým cestám alebo používanie určitých sieťových ovládačov.",
     "help": "Pomoc",
     "feedback": "Spätná väzba / Nahlásiť chybu",
-    "source": "Zdrojový kód"
+    "source": "Zdrojový kód",
+    "licenses": "Licencie open source"
+  },
+  "notices": {
+    "title": "Licencie open source",
+    "aria_label": "Licencie open source",
+    "intro": "{{product}} je licencovaný pod {{license}}.",
+    "source_link": "Získať zdrojový kód",
+    "summary": "Obsahuje nasledujúce balíky open source ({{count}}). Licencia a upozornenie o autorských právach každého balíka sú v plnom znení uvedené nižšie.",
+    "licenses_used": "Licencie",
+    "filter_placeholder": "Filtrovať podľa názvu, licencie alebo vydavateľa",
+    "no_matches": "Tomuto filtru nezodpovedajú žiadne balíky",
+    "no_text": "S týmto balíkom nebol dodaný text licencie — pozrite si domovskú stránku balíka vyššie."
   },
   "runtime": {
     "docker": "Docker",
