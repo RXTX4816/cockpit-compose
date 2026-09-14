@@ -91,14 +91,11 @@ test('Env file editor warns on a duplicate key added via Table mode instead of s
   // Cancel the warning — the file must be left untouched on disk.
   await confirm.getByRole('button', { name: 'Cancel' }).click({ timeout: 20000 });
   await expect(confirm).not.toBeVisible({ timeout: 10000 });
-  // Not scoped through the `modal` (role=dialog) locator here: PatternFly
-  // appears to leave the EnvModal's dialog subtree marked aria-hidden for a
-  // beat after the nested confirm dialog closes (likely inert/focus-trap
-  // bookkeeping for the outgoing nested modal), which makes any role-based
-  // query against it resolve to zero elements even though it's visibly
-  // present and clickable — a real, if minor, a11y bug worth a follow-up
-  // issue. Querying by plain text at the page level sidesteps it.
-  await page.getByText('Cancel', { exact: true }).last().click({ timeout: 20000 });
+  // Scoped through the `modal` (role=dialog) locator again: this used to resolve to
+  // zero elements for a beat after the nested confirm dialog closed, because the
+  // closing modal's own aria-hidden sweep had marked this one hidden — the same
+  // #277 root cause, mitigated app-side by useKeepTopModalAccessible().
+  await modal.getByRole('button', { name: 'Cancel', exact: true }).click({ timeout: 20000 });
   await expect(modal).not.toBeVisible();
 
   const reopened = await openEnvModal(page);

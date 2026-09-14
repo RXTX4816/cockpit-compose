@@ -72,16 +72,14 @@ test('Multi-file tabs show each file\'s own real content, not shared/stale conte
   await modal.getByRole('button', { name: 'Close' }).click();
 });
 
-// A previous attempt at this scenario (see the header comment above) found
-// the "Create file" button unreliable to click. Root-caused this session:
-// typing into the nested "Add compose file" modal's filename field gets its
-// own backdrop (and the outer YamlModal's) stuck at aria-hidden="true" —
-// visually and functionally the modal keeps working fine (a plain mouse
-// click still creates the file for real), but Playwright's (and a real
-// screen reader's) accessible-name resolution can no longer see anything
-// inside it, so getByRole never resolves. This is a real PatternFly
-// focus-trap bug in modal-in-modal nesting, filed as #277 — not fixed here,
-// worked around below with a CSS-based click for the one button affected.
+// A previous attempt at this scenario (see the header comment above) found the
+// "Create file" button unreliable to click: typing into the nested "Add compose
+// file" modal's filename field left its own backdrop (and the outer YamlModal's)
+// stuck at aria-hidden="true", so getByRole could no longer see anything inside
+// it — issue #277. Root cause turned out to be PatternFly's Modal hiding every
+// body child except its *own* backdrop on each re-render, so the outer modal
+// hid the inner one; mitigated app-side by useKeepTopModalAccessible().
+// The role-based queries below are back, and are what regression-test it.
 test('Add file creates a real new compose file; Delete file removes it from disk', async ({ pluginPage: page }, testInfo) => {
   test.setTimeout(60_000);
   const vm = testInfo.project.name;
@@ -98,12 +96,10 @@ test('Add file creates a real new compose file; Delete file removes it from disk
   await expect(addModal).toBeVisible({ timeout: 10000 });
   await addModal.locator('#ym-new-filename').fill('extra.yml');
 
-  // #277 workaround: after the fill above, addModal is no longer resolvable
-  // via role/name (see comment above) — target the primary footer button by
-  // CSS instead of by accessible role.
-  await page.locator('.pf-v6-c-modal-box').filter({ hasText: 'Add compose file' })
-    .locator('.pf-v6-c-button.pf-m-primary').click();
-  await expect(page.locator('.pf-v6-c-modal-box').filter({ hasText: 'Add compose file' })).toHaveCount(0, { timeout: 15000 });
+  // Deliberately role-based: this is the #277 regression test. Before the fix the
+  // fill above made this dialog unreachable through the accessibility tree.
+  await addModal.getByRole('button', { name: 'Create file', exact: true }).click();
+  await expect(addModal).toHaveCount(0, { timeout: 15000 });
 
   // Real effect: a second tab for the real new file exists, and it's the
   // one now active/showing its (stub) content — not just a UI state flag.

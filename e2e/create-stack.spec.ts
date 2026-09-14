@@ -13,12 +13,14 @@ const DIR = '/home/test/testcompose';
 // were actually created (not just a UI toast), then deletes it again so the
 // test doesn't leave junk behind for other specs/runs.
 //
-// Intermittent flake, same class as issue #277 (yaml-editor.spec.ts): filling
-// the #csm-name/#csm-dir TextInputs occasionally leaves this modal's own
-// backdrop stuck at aria-hidden="true", so the "Create" button becomes
-// unreachable via getByRole even though it's still visibly present and
-// clickable. Reproduces roughly 1 in 3 runs on this VM; passes reliably when
-// re-run. Not fixed here — same root cause, tracked under #277.
+// Previously an intermittent flake (~1 in 3 runs): filling the #csm-name/#csm-dir
+// TextInputs left this modal's own backdrop stuck at aria-hidden="true", so the
+// "Create" button became unreachable via getByRole even though it stayed visibly
+// present and clickable — issue #277. PatternFly's Modal hides every body child
+// except its own backdrop on each re-render, so any second Modal in the tree hides
+// this one; mitigated app-side by useKeepTopModalAccessible(). The role-based
+// queries below should now be reliable — if this starts flaking again, that
+// mitigation is the first place to look.
 test('Create Stack (manual method) actually creates a compose file on disk', async ({ pluginPage: page }) => {
   await baseData(page);
 
