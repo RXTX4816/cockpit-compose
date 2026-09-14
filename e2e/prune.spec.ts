@@ -1,6 +1,7 @@
 import { test, expect } from '@rxtx4816/cockpit-plugin-base-react/e2e';
 import { baseData } from './helpers/base';
 import { downedCard, downStack, ensureDown, stackRow, upStack } from './helpers/stacks';
+import { engineCli, sshExec } from './helpers/vm';
 
 // `volumes-test` (db+app, db uses a named volume `pgdata` — see
 // scripts/test-vm.config.sh) is brought up then Stopped (not removed) so it
@@ -196,4 +197,79 @@ test('Prune removes a real one-shot exited container by name', async ({ pluginPa
   await expect(infoModal).toBeVisible();
   await expect(infoModal.locator('.sim-no-containers')).toBeVisible({ timeout: 10000 });
   await infoModal.getByRole('button', { name: 'Close' }).click();
+});
+
+// Wave 5 (#227): the host-wide "Prune images" button (GlobalPruneModal), which is
+// a different flow from every other test in this file — those all go through a
+// stack row's ⋮ → Prune. This one is not scoped to a project at all, and is gated
+// behind an explicit "I understand" checkbox rather than a preview/confirm step.
+//
+// `gotify` uses gotify/server, an image no other fixture stack shares, so once
+// gotify is fully down its image is unambiguously unused and must show up in the
+// host-wide scan.
+test('Global Prune images removes a genuinely unused image host-wide', async ({ pluginPage: page }, testInfo) => {
+  test.setTimeout(120_000);
+  const vm = testInfo.project.name;
+  await baseData(page);
+
+  // Bring gotify up then fully down, so its image exists locally but no container
+  // references it — the exact condition the global scan looks for.
+  await ensureDown(page, 'gotify');
+  await upStack(page, 'gotify');
+  await downStack(page, 'gotify');
+
+  // Precondition, asserted rather than assumed: the image really is on the host.
+  const before = await sshExec(vm, `${engineCli(vm)} images --format "{{.Repository}}"`);
+  expect(before).toContain('gotify/server');
+
+  await page.getByRole('button', { name: 'Prune images' }).first().click();
+
+  const modal = page.getByRole('dialog', { name: 'Prune unused images (all stacks)' });
+  await expect(modal).toBeVisible();
+
+  // The scan is real work against the host — it lists actual repo:tags.
+  await expect(modal.getByText('Scanning for unused images', { exact: false })).not.toBeVisible({ timeout: 30000 });
+  await expect(modal.getByText('gotify/server', { exact: false })).toBeVisible({ timeout: 30000 });
+
+  // The destructive button is gated on the acknowledgement checkbox, not merely
+  // styled as dangerous — assert the gate before satisfying it.
+  const pruneButton = modal.getByRole('button', { name: 'Prune', exact: true });
+  await expect(pruneButton).toBeDisabled();
+  await modal.locator('#prune-global-confirm').check();
+  await expect(pruneButton).toBeEnabled();
+
+  await pruneButton.click();
+  await expect(modal.getByText('Done', { exact: false })).toBeVisible({ timeout: 60000 });
+  await modal.getByRole('contentinfo').getByRole('button', { name: 'Close' }).click();
+  await expect(modal).not.toBeVisible();
+
+  // Real effect: the image is genuinely gone from the host, not just absent from
+  // a re-rendered list.
+  const after = await sshExec(vm, `${engineCli(vm)} images --format "{{.Repository}}"`);
+  expect(after).not.toContain('gotify/server');
+});
+
+// The checkbox gate is the only thing standing between a misclick and deleting
+// every unused image on the host, so it gets its own assertion independent of the
+// happy path above (which could stop testing it if the flow is ever reordered).
+test('Global Prune refuses to run until the acknowledgement checkbox is checked', async ({ pluginPage: page }) => {
+  test.setTimeout(60_000);
+  await baseData(page);
+
+  await page.getByRole('button', { name: 'Prune images' }).first().click();
+  const modal = page.getByRole('dialog', { name: 'Prune unused images (all stacks)' });
+  await expect(modal).toBeVisible();
+  await expect(modal.getByText('Scanning for unused images', { exact: false })).not.toBeVisible({ timeout: 30000 });
+
+  // With nothing unused the modal says so and offers no destructive action at
+  // all; with something unused the button exists but stays disabled. Both are
+  // valid states here — what must never happen is an enabled Prune button while
+  // the checkbox is unchecked.
+  const nothingFound = await modal.getByText('No unused images found', { exact: false }).isVisible();
+  if (!nothingFound) {
+    await expect(modal.getByRole('button', { name: 'Prune', exact: true })).toBeDisabled();
+  }
+
+  await modal.getByRole('button', { name: 'Cancel' }).click();
+  await expect(modal).not.toBeVisible();
 });

@@ -58,3 +58,21 @@ export async function sshExec(projectName: string, command: string): Promise<str
   );
   return stdout;
 }
+
+/**
+ * The container CLI to use for out-of-band state checks on a given VM project,
+ * matching the runtime the app itself ends up on there.
+ *
+ * The app defaults to Docker and only switches to Podman when Docker is absent
+ * (RuntimeToggle's startup suggestion, dismissed as "Continue" by baseData()). So
+ * podman-only VMs use podman; docker-only, "-both" and "fedora-full" VMs keep
+ * Docker. fedora-podman-rootful runs its engine as root, so its CLI needs sudo to
+ * see the same containers the app manages.
+ *
+ * Returns a command prefix, e.g. `${engineCli(vm)} ps -a`.
+ */
+export function engineCli(projectName: string): string {
+  if (projectName === 'fedora-podman-rootful') return 'sudo podman';
+  if (/-podman$/.test(projectName)) return 'podman';
+  return 'docker';
+}
