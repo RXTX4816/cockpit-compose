@@ -8,30 +8,25 @@ import { downedCard, downStack, ensureDown, stackRow, upStack } from './helpers/
 // testing guide §6.16.1.
 //
 // NOTE on volume pruning specifically (§6.16.7 "dangling named volume"): an
-// earlier pass's assumption here — that pruning volumes-test's stopped
-// containers makes the row disappear immediately, leaving no UI path to
-// reach the now-dangling volume — turned out to rest on a false premise on
-// Podman: see issue #274. Prune Containers is a silent no-op there (the
-// `podman container prune` command it shells out to categorically ignores
-// containers that belong to a pod, which every podman-compose stack's
-// containers are), so the row never actually loses its containers and never
-// moves to the downed section at all. Whether the dangling-volume UI gap
-// is real on Docker (where no pod concept exists) is still untested —
-// worth revisiting once #274 is fixed and Podman's Prune Containers can be
-// trusted to reflect what it claims to do.
+// earlier pass assumed that pruning volumes-test's stopped containers makes the
+// row disappear immediately, leaving no UI path to reach the now-dangling volume.
+// That turned out to be false twice over. On Podman it rested on #274 (Prune
+// Containers was a silent no-op there, so the row never lost its containers at
+// all) — now fixed. And on both runtimes the row does *not* disappear: `compose
+// ls` still lists a known project with zero containers, so it stays as "stopped",
+// as the first test below asserts. Whether the dangling-volume UI gap is real is
+// therefore still open, but for a different reason than originally recorded, and
+// Podman's Prune Containers can now be trusted to do what it claims.
 test.afterEach(async ({ pluginPage: page }) => {
   if (await stackRow(page, 'volumes-test').count()) {
     await downStack(page, 'volumes-test').catch(() => {});
   }
 });
 
-test('Prune removes real stopped containers, not just closes the dialog', async ({ pluginPage: page }, testInfo) => {
-  // Genuinely broken on Podman — see #274 (podman container prune is a
-  // silent no-op on pod-member containers, which every podman-compose
-  // stack's containers are). Kept asserting the *correct* behavior rather
-  // than weakened to match the bug, so this starts passing again the moment
-  // #274 is fixed instead of needing to be rewritten.
-  test.fixme(testInfo.project.name.includes('podman'), 'podman container prune is a no-op on pod-member containers — see #274');
+test('Prune removes real stopped containers, not just closes the dialog', async ({ pluginPage: page }) => {
+  // Runs on Podman again since #274 was fixed. This test always asserted the correct
+  // behaviour rather than being weakened to match the bug, so removing the skip is all
+  // that was needed.
   // See logs.spec.ts for why: Up alone can eat most of the default 30s.
   test.setTimeout(120_000);
   await baseData(page);
@@ -157,13 +152,12 @@ test('Prune does not offer to remove an image another stack is still using', asy
 // `exited-containers_prunetest` (testing guide §6.16.6) exits immediately
 // (restart: "no"), giving Prune's Containers section a real stopped
 // container to list and remove by name.
-test('Prune removes a real one-shot exited container by name', async ({ pluginPage: page }, testInfo) => {
-  // Genuinely broken on Podman — see #274 (podman container prune is a
-  // silent no-op on pod-member containers, which every podman-compose
-  // stack's containers are). This test previously only checked the preview
-  // modal and that "Prune selected" closed it, never that the container was
-  // actually gone afterward — which is exactly how #274 went unnoticed.
-  test.fixme(testInfo.project.name.includes('podman'), 'podman container prune is a no-op on pod-member containers — see #274');
+test('Prune removes a real one-shot exited container by name', async ({ pluginPage: page }) => {
+  // Runs on Podman too since #274 was fixed: `podman container prune` silently skips
+  // pod-member containers (which every podman-compose stack's containers are), so
+  // pruneContainers() now lists and `podman rm`s them directly. The final assertion
+  // below — that the container is really gone, not just that the modal closed — is
+  // what catches a regression; only checking the modal is how #274 went unnoticed.
   test.setTimeout(60_000);
   await baseData(page);
   await ensureDown(page, 'exited-containers_prunetest');

@@ -1,4 +1,5 @@
-import { cli, dockerSpawnEnviron, socketSuperuser } from "../cockpit";
+import { cli, dockerSpawnEnviron, socketSuperuser, getIsPodman } from "../cockpit";
+import { makeFakeProcess } from "./internal";
 
 export function removeImages(ids: string[], superuser?: "try"): CockpitProcess {
   return cockpit.spawn(
@@ -53,7 +54,32 @@ export function pruneImages(superuser?: "try"): CockpitProcess {
   );
 }
 
+// On Podman every podman-compose / `podman compose` stack's containers are members of an
+// auto-created pod (`pod_<project>`), and `podman container prune` categorically skips pod
+// members — it exits 0, reports nothing and removes nothing, so the whole feature was a
+// silent no-op there while the preview correctly listed the containers (#274). `podman rm`
+// on the very same containers works fine, so list the IDs and remove them directly.
+//
+// The filters deliberately match listStoppedContainers() (query.ts), which is what the
+// preview shows — so what gets removed is exactly what the user was shown.
+function pruneContainersPodman(project: string, superuser?: "try"): CockpitProcess {
+  return makeFakeProcess(async () => {
+    let raw = "";
+    const psProc = cockpit.spawn(
+      cli("ps", "-a", "--filter", "status=exited", "--filter", `label=com.docker.compose.project=${project}`, "--format", "{{.ID}}"),
+      { superuser, err: "message", ...dockerSpawnEnviron() },
+    );
+    psProc.stream(d => { raw += d; });
+    await psProc;
+    const ids = raw.split("\n").map(l => l.trim()).filter(Boolean);
+    if (ids.length === 0) return "";
+    await cockpit.spawn(cli("rm", ...ids), { superuser, err: "message", ...dockerSpawnEnviron() });
+    return ids.join("\n");
+  });
+}
+
 export function pruneContainers(project: string, superuser?: "try"): CockpitProcess {
+  if (getIsPodman()) return pruneContainersPodman(project, superuser);
   return cockpit.spawn(
     cli("container", "prune", "-f", "--filter", `label=com.docker.compose.project=${project}`),
     { superuser, err: "message", ...dockerSpawnEnviron() },
