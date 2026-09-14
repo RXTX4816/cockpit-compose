@@ -28,7 +28,7 @@
     "base:reset": "yalc retreat --all && npm install"
   },
   "devDependencies": {
-    "@patternfly/react-core": "^6.6.1",
+    "@patternfly/react-core": "^6.6.2",
     "@playwright/test": "^1.61.1",
     "@rxtx4816/cockpit-plugin-base-react": "^2.1.0",
     "@testing-library/jest-dom": "^7.0.0",
