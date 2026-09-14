@@ -17,7 +17,8 @@
     "unknown": "לא ידוע",
     "continue": "המשך",
     "copy": "העתק",
-    "copied": "הועתק!"
+    "copied": "הועתק!",
+    "pull_policy_label": "מדיניות משיכה: {{policy}}"
   },
   "stacks": {
     "title": "ערימות Compose",

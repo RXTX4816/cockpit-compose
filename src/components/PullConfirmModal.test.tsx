@@ -91,3 +91,41 @@ describe("PullConfirmModal", () => {
     expect(screen.queryByText(/buildonly/)).not.toBeInTheDocument();
   });
 });
+
+// #287: Compose 5.5.0 honours pull_policy refresh windows. Reading pull_policy at
+// all also makes the existing unpinned warning correct for policies that never
+// re-fetch — ":latest" is not a moving target if nothing is allowed to move it.
+describe("PullConfirmModal — pull_policy awareness", () => {
+  const withCompose = (yaml: string) => {
+    mockReadComposeFile.mockImplementation(() => mockProcess(yaml));
+    render(<PullConfirmModal stack={stack} onConfirm={vi.fn()} onClose={vi.fn()} />);
+  };
+
+  it("shows the pull policy next to a service that sets one", async () => {
+    withCompose("services:\n  web:\n    image: nginx:latest\n    pull_policy: weekly\n");
+    expect(await screen.findByText("pull policy: weekly")).toBeInTheDocument();
+  });
+
+  it("shows no policy label for a service that does not set one", async () => {
+    withCompose("services:\n  web:\n    image: nginx:latest\n");
+    await screen.findByText("nginx:latest");
+    expect(screen.queryByText(/pull policy:/)).toBeNull();
+  });
+
+  it("still warns about an unpinned image on a refresh window", async () => {
+    withCompose("services:\n  web:\n    image: nginx:latest\n    pull_policy: daily\n");
+    expect(await screen.findByText(/unpinned/)).toBeInTheDocument();
+  });
+
+  it("does not warn about an unpinned image the policy will never re-fetch", async () => {
+    withCompose("services:\n  web:\n    image: nginx:latest\n    pull_policy: never\n");
+    await screen.findByText("nginx:latest");
+    expect(screen.queryByText(/unpinned/)).toBeNull();
+  });
+
+  it("renders a compose file from an older Compose unchanged", async () => {
+    withCompose("services:\n  web:\n    image: nginx:latest\n    pull_policy: if_not_present\n");
+    expect(await screen.findByText("pull policy: if_not_present")).toBeInTheDocument();
+    expect(screen.queryByText(/unpinned/)).toBeNull();
+  });
+});

@@ -17,7 +17,8 @@
     "unknown": "tidak diketahui",
     "continue": "Lanjutkan",
     "copy": "Salin",
-    "copied": "Tersalin!"
+    "copied": "Tersalin!",
+    "pull_policy_label": "kebijakan pull: {{policy}}"
   },
   "stacks": {
     "title": "Tumpukan Compose",

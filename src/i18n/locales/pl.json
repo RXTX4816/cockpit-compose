@@ -17,7 +17,8 @@
     "unknown": "nieznany",
     "continue": "Kontynuuj",
     "copy": "Kopiuj",
-    "copied": "Skopiowano!"
+    "copied": "Skopiowano!",
+    "pull_policy_label": "zasada pobierania: {{policy}}"
   },
   "stacks": {
     "title": "Stosy Compose",

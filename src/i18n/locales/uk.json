@@ -17,7 +17,8 @@
     "unknown": "невідомо",
     "continue": "Продовжити",
     "copy": "Копіювати",
-    "copied": "Скопійовано!"
+    "copied": "Скопійовано!",
+    "pull_policy_label": "політика завантаження: {{policy}}"
   },
   "stacks": {
     "title": "Стеки Compose",

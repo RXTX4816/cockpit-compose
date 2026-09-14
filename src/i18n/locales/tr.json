@@ -17,7 +17,8 @@
     "unknown": "bilinmiyor",
     "continue": "Devam Et",
     "copy": "Kopyala",
-    "copied": "Kopyalandı!"
+    "copied": "Kopyalandı!",
+    "pull_policy_label": "çekme ilkesi: {{policy}}"
   },
   "stacks": {
     "title": "Compose Yığınları",

@@ -9,33 +9,9 @@ import {
   Button,
   Alert,
 } from "@patternfly/react-core";
-import { load as loadYaml } from "js-yaml";
 import { type ComposeStack, readComposeFile } from "../api";
 import { splitConfigFiles } from "../lib/configFiles";
-
-interface ImageEntry {
-  service: string;
-  image: string;
-  risky: boolean;
-}
-
-function parseImages(yaml: string): ImageEntry[] {
-  try {
-    const doc = loadYaml(yaml) as Record<string, unknown>;
-    const services = doc?.services as Record<string, { image?: string; build?: unknown }> | undefined;
-    if (!services) return [];
-    return Object.entries(services)
-      .filter(([, svc]) => svc?.image && !svc?.build)
-      .map(([name, svc]) => {
-        const image = svc.image!;
-        const tag = image.includes(":") ? image.split(":").pop()! : "latest";
-        const risky = tag === "latest" || tag === "";
-        return { service: name, image, risky };
-      });
-  } catch {
-    return [];
-  }
-}
+import { parseServiceImages, type ServiceImage } from "../lib/serviceImages";
 
 interface Props {
   stack: ComposeStack;
@@ -46,13 +22,13 @@ interface Props {
 export function PullConfirmModal({ stack, onConfirm, onClose }: Props) {
   const { t } = useTranslation();
   const configFile = splitConfigFiles(stack.ConfigFiles)[0] ?? "";
-  const [images, setImages] = useState<ImageEntry[]>([]);
+  const [images, setImages] = useState<ServiceImage[]>([]);
 
   useEffect(() => {
     let content = "";
     const proc = readComposeFile(configFile);
     proc.stream((data: string) => { content += data; });
-    void proc.then(() => setImages(parseImages(content)));
+    void proc.then(() => setImages(parseServiceImages(content)));
   }, [configFile]);
 
   const riskyImages = images.filter(i => i.risky);
@@ -77,11 +53,16 @@ export function PullConfirmModal({ stack, onConfirm, onClose }: Props) {
           <div style={{ fontSize: "0.875rem" }}>
             <strong>{t("pull_confirm_modal.images_title")}</strong>
             <ul style={{ margin: "0.5rem 0 0 1.25rem", padding: 0 }}>
-              {images.map(({ service, image, risky }) => (
+              {images.map(({ service, image, risky, pullPolicy }) => (
                 <li key={service} style={{ marginBottom: "0.25rem" }}>
                   <code>{service}</code>
                   {" — "}
                   <code>{image}</code>
+                  {pullPolicy && (
+                    <span style={{ marginLeft: "0.4rem", color: "var(--pf-t--global--text--color--subtle)" }}>
+                      {t("common.pull_policy_label", { policy: pullPolicy })}
+                    </span>
+                  )}
                   {risky && (
                     <span style={{ marginLeft: "0.4rem", color: "var(--pf-t--global--color--status--warning--default)" }}>
                       {t("pull_confirm_modal.unpinned_label")}

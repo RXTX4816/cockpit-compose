@@ -17,7 +17,8 @@
     "unknown": "不明",
     "continue": "続ける",
     "copy": "コピー",
-    "copied": "コピーしました！"
+    "copied": "コピーしました！",
+    "pull_policy_label": "プルポリシー: {{policy}}"
   },
   "stacks": {
     "title": "Compose スタック",

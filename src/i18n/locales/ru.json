@@ -17,7 +17,8 @@
     "unknown": "неизвестно",
     "continue": "Продолжить",
     "copy": "Копировать",
-    "copied": "Скопировано!"
+    "copied": "Скопировано!",
+    "pull_policy_label": "политика загрузки: {{policy}}"
   },
   "stacks": {
     "title": "Стеки Compose",

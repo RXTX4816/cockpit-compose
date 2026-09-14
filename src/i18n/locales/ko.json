@@ -17,7 +17,8 @@
     "unknown": "알 수 없음",
     "continue": "계속",
     "copy": "복사",
-    "copied": "복사됨!"
+    "copied": "복사됨!",
+    "pull_policy_label": "풀 정책: {{policy}}"
   },
   "stacks": {
     "title": "Compose 스택",

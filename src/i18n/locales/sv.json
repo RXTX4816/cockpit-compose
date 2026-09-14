@@ -17,7 +17,8 @@
     "unknown": "okänd",
     "continue": "Fortsätt",
     "copy": "Kopiera",
-    "copied": "Kopierat!"
+    "copied": "Kopierat!",
+    "pull_policy_label": "hämtningspolicy: {{policy}}"
   },
   "stacks": {
     "title": "Compose-stackar",
