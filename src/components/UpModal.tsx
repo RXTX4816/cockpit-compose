@@ -26,12 +26,22 @@ export function UpModal({ stack, profiles = [], onClose }: Props) {
   const { lines, done, failed, errorMsg, cancel } = useUpStream(stack.Name, configFiles, profiles);
   const { enqueue } = useBackgroundTasks();
 
+  // Two very different intents share this handler: aborting a run still in flight
+  // (the Cancel button, and the modal's X while !done), and dismissing one that has
+  // already finished (the Close button). Only the first should touch the channel.
+  //
+  // Cancelling a finished stream is meant to be a no-op — useAsyncStream nulls its
+  // process ref in the same callback that sets `done` — but #272 reports Up work being
+  // discarded by exactly this call on some VMs, so stop relying on that contract from
+  // here. Dismissing a completed run has no reason to close a channel at all.
   const handleClose = () => {
-    cancel();
+    if (!done) cancel();
     onClose(done && !failed);
   };
 
   const handleBackground = () => {
+    // Deliberately unconditional: this hands the run to the background task, which
+    // re-launches it with its own process, so this modal's channel must go.
     cancel();
     enqueue(stack.Name, "up", t("up_modal.background_label", { name: stack.Name }), buildUpStarter(stack, profiles));
     onClose(true);
