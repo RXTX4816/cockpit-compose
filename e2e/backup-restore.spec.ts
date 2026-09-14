@@ -59,7 +59,7 @@ test('Backup creates a real archive on disk, and Restore recreates a runnable st
   await restoreModal.getByRole('button', { name: 'Rescan' }).click();
 
   const archiveFilename = archivePreview.split('/').pop()!;
-  const radio = restoreModal.getByRole('radio', { name: new RegExp(archiveFilename.replace('.', '\\.')) });
+  const radio = restoreModal.getByRole('radio', { name: archiveFilename });
   await expect(radio).toBeVisible({ timeout: 10000 });
   await radio.check();
 
@@ -114,7 +114,7 @@ async function openRestoreWith(page: Page, archivePath: string) {
   await restoreModal.locator('#rm-scan-dir').fill(BACKUP_DIR);
   await restoreModal.getByRole('button', { name: 'Rescan' }).click();
   const filename = archivePath.split('/').pop()!;
-  const radio = restoreModal.getByRole('radio', { name: new RegExp(filename.replace(/\./g, '\\.')) });
+  const radio = restoreModal.getByRole('radio', { name: filename });
   await expect(radio).toBeVisible({ timeout: 10000 });
   await radio.check();
   await expect(restoreModal.locator('#rm-new-name')).toBeVisible({ timeout: 10000 });
@@ -136,7 +136,7 @@ test('Deleting a backup removes the archive from disk, behind two confirmations'
   await restoreModal.getByRole('button', { name: 'Rescan' }).click();
 
   const filename = archivePath.split('/').pop()!;
-  const radio = restoreModal.getByRole('radio', { name: new RegExp(filename.replace(/\./g, '\\.')) });
+  const radio = restoreModal.getByRole('radio', { name: filename });
   await expect(radio).toBeVisible({ timeout: 10000 });
 
   // The trash button sits in the same row as this archive's radio. Ancestor divs of
