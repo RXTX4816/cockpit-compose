@@ -174,8 +174,7 @@ describe("YamlModal", () => {
     expect(restore).toHaveBeenCalledWith("/path/compose.yml.snapshot.1700000000000");
   });
 
-  it("Delete snapshot calls remove", async () => {
-    const remove = vi.fn().mockResolvedValue(undefined);
+  async function openSnapshotHistory(remove = vi.fn().mockResolvedValue(undefined)) {
     mockUseSnapshots.mockReturnValue({
       snapshots: [{ timestamp: 1700000000000, name: "Jan 1 2024", path: "/path/compose.yml.snapshot.1700000000000" }],
       load: vi.fn().mockResolvedValue(undefined),
@@ -186,8 +185,41 @@ describe("YamlModal", () => {
     render(<YamlModal stack={stack} onClose={vi.fn()} />);
     await waitFor(() => screen.getByRole("button", { name: /History/i }));
     fireEvent.click(screen.getByRole("button", { name: /History/i }));
-    fireEvent.click(screen.getByRole("button", { name: /Delete/i }));
+    return remove;
+  }
+
+  it("Delete snapshot asks for confirmation before removing anything", async () => {
+    const remove = await openSnapshotHistory();
+    fireEvent.click(screen.getByRole("button", { name: /^Delete$/i }));
+
+    // Nothing is removed until the confirmation is accepted.
+    expect(remove).not.toHaveBeenCalled();
+    expect(await screen.findByText(/Delete snapshot "Jan 1 2024"\?/)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /^Delete snapshot$/i }));
     await waitFor(() => expect(remove).toHaveBeenCalledWith("/path/compose.yml.snapshot.1700000000000"));
+  });
+
+  it("Cancelling the snapshot delete confirmation keeps the snapshot", async () => {
+    const remove = await openSnapshotHistory();
+    fireEvent.click(screen.getByRole("button", { name: /^Delete$/i }));
+    await screen.findByText(/Delete snapshot "Jan 1 2024"\?/);
+
+    fireEvent.click(screen.getByRole("button", { name: /^Cancel$/i }));
+
+    await waitFor(() => expect(screen.queryByText(/Delete snapshot "Jan 1 2024"\?/)).toBeNull());
+    expect(remove).not.toHaveBeenCalled();
+  });
+
+  it("Shows an inline error and keeps the dialog open when snapshot removal fails", async () => {
+    const remove = vi.fn().mockRejectedValue(new Error("permission denied"));
+    await openSnapshotHistory(remove);
+    fireEvent.click(screen.getByRole("button", { name: /^Delete$/i }));
+    await screen.findByText(/Delete snapshot "Jan 1 2024"\?/);
+    fireEvent.click(screen.getByRole("button", { name: /^Delete snapshot$/i }));
+
+    expect(await screen.findByText("permission denied")).toBeInTheDocument();
+    expect(screen.getByText(/Delete snapshot "Jan 1 2024"\?/)).toBeInTheDocument();
   });
 
   it("Lock button while editing returns to read mode without resetting content", async () => {
