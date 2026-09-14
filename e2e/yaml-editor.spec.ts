@@ -1,7 +1,7 @@
 import { test, expect } from '@rxtx4816/cockpit-plugin-base-react/e2e';
 import { baseData } from './helpers/base';
-import { openYamlEditor, yamlEditorContent } from './helpers/stacks';
-import { sshExec } from './helpers/vm';
+import { downStack, ensureDown, openYamlEditor, stackRow, upStack, yamlEditorContent } from './helpers/stacks';
+import { engineCli, sshExec } from './helpers/vm';
 
 test.describe('basic editor behavior (gotify, pre-opened in edit mode)', () => {
   test.beforeEach(async ({ pluginPage: page }) => {
@@ -207,4 +207,121 @@ test('Snapshot history records a real edit, shows a diff, and Restore reverts th
   await expect(modal.getByRole('button', { name: 'Edit' })).toBeVisible({ timeout: 10000 });
   const restoredContent = await modal.locator('.cm-content').textContent();
   expect(restoredContent).toBe(originalContent);
+});
+
+// Wave 5 (#227): "Import" an existing on-disk file into the stack, which is a
+// different flow from "Add" (create-new, covered above). The multi-file fixture's
+// second file is pre-staged by cloud-init rather than imported through the UI, so
+// the Import button itself had never been clicked.
+//
+// The file is placed over SSH first so it exists on disk but is not yet one of the
+// stack's ConfigFiles — exactly the state Import's directory scan looks for.
+test('Import adds an existing on-disk file as a real tab, backed by that same file', async ({ pluginPage: page }, testInfo) => {
+  test.setTimeout(60_000);
+  const vm = testInfo.project.name;
+  const DIR = '/home/test/testcompose/env-test';
+  const FILE = `${DIR}/e2e-import.yml`;
+  await sshExec(vm, `printf 'services:\\n  imported:\\n    image: busybox\\n    # e2e-import-origin\\n' > ${FILE}`);
+
+  try {
+    await baseData(page);
+    await openYamlEditor(page, 'env-test');
+    const modal = page.getByRole('dialog').filter({ hasText: 'env-test — compose file' });
+    await expect(modal.locator('[role="tab"]')).toHaveCount(1);
+
+    await modal.getByRole('button', { name: 'Import', exact: true }).click();
+    const importModal = page.getByRole('dialog').filter({ hasText: 'Import existing file' });
+    await expect(importModal).toBeVisible({ timeout: 10000 });
+
+    // The scan lists the untracked file by its full path, labelled by basename.
+    const select = importModal.locator('#ym-import-file');
+    await expect(select.locator(`option[value="${FILE}"]`)).toHaveCount(1, { timeout: 15000 });
+    await select.selectOption(FILE);
+    await importModal.getByRole('button', { name: 'Import', exact: true }).click();
+    await expect(importModal).toHaveCount(0, { timeout: 10000 });
+
+    // Real effect #1: a second tab exists for it, showing the file's real content.
+    await expect(modal.locator('[role="tab"]')).toHaveCount(2, { timeout: 10000 });
+    const tab = modal.getByRole('tab', { name: /e2e-import\.yml/ });
+    await expect(tab).toBeVisible();
+    await tab.click();
+    await expect(modal.locator('.cm-content')).toContainText('e2e-import-origin', { timeout: 10000 });
+
+    // Real effect #2 — it is the same file, not an in-memory copy: an edit saved in
+    // this tab lands at that exact path on disk.
+    await modal.getByRole('button', { name: 'Edit' }).click();
+    await modal.locator('.cm-content').click();
+    await page.keyboard.press('Control+End');
+    await page.keyboard.type('\n    # e2e-import-edited');
+    await modal.getByRole('button', { name: 'Save', exact: true }).click();
+    await expect(modal.getByRole('button', { name: 'Edit' })).toBeVisible({ timeout: 10000 });
+
+    const onDisk = await sshExec(vm, `cat ${FILE}`);
+    expect(onDisk).toContain('e2e-import-origin');
+    expect(onDisk).toContain('e2e-import-edited');
+  } finally {
+    await sshExec(vm, `rm -f ${FILE} ${FILE}.snapshot.*`).catch(() => {});
+  }
+});
+
+// Wave 5 (#227): selective recreation. After a compose file changes, Up should
+// recreate only the services whose definition changed and leave the rest alone.
+// Nothing asserted that before — backup-restore.spec.ts touches re-Up only
+// incidentally.
+//
+// Deviation from the inventory's planned shape, deliberately: it suggested bumping
+// one service's image tag. That makes the test depend on pulling a new image from
+// a registry, which is slow and network-flaky. Adding an environment variable is an
+// equally real change to the service definition — Compose recreates for it the same
+// way — with no pull involved.
+//
+// The file is edited over SSH rather than keystroke-by-keystroke in CodeMirror,
+// whose auto-indent makes precise YAML insertion brittle; the editor's own save path
+// is already covered by the snapshot test above. What is under test here is what Up
+// does with the change, and that part goes through the UI.
+test('Up after editing one service recreates only that service\'s container', async ({ pluginPage: page }, testInfo) => {
+  test.setTimeout(150_000);
+  const vm = testInfo.project.name;
+  const FILE = '/home/test/testcompose/multi/docker-compose.yml';
+  const cli = engineCli(vm);
+  const idOf = async (service: string) => (await sshExec(vm,
+    `${cli} ps -q --no-trunc --filter label=com.docker.compose.project=multi --filter label=com.docker.compose.service=${service}`)).trim();
+
+  await sshExec(vm, `cp ${FILE} ${FILE}.e2e-bak`);
+  try {
+    await baseData(page);
+    await ensureDown(page, 'multi');
+    await upStack(page, 'multi');
+
+    const before = { web: await idOf('web'), cache: await idOf('cache'), worker: await idOf('worker') };
+    for (const [svc, id] of Object.entries(before)) {
+      expect(id, `${svc} should be running before the edit`).not.toBe('');
+    }
+
+    // Change `cache`'s definition only: add an environment block under it.
+    await sshExec(vm,
+      `sed -i 's#^    image: redis:alpine$#    image: redis:alpine\\n    environment:\\n      E2E_RECREATE_MARKER: "1"#' ${FILE}`);
+    expect(await sshExec(vm, `cat ${FILE}`)).toContain('E2E_RECREATE_MARKER');
+
+    // Up again, from the running row.
+    const row = stackRow(page, 'multi');
+    await row.getByRole('button', { name: 'Up', exact: true }).click();
+    await page.getByRole('dialog', { name: /Confirm up.*multi/ }).getByRole('button', { name: 'Up', exact: true }).click();
+    const progress = page.getByRole('dialog', { name: /^Up.*multi/ });
+    await progress.getByRole('button', { name: 'Close' }).click({ timeout: 60000 });
+    await expect(row).toHaveAttribute('data-status', /running|partial/, { timeout: 30000 });
+
+    // Real effect: only the edited service has a new container.
+    await expect.poll(() => idOf('cache'), { timeout: 30000 }).not.toBe(before.cache);
+    expect(await idOf('cache')).not.toBe('');
+    expect(await idOf('web'), 'web was not edited and must keep its container').toBe(before.web);
+    expect(await idOf('worker'), 'worker was not edited and must keep its container').toBe(before.worker);
+
+    // And the change genuinely reached the new container.
+    const env = await sshExec(vm, `${cli} inspect --format '{{range .Config.Env}}{{println .}}{{end}}' ${await idOf('cache')}`);
+    expect(env).toContain('E2E_RECREATE_MARKER=1');
+  } finally {
+    await sshExec(vm, `mv ${FILE}.e2e-bak ${FILE}`).catch(() => {});
+    if (await stackRow(page, 'multi').count()) await downStack(page, 'multi').catch(() => {});
+  }
 });

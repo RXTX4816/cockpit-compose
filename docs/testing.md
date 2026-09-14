@@ -1149,31 +1149,29 @@ All features work identically to rootful Docker.
 
 ---
 
-## 9. E2E Coverage — Planned, Not Yet Implemented
+## 9. E2E Coverage — Wave 5 Written, Not Yet Run
 
-Full detail lives in [`docs/wiki/E2E-Test-Inventory.md`](wiki/E2E-Test-Inventory.md#wave-5--planned-not-yet-implemented)
+Full detail lives in [`docs/wiki/E2E-Test-Inventory.md`](wiki/E2E-Test-Inventory.md#wave-5--written-not-yet-run-on-the-vm-matrix)
 ("Wave 5") — this section is a pointer/summary so it's discoverable from the manual
-testing guide too, not just the wiki. **These must be implemented in a future
-session**; none of them have automated coverage today, found via a systematic
-cross-check of every component and every documented sub-flow against the actual
-`e2e/*.spec.ts` assertions:
+testing guide too. All ten gaps found by the systematic cross-check now have specs,
+**but none has been run on the VM matrix yet**, so expect a fix-up pass on first run:
 
-- Global image prune (`GlobalPruneModal` — the host-wide "Prune images" button, distinct from per-stack Prune)
-- Pause / Unpause a running stack
-- Scale's port-conflict warning (existing test deliberately avoids triggering it)
-- Command history autocomplete, shared by the Exec and Run Command modals
-- YAML editor's "Import an existing file" flow (distinct from "Add new file", which is covered)
-- Backup archive deletion
-- Restore's "Target already exists" overwrite-confirm checkbox, and archive "Name conflict" handling
-- "Find best match" fuzzy directory-scan (downed-stacks scan bar and Create Stack's directory field)
-- Selective container recreation after editing a compose file and re-Up'ing (only the changed service should restart)
-- Run Command's "Remove container when done" unchecked (container should persist after exit)
+- Global image prune (`GlobalPruneModal`) — `e2e/prune.spec.ts`
+- Pause / Unpause — `e2e/stack-lifecycle.spec.ts`
+- Scale's port-conflict warning — `e2e/scale.spec.ts`
+- Command history autocomplete, Exec and Run — `e2e/exec.spec.ts`, `e2e/run-command.spec.ts`
+- YAML editor "Import an existing file" — `e2e/yaml-editor.spec.ts`
+- Backup archive deletion — `e2e/backup-restore.spec.ts`
+- Restore's "Target already exists" gate and "Name conflict" handling — `e2e/backup-restore.spec.ts`
+- "Find best match" — `e2e/find-best-match.spec.ts`
+- Selective container recreation after edit + re-Up — `e2e/yaml-editor.spec.ts`
+- Run Command's `--rm` unchecked — `e2e/run-command.spec.ts`
 
-Two **open, unfixed app bugs** found and filed while writing other specs this pass
-also need dedicated regression tests once fixed — the existing specs that touch
-their modals currently work around them (real click → programmatic/CSS click)
-specifically so the underlying feature stays tested, which means neither bug
-today has a test that actually fails because of it:
+Three of these follow the code rather than the originally planned shape (scale
+conflict, name conflict, recreation trigger) — the inventory explains each.
 
-- Issue [#277](https://github.com/RXTX4816/cockpit-compose/issues/277) — nested "Add compose file" modal loses ARIA accessibility (stuck `aria-hidden="true"`) after typing in its Filename input.
-- Issue [#283](https://github.com/RXTX4816/cockpit-compose/issues/283) — Background Tasks drawer header intercepts real mouse clicks meant for the log modal's Close button.
+The two app bugs earlier specs had to work around are both fixed, and their
+workarounds replaced with real interactions that now serve as regression tests:
+
+- Issue [#277](https://github.com/RXTX4816/cockpit-compose/issues/277) — nested modals losing ARIA accessibility; fixed by PatternFly 6.6.2.
+- Issue [#283](https://github.com/RXTX4816/cockpit-compose/issues/283) — Background Tasks drawer intercepting the log modal's Close; fixed by lowering the drawer's z-index tier.
