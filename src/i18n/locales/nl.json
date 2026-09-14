@@ -96,7 +96,19 @@
     "rootless_help_body": "Docker of Podman wordt uitgevoerd in rootless-modus — containers draaien als uw gebruiker, niet als root. Dit verbetert de beveiliging, maar kan sommige functies beperken zoals het binden van geprivilegieerde poorten (<1024), toegang tot systeempaden of het gebruik van bepaalde netwerkstuurprogramma's.",
     "help": "Hulp",
     "feedback": "Feedback / Bug melden",
-    "source": "Broncode"
+    "source": "Broncode",
+    "licenses": "Opensourcelicenties"
+  },
+  "notices": {
+    "title": "Opensourcelicenties",
+    "aria_label": "Opensourcelicenties",
+    "intro": "{{product}} is gelicentieerd onder {{license}}.",
+    "source_link": "Broncode ophalen",
+    "summary": "Het bundelt de volgende {{count}} opensourcepakketten. De licentie en copyrightvermelding van elk pakket zijn hieronder volledig weergegeven.",
+    "licenses_used": "Licenties",
+    "filter_placeholder": "Filteren op naam, licentie of uitgever",
+    "no_matches": "Geen pakketten komen overeen met dit filter",
+    "no_text": "Bij dit pakket is geen licentietekst meegeleverd — zie de pakketpagina hierboven."
   },
   "runtime": {
     "docker": "Docker",

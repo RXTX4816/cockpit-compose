@@ -96,7 +96,19 @@
     "rootless_help_body": "Docker nebo Podman běží v rootless režimu — kontejnery běží jako váš uživatel, ne jako root. Zlepšuje to bezpečnost, ale může omezit některé funkce, jako je vazba privilegovaných portů (<1024), přístup k systémovým cestám nebo použití určitých síťových ovladačů.",
     "help": "Nápověda",
     "feedback": "Zpětná vazba / Nahlásit chybu",
-    "source": "Zdrojový kód"
+    "source": "Zdrojový kód",
+    "licenses": "Licence open source"
+  },
+  "notices": {
+    "title": "Licence open source",
+    "aria_label": "Licence open source",
+    "intro": "{{product}} je licencován pod {{license}}.",
+    "source_link": "Získat zdrojový kód",
+    "summary": "Obsahuje následující open source balíčky ({{count}}). Licence a copyrightové upozornění každého balíčku jsou v plném znění uvedeny níže.",
+    "licenses_used": "Licence",
+    "filter_placeholder": "Filtrovat podle názvu, licence nebo vydavatele",
+    "no_matches": "Tomuto filtru neodpovídají žádné balíčky",
+    "no_text": "S tímto balíčkem nebyl dodán text licence — viz domovská stránka balíčku výše."
   },
   "runtime": {
     "docker": "Docker",

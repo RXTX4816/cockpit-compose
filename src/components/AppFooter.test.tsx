@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import { mockProcess } from "../test/helpers";
 
 vi.mock("../api", async (importOriginal) => {
@@ -146,6 +146,26 @@ describe("AppFooter", () => {
     expect(hrefs.some(h => h.includes("issues"))).toBe(true);
     // AGPL §13: the running plugin must offer its Corresponding Source.
     expect(hrefs).toContain("https://github.com/RXTX4816/cockpit-compose");
+  });
+
+  it("offers an open source licenses control", async () => {
+    const { AppFooter } = await import("./AppFooter");
+    render(<AppFooter runtime="docker" />);
+    expect(screen.getByRole("button", { name: "Open source licenses" })).toBeInTheDocument();
+  });
+
+  it("keeps the licenses modal closed until the control is clicked", async () => {
+    const { AppFooter } = await import("./AppFooter");
+    render(<AppFooter runtime="docker" />);
+    expect(screen.queryByRole("dialog")).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "Open source licenses" }));
+
+    // The bundled packages' licenses have to be reachable from the served UI, not
+    // only from THIRD-PARTY-NOTICES.txt on the server's disk.
+    const dialog = await screen.findByRole("dialog");
+    expect(dialog).toBeInTheDocument();
+    expect(screen.getByText(/cockpit-compose is licensed under AGPL-3\.0-only/)).toBeInTheDocument();
   });
 
   it("opens links in a new tab (target=_blank)", async () => {

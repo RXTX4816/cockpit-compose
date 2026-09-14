@@ -102,7 +102,19 @@
     "rootful_help_body": "Docker or Podman is running in rootful (system-wide) mode — containers run as root. Actions are escalated via Cockpit's administrative access when needed.",
     "help": "Help",
     "feedback": "Feedback / Report bug",
-    "source": "Source code"
+    "source": "Source code",
+    "licenses": "Open source licenses"
+  },
+  "notices": {
+    "title": "Open source licenses",
+    "aria_label": "Open source licenses",
+    "intro": "{{product}} is licensed under {{license}}.",
+    "source_link": "Get the source code",
+    "summary": "It bundles the following {{count}} open source packages. Each package's own license and copyright notice is reproduced in full below.",
+    "licenses_used": "Licenses",
+    "filter_placeholder": "Filter by name, license or publisher",
+    "no_matches": "No packages match this filter",
+    "no_text": "No license text shipped with this package — see the package homepage above."
   },
   "runtime": {
     "docker": "Docker",

@@ -96,7 +96,19 @@
     "rootless_help_body": "O Docker ou Podman está sendo executado em modo sem root — os contêineres são executados como seu usuário, não como root. Isso melhora a segurança, mas pode limitar alguns recursos como vincular portas privilegiadas (<1024), acessar caminhos do sistema ou usar determinados drivers de rede.",
     "help": "Ajuda",
     "feedback": "Feedback / Reportar bug",
-    "source": "Código-fonte"
+    "source": "Código-fonte",
+    "licenses": "Licenças de código aberto"
+  },
+  "notices": {
+    "title": "Licenças de código aberto",
+    "aria_label": "Licenças de código aberto",
+    "intro": "{{product}} é licenciado sob {{license}}.",
+    "source_link": "Obter o código-fonte",
+    "summary": "Ele empacota os {{count}} pacotes de código aberto a seguir. A licença e o aviso de direitos autorais de cada pacote são reproduzidos na íntegra abaixo.",
+    "licenses_used": "Licenças",
+    "filter_placeholder": "Filtrar por nome, licença ou publicador",
+    "no_matches": "Nenhum pacote corresponde a este filtro",
+    "no_text": "Nenhum texto de licença foi fornecido com este pacote — consulte a página do pacote acima."
   },
   "runtime": {
     "docker": "Docker",

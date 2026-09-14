@@ -16,6 +16,7 @@ src/*.map
 src/assets/
 THIRD-PARTY-NOTICES.txt
 third-party-notices.json
+src/generated/
 *.tar.gz
 *.tar.gz.sha256
 

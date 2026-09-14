@@ -96,7 +96,19 @@
     "rootless_help_body": "Docker 或 Podman 正在无根模式下运行 — 容器以您的用户身份运行，而非 root。这提高了安全性，但可能限制某些功能，例如绑定特权端口（<1024）、访问系统路径或使用某些网络驱动程序。",
     "help": "帮助",
     "feedback": "反馈 / 报告问题",
-    "source": "源代码"
+    "source": "源代码",
+    "licenses": "开源许可证"
+  },
+  "notices": {
+    "title": "开源许可证",
+    "aria_label": "开源许可证",
+    "intro": "{{product}} 基于 {{license}} 许可证发布。",
+    "source_link": "获取源代码",
+    "summary": "它捆绑了以下 {{count}} 个开源软件包。每个软件包的许可证和版权声明全文如下。",
+    "licenses_used": "许可证",
+    "filter_placeholder": "按名称、许可证或发布者筛选",
+    "no_matches": "没有软件包符合此筛选条件",
+    "no_text": "此软件包未随附许可证文本 — 请参阅上方的软件包主页。"
   },
   "runtime": {
     "docker": "Docker",

@@ -96,7 +96,19 @@
     "rootless_help_body": "Docker atau Podman berjalan dalam mode tanpa root — kontainer berjalan sebagai pengguna Anda, bukan root. Ini meningkatkan keamanan tetapi mungkin membatasi beberapa fitur seperti mengikat port istimewa (<1024), mengakses jalur sistem, atau menggunakan driver jaringan tertentu.",
     "help": "Bantuan",
     "feedback": "Masukan / Laporkan bug",
-    "source": "Kode sumber"
+    "source": "Kode sumber",
+    "licenses": "Lisensi sumber terbuka"
+  },
+  "notices": {
+    "title": "Lisensi sumber terbuka",
+    "aria_label": "Lisensi sumber terbuka",
+    "intro": "{{product}} dilisensikan di bawah {{license}}.",
+    "source_link": "Dapatkan kode sumber",
+    "summary": "Aplikasi ini memaketkan {{count}} paket sumber terbuka berikut. Lisensi dan pemberitahuan hak cipta setiap paket direproduksi selengkapnya di bawah ini.",
+    "licenses_used": "Lisensi",
+    "filter_placeholder": "Saring menurut nama, lisensi, atau penerbit",
+    "no_matches": "Tidak ada paket yang cocok dengan filter ini",
+    "no_text": "Tidak ada teks lisensi yang disertakan dengan paket ini — lihat beranda paket di atas."
   },
   "runtime": {
     "docker": "Docker",
