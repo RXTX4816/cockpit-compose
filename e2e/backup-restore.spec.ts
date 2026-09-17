@@ -1,7 +1,7 @@
 import type { Locator, Page } from '@playwright/test';
 import { test, expect } from '@rxtx4816/cockpit-plugin-base-react/e2e';
 import { baseData } from './helpers/base';
-import { downStack, downedCard, ensureDown, stackRow, upStack } from './helpers/stacks';
+import { closeUpProgress, downStack, downedCard, ensureDown, stackRow, upStack } from './helpers/stacks';
 import { sshExec } from './helpers/vm';
 
 const BACKUP_DIR = '/home/test/testcompose';
@@ -83,7 +83,7 @@ test('Backup creates a real archive on disk, and Restore recreates a runnable st
   await restoredCard.getByRole('button', { name: 'Up', exact: true }).click();
   await page.getByRole('dialog', { name: new RegExp(`Confirm up.*${RESTORE_NAME}`) }).getByRole('button', { name: 'Up', exact: true }).click();
   const progress = page.getByRole('dialog', { name: new RegExp(`^Up.*${RESTORE_NAME}`) });
-  await progress.getByRole('button', { name: 'Close' }).click({ timeout: 30000 });
+  await closeUpProgress(progress);
   await expect(stackRow(page, RESTORE_NAME)).toHaveAttribute('data-status', /running|partial/, { timeout: 20000 });
 });
 

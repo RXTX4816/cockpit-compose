@@ -26,9 +26,24 @@ export async function upStack(page: Page, name: string) {
   await confirm.getByRole('button', { name: 'Up', exact: true }).click();
 
   const progress = page.getByRole('dialog', { name: new RegExp(`^Up.*${name}`) });
-  await progress.getByRole('button', { name: 'Close' }).click({ timeout: 30000 });
+  await closeUpProgress(progress);
 
   await expect(stackRow(page, name)).toHaveAttribute('data-status', /running|partial/, { timeout: 20000 });
+}
+
+/**
+ * Waits for an Up progress dialog to finish, then dismisses it.
+ *
+ * Clicks the *footer's* Close, which UpModal only renders once the run is done. The
+ * dialog's header X is also named "Close" and is present from the first frame, so a
+ * bare `getByRole('button', { name: 'Close' })` resolves to it immediately — and
+ * closing UpModal before it is done cancels the in-flight `compose up`. Whether the
+ * stack came up at all then depended on whether compose happened to finish before
+ * the cancel landed, which is why so many specs failed at random with the stack
+ * simply never appearing.
+ */
+export async function closeUpProgress(progress: Locator, timeout = 60000) {
+  await progress.locator('.um-footer').getByRole('button', { name: 'Close' }).click({ timeout });
 }
 
 /**
@@ -37,7 +52,21 @@ export async function upStack(page: Page, name: string) {
  */
 export async function downStack(page: Page, name: string) {
   await stackRow(page, name).getByRole('button', { name: 'Down (remove containers)' }).click();
-  await page.getByRole('dialog').getByRole('button', { name: 'Down (remove)' }).click();
+  const confirm = page.getByRole('dialog', { name: 'Confirm down' });
+  await confirm.getByRole('button', { name: 'Down (remove)' }).click();
+
+  // Wait for the confirm dialog to close, which DownModal only does once the down has
+  // actually finished (it keeps itself open, with its buttons disabled, while running).
+  //
+  // The row vanishing is not enough on its own: StacksView hides a stack optimistically
+  // the moment Down is clicked (its manuallyDownedStacks list), so the row is gone long
+  // before compose is. Returning then let a following Up run concurrently with the still
+  // in-flight down — which promptly killed and destroyed the containers that Up had just
+  // created, leaving no stack at all. Confirmed from `docker events`: create/start, then
+  // kill and destroy one second later.
+  // Capped and non-fatal: this is a guard against returning mid-down, not an assertion
+  // about the dialog, and a down that has already finished costs nothing here.
+  await confirm.waitFor({ state: 'detached', timeout: 20000 }).catch(() => {});
   await expect(stackRow(page, name)).toHaveCount(0, { timeout: 20000 });
 }
 
@@ -79,11 +108,15 @@ export async function ensureNoRunningStacks(page: Page) {
  */
 export async function openYamlEditor(page: Page, name: string) {
   const downed = downedCard(page, name);
-  if (await downed.count()) {
-    await downed.getByRole('button', { name: 'Edit compose file' }).click({ force: true, timeout: 20000 });
-  } else {
-    await stackRow(page, name).getByRole('button', { name: 'Edit compose file' }).click({ force: true, timeout: 20000 });
-  }
+  const button = (await downed.count())
+    ? downed.getByRole('button', { name: 'Edit compose file' })
+    : stackRow(page, name).getByRole('button', { name: 'Edit compose file' });
+  // force also skips the check that nothing is covering the button, so make sure
+  // nothing is: the page footer is sticky, and for the last rows of the downed list
+  // it sits right over the button. A forced click there lands on the footer, the
+  // editor never opens, and the failure shows up as a missing dialog instead.
+  await button.evaluate(el => el.scrollIntoView({ block: 'center' }));
+  await button.click({ force: true, timeout: 20000 });
   await expect(page.getByRole('dialog')).toBeVisible();
 }
 

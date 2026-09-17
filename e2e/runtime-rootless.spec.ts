@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { loginWithAdminAccess } from './helpers/admin';
 import { baseData, dismissStartupPodmanPrompt } from './helpers/base';
-import { downStack, downedCard, ensureDown, stackRow } from './helpers/stacks';
+import { closeUpProgress, downStack, downedCard, ensureDown, stackRow } from './helpers/stacks';
 
 /**
  * Regression coverage for issue #242 and the follow-on rootful-Podman bugs found while
@@ -39,7 +39,8 @@ test.describe('rootful Podman (no rootless socket)', () => {
     await row.getByRole('button', { name: 'Stack info' }).click();
     const modal = page.getByRole('dialog', { name: /gotify/i });
     await expect(modal).toBeVisible();
-    await expect(modal.locator('.sim-no-containers')).not.toBeVisible();
+    // By text, not by `.sim-no-containers`, which StackInfoModal also uses for "No images found."
+    await expect(modal.getByText('No containers found.', { exact: true })).not.toBeVisible();
     await expect(modal.getByText(/running/i).first()).toBeVisible();
     await modal.getByRole('button', { name: 'Close' }).click();
   });
@@ -118,7 +119,7 @@ test.describe('Docker rootless (fedora-full)', () => {
     await ensureDown(page, 'gotify');
     await downedCard(page, 'gotify').getByRole('button', { name: 'Up', exact: true }).click();
     await page.getByRole('dialog', { name: /Confirm up.*gotify/ }).getByRole('button', { name: 'Up', exact: true }).click();
-    await page.getByRole('dialog', { name: /^Up.*gotify/ }).getByRole('button', { name: 'Close' }).click({ timeout: 30000 });
+    await closeUpProgress(page.getByRole('dialog', { name: /^Up.*gotify/ }));
     await expect(stackRow(page, 'gotify')).toHaveAttribute('data-status', /running|partial/, { timeout: 60000 });
 
     await downStack(page, 'gotify');

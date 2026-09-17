@@ -148,7 +148,20 @@ test('A real poll failure shows the load-failed alert, and Retry recovers once t
   const runtime = await page.getByRole('button', { name: 'Podman', exact: true }).getAttribute('aria-pressed') === 'true'
     ? 'podman' : 'docker';
   const vm = testInfo.project.name;
-  await sshExec(vm, `sudo mv /usr/bin/${runtime} /usr/bin/${runtime}.e2e-disabled`);
+  // Disabling the CLI alone no longer breaks the poll: listStacks() reads over the
+  // engine's REST socket first and only falls back to the CLI when that fails, so on
+  // any VM with a detected socket the binary was never touched and the alert never
+  // appeared. Break every socket this runtime could be using as well.
+  //
+  // Renamed rather than chmod'ed: the app may reach the socket with superuser, and
+  // root ignores permission bits. The daemon keeps listening on the socket's inode, so
+  // renaming the path back restores it exactly.
+  const sockets = runtime === 'podman'
+    ? ['/run/podman/podman.sock', '/run/user/1000/podman/podman.sock']
+    : ['/var/run/docker.sock', '/run/user/1000/docker.sock'];
+  const disable = sockets.map(s => `if sudo test -S ${s}; then sudo mv ${s} ${s}.e2e-disabled; fi`).join('; ');
+  const restore = sockets.map(s => `if sudo test -e ${s}.e2e-disabled; then sudo mv ${s}.e2e-disabled ${s}; fi`).join('; ');
+  await sshExec(vm, `sudo mv /usr/bin/${runtime} /usr/bin/${runtime}.e2e-disabled; ${disable}`);
   try {
     // No manual refresh control exists for the main poll — the 500ms
     // auto-refresh interval (src/components/StacksView/index.tsx) will hit
@@ -163,7 +176,7 @@ test('A real poll failure shows the load-failed alert, and Retry recovers once t
     await retry.click();
     await expect(alert).toBeVisible({ timeout: 10000 });
   } finally {
-    await sshExec(vm, `sudo mv /usr/bin/${runtime}.e2e-disabled /usr/bin/${runtime}`);
+    await sshExec(vm, `sudo mv /usr/bin/${runtime}.e2e-disabled /usr/bin/${runtime}; ${restore}`);
   }
 
   // Real effect: fixing the runtime and retrying actually recovers — the

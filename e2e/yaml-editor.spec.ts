@@ -1,6 +1,6 @@
 import { test, expect } from '@rxtx4816/cockpit-plugin-base-react/e2e';
 import { baseData } from './helpers/base';
-import { downStack, ensureDown, openYamlEditor, stackRow, upStack, yamlEditorContent } from './helpers/stacks';
+import { closeUpProgress, downStack, ensureDown, openYamlEditor, stackRow, upStack, yamlEditorContent } from './helpers/stacks';
 import { engineCli, sshExec } from './helpers/vm';
 
 test.describe('basic editor behavior (gotify, pre-opened in edit mode)', () => {
@@ -214,20 +214,26 @@ test('Snapshot history records a real edit, shows a diff, and Restore reverts th
 // second file is pre-staged by cloud-init rather than imported through the UI, so
 // the Import button itself had never been clicked.
 //
-// The file is placed over SSH first so it exists on disk but is not yet one of the
-// stack's ConfigFiles — exactly the state Import's directory scan looks for.
+// The file is placed over SSH only *after* the stacks scan and the editor are open,
+// so it exists on disk but is not yet one of the stack's ConfigFiles — exactly the
+// state Import's own directory scan looks for. Creating it beforehand does not give
+// that state: the downed-stacks scan already counts extra .yml files in a stack's
+// directory as part of the stack (the same way multi-file picks up overrides.yml), so
+// the file would already be a tab before Import is ever clicked.
 test('Import adds an existing on-disk file as a real tab, backed by that same file', async ({ pluginPage: page }, testInfo) => {
   test.setTimeout(60_000);
   const vm = testInfo.project.name;
   const DIR = '/home/test/testcompose/env-test';
   const FILE = `${DIR}/e2e-import.yml`;
-  await sshExec(vm, `printf 'services:\\n  imported:\\n    image: busybox\\n    # e2e-import-origin\\n' > ${FILE}`);
+  await sshExec(vm, `rm -f ${FILE} ${FILE}.snapshot.*`);
 
   try {
     await baseData(page);
     await openYamlEditor(page, 'env-test');
     const modal = page.getByRole('dialog').filter({ hasText: 'env-test — compose file' });
     await expect(modal.locator('[role="tab"]')).toHaveCount(1);
+
+    await sshExec(vm, `printf 'services:\\n  imported:\\n    image: busybox\\n    # e2e-import-origin\\n' > ${FILE}`);
 
     await modal.getByRole('button', { name: 'Import', exact: true }).click();
     const importModal = page.getByRole('dialog').filter({ hasText: 'Import existing file' });
@@ -308,7 +314,7 @@ test('Up after editing one service recreates only that service\'s container', as
     await row.getByRole('button', { name: 'Up', exact: true }).click();
     await page.getByRole('dialog', { name: /Confirm up.*multi/ }).getByRole('button', { name: 'Up', exact: true }).click();
     const progress = page.getByRole('dialog', { name: /^Up.*multi/ });
-    await progress.getByRole('button', { name: 'Close' }).click({ timeout: 60000 });
+    await closeUpProgress(progress);
     await expect(row).toHaveAttribute('data-status', /running|partial/, { timeout: 30000 });
 
     // Real effect: only the edited service has a new container.

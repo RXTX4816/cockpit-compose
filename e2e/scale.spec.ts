@@ -88,7 +88,10 @@ test('Scaling a service with a static host port warns about the conflict, in the
     await expect(alert).toBeVisible();
     await expect(modal.locator('code', { hasText: /^web$/ })).toBeVisible();
     await expect(modal.locator('code', { hasText: /^worker$/ })).toHaveCount(0);
-    await expect(modal.locator('svg[title="Has static host port bindings"], [title="Has static host port bindings"]')).toHaveCount(1);
+    // By role, not by a `title` attribute selector: PatternFly icons put their title in
+    // an SVG <title> child, so `svg[title="…"]` matches nothing. The title does surface
+    // as the icon's accessible name, which is what this asserts.
+    await expect(modal.getByRole('img', { name: 'Has static host port bindings' })).toHaveCount(1);
 
     // It warns, it does not block.
     const apply = modal.getByRole('button', { name: 'Apply' });
@@ -114,8 +117,13 @@ test('Scaling a service with a static host port warns about the conflict, in the
     await expect.poll(runningWorkers, { timeout: 30000 }).toBe(2);
 
     // Close whatever state the modal ended in (error alert or already dismissed).
+    // Via its own close button, not Escape: the confirm step offers Apply and Back but
+    // no Cancel, and Escape does not dismiss it — so the modal stayed open, and the
+    // cleanup that follows could not click the stack row behind it. That hung until the
+    // test budget ran out and was reported as an afterEach timeout rather than as this.
     if (await modal.isVisible()) {
-      await page.keyboard.press('Escape');
+      await modal.getByRole('button', { name: 'Close' }).first().click();
+      await expect(modal).not.toBeVisible({ timeout: 10000 });
     }
   });
 });

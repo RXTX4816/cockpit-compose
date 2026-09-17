@@ -1,6 +1,6 @@
 import { test, expect } from '@rxtx4816/cockpit-plugin-base-react/e2e';
 import { baseData } from './helpers/base';
-import { downedCard, downStack, ensureDown, stackRow, upStack, withRunningStack } from './helpers/stacks';
+import { closeUpProgress, downedCard, downStack, ensureDown, stackRow, upStack, withRunningStack } from './helpers/stacks';
 import { engineCli, sshExec } from './helpers/vm';
 
 // Uses gotify (always pre-staged, always down at VM boot). afterEach forces
@@ -46,7 +46,7 @@ test('Start with a profile selected only starts that profile\'s services, not ev
   await confirm.getByRole('checkbox', { name: 'dev' }).check();
   await confirm.getByRole('button', { name: 'Up', exact: true }).click();
   const progress = page.getByRole('dialog', { name: /^Up.*profiles/ });
-  await progress.getByRole('button', { name: 'Close' }).click({ timeout: 30000 });
+  await closeUpProgress(progress);
   await expect(stackRow(page, 'profiles')).toHaveAttribute('data-status', /running|partial/, { timeout: 20000 });
 
   // Real effect: Stack Info shows `debug` (profile: dev) running, `monitoring`

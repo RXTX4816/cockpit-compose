@@ -1,6 +1,6 @@
 import { test, expect } from '@rxtx4816/cockpit-plugin-base-react/e2e';
 import { baseData } from './helpers/base';
-import { downStack, downedCard, ensureDown, stackRow } from './helpers/stacks';
+import { closeUpProgress, downStack, downedCard, ensureDown, stackRow } from './helpers/stacks';
 import { containerName, engineCli, sshExec } from './helpers/vm';
 
 // Parametrized real-behavior checks for the pre-staged fixture stacks that
@@ -21,7 +21,7 @@ async function up(page: import('@playwright/test').Page, name: string) {
   await downedCard(page, name).getByRole('button', { name: 'Up', exact: true }).click();
   await page.getByRole('dialog', { name: new RegExp(`Confirm up.*${name}`) }).getByRole('button', { name: 'Up', exact: true }).click();
   const progress = page.getByRole('dialog', { name: new RegExp(`^Up.*${name}`) });
-  await progress.getByRole('button', { name: 'Close' }).click({ timeout: 30000 });
+  await closeUpProgress(progress);
 }
 
 test('healthcheck fixture: Stack Info reports the real health state the runtime is in', async ({ pluginPage: page }, testInfo) => {

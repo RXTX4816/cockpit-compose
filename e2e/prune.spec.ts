@@ -1,6 +1,6 @@
 import { test, expect } from '@rxtx4816/cockpit-plugin-base-react/e2e';
 import { baseData } from './helpers/base';
-import { downedCard, downStack, ensureDown, stackRow, upStack } from './helpers/stacks';
+import { closeUpProgress, downedCard, downStack, ensureDown, stackRow, upStack } from './helpers/stacks';
 import { containerName, engineCli, sshExec } from './helpers/vm';
 
 // `volumes-test` (db+app, db uses a named volume `pgdata` — see
@@ -28,8 +28,10 @@ test('Prune removes real stopped containers, not just closes the dialog', async 
   // Runs on Podman again since #274 was fixed. This test always asserted the correct
   // behaviour rather than being weakened to match the bug, so removing the skip is all
   // that was needed.
-  // See logs.spec.ts for why: Up alone can eat most of the default 30s.
-  test.setTimeout(120_000);
+  // See logs.spec.ts for why: Up alone can eat most of the default 30s. This one also
+  // downs, ups, stops, prunes and then reads Stack Info back, and downStack now waits
+  // for the down to genuinely finish rather than for the row to be hidden optimistically.
+  test.setTimeout(180_000);
   await baseData(page);
   const row = stackRow(page, 'volumes-test');
 
@@ -62,22 +64,25 @@ test('Prune removes real stopped containers, not just closes the dialog', async 
     await previewModal.getByRole('button', { name: 'Prune selected' }).click();
     await expect(previewModal).not.toBeVisible({ timeout: 20000 });
 
-    // Real effect check: the stack itself does NOT drop out of the
-    // running-stacks list — `compose ls` (podman and docker alike) still
-    // lists a known project even with zero containers, so it stays visible
-    // here as "stopped". Its "N services" count also doesn't change (that
-    // reflects the compose *file's* defined services, not live container
-    // count). (Earlier versions of this test assumed the row would
-    // disappear, or that the services count would drop to 0 — both verified
-    // false against the real DOM/app behavior.) Stack Info is the one place
-    // that actually reflects live container state, so that's what proves
-    // the containers are really gone.
-    await expect(row).toHaveAttribute('data-status', 'stopped', { timeout: 15000 });
-    await row.getByRole('button', { name: 'Stack info' }).click();
-    const infoModal = page.getByRole('dialog', { name: /Info — volumes-test/ });
-    await expect(infoModal).toBeVisible();
-    await expect(infoModal.locator('.sim-no-containers')).toBeVisible({ timeout: 10000 });
-    await infoModal.getByRole('button', { name: 'Close' }).click();
+    // Real effect: the containers are genuinely gone from the engine, not merely absent
+    // from a dialog that closed.
+    //
+    // Asked of the runtime, and the stack is expected to leave the running-stacks list.
+    // An earlier version of this test asserted the opposite — that the row stays as
+    // "stopped" because `compose ls` still lists a project with zero containers. That no
+    // longer holds: listStacks() reads containers over the engine socket and groups them
+    // by project label (api/stacks/query.ts), so a project with no containers left has
+    // nothing to group and drops out. The old assertion did not fail cleanly either — the
+    // follow-up click on the vanished row's "Stack info" button waited out the entire
+    // test budget, which surfaced as a timeout with no indication of the real cause.
+    await expect(row).toHaveCount(0, { timeout: 20000 });
+    await expect
+      .poll(
+        async () => (await sshExec(testInfo.project.name,
+          `${engineCli(testInfo.project.name)} ps -a --filter label=com.docker.compose.project=volumes-test -q || true`)).trim(),
+        { timeout: 15000, intervals: [1000] },
+      )
+      .toBe('');
   } finally {
     if (await row.count()) {
       await downStack(page, 'volumes-test').catch(() => {});
@@ -175,7 +180,7 @@ test('Prune removes a real one-shot exited container by name', async ({ pluginPa
   const confirm = page.getByRole('dialog', { name: /Confirm up.*exited-containers_prunetest/ });
   await confirm.getByRole('button', { name: 'Up', exact: true }).click();
   const progress = page.getByRole('dialog', { name: /^Up.*exited-containers_prunetest/ });
-  await progress.getByRole('button', { name: 'Close' }).click({ timeout: 30000 });
+  await closeUpProgress(progress);
 
   const row = stackRow(page, 'exited-containers_prunetest');
   await expect(row).toBeVisible({ timeout: 15000 });
