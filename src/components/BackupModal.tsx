@@ -40,22 +40,28 @@ export function BackupModal({ stack, onClose }: Props) {
   const [warning, setWarning] = useState<string | null>(null);
   const [savedPath, setSavedPath] = useState<string | null>(null);
 
-  const archiveFilename = `${baseName || stack.Name}-${formatArchiveTimestamp(new Date())}.bak.tar.gz`;
+  // Frozen when the modal opens, so the previewed path names the file that actually
+  // gets written. This used to be computed twice — once inline here for the preview,
+  // once again inside handleCreate — so any timestamp tick between opening the dialog
+  // and clicking Create wrote the archive to a path the preview had never shown.
+  // Re-evaluating it on every render also meant the previewed name drifted while the
+  // dialog simply sat open. Only one archive is created per modal session (the footer
+  // switches to Close on success), so a single frozen value cannot collide.
+  const [timestamp] = useState(() => formatArchiveTimestamp(new Date()));
+
+  const archiveFilename = `${baseName || stack.Name}-${timestamp}.bak.tar.gz`;
   const destPath = `${destDir.replace(/\/$/, "")}/${archiveFilename}`;
 
   async function handleCreate() {
     setRunning(true);
     setError(null);
     setWarning(null);
-    const timestamp = formatArchiveTimestamp(new Date());
-    const filename = `${baseName || stack.Name}-${timestamp}.bak.tar.gz`;
-    const fullDestPath = `${destDir.replace(/\/$/, "")}/${filename}`;
     try {
-      const { warning } = await createBackupArchive(stackParentDir || stackDir, dirName, fullDestPath, {
+      const { warning } = await createBackupArchive(stackParentDir || stackDir, dirName, destPath, {
         includeSnapshots,
         includeSubdirs,
       });
-      setSavedPath(fullDestPath);
+      setSavedPath(destPath);
       if (warning) setWarning(warning);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : String(e));

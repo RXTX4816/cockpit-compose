@@ -70,6 +70,27 @@ describe("BackupModal", () => {
     expect(options.includeSnapshots).toBe(false);
   });
 
+  it("writes the archive to exactly the path the preview showed, even across a timestamp tick", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    try {
+      render(<BackupModal stack={stack} onClose={vi.fn()} />);
+      // The modal renders through a portal, so it is not under render()'s container.
+      const previewPath = document.querySelector<HTMLInputElement>("#bm-preview")!.value;
+
+      // Sit on the dialog long enough for the archive timestamp to move on. The path
+      // was previously rebuilt on click, so the file landed somewhere the user was
+      // never shown.
+      await vi.advanceTimersByTimeAsync(65_000);
+
+      fireEvent.click(screen.getByRole("button", { name: /Create backup/i }));
+      await waitFor(() => expect(mockCreateBackupArchive).toHaveBeenCalledOnce());
+      const [, , destPath] = mockCreateBackupArchive.mock.calls[0];
+      expect(destPath).toBe(previewPath);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("calls createBackupArchive with includeSubdirs false when unchecked", async () => {
     render(<BackupModal stack={stack} onClose={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: /Create backup/i }));
