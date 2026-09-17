@@ -42,6 +42,32 @@ export async function downStack(page: Page, name: string) {
 }
 
 /**
+ * Downs every stack the running-stacks list currently shows.
+ *
+ * For assertions about the *absence* of any running stack — controls gated purely on
+ * `stacks.length === 0`, for instance. Those cannot just down one fixture by name:
+ * any stack another spec left up keeps the control live, which makes such a test pass
+ * or fail on what ran before it rather than on what it is testing.
+ *
+ * Loops because downing one stack re-renders the list, and a stack that was still
+ * shutting down may reappear on the next pass.
+ */
+export async function ensureNoRunningStacks(page: Page) {
+  for (let pass = 0; pass < 10; pass++) {
+    const names = [...new Set(
+      await page.locator('[data-stack-name]').evaluateAll(
+        els => els.map(el => el.getAttribute('data-stack-name')).filter((n): n is string => Boolean(n)),
+      ),
+    )];
+    if (names.length === 0) return;
+    for (const name of names) {
+      await downStack(page, name).catch(() => {});
+    }
+  }
+  await expect(page.locator('[data-stack-name]')).toHaveCount(0, { timeout: 20000 });
+}
+
+/**
  * Opens the compose YAML editor (read-only) for a stack, from either the
  * downed or running list. `force: true` — under sustained session load this
  * click has repeatedly hit Playwright's actionability/stability check

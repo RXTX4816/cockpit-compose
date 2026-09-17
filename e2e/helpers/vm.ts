@@ -76,3 +76,23 @@ export function engineCli(projectName: string): string {
   if (/-podman$/.test(projectName)) return 'podman';
   return 'docker';
 }
+
+/**
+ * The separator the active runtime puts between project, service and index when it
+ * names a container: Docker Compose v2 builds `project-service-1`, podman-compose
+ * builds `project_service_1`.
+ *
+ * Derive expected container names from this rather than hardcoding one runtime's
+ * spelling — a hardcoded name silently passes on the runtime it was written against
+ * and fails everywhere else, and a separator-agnostic regex would also accept the
+ * app producing the *wrong* separator for the runtime in use.
+ */
+export function composeSep(projectName: string): '-' | '_' {
+  return engineCli(projectName).includes('podman') ? '_' : '-';
+}
+
+/** Container name as the active runtime spells it, e.g. `volumes-test-db-1`. */
+export function containerName(projectName: string, project: string, service: string, index = 1): string {
+  const sep = composeSep(projectName);
+  return `${project}${sep}${service}${sep}${index}`;
+}

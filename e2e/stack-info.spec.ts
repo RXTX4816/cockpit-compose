@@ -1,7 +1,7 @@
 import { test, expect } from '@rxtx4816/cockpit-plugin-base-react/e2e';
 import { baseData } from './helpers/base';
 import { downStack, ensureDown, stackRow, upStack, withRunningStack } from './helpers/stacks';
-import { sshExec } from './helpers/vm';
+import { containerName, sshExec } from './helpers/vm';
 
 // `volumes-test` (db+app, db uses a named volume `pgdata` — see
 // scripts/test-vm.config.sh) gives us real services, images, volumes, and a
@@ -72,7 +72,10 @@ test('Stack Info flags a network actually shared with another project', async ({
   try {
     const runtime = await page.getByRole('button', { name: 'Podman', exact: true }).getAttribute('aria-pressed') === 'true'
       ? 'podman' : 'docker';
-    await sshExec(vm, `${runtime} network connect gotify_default multi_web_1 || ${runtime} network connect gotify_default multi-web-1`);
+    // Name the container as the active runtime actually spells it, rather than trying
+    // one spelling and falling back to the other: the `||` form hid a genuinely failed
+    // connect behind an exit status that only reflected the second attempt.
+    await sshExec(vm, `${runtime} network connect gotify_default ${containerName(vm, 'multi', 'web')}`);
 
     const row = stackRow(page, 'gotify');
     await row.getByRole('button', { name: 'Stack info', exact: true }).click();

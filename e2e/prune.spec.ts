@@ -1,7 +1,7 @@
 import { test, expect } from '@rxtx4816/cockpit-plugin-base-react/e2e';
 import { baseData } from './helpers/base';
 import { downedCard, downStack, ensureDown, stackRow, upStack } from './helpers/stacks';
-import { engineCli, sshExec } from './helpers/vm';
+import { containerName, engineCli, sshExec } from './helpers/vm';
 
 // `volumes-test` (db+app, db uses a named volume `pgdata` — see
 // scripts/test-vm.config.sh) is brought up then Stopped (not removed) so it
@@ -24,7 +24,7 @@ test.afterEach(async ({ pluginPage: page }) => {
   }
 });
 
-test('Prune removes real stopped containers, not just closes the dialog', async ({ pluginPage: page }) => {
+test('Prune removes real stopped containers, not just closes the dialog', async ({ pluginPage: page }, testInfo) => {
   // Runs on Podman again since #274 was fixed. This test always asserted the correct
   // behaviour rather than being weakened to match the bug, so removing the skip is all
   // that was needed.
@@ -53,10 +53,12 @@ test('Prune removes real stopped containers, not just closes the dialog', async 
 
     const previewModal = page.getByRole('dialog', { name: /Confirm prune — volumes-test/ });
     await expect(previewModal).toBeVisible();
-    // Real effect target: the stopped db container listed by name, not just a
-    // generic count. Podman container names use underscores as the
-    // service/index separators (project name's own hyphen is untouched).
-    await expect(previewModal.getByText('volumes-test_db_1', { exact: false })).toBeVisible({ timeout: 10000 });
+    // Real effect target: the stopped db container listed by name, not just a generic
+    // count. The service/index separator differs by runtime — podman-compose spells it
+    // `volumes-test_db_1`, Docker Compose `volumes-test-db-1` — so derive it rather
+    // than hardcoding either. (The project name's own hyphen is untouched by both.)
+    const dbContainer = containerName(testInfo.project.name, 'volumes-test', 'db');
+    await expect(previewModal.getByText(dbContainer, { exact: false })).toBeVisible({ timeout: 10000 });
     await previewModal.getByRole('button', { name: 'Prune selected' }).click();
     await expect(previewModal).not.toBeVisible({ timeout: 20000 });
 
@@ -153,7 +155,7 @@ test('Prune does not offer to remove an image another stack is still using', asy
 // `exited-containers_prunetest` (testing guide §6.16.6) exits immediately
 // (restart: "no"), giving Prune's Containers section a real stopped
 // container to list and remove by name.
-test('Prune removes a real one-shot exited container by name', async ({ pluginPage: page }) => {
+test('Prune removes a real one-shot exited container by name', async ({ pluginPage: page }, testInfo) => {
   // Runs on Podman too since #274 was fixed: `podman container prune` silently skips
   // pod-member containers (which every podman-compose stack's containers are), so
   // pruneContainers() now lists and `podman rm`s them directly. The final assertion
@@ -187,16 +189,26 @@ test('Prune removes a real one-shot exited container by name', async ({ pluginPa
 
   const previewModal = page.getByRole('dialog', { name: /Confirm prune — exited-containers_prunetest/ });
   await expect(previewModal).toBeVisible();
-  await expect(previewModal.getByText('exited-containers_prunetest_job_1', { exact: false })).toBeVisible({ timeout: 10000 });
+  // Docker Compose spells this `…-job-1`, podman-compose `…_job_1` — derive it from
+  // the runtime rather than hardcoding either.
+  const jobContainer = containerName(testInfo.project.name, 'exited-containers_prunetest', 'job');
+  await expect(previewModal.getByText(jobContainer, { exact: false })).toBeVisible({ timeout: 10000 });
   await previewModal.getByRole('button', { name: 'Prune selected' }).click();
   await expect(previewModal).not.toBeVisible({ timeout: 20000 });
 
   // Real effect: the container is actually gone, not just the modal closed.
-  await row.getByRole('button', { name: 'Stack info' }).click();
-  const infoModal = page.getByRole('dialog', { name: /Info — exited-containers_prunetest/ });
-  await expect(infoModal).toBeVisible();
-  await expect(infoModal.locator('.sim-no-containers')).toBeVisible({ timeout: 10000 });
-  await infoModal.getByRole('button', { name: 'Close' }).click();
+  //
+  // Asked of the runtime rather than read back through Stack Info. Pruning this
+  // project's only container leaves it with none, and the row is then not reliably
+  // still in the running-stacks table where the Stack info button lives — so going
+  // through the UI here tested the table's post-prune bookkeeping as much as the
+  // prune itself, and hung on the button when the row had moved.
+  await expect
+    .poll(
+      async () => (await sshExec(testInfo.project.name, `${engineCli(testInfo.project.name)} ps -a --filter name=${jobContainer} --format '{{.Names}}' || true`)).trim(),
+      { timeout: 15000, intervals: [1000] },
+    )
+    .toBe('');
 });
 
 // Wave 5 (#227): the host-wide "Prune images" button (GlobalPruneModal), which is

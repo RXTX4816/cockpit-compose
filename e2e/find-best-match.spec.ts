@@ -1,6 +1,6 @@
 import { test, expect } from '@rxtx4816/cockpit-plugin-base-react/e2e';
 import { baseData, dismissStartupPodmanPrompt, COMPOSE_DIR } from './helpers/base';
-import { downStack, stackRow, upStack, ensureDown } from './helpers/stacks';
+import { downStack, ensureNoRunningStacks, stackRow, upStack, ensureDown } from './helpers/stacks';
 
 // Wave 5 (#227): "Find best match" (actions.find_best_match) infers the compose
 // root from the directories of stacks the runtime already knows about, so the
@@ -11,6 +11,13 @@ import { downStack, stackRow, upStack, ensureDown } from './helpers/stacks';
 // The button is disabled while `stacks.length === 0`, i.e. it can only infer a
 // root from *running* stacks. So each test brings a fixture stack up first;
 // that is the precondition, not incidental setup.
+// The control has two accessible names depending on layout: the default layout
+// renders a labelled button ("Find best match", with the longer phrasing only as a
+// `title`, which does not contribute to the accessible name), while the minimal
+// layout renders an icon-only button carrying that phrasing as its aria-label.
+// Matching either keeps these tests valid in both layouts.
+const FIND_BEST_MATCH = /Find best match|Infer compose root from active stacks/;
+
 test.afterEach(async ({ pluginPage: page }) => {
   if (await stackRow(page, 'gotify').count()) {
     await downStack(page, 'gotify').catch(() => {});
@@ -28,7 +35,7 @@ test('Find best match infers the real compose root from a running stack, and sca
   const scanInput = page.getByLabel('Compose directory');
   await scanInput.fill('/tmp');
 
-  await page.getByRole('button', { name: 'Infer compose root from active stacks' }).first().click();
+  await page.getByRole('button', { name: FIND_BEST_MATCH }).first().click();
 
   // Real effect #1: the field resolves to the actual compose root on disk,
   // inferred from gotify's own directory (COMPOSE_DIR/gotify).
@@ -45,11 +52,12 @@ test('Find best match infers the real compose root from a running stack, and sca
 test('Find best match is unavailable with no running stacks to infer from', async ({ pluginPage: page }) => {
   await dismissStartupPodmanPrompt(page);
   await baseData(page);
-  // gotify (and everything else) stays down — nothing for the heuristic to work
-  // from, so the control must be disabled rather than resolving to a guess.
-  await ensureDown(page, 'gotify');
+  // Nothing may be running — the control is disabled purely on `stacks.length === 0`,
+  // so any stack an earlier spec left up keeps it enabled and this assertion fails on
+  // what ran before it. Downing gotify alone was not enough.
+  await ensureNoRunningStacks(page);
 
-  const button = page.getByRole('button', { name: 'Infer compose root from active stacks' }).first();
+  const button = page.getByRole('button', { name: FIND_BEST_MATCH }).first();
   await expect(button).toBeDisabled();
 });
 
@@ -64,8 +72,14 @@ test('Create Stack offers Find best match for its directory field too', async ({
   await expect(modal).toBeVisible();
 
   await modal.locator('#csm-dir').fill('/tmp');
-  await modal.getByRole('button', { name: 'Infer compose root from active stacks' }).click();
+  await modal.getByRole('button', { name: FIND_BEST_MATCH }).click();
 
   // Same inference, reached through the other entry point.
   await expect(modal.locator('#csm-dir')).toHaveValue(COMPOSE_DIR, { timeout: 15000 });
+
+  // Close the dialog before finishing: afterEach downs gotify through the page
+  // underneath, and a modal left open intercepts those clicks — the hook then burns
+  // the whole remaining test budget and fails a test whose body passed.
+  await modal.getByRole('button', { name: 'Cancel', exact: true }).click();
+  await expect(modal).not.toBeVisible({ timeout: 10000 });
 });

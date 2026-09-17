@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 import { test, expect } from '@rxtx4816/cockpit-plugin-base-react/e2e';
 import { baseData } from './helpers/base';
 import { downStack, downedCard, ensureDown, stackRow, upStack } from './helpers/stacks';
@@ -121,6 +121,27 @@ async function openRestoreWith(page: Page, archivePath: string) {
   return { restoreModal, radio, filename };
 }
 
+/**
+ * The archive's own row — the element holding both its radio and its trash button.
+ *
+ * The `has:` locators MUST be built from `page`, not from `restoreModal`. Playwright
+ * re-anchors an inner locator's whole selector chain at each candidate element, so a
+ * modal-rooted inner locator becomes "a dialog inside this div", which matches nothing
+ * — silently, as zero matches rather than an error, so the subsequent click just hangs
+ * until the test times out. That is what the previous `locator('div', { has: radio })`
+ * here was doing.
+ *
+ * Two divs then contain both the radio and a delete button — the list and the row —
+ * and the row, being innermost, is last in document order.
+ */
+function archiveRow(page: Page, restoreModal: Locator, filename: string): Locator {
+  return restoreModal
+    .locator('div')
+    .filter({ has: page.getByRole('radio', { name: filename }) })
+    .filter({ has: page.getByRole('button', { name: 'Delete backup' }) })
+    .last();
+}
+
 test('Deleting a backup removes the archive from disk, behind two confirmations', async ({ pluginPage: page }, testInfo) => {
   test.setTimeout(90_000);
   const vm = testInfo.project.name;
@@ -139,10 +160,7 @@ test('Deleting a backup removes the archive from disk, behind two confirmations'
   const radio = restoreModal.getByRole('radio', { name: filename });
   await expect(radio).toBeVisible({ timeout: 10000 });
 
-  // The trash button sits in the same row as this archive's radio. Ancestor divs of
-  // the row also contain the radio, and ancestors precede descendants in document
-  // order, so the innermost match — the row itself — is the last one.
-  await restoreModal.locator('div', { has: radio }).last().getByRole('button', { name: 'Delete backup' }).click();
+  await archiveRow(page, restoreModal, filename).getByRole('button', { name: 'Delete backup' }).click();
 
   // Confirmation 1 names the file.
   const confirm1 = page.getByRole('dialog', { name: 'Delete this backup?' });
@@ -169,8 +187,8 @@ test('Cancelling the second delete confirmation keeps the archive', async ({ plu
   await ensureDown(page, 'gotify');
   const archivePath = await createBackup(page, 'gotify');
 
-  const { restoreModal, radio } = await openRestoreWith(page, archivePath);
-  await restoreModal.locator('div', { has: radio }).last().getByRole('button', { name: 'Delete backup' }).click();
+  const { restoreModal, radio, filename } = await openRestoreWith(page, archivePath);
+  await archiveRow(page, restoreModal, filename).getByRole('button', { name: 'Delete backup' }).click();
   await page.getByRole('dialog', { name: 'Delete this backup?' }).getByRole('button', { name: 'Delete', exact: true }).click();
 
   const confirm2 = page.getByRole('dialog', { name: 'This action is irreversible' });
