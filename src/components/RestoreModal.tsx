@@ -233,12 +233,34 @@ export function RestoreModal({ existingStacks, defaultScanDir, onClose, onRestor
           if (!await checkPathExists(tmpSrc)) {
             throw new Error(t("restore_modal.error_src_missing", { path: extractedPath }));
           }
-          if (await checkPathExists(renamedPath)) {
-            throw new Error(t("restore_modal.error_dest_exists", { path: renamedPath }));
-          }
           const renamedParent = renamedPath.slice(0, renamedPath.lastIndexOf("/"));
           await cockpit.spawn(["mkdir", "-p", "--", renamedParent], { superuser: "try", err: "message" });
-          await cockpit.spawn(["mv", "--", tmpSrc, renamedPath], { superuser: "try", err: "message" });
+
+          // An existing target only gets this far if the user ticked the overwrite
+          // acknowledgement (canRestore requires it), so replace it. This used to throw
+          // unconditionally, which made the overwrite the dialog offers impossible.
+          // Swapped rather than deleted up front: `mv` onto an existing directory nests the
+          // restored copy inside it, and deleting first would lose the old directory if the
+          // move then failed. The old one is only removed once the new one is in place.
+          let displaced: string | null = null;
+          if (await checkPathExists(renamedPath)) {
+            if (!targetExistsConfirmed) {
+              throw new Error(t("restore_modal.error_dest_exists", { path: renamedPath }));
+            }
+            displaced = `${renamedPath}.restore-displaced-${Date.now()}`;
+            await cockpit.spawn(["mv", "--", renamedPath, displaced], { superuser: "try", err: "message" });
+          }
+          try {
+            await cockpit.spawn(["mv", "--", tmpSrc, renamedPath], { superuser: "try", err: "message" });
+          } catch (e) {
+            if (displaced) {
+              await cockpit.spawn(["mv", "--", displaced, renamedPath], { superuser: "try", err: "message" }).catch(() => {});
+            }
+            throw e;
+          }
+          if (displaced) {
+            await cockpit.spawn(["rm", "-rf", "--", displaced], { superuser: "try", err: "message" }).catch(() => {});
+          }
         } finally {
           await cockpit.spawn(["rm", "-rf", "--", tmpDir], { err: "message" }).catch(() => {});
         }
