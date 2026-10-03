@@ -30,7 +30,7 @@ make this practical (`baseData`, `stacks.ts`, `runtime.ts`).
 | 6.13 | Stack info (services/images/volumes/networks tabs, shared networks) | `e2e/stack-info.spec.ts` | ✅ (found & fixed a real bug — see Notes; shared-networks case covered by connecting a real container to another project's network via SSH) |
 | 6.14 | Edit YAML (multi-file tabs, add/delete file, import, snapshot history/diff/restore) | `e2e/yaml-editor.spec.ts` | ✅ (add/delete file found & documented a real accessibility bug — see Notes and issue [#277](https://github.com/RXTX4816/cockpit-compose/issues/277)) |
 | 6.15 | Edit env file (table/raw modes, duplicate-key warning, add file) | `e2e/env-editor.spec.ts` | ✅ (found a real doc/behavior mismatch — see Notes) |
-| 6.16.1 | Prune — basic flow (containers; volumes appears unreachable via UI, see reference doc) | `e2e/prune.spec.ts` | ⚠️ image/shared-image prune tests pass; container-prune tests marked `test.fixme` on Podman pending issue [#274](https://github.com/RXTX4816/cockpit-compose/issues/274) — see Notes |
+| 6.16.1 | Prune — basic flow (containers; volumes appears unreachable via UI, see reference doc) | `e2e/prune.spec.ts` | ✅ image, shared-image and container prune tests all pass, Podman included since [#274](https://github.com/RXTX4816/cockpit-compose/issues/274) was fixed (#308) — see Notes |
 | 6.17 | Scale services (increase replicas, port-conflict warning) | `e2e/scale.spec.ts` | ✅ |
 | 6.19 | Create stack (manual/template/git-URL methods, validation bypass) | `e2e/create-stack.spec.ts` | ✅ (all three methods + validation bypass covered; git-URL clones a real public repo — see Notes for the fixture choice and required VM package, and issue [#277](https://github.com/RXTX4816/cockpit-compose/issues/277) for a related intermittent flake) |
 | downed-stacks bulk actions (select-all + bulk Up, commit 85fe38d) | Bulk select/Up on downed stacks table | `e2e/downed-stacks-bulk.spec.ts` | ✅ |
@@ -99,12 +99,13 @@ one VM at a time with `VM_MEM=2048` and `--workers=1`:
 - `arch-both`: 83 passed, 0 failed, 13 skipped; the one flaky test (scale port conflict,
   closing the dialog before Apply had settled) was fixed and then passed 3/3 with retries off
 
-The first real runs needed a fix-up pass, and found four app bugs. Three are fixed on this
-branch: the backup archive written under a different name than previewed, Restore
-ignoring its overwrite confirmation (#320), and the Scale confirm heading showing a raw
-`{{name}}` placeholder. The fourth, Run in Background reporting Failed for a stack that
-was running (#319, same root cause as #272), is fixed separately; its spec stays
-`test.fixme` until that lands.
+The first real runs needed a fix-up pass, and found four app bugs, all fixed: the backup
+archive written under a different name than previewed, Restore ignoring its overwrite
+confirmation (#320), the Scale confirm heading showing a raw `{{name}}` placeholder, and
+Run in Background reporting Failed for a stack that was running (#319, fixed in #333
+together with #272). The #319 spec is active again, joined by a regression test for #272
+(closing the Up dialog with ✕ mid-run backgrounds the Up instead of discarding it). Both
+passed 3/3 with retries off on `fedora-full`. No spec in the suite is `test.fixme` anymore.
 
 Each asserts a real backend effect (engine state or files over SSH), in keeping with
 the rest of the suite. SSH-side engine checks go through the new
