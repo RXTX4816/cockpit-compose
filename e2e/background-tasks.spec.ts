@@ -15,11 +15,8 @@ test.afterEach(async ({ pluginPage: page }) => {
 /**
  * Puts a real task into the background queue by pulling gotify's images there.
  *
- * Tests that only need *a* background task use this instead of Up. Up's Run in
- * Background closes the foreground run and starts a second `compose up`, and the two
- * race: the second can hit "container name already in use" and report Failed while
- * the stack is in fact running (#319). A pull is safe to repeat, so handing it to the
- * background has no such race and the task reliably completes.
+ * Tests that only need *a* background task use this rather than Up: a pull is safe
+ * to repeat, which keeps those tests independent of the stack's state.
  */
 async function pullGotifyInBackground(page: Page) {
   await ensureDown(page, 'gotify');
@@ -32,30 +29,51 @@ async function pullGotifyInBackground(page: Page) {
   await expect(progress).not.toBeVisible();
 }
 
-// Skipped until #319 is fixed: this is the one test about Up specifically, and Up's
-// Run in Background races itself (see pullGotifyInBackground above), so it fails
-// whenever the race lands. Un-skip it as part of fixing #319.
-test.fixme('Run in Background actually starts the stack, tracked through Pending → Running → Complete', async ({ pluginPage: page }) => {
-  test.setTimeout(90_000);
-  await baseData(page);
+// Up hands its *running* process to the background queue rather than cancelling it and
+// starting a second `compose up`. That second run used to collide with the container the
+// first had already created and report Failed for a stack that was running (#319).
+async function startUpOfGotify(page: Page) {
   await ensureDown(page, 'gotify');
-
   await downedCard(page, 'gotify').getByRole('button', { name: 'Up', exact: true }).click();
   await page.getByRole('dialog', { name: /Confirm up.*gotify/ }).getByRole('button', { name: 'Up', exact: true }).click();
   const progress = page.getByRole('dialog', { name: /^Up.*gotify/ });
   await expect(progress).toBeVisible();
-  await progress.getByRole('button', { name: 'Run in Background' }).click();
-  await expect(progress).not.toBeVisible();
+  return progress;
+}
 
+async function expectGotifyUpCompletedInBackground(page: Page) {
   await page.getByRole('button', { name: 'Background tasks' }).click();
   const panel = page.locator('.btd-panel');
-  const taskRow = panel.getByText('gotify', { exact: false }).first();
+  const taskRow = panel.locator('li', { hasText: 'gotify' }).first();
   await expect(taskRow).toBeVisible({ timeout: 10000 });
 
-  // Real effect: the task genuinely completes (not just a status label) and
-  // the stack is actually running once it does.
-  await expect(panel.getByText('Complete', { exact: true })).toBeVisible({ timeout: 30000 });
-  await expect(stackRow(page, 'gotify')).toHaveAttribute('data-status', /running|partial/, { timeout: 10000 });
+  // Real effect: the task genuinely completes, never shows Failed, and the stack is
+  // actually running afterwards.
+  await expect(taskRow.getByText('Complete', { exact: true })).toBeVisible({ timeout: 60000 });
+  await expect(taskRow.getByText('Failed', { exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Background tasks' }).click();
+  await expect(stackRow(page, 'gotify')).toHaveAttribute('data-status', /running|partial/, { timeout: 15000 });
+}
+
+test('Run in Background carries the running Up on and completes it, without a Failed retry (#319)', async ({ pluginPage: page }) => {
+  test.setTimeout(120_000);
+  await baseData(page);
+  const progress = await startUpOfGotify(page);
+  await progress.getByRole('button', { name: 'Run in Background' }).click();
+  await expect(progress).not.toBeVisible();
+  await expectGotifyUpCompletedInBackground(page);
+});
+
+// #272: the dialog's ✕ used to cancel an Up still in flight, silently discarding work the
+// user had confirmed. Dismissing it now hands the run to the background instead.
+test('Closing the Up dialog with its ✕ mid-run backgrounds the Up instead of discarding it (#272)', async ({ pluginPage: page }) => {
+  test.setTimeout(120_000);
+  await baseData(page);
+  const progress = await startUpOfGotify(page);
+  // The header ✕, present from the first frame, while the run is still going.
+  await progress.getByRole('button', { name: 'Close' }).first().click();
+  await expect(progress).not.toBeVisible();
+  await expectGotifyUpCompletedInBackground(page);
 });
 
 // Clicking a finished task shows its captured log (BackgroundTaskLogModal).
