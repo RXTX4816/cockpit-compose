@@ -142,6 +142,76 @@ describe("useBackgroundTasks", () => {
     await waitFor(() => expect(result.current.tasks[0].lines).toEqual(["Container myapp-web-1  Starting"]));
   });
 
+  describe("adopt", () => {
+    function heldProcess() {
+      let resolveFn!: () => void;
+      let rejectFn!: (err: Error) => void;
+      let streamCb: ((data: string) => void) | undefined;
+      const p = new Promise<string>((resolve, reject) => { resolveFn = () => resolve(""); rejectFn = reject; });
+      const proc = Object.assign(p, {
+        stream: (cb: (data: string) => void) => { streamCb = cb; return proc; },
+        close: vi.fn(() => rejectFn(new Error("terminated"))),
+        input: vi.fn(),
+        wait: () => p,
+      }) as unknown as CockpitProcess;
+      return { proc, resolve: () => resolveFn(), reject: (e: Error) => rejectFn(e), emit: (d: string) => streamCb?.(d) };
+    }
+
+    it("tracks an already-running process without launching anything, keeping its log so far", async () => {
+      const { result } = renderHook(() => useBackgroundTasks(), { wrapper });
+      const held = heldProcess();
+
+      act(() => { result.current.adopt("myapp", "up", "Up myapp", held.proc, ["Network myapp_default Created"], " Container myapp-web-1 Cr"); });
+      expect(result.current.tasks[0]).toMatchObject({ status: "running", lines: ["Network myapp_default Created"] });
+
+      // The partial line handed over is completed by the next chunk, not lost.
+      act(() => { held.emit("eated\n"); });
+      await waitFor(() => expect(result.current.tasks[0].lines).toEqual([
+        "Network myapp_default Created", " Container myapp-web-1 Created",
+      ]));
+
+      await act(async () => { held.resolve(); });
+      await waitFor(() => expect(result.current.tasks[0].status).toBe("success"));
+    });
+
+    it("reports a real failure of the adopted process as an error", async () => {
+      const { result } = renderHook(() => useBackgroundTasks(), { wrapper });
+      const held = heldProcess();
+      act(() => { result.current.adopt("myapp", "up", "Up myapp", held.proc, [], ""); });
+      await act(async () => { held.reject(new Error("boom")); });
+      await waitFor(() => expect(result.current.tasks[0]).toMatchObject({ status: "error", errorMsg: "boom" }));
+    });
+
+    it("can be stopped like any running task", async () => {
+      const { result } = renderHook(() => useBackgroundTasks(), { wrapper });
+      const held = heldProcess();
+      act(() => { result.current.adopt("myapp", "up", "Up myapp", held.proc, [], ""); });
+      act(() => { result.current.stop(result.current.tasks[0].id); });
+      expect(held.proc.close).toHaveBeenCalled();
+      await waitFor(() => expect(result.current.tasks[0].status).toBe("stopped"));
+    });
+
+    it("does not hold up the queue: a queued task still starts and its slot is not released twice", async () => {
+      const { result } = renderHook(() => useBackgroundTasks(), { wrapper });
+      const adopted = heldProcess();
+      const queued = heldProcess();
+      const second = vi.fn((launch: (p: CockpitProcess) => void) => launch(fakeProcess("resolve")));
+
+      act(() => { result.current.adopt("a", "up", "Up a", adopted.proc, [], ""); });
+      act(() => { result.current.enqueue("b", "pull", "Pull b", launch => launch(queued.proc)); });
+      act(() => { result.current.enqueue("c", "pull", "Pull c", second); });
+      expect(result.current.tasks.map(t => t.status)).toEqual(["running", "running", "pending"]);
+
+      // The adopted task finishing must not free the queue's runner while b is still going.
+      await act(async () => { adopted.resolve(); });
+      await waitFor(() => expect(result.current.tasks[0].status).toBe("success"));
+      expect(second).not.toHaveBeenCalled();
+
+      await act(async () => { queued.resolve(); });
+      await waitFor(() => expect(result.current.tasks[2].status).toBe("success"));
+    });
+  });
+
   it("enqueueing a pending (not-yet-started) task and removing it never invokes its starter", () => {
     const { result } = renderHook(() => useBackgroundTasks(), { wrapper });
     const start1 = vi.fn((launch: (p: CockpitProcess) => void) => launch(fakeProcess("resolve")));

@@ -22,22 +22,36 @@ interface Props {
 export function PullModal({ stack, onClose }: Props) {
   const { t } = useTranslation();
   const configFiles = splitConfigFiles(stack.ConfigFiles);
-  const { lines, done, failed, errorMsg, cancel } = usePullStream(stack.Name, configFiles);
-  const { enqueue } = useBackgroundTasks();
+  const { lines, done, failed, errorMsg, cancel, detach } = usePullStream(stack.Name, configFiles);
+  const { enqueue, adopt } = useBackgroundTasks();
 
-  const handleClose = () => {
-    cancel();
+  // Same handover as UpModal: the background task adopts the running pull instead
+  // of cancelling it and downloading everything again.
+  const handleBackground = () => {
+    const label = t("pull_modal.background_label", { name: stack.Name });
+    const handed = detach();
+    if (handed) {
+      adopt(stack.Name, "pull", label, handed.proc, lines.map(l => l.text), handed.pending);
+    } else {
+      cancel();
+      enqueue(stack.Name, "pull", label, buildPullStarter(stack));
+    }
     onClose();
   };
 
-  const handleBackground = () => {
+  // Only the Cancel button aborts; dismissing a pull still in flight backgrounds it.
+  const handleDismiss = () => {
+    if (done) onClose();
+    else handleBackground();
+  };
+
+  const handleCancel = () => {
     cancel();
-    enqueue(stack.Name, "pull", t("pull_modal.background_label", { name: stack.Name }), buildPullStarter(stack));
     onClose();
   };
 
   return (
-    <Modal isOpen onClose={handleClose} variant="medium" aria-label={t("pull_modal.aria_label", { name: stack.Name })}>
+    <Modal isOpen onClose={handleDismiss} variant="medium" aria-label={t("pull_modal.aria_label", { name: stack.Name })}>
       <ModalHeader title={t("pull_modal.title", { name: stack.Name })} />
       <ModalBody>
         <div className="pm-header">
@@ -58,10 +72,10 @@ export function PullModal({ stack, onClose }: Props) {
             ? (
               <>
                 <Button variant="secondary" onClick={handleBackground}>{t("pull_modal.background_button")}</Button>
-                <Button variant="secondary" onClick={handleClose}>{t("common.cancel")}</Button>
+                <Button variant="secondary" onClick={handleCancel}>{t("common.cancel")}</Button>
               </>
             )
-            : <Button variant="primary" onClick={handleClose}>{t("common.close")}</Button>
+            : <Button variant="primary" onClick={handleDismiss}>{t("common.close")}</Button>
           }
         </div>
       </ModalBody>

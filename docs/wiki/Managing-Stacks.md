@@ -27,7 +27,7 @@ A progress modal opens and streams the output of `docker compose up` in real tim
 - **✓ Up complete** — all containers started successfully
 - **✗ Up failed** — an error occurred; the full error is shown below the status
 
-Click **Close** when done. If the operation is still running, click **Cancel** to abort it. Alternatively, click **Run in Background** to close the modal and keep the operation running — see [Background Tasks](Background-Tasks).
+Click **Close** when done. If the operation is still running, click **Cancel** to abort it. Alternatively, click **Run in Background** (or close the modal with its **✕**) to close it and keep the operation running — see [Background Tasks](Background-Tasks).
 
 ---
 

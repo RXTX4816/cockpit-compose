@@ -23,32 +23,41 @@ interface Props {
 export function UpModal({ stack, profiles = [], onClose }: Props) {
   const { t } = useTranslation();
   const configFiles = splitConfigFiles(stack.ConfigFiles);
-  const { lines, done, failed, errorMsg, cancel } = useUpStream(stack.Name, configFiles, profiles);
-  const { enqueue } = useBackgroundTasks();
+  const { lines, done, failed, errorMsg, cancel, detach } = useUpStream(stack.Name, configFiles, profiles);
+  const { enqueue, adopt } = useBackgroundTasks();
 
-  // Two very different intents share this handler: aborting a run still in flight
-  // (the Cancel button, and the modal's X while !done), and dismissing one that has
-  // already finished (the Close button). Only the first should touch the channel.
-  //
-  // Cancelling a finished stream is meant to be a no-op — useAsyncStream nulls its
-  // process ref in the same callback that sets `done` — but #272 reports Up work being
-  // discarded by exactly this call on some VMs, so stop relying on that contract from
-  // here. Dismissing a completed run has no reason to close a channel at all.
-  const handleClose = () => {
-    if (!done) cancel();
-    onClose(done && !failed);
-  };
-
+  // Hands the run to the background task queue. The same process carries on rather
+  // than being cancelled and launched again, since a second `compose up` collides with
+  // containers the first already created and reports a failure for a stack that is in
+  // fact running (#319). Only when nothing has launched yet (superuser access still
+  // resolving) is there nothing to adopt, and starting afresh is safe.
   const handleBackground = () => {
-    // Deliberately unconditional: this hands the run to the background task, which
-    // re-launches it with its own process, so this modal's channel must go.
-    cancel();
-    enqueue(stack.Name, "up", t("up_modal.background_label", { name: stack.Name }), buildUpStarter(stack, profiles));
+    const label = t("up_modal.background_label", { name: stack.Name });
+    const handed = detach();
+    if (handed) {
+      adopt(stack.Name, "up", label, handed.proc, lines.map(l => l.text), handed.pending);
+    } else {
+      cancel();
+      enqueue(stack.Name, "up", label, buildUpStarter(stack, profiles));
+    }
     onClose(true);
   };
 
+  // Only the Cancel button aborts a run in flight. Dismissing the dialog any other way
+  // (its X, Escape) while compose is still working used to cancel it too, silently
+  // discarding an Up the user had confirmed (#272); it now moves to the background.
+  const handleDismiss = () => {
+    if (done) onClose(!failed);
+    else handleBackground();
+  };
+
+  const handleCancel = () => {
+    cancel();
+    onClose(false);
+  };
+
   return (
-    <Modal isOpen onClose={handleClose} variant="medium" aria-label={t("up_modal.aria_label", { name: stack.Name })}>
+    <Modal isOpen onClose={handleDismiss} variant="medium" aria-label={t("up_modal.aria_label", { name: stack.Name })}>
       <ModalHeader title={t("up_modal.title", { name: stack.Name })} />
       <ModalBody>
         <div className="um-header">
@@ -69,10 +78,10 @@ export function UpModal({ stack, profiles = [], onClose }: Props) {
             ? (
               <>
                 <Button variant="secondary" onClick={handleBackground}>{t("up_modal.background_button")}</Button>
-                <Button variant="secondary" onClick={handleClose}>{t("common.cancel")}</Button>
+                <Button variant="secondary" onClick={handleCancel}>{t("common.cancel")}</Button>
               </>
             )
-            : <Button variant="primary" onClick={handleClose}>{t("common.close")}</Button>
+            : <Button variant="primary" onClick={handleDismiss}>{t("common.close")}</Button>
           }
         </div>
       </ModalBody>

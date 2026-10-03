@@ -8,8 +8,9 @@ vi.mock("../hooks/useUpStream", () => ({
 }));
 
 const mockEnqueue = vi.fn();
+const mockAdopt = vi.fn();
 vi.mock("../hooks/useBackgroundTasks", () => ({
-  useBackgroundTasks: () => ({ enqueue: mockEnqueue, tasks: [], stop: vi.fn(), remove: vi.fn() }),
+  useBackgroundTasks: () => ({ enqueue: mockEnqueue, adopt: mockAdopt, tasks: [], stop: vi.fn(), remove: vi.fn() }),
 }));
 
 import { useUpStream } from "../hooks/useUpStream";
@@ -28,8 +29,10 @@ beforeEach(() => {
     failed: false,
     errorMsg: "",
     cancel: vi.fn(),
+    detach: vi.fn(() => null),
   });
   mockEnqueue.mockReset();
+  mockAdopt.mockReset();
 });
 
 describe("UpModal", () => {
@@ -56,6 +59,7 @@ describe("UpModal", () => {
       failed: false,
       errorMsg: "",
       cancel: vi.fn(),
+      detach: vi.fn(() => null),
     });
     render(<UpModal stack={stack} onClose={vi.fn()} />);
     expect(screen.getByText(/Up complete/i)).toBeInTheDocument();
@@ -70,6 +74,7 @@ describe("UpModal", () => {
       failed: true,
       errorMsg: "permission denied",
       cancel: vi.fn(),
+      detach: vi.fn(() => null),
     });
     render(<UpModal stack={stack} onClose={vi.fn()} />);
     expect(screen.getByText(/Up failed/i)).toBeInTheDocument();
@@ -88,6 +93,7 @@ describe("UpModal", () => {
       failed: false,
       errorMsg: "",
       cancel: vi.fn(),
+      detach: vi.fn(() => null),
     });
     render(<UpModal stack={stack} onClose={vi.fn()} />);
     expect(screen.getByText(/Container myapp-web-1/)).toBeInTheDocument();
@@ -96,7 +102,7 @@ describe("UpModal", () => {
   it("calls cancel() and onClose(false) when Cancel clicked while running", () => {
     const cancel = vi.fn();
     const onClose = vi.fn();
-    mockUseUpStream.mockReturnValue({ lines: [], done: false, failed: false, errorMsg: "", cancel });
+    mockUseUpStream.mockReturnValue({ lines: [], done: false, failed: false, errorMsg: "", cancel, detach: vi.fn(() => null) });
     render(<UpModal stack={stack} onClose={onClose} />);
     fireEvent.click(screen.getByRole("button", { name: /Cancel/i }));
     expect(cancel).toHaveBeenCalledOnce();
@@ -106,7 +112,7 @@ describe("UpModal", () => {
   it("calls onClose(true) when Close clicked after success", () => {
     const cancel = vi.fn();
     const onClose = vi.fn();
-    mockUseUpStream.mockReturnValue({ lines: [], done: true, failed: false, errorMsg: "", cancel });
+    mockUseUpStream.mockReturnValue({ lines: [], done: true, failed: false, errorMsg: "", cancel, detach: vi.fn(() => null) });
     render(<UpModal stack={stack} onClose={onClose} />);
     const closeButtons = screen.getAllByRole("button", { name: /Close/i });
     fireEvent.click(closeButtons[closeButtons.length - 1]);
@@ -118,7 +124,7 @@ describe("UpModal", () => {
   // behind a log that had already printed "Started".
   it("does not cancel the stream when Close is clicked after success", () => {
     const cancel = vi.fn();
-    mockUseUpStream.mockReturnValue({ lines: [], done: true, failed: false, errorMsg: "", cancel });
+    mockUseUpStream.mockReturnValue({ lines: [], done: true, failed: false, errorMsg: "", cancel, detach: vi.fn(() => null) });
     render(<UpModal stack={stack} onClose={vi.fn()} />);
     const closeButtons = screen.getAllByRole("button", { name: /Close/i });
     fireEvent.click(closeButtons[closeButtons.length - 1]);
@@ -127,38 +133,53 @@ describe("UpModal", () => {
 
   it("does not cancel the stream when Close is clicked after failure", () => {
     const cancel = vi.fn();
-    mockUseUpStream.mockReturnValue({ lines: [], done: true, failed: true, errorMsg: "boom", cancel });
+    mockUseUpStream.mockReturnValue({ lines: [], done: true, failed: true, errorMsg: "boom", cancel, detach: vi.fn(() => null) });
     render(<UpModal stack={stack} onClose={vi.fn()} />);
     const closeButtons = screen.getAllByRole("button", { name: /Close/i });
     fireEvent.click(closeButtons[closeButtons.length - 1]);
     expect(cancel).not.toHaveBeenCalled();
   });
 
-  it("still cancels when the modal X is used while the run is in flight", () => {
+  // #272: the X used to cancel an Up still in flight, silently discarding work the
+  // user had confirmed. Dismissing now hands the run to the background instead.
+  it("dismissing with the modal X while the run is in flight backgrounds it instead of cancelling", () => {
     const cancel = vi.fn();
     const onClose = vi.fn();
-    mockUseUpStream.mockReturnValue({ lines: [], done: false, failed: false, errorMsg: "", cancel });
+    const proc = {} as CockpitProcess;
+    mockUseUpStream.mockReturnValue({
+      lines: [], done: false, failed: false, errorMsg: "", cancel, detach: vi.fn(() => ({ proc, pending: "" })),
+    });
     render(<UpModal stack={stack} onClose={onClose} />);
     // The modal's own X, not the footer Cancel button.
     fireEvent.click(screen.getAllByRole("button", { name: /Close/i })[0]);
-    expect(cancel).toHaveBeenCalledOnce();
-    expect(onClose).toHaveBeenCalledWith(false);
+    expect(cancel).not.toHaveBeenCalled();
+    expect(mockAdopt).toHaveBeenCalledWith("myapp", "up", expect.stringContaining("myapp"), proc, [], "");
+    expect(onClose).toHaveBeenCalledWith(true);
   });
 
-  it("still cancels when handing a running job to the background", () => {
+  // #319: cancelling and relaunching collided with containers the first run had
+  // already created, so the task reported Failed for a stack that was running.
+  it("Run in Background adopts the running process instead of launching compose up again", () => {
     const cancel = vi.fn();
-    mockUseUpStream.mockReturnValue({ lines: [], done: false, failed: false, errorMsg: "", cancel });
+    const proc = {} as CockpitProcess;
+    mockUseUpStream.mockReturnValue({
+      lines: [{ text: "Container myapp-web-1 Creating", kind: "info" }], done: false, failed: false, errorMsg: "", cancel,
+      detach: vi.fn(() => ({ proc, pending: " Container myapp-web-1 Cre" })),
+    } as unknown as ReturnType<typeof useUpStream>);
     render(<UpModal stack={stack} onClose={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: /Run in Background/i }));
-    // The background task relaunches with its own process, so this channel must go.
-    expect(cancel).toHaveBeenCalledOnce();
-    expect(mockEnqueue).toHaveBeenCalled();
+    expect(mockAdopt).toHaveBeenCalledWith(
+      "myapp", "up", expect.stringContaining("myapp"), proc,
+      ["Container myapp-web-1 Creating"], " Container myapp-web-1 Cre",
+    );
+    expect(cancel).not.toHaveBeenCalled();
+    expect(mockEnqueue).not.toHaveBeenCalled();
   });
 
   it("calls onClose(false) when Close clicked after failure", () => {
     const cancel = vi.fn();
     const onClose = vi.fn();
-    mockUseUpStream.mockReturnValue({ lines: [], done: true, failed: true, errorMsg: "boom", cancel });
+    mockUseUpStream.mockReturnValue({ lines: [], done: true, failed: true, errorMsg: "boom", cancel, detach: vi.fn(() => null) });
     render(<UpModal stack={stack} onClose={onClose} />);
     const closeButtons = screen.getAllByRole("button", { name: /Close/i });
     fireEvent.click(closeButtons[closeButtons.length - 1]);
@@ -167,13 +188,13 @@ describe("UpModal", () => {
 
   it("passes all ConfigFiles from comma-separated list to useUpStream", () => {
     const multiStack: ComposeStack = { ...stack, ConfigFiles: "/a.yml, /b.yml" };
-    mockUseUpStream.mockReturnValue({ lines: [], done: false, failed: false, errorMsg: "", cancel: vi.fn() });
+    mockUseUpStream.mockReturnValue({ lines: [], done: false, failed: false, errorMsg: "", cancel: vi.fn(), detach: vi.fn(() => null) });
     render(<UpModal stack={multiStack} onClose={vi.fn()} />);
     expect(mockUseUpStream).toHaveBeenCalledWith("myapp", ["/a.yml", "/b.yml"], []);
   });
 
   it("forwards profiles to useUpStream", () => {
-    mockUseUpStream.mockReturnValue({ lines: [], done: false, failed: false, errorMsg: "", cancel: vi.fn() });
+    mockUseUpStream.mockReturnValue({ lines: [], done: false, failed: false, errorMsg: "", cancel: vi.fn(), detach: vi.fn(() => null) });
     render(<UpModal stack={stack} profiles={["dev", "debug"]} onClose={vi.fn()} />);
     expect(mockUseUpStream).toHaveBeenCalledWith("myapp", ["/path/compose.yml"], ["dev", "debug"]);
   });
@@ -184,15 +205,15 @@ describe("UpModal", () => {
   });
 
   it("does not show Run in Background button when done", () => {
-    mockUseUpStream.mockReturnValue({ lines: [], done: true, failed: false, errorMsg: "", cancel: vi.fn() });
+    mockUseUpStream.mockReturnValue({ lines: [], done: true, failed: false, errorMsg: "", cancel: vi.fn(), detach: vi.fn(() => null) });
     render(<UpModal stack={stack} onClose={vi.fn()} />);
     expect(screen.queryByRole("button", { name: /Run in Background/i })).not.toBeInTheDocument();
   });
 
-  it("clicking Run in Background cancels the foreground stream, enqueues a task, and closes with success", () => {
+  it("Run in Background before compose has launched cancels and enqueues a fresh run", () => {
     const cancel = vi.fn();
     const onClose = vi.fn();
-    mockUseUpStream.mockReturnValue({ lines: [], done: false, failed: false, errorMsg: "", cancel });
+    mockUseUpStream.mockReturnValue({ lines: [], done: false, failed: false, errorMsg: "", cancel, detach: vi.fn(() => null) });
     render(<UpModal stack={stack} onClose={onClose} />);
     fireEvent.click(screen.getByRole("button", { name: /Run in Background/i }));
     expect(cancel).toHaveBeenCalledOnce();
