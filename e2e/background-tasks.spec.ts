@@ -101,8 +101,10 @@ test('Clicking a finished task shows its real captured log output', async ({ plu
 
   // Real effect: the modal shows genuine captured log output from the run, not an
   // empty placeholder. Matched on pull's own progress wording rather than "gotify",
-  // which the dialog's title ("Pull — gotify") would satisfy by itself.
-  await expect(logModal.getByText(/Pulled|Pulling/).first()).toBeVisible({ timeout: 10000 });
+  // which the dialog's title ("Pull — gotify") would satisfy by itself. Docker Compose
+  // says "Pulling"/"Pulled"; podman-compose passes podman's own output through
+  // ("Trying to pull …", "Writing manifest to image destination").
+  await expect(logModal.getByText(/Pulled|Pulling|Trying to pull|Writing manifest/).first()).toBeVisible({ timeout: 10000 });
 
   // A real simulated mouse click, deliberately: this is the regression test for
   // #283. The drawer used to share the modal box's z-index tier, so its <h1>
