@@ -383,14 +383,19 @@ describe("RestoreModal — overwriting an existing target under a new name", () 
     return onRestored;
   }
 
+  // Each step waits on a chain of mocked async work (archive listing, target checks).
+  // Testing Library's 1s default was enough locally but not on a loaded 2-core CI runner
+  // running the whole suite in parallel, where the Restore-enabled wait timed out once.
+  const SLOW = { timeout: 5000 };
+
   async function confirmAndRestore() {
-    await waitFor(() => screen.getByText(/myapp-2026-06-12/));
+    await waitFor(() => screen.getByText(/myapp-2026-06-12/), SLOW);
     fireEvent.click(screen.getByRole("radio"));
-    await waitFor(() => screen.getByText(/already exists/i));
+    await waitFor(() => screen.getByText(/already exists/i), SLOW);
     fireEvent.click(screen.getByRole("checkbox", { name: /I understand/i }));
     await waitFor(() =>
-      expect(screen.getByRole("button", { name: /^Restore$/i })).not.toBeDisabled()
-    );
+      expect(screen.getByRole("button", { name: /^Restore$/i })).not.toBeDisabled(),
+    SLOW);
     fireEvent.click(screen.getByRole("button", { name: /^Restore$/i }));
   }
 
@@ -405,7 +410,7 @@ describe("RestoreModal — overwriting an existing target under a new name", () 
     });
     const onRestored = renderOverwrite(spawnMock);
     await confirmAndRestore();
-    await waitFor(() => expect(onRestored).toHaveBeenCalledOnce());
+    await waitFor(() => expect(onRestored).toHaveBeenCalledOnce(), SLOW);
     expect(screen.queryByText(/aborting to prevent overwrite/i)).not.toBeInTheDocument();
 
     // Old directory moved aside, restored copy moved into place, and only then the old
@@ -429,7 +434,7 @@ describe("RestoreModal — overwriting an existing target under a new name", () 
     });
     const onRestored = renderOverwrite(spawnMock);
     await confirmAndRestore();
-    await waitFor(() => expect(screen.getByText(/cannot move/i)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/cannot move/i)).toBeInTheDocument(), SLOW);
     expect(onRestored).not.toHaveBeenCalled();
 
     const calls = spawnMock.mock.calls.map(c => c[0] as string[]);
