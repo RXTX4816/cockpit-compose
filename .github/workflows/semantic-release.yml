@@ -1,14 +1,31 @@
 name: Semantic Release
 
+# Every push to main whose CI passes gets a run that waits for the
+# maintainer's approval on the `release` environment before tagging. A newer
+# main commit cancels the previous pending run, so only the tip is offered.
+# workflow_dispatch re-offers the current tip, e.g. after an approval expired.
+
 on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
   workflow_dispatch:
 
+concurrency:
+  group: semantic-release
+  cancel-in-progress: true
+
 permissions:
-  contents: write
+  contents: read
+  actions: read
 
 jobs:
   semantic-release:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
     uses: RXTX4816/cockpit-plugin-base-react/.github/workflows/semantic-release-plugin.yml@main
     with:
-      initial_version: v0.1.0
+      sha: ${{ github.event.workflow_run.head_sha || github.sha }}
     secrets: inherit
