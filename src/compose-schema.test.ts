@@ -95,6 +95,15 @@ describe("validateComposeSpec", () => {
     expect(errors.length).toBeGreaterThan(0);
   });
 
+  it.each([
+    ["x- extension fields", { "x-common": { restart: "always" } }],
+    ["include (Compose 2.20)", { include: ["other.yml", { path: "db.yml" }] }],
+    ["models (Compose 2.38)", { models: { llm: { model: "ai/smollm2" } } }],
+    ["jobs (Compose 5.6.0)", { jobs: { migrate: { image: "alpine", triggers: { manual: true } } } }],
+  ])("accepts the top-level %s", (_label, extra) => {
+    expect(validateComposeSpec({ ...minimalValid, ...extra })).toEqual([]);
+  });
+
   it("reports unknown top-level properties via additionalProperties error", () => {
     const spec = { ...minimalValid, totally_unknown_prop: "value" };
     const errors = validateComposeSpec(spec);
