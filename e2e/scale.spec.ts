@@ -121,6 +121,16 @@ test('Scaling a service with a static host port warns about the conflict, in the
     // no Cancel, and Escape does not dismiss it — so the modal stayed open, and the
     // cleanup that follows could not click the stack row behind it. That hung until the
     // test budget ran out and was reported as an afterEach timeout rather than as this.
+    //
+    // Wait for Apply to settle first. The engine checks above can already pass while
+    // compose is still busy failing to bind the second `web` replica, and the dialog
+    // ignores its close button until the run ends. Clicking during that window was a
+    // silent no-op, which made this flaky on slower VMs. Settled means: the dialog closed
+    // itself (success), or Apply is enabled again (it failed and shows the error).
+    await expect.poll(
+      async () => !(await modal.isVisible()) || await apply.isEnabled(),
+      { timeout: 60000 },
+    ).toBe(true);
     if (await modal.isVisible()) {
       await modal.getByRole('button', { name: 'Close' }).first().click();
       await expect(modal).not.toBeVisible({ timeout: 10000 });
