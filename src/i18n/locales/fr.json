@@ -52,6 +52,7 @@
   "actions": {
     "up": "Démarrer",
     "up_title": "Démarrer la pile ou recréer les conteneurs modifiés",
+    "up_paused_title": "Reprenez la pile avant de lancer Up",
     "down": "Arrêter",
     "down_title": "Arrêter (supprimer les conteneurs)",
     "stop": "Stopper",

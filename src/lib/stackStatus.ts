@@ -12,7 +12,15 @@ export function effectiveStatus(
   if (base !== "partial" || containers.length === 0) return base;
   const exited = containers.filter(c => c.State === "exited");
   if (exited.length === 0) return base;
-  return exited.every(c => /exited \(0\)/i.test(c.Status)) ? "running" : base;
+  if (!exited.every(c => /exited \(0\)/i.test(c.Status))) return base;
+  const live = containers.filter(c => c.State !== "exited");
+  if (live.length > 0 && live.every(c => c.State === "paused")) return "paused";
+  return live.every(c => c.State === "running") ? "running" : base;
+}
+
+/** Whether the stack has live containers (running, restarting or paused) for Stop to act on. */
+export function isStackUp(status: ReturnType<typeof parseStackStatus>): boolean {
+  return status === "running" || status === "partial" || status === "paused";
 }
 
 /**

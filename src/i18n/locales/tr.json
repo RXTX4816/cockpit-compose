@@ -52,6 +52,7 @@
   "actions": {
     "up": "Başlat",
     "up_title": "Yığını başlat veya değiştirilen konteynerleri yeniden oluştur",
+    "up_paused_title": "Up çalıştırmadan önce yığını devam ettirin",
     "down": "Durdur",
     "down_title": "Durdur (konteynerleri kaldır)",
     "stop": "Durdur",

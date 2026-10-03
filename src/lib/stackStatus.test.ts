@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { effectiveStatus, stackHealthSummary } from "./stackStatus";
+import { effectiveStatus, isStackUp, stackHealthSummary } from "./stackStatus";
 import type { ComposeContainer } from "../api";
 
 function makeContainer(state: string, status: string, health?: string): ComposeContainer {
@@ -35,6 +35,35 @@ describe("effectiveStatus", () => {
       makeContainer("exited", "Exited (1) 1 hour ago"),
     ];
     expect(effectiveStatus("partial", containers)).toBe("partial");
+  });
+
+  it("returns paused when the only live containers are paused beside a cleanly exited one", () => {
+    const containers = [
+      makeContainer("paused", "Up 2 hours (Paused)"),
+      makeContainer("exited", "Exited (0) 1 hour ago"),
+    ];
+    expect(effectiveStatus("partial", containers)).toBe("paused");
+  });
+
+  it("stays partial when a live container is restarting, even if the exited ones are clean", () => {
+    const containers = [
+      makeContainer("restarting", "Restarting (1) 3 seconds ago"),
+      makeContainer("exited", "Exited (0) 1 hour ago"),
+    ];
+    expect(effectiveStatus("partial", containers)).toBe("partial");
+  });
+});
+
+describe("isStackUp", () => {
+  it("is true while any container is live, paused included", () => {
+    expect(isStackUp("running")).toBe(true);
+    expect(isStackUp("partial")).toBe(true);
+    expect(isStackUp("paused")).toBe(true);
+  });
+
+  it("is false for a stopped or unrecognised stack", () => {
+    expect(isStackUp("stopped")).toBe(false);
+    expect(isStackUp("unknown")).toBe(false);
   });
 });
 

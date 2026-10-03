@@ -109,6 +109,25 @@ describe("parseStackStatus", () => {
     expect(parseStackStatus("creating(1)")).toBe("unknown");
   });
 
+  it("treats a crash-looping (restarting) stack as partial, not unknown", () => {
+    expect(parseStackStatus("restarting(1)")).toBe("partial");
+    expect(parseStackStatus("restarting(1), running(2)")).toBe("partial");
+  });
+
+  it("treats paused containers next to exited ones as partial, not stopped", () => {
+    expect(parseStackStatus("exited(1), paused(1)")).toBe("partial");
+  });
+
+  it("keeps running when some containers are paused and none are down", () => {
+    expect(parseStackStatus("paused(1), running(1)")).toBe("running");
+  });
+
+  it("treats never-started (created) and dead containers as down", () => {
+    expect(parseStackStatus("created(2)")).toBe("stopped");
+    expect(parseStackStatus("dead(1)")).toBe("stopped");
+    expect(parseStackStatus("created(1), running(1)")).toBe("partial");
+  });
+
   it("is case-insensitive", () => {
     expect(parseStackStatus("Running(1)")).toBe("running");
   });

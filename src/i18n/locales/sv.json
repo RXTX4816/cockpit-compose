@@ -52,6 +52,7 @@
   "actions": {
     "up": "Starta",
     "up_title": "Starta stack eller återskapa ändrade containers",
+    "up_paused_title": "Återuppta stacken innan du kör Up",
     "down": "Stoppa",
     "down_title": "Stoppa (ta bort containers)",
     "stop": "Stoppa",

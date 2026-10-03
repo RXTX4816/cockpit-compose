@@ -240,6 +240,22 @@ describe("PrettyCard", () => {
     expect(doAction).toHaveBeenCalledWith("start", expect.any(Function));
   });
 
+  // #318: a paused stack used to lose both Stop and Start.
+  it("keeps Stop available and greys Up out for a paused stack", async () => {
+    const onUp = vi.fn();
+    render(<PrettyCard {...defaultProps} onUp={onUp} stack={{ ...stack, Status: "paused(2)" }} />);
+    expect(screen.getByRole("button", { name: /^stop$/i })).toBeEnabled();
+    const up = screen.getByRole("button", { name: /^up$/i });
+    expect(up).toHaveAttribute("aria-disabled", "true");
+    await click(up);
+    expect(onUp).not.toHaveBeenCalled();
+  });
+
+  it("offers Stop for a crash-looping (restarting) stack instead of hiding it", () => {
+    render(<PrettyCard {...defaultProps} stack={{ ...stack, Status: "restarting(1)" }} />);
+    expect(screen.getByRole("button", { name: /^stop$/i })).toBeInTheDocument();
+  });
+
   it("closes stop confirm modal when X button is clicked", async () => {
     render(<PrettyCard {...defaultProps} />);
     await click(screen.getByRole("button", { name: /^stop$/i }));

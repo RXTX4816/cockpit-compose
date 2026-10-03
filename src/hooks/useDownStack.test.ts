@@ -107,7 +107,7 @@ describe("useDownStack", () => {
     const { result } = renderHook(() => useDownStack(vi.fn(), vi.fn()));
     act(() => { result.current.open(multiStack); });
     await act(() => result.current.execute());
-    const spawnArgs = mockSpawn.mock.calls[0][0] as string[];
+    const spawnArgs = mockSpawn.mock.calls.find(c => (c[0] as string[]).includes("down"))![0] as string[];
     expect(spawnArgs).toContain("/path/a.yml");
     expect(spawnArgs).toContain("/path/b.yml");
     expect(spawnArgs.filter(a => a === "-f")).toHaveLength(2);

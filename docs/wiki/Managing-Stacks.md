@@ -92,6 +92,8 @@ Found in the **⋮ more** menu. Disabled for stopped or unknown stacks.
 
 Found in the **⋮ more** menu. **Pause** is shown when the stack is running; **Unpause** is shown when the stack is paused (status label turns blue).
 
+While a stack is paused, **Up** is greyed out (unpause it first), but **Stop** and **Down** still work: the stack's paused containers are unpaused for you first, since Podman refuses to stop a paused container.
+
 ---
 
 ## Kill

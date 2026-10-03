@@ -34,10 +34,32 @@ describe("startStack", () => {
 });
 
 describe("stopStack", () => {
-  it("runs compose stop for the project", () => {
-    stopStack("myapp", ["/myapp/compose.yml"]);
-    const args = mockSpawn.mock.calls[0][0] as string[];
+  it("runs compose stop for the project", async () => {
+    await stopStack("myapp", ["/myapp/compose.yml"]);
+    const args = mockSpawn.mock.calls[mockSpawn.mock.calls.length - 1][0] as string[];
     expect(args).toEqual(["docker", "compose", "-p", "myapp", "-f", "/myapp/compose.yml", "stop"]);
+  });
+
+  // Podman refuses to stop a paused container ("container state improper").
+  it("unpauses the project's paused containers before stopping", async () => {
+    mockSpawn.mockReturnValueOnce(mockProcess("abc123\ndef456\n"));
+    await stopStack("myapp", ["/myapp/compose.yml"]);
+    const calls = mockSpawn.mock.calls.map(c => c[0] as string[]);
+    expect(calls[0]).toEqual(["docker", "ps", "-aq", "--filter", "label=com.docker.compose.project=myapp", "--filter", "status=paused"]);
+    expect(calls[1]).toEqual(["docker", "unpause", "abc123", "def456"]);
+    expect(calls[2]).toContain("stop");
+  });
+
+  it("skips unpause when nothing is paused", async () => {
+    await stopStack("myapp", ["/myapp/compose.yml"]);
+    expect(mockSpawn.mock.calls.some(c => (c[0] as string[]).includes("unpause"))).toBe(false);
+  });
+
+  it("close() before the stop has started keeps it from starting", async () => {
+    const proc = stopStack("myapp", ["/myapp/compose.yml"]);
+    proc.close();
+    await expect(proc).rejects.toThrow("cancelled");
+    expect(mockSpawn.mock.calls.some(c => (c[0] as string[]).includes("stop"))).toBe(false);
   });
 });
 
@@ -70,10 +92,19 @@ describe("restartStack", () => {
 });
 
 describe("downStack", () => {
-  it("runs compose down for the project", () => {
-    downStack("myapp", ["/myapp/compose.yml"]);
-    const args = mockSpawn.mock.calls[0][0] as string[];
+  it("runs compose down for the project", async () => {
+    await downStack("myapp", ["/myapp/compose.yml"]);
+    const args = mockSpawn.mock.calls[mockSpawn.mock.calls.length - 1][0] as string[];
     expect(args).toEqual(["docker", "compose", "-p", "myapp", "-f", "/myapp/compose.yml", "down"]);
+  });
+
+  it("unpauses the project's paused containers before taking it down", async () => {
+    setRuntime("podman");
+    mockSpawn.mockReturnValueOnce(mockProcess("abc123\n"));
+    await downStack("myapp", ["/myapp/compose.yml"]);
+    const calls = mockSpawn.mock.calls.map(c => c[0] as string[]);
+    expect(calls[1]).toEqual(["podman", "unpause", "abc123"]);
+    expect(calls[2]).toContain("down");
   });
 });
 

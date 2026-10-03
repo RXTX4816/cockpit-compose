@@ -3,12 +3,18 @@ import type { ParsedPort, StackStatus } from "./types";
 
 export function parseStackStatus(status: string): StackStatus {
   const lower = status.toLowerCase();
-  if (lower.includes("paused") && !lower.includes("running") && !lower.includes("exit")) return "paused";
-  const hasRunning = lower.includes("running");
-  const hasExited = lower.includes("exit") || lower.includes("stopped");
-  if (hasRunning && !hasExited) return "running";
-  if (hasRunning && hasExited) return "partial";
-  if (!hasRunning && hasExited) return "stopped";
+  const running = /\brunning\b/.test(lower);
+  // A crash-looping container alternates between running and restarting: up, but not
+  // healthy. Unrecognised, it made the whole stack "unknown", which dropped Stop.
+  const restarting = /\brestarting\b/.test(lower);
+  const paused = /\bpaused\b/.test(lower);
+  // "created" was never started, e.g. left behind by an interrupted up.
+  const down = /\bexit/.test(lower) || /\b(stopped|dead|created)\b/.test(lower);
+  if (running && !restarting && !down) return "running";
+  if (running || restarting) return "partial";
+  // Paused containers next to exited ones are still in memory, so the stack is not down.
+  if (paused) return down ? "partial" : "paused";
+  if (down) return "stopped";
   return "unknown";
 }
 

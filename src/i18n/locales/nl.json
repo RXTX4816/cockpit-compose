@@ -52,6 +52,7 @@
   "actions": {
     "up": "Starten",
     "up_title": "Stack starten of gewijzigde containers opnieuw aanmaken",
+    "up_paused_title": "Hervat de stack voordat je Up uitvoert",
     "down": "Stoppen",
     "down_title": "Stoppen (containers verwijderen)",
     "stop": "Stoppen",

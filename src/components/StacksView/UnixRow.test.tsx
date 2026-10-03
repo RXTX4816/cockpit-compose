@@ -107,6 +107,22 @@ describe("UnixRow", () => {
     expect(screen.getByText("[up]")).toBeInTheDocument();
   });
 
+  it("shows [stop], not [up], for a paused stack", () => {
+    render(<UnixRow {...defaultProps} stack={{ ...stack, Status: "paused(2)" }} />);
+    expect(screen.getByText("[stop]")).toBeEnabled();
+    expect(screen.queryByText("[up]")).toBeNull();
+  });
+
+  // A status the row did not recognise (crash-looping, never-started) used to fall back to
+  // "unknown", which swapped [stop] for [up] until the stack happened to settle.
+  it.each(["restarting(1)", "running(1), restarting(1)", "paused(1), exited(1)"])(
+    "keeps [stop] for %s",
+    status => {
+      render(<UnixRow {...defaultProps} stack={{ ...stack, Status: status }} />);
+      expect(screen.getByText("[stop]")).toBeInTheDocument();
+    },
+  );
+
   it("calls onDown when [down] is clicked", async () => {
     render(<UnixRow {...defaultProps} />);
     await click(screen.getByText("[down]"));

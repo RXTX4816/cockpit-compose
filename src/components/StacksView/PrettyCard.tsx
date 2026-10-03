@@ -15,7 +15,7 @@ import {
 } from "@patternfly/react-core";
 import { Tooltip } from "@rxtx4816/cockpit-plugin-base-react/components";
 import { type ComposeStack, parseStackStatus, parseServiceCount, formatBytes, getPortUrl, parseShortUptime } from "../../api";
-import { effectiveStatus, stackHealthSummary } from "../../lib/stackStatus";
+import { effectiveStatus, isStackUp, stackHealthSummary } from "../../lib/stackStatus";
 import {
   CheckCircleIcon,
   ExclamationTriangleIcon,
@@ -142,7 +142,7 @@ export function PrettyCard({
   useEffect(() => { void loadContainers(); }, [loadContainers]);
   useAutoRefresh(loadContainers, acting ? 500 : 3000, globalActing && !acting && !actingService);
 
-  const isRunning = status === "running" || status === "partial";
+  const isUp = isStackUp(status);
   const cpuPct = stats?.cpu ?? 0;
   const cpuColor = cpuPct > 80 ? "#e17055" : cpuPct > 50 ? "#fdcb6e" : "#00b894";
 
@@ -253,11 +253,13 @@ export function PrettyCard({
         {/* Action bar */}
         <div className="pc-actions">
           <div className="pc-actions-left">
-            <Button variant="primary" size="sm" onClick={onUp} isDisabled={acting} icon={<AngleUpIcon />}>
-              {t("actions.up")}
-            </Button>
+            <Tooltip content={status === "paused" ? t("actions.up_paused_title") : t("actions.up_title")}>
+              <Button variant="primary" size="sm" onClick={onUp} isDisabled={acting} isAriaDisabled={!acting && status === "paused"} icon={<AngleUpIcon />}>
+                {t("actions.up")}
+              </Button>
+            </Tooltip>
 
-            {isRunning ? (
+            {isUp ? (
               <Button variant="primary" size="sm" onClick={() => setConfirmStopOpen(true)} isDisabled={acting}>
                 {t("actions.stop")}
               </Button>

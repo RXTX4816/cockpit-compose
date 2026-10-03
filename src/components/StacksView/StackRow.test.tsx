@@ -101,6 +101,22 @@ describe("StackRow", () => {
     expect(screen.getByRole("button", { name: /^Start$/i })).toBeInTheDocument();
   });
 
+  // #318: a paused stack used to lose both Stop and Start.
+  it("keeps Stop available and greys Up out for a paused stack", () => {
+    const onUp = vi.fn();
+    render(<StackRow {...defaultProps} onUp={onUp} stack={{ ...stack, Status: "paused(2)" }} />);
+    expect(screen.getByRole("button", { name: /^Stop$/i })).toBeEnabled();
+    const up = screen.getByRole("button", { name: /^Up$/i });
+    expect(up).toHaveAttribute("aria-disabled", "true");
+    fireEvent.click(up);
+    expect(onUp).not.toHaveBeenCalled();
+  });
+
+  it("offers Stop for a crash-looping (restarting) stack instead of hiding it", () => {
+    render(<StackRow {...defaultProps} stack={{ ...stack, Status: "restarting(1)" }} />);
+    expect(screen.getByRole("button", { name: /^Stop$/i })).toBeInTheDocument();
+  });
+
   it("renders Logs button", () => {
     render(<StackRow {...defaultProps} />);
     expect(screen.getByRole("button", { name: /Logs/i })).toBeInTheDocument();

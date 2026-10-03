@@ -52,6 +52,7 @@
   "actions": {
     "up": "启动",
     "up_title": "启动堆栈或重新创建已更改的容器",
+    "up_paused_title": "运行 Up 前请先恢复堆栈",
     "down": "停止",
     "down_title": "停止（移除容器）",
     "stop": "停止",

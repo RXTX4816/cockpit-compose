@@ -52,6 +52,7 @@
   "actions": {
     "up": "Iniciar",
     "up_title": "Iniciar pilha ou recriar contêineres alterados",
+    "up_paused_title": "Retome a pilha antes de executar Up",
     "down": "Parar",
     "down_title": "Parar (remover contêineres)",
     "stop": "Parar",
