@@ -52,6 +52,7 @@
   "actions": {
     "up": "Jalankan",
     "up_title": "Jalankan tumpukan atau buat ulang kontainer yang berubah",
+    "up_paused_title": "Lanjutkan tumpukan sebelum menjalankan Up",
     "down": "Hentikan",
     "down_title": "Hentikan (hapus kontainer)",
     "stop": "Hentikan",

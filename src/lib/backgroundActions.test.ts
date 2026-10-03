@@ -25,6 +25,7 @@ describe("stackSuperuser() escalation (background flow)", () => {
     const launch = vi.fn();
     await buildDownStarter(stack)(launch);
     expect(launch).toHaveBeenCalledOnce();
+    await launch.mock.calls[0][0];
     const spawnCallOptions = mockSpawn.mock.calls.find(call => (call[0] as string[]).includes("down"))?.[1] as
       { superuser?: "try" } | undefined;
     // Default test environment has no cockpit.user() available, so composeFileSuperuser (and
@@ -65,6 +66,7 @@ describe("buildDownStarter", () => {
     const launch = vi.fn();
     await starter(launch);
     expect(launch).toHaveBeenCalledOnce();
+    await launch.mock.calls[0][0];
     const args = mockSpawn.mock.calls[mockSpawn.mock.calls.length - 1][0] as string[];
     expect(args).toContain("down");
     expect(args).toContain("myapp");

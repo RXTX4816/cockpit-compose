@@ -52,6 +52,7 @@
   "actions": {
     "up": "Pornire",
     "up_title": "Pornire stivă sau recreare containere modificate",
+    "up_paused_title": "Reluați stiva înainte de a rula Up",
     "down": "Oprire",
     "down_title": "Oprire (eliminare containere)",
     "stop": "Oprire",

@@ -52,6 +52,7 @@
   "actions": {
     "up": "Käynnistä",
     "up_title": "Käynnistä pino tai luo muuttuneet kontit uudelleen",
+    "up_paused_title": "Jatka pinoa ennen Up-toimintoa",
     "down": "Sammuta",
     "down_title": "Sammuta (poista kontit)",
     "stop": "Pysäytä",

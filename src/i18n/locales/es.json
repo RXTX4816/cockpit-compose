@@ -52,6 +52,7 @@
   "actions": {
     "up": "Iniciar",
     "up_title": "Iniciar pila o recrear contenedores modificados",
+    "up_paused_title": "Reanuda la pila antes de ejecutar Up",
     "down": "Detener",
     "down_title": "Detener (eliminar contenedores)",
     "stop": "Parar",

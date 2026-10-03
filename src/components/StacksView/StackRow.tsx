@@ -27,7 +27,7 @@ import {
   parseStackStatus,
   parseServiceCount,
 } from "../../api";
-import { effectiveStatus, stackHealthSummary } from "../../lib/stackStatus";
+import { effectiveStatus, isStackUp, stackHealthSummary } from "../../lib/stackStatus";
 import {
   CheckCircleIcon,
   ExclamationTriangleIcon,
@@ -209,18 +209,19 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
 
             <DataListCell key="actions" width={2} alignRight>
               <span className="sr-actions-cell">
-                <Tooltip content={t("actions.up_title")}>
+                <Tooltip content={status === "paused" ? t("actions.up_paused_title") : t("actions.up_title")}>
                   <Button
                     variant="primary"
                     size="sm"
                     onClick={onUp}
                     isDisabled={acting}
+                    isAriaDisabled={!acting && status === "paused"}
                   >
                     {t("actions.up")}
                   </Button>
                 </Tooltip>
 
-                {(status === "running" || status === "partial") ? (
+                {isStackUp(status) ? (
                   <Button
                     variant="secondary"
                     size="sm"

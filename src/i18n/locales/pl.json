@@ -54,6 +54,7 @@
   "actions": {
     "up": "Uruchom",
     "up_title": "Uruchom stos lub odtwórz zmienione kontenery",
+    "up_paused_title": "Wznów stos przed uruchomieniem Up",
     "down": "Wyłącz",
     "down_title": "Wyłącz (usuń kontenery)",
     "stop": "Zatrzymaj",

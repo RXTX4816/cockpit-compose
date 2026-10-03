@@ -52,6 +52,7 @@
   "actions": {
     "up": "Avvia",
     "up_title": "Avvia lo stack o ricrea i container modificati",
+    "up_paused_title": "Riprendi lo stack prima di eseguire Up",
     "down": "Arresta",
     "down_title": "Arresta (rimuovi container)",
     "stop": "Ferma",

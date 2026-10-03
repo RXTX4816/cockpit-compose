@@ -15,7 +15,7 @@ import {
 } from "@patternfly/react-core";
 import { Tooltip } from "@rxtx4816/cockpit-plugin-base-react/components";
 import { type ComposeStack, parseStackStatus, parseServiceCount, formatBytes, getPortUrl } from "../../api";
-import { effectiveStatus } from "../../lib/stackStatus";
+import { effectiveStatus, isStackUp } from "../../lib/stackStatus";
 import {
   EllipsisVIcon,
   ArrowsAltVIcon,
@@ -118,7 +118,7 @@ export function UnixRow({
   useAutoRefresh(loadContainers, acting ? 500 : 3000, globalActing && !acting && !actingService);
 
   const sl = STATUS_LABEL[status] ?? STATUS_LABEL.unknown;
-  const isUp = status === "running" || status === "partial" || status === "paused";
+  const isUp = isStackUp(status);
   const cpuStr = stats ? `${stats.cpu.toFixed(1)}%` : "—";
   const memStr = stats ? formatBytes(stats.mem) : "—";
 

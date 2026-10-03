@@ -52,6 +52,7 @@
   "actions": {
     "up": "啟動",
     "up_title": "啟動堆疊或重新建立已變更的容器",
+    "up_paused_title": "執行 Up 前請先恢復堆疊",
     "down": "停止",
     "down_title": "停止（移除容器）",
     "stop": "停止",

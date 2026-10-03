@@ -55,6 +55,7 @@
   "actions": {
     "up": "Up",
     "up_title": "Start stack or recreate changed containers",
+    "up_paused_title": "Unpause the stack before running Up",
     "down": "Down",
     "down_title": "Down (remove containers)",
     "stop": "Stop",

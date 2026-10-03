@@ -40,7 +40,7 @@ describe("useStackActions", () => {
       useStackActions("myapp", ["/path/compose.yml"], vi.fn()),
     );
     await act(() => result.current.doAction("stop"));
-    const args = mockSpawn.mock.calls[0][0] as string[];
+    const args = mockSpawn.mock.calls[mockSpawn.mock.calls.length - 1][0] as string[];
     expect(args).toContain("stop");
   });
 
@@ -110,8 +110,8 @@ describe("useStackActions", () => {
 
   it("clears actionError on next action attempt", async () => {
     mockSpawn
-      .mockReturnValueOnce(mockProcess("", "error"))
-      .mockReturnValueOnce(mockProcess(""));
+      .mockReturnValue(mockProcess(""))
+      .mockReturnValueOnce(mockProcess("", "error"));
     const { result } = renderHook(() =>
       useStackActions("myapp", ["/path/compose.yml"], vi.fn()),
     );

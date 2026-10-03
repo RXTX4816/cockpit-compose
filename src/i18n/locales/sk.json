@@ -52,6 +52,7 @@
   "actions": {
     "up": "Spustiť",
     "up_title": "Spustiť zásobník alebo znova vytvoriť zmenené kontajnery",
+    "up_paused_title": "Pred spustením Up zásobník obnovte",
     "down": "Zastaviť",
     "down_title": "Zastaviť (odstrániť kontajnery)",
     "stop": "Zastaviť",

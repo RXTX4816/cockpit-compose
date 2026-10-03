@@ -15,7 +15,7 @@ import {
 } from "@patternfly/react-core";
 import { Tooltip } from "@rxtx4816/cockpit-plugin-base-react/components";
 import { type ComposeStack, parseStackStatus, parseServiceCount } from "../../api";
-import { effectiveStatus } from "../../lib/stackStatus";
+import { effectiveStatus, isStackUp } from "../../lib/stackStatus";
 import {
   AngleUpIcon,
   ArrowAltCircleDownIcon,
@@ -166,7 +166,7 @@ export function MinimalCard({
     onToggleSelect();
   };
 
-  const isUp = status === "running" || status === "partial" || status === "paused";
+  const isUp = isStackUp(status);
   const sv = STATUS_VARS[status] ?? STATUS_VARS.unknown;
 
   return (
@@ -205,13 +205,13 @@ export function MinimalCard({
             popperProps={{ position: "right" }}
           >
             <DropdownList>
-              {(status === "running" || status === "partial") && (
+              {isUp && (
                 <DropdownItem key="stop" onClick={() => { setMenuOpen(false); setConfirmStopOpen(true); }}>{t("actions.stop")}</DropdownItem>
               )}
               {status === "stopped" && (
                 <DropdownItem key="start" onClick={() => { setMenuOpen(false); void doAction("start", afterAction); }}>{t("actions.start")}</DropdownItem>
               )}
-              {(status === "running" || status === "partial" || status === "stopped") && <Divider component="li" />}
+              {(isUp || status === "stopped") && <Divider component="li" />}
               <DropdownItem key="pull" icon={<DownloadIcon />} onClick={() => { setMenuOpen(false); onPull(); }}>{t("actions.pull_title")}</DropdownItem>
               <DropdownItem key="shell" icon={<TerminalIcon />} onClick={() => { setMenuOpen(false); onExec(); }}>{t("actions.shell")}</DropdownItem>
               <DropdownItem key="logs" icon={<FileAltIcon />} onClick={() => { setMenuOpen(false); onLogs(); }}>{t("actions.logs_title")}</DropdownItem>
