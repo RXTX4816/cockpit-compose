@@ -58,3 +58,41 @@ export async function sshExec(projectName: string, command: string): Promise<str
   );
   return stdout;
 }
+
+/**
+ * The container CLI to use for out-of-band state checks on a given VM project,
+ * matching the runtime the app itself ends up on there.
+ *
+ * The app defaults to Docker and only switches to Podman when Docker is absent
+ * (RuntimeToggle's startup suggestion, dismissed as "Continue" by baseData()). So
+ * podman-only VMs use podman; docker-only, "-both" and "fedora-full" VMs keep
+ * Docker. fedora-podman-rootful runs its engine as root, so its CLI needs sudo to
+ * see the same containers the app manages.
+ *
+ * Returns a command prefix, e.g. `${engineCli(vm)} ps -a`.
+ */
+export function engineCli(projectName: string): string {
+  if (projectName === 'fedora-podman-rootful') return 'sudo podman';
+  if (/-podman$/.test(projectName)) return 'podman';
+  return 'docker';
+}
+
+/**
+ * The separator the active runtime puts between project, service and index when it
+ * names a container: Docker Compose v2 builds `project-service-1`, podman-compose
+ * builds `project_service_1`.
+ *
+ * Derive expected container names from this rather than hardcoding one runtime's
+ * spelling — a hardcoded name silently passes on the runtime it was written against
+ * and fails everywhere else, and a separator-agnostic regex would also accept the
+ * app producing the *wrong* separator for the runtime in use.
+ */
+export function composeSep(projectName: string): '-' | '_' {
+  return engineCli(projectName).includes('podman') ? '_' : '-';
+}
+
+/** Container name as the active runtime spells it, e.g. `volumes-test-db-1`. */
+export function containerName(projectName: string, project: string, service: string, index = 1): string {
+  const sep = composeSep(projectName);
+  return `${project}${sep}${service}${sep}${index}`;
+}

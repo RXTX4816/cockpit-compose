@@ -1,7 +1,10 @@
 import { test, expect } from '@rxtx4816/cockpit-plugin-base-react/e2e';
 import { loginWithAdminAccess } from './helpers/admin';
 import { baseData } from './helpers/base';
-import { ensureDown, stackRow, downStack } from './helpers/stacks';
+import { closeUpProgress, ensureDown, stackRow, downStack } from './helpers/stacks';
+import { sshExec } from './helpers/vm';
+
+const SUPERUSER_DIR = '/home/test/testcompose/superuser-test';
 
 /**
  * Regression coverage for `composeFileSuperuser()` (src/api/cockpit.ts:334-344):
@@ -25,26 +28,39 @@ import { ensureDown, stackRow, downStack } from './helpers/stacks';
  * exercise meaningfully without becoming a test of "this stack never appears."
  *
  * Fixture: `testcompose/superuser-test` (docker-compose.yml, nginx:alpine on
- * :8099), created root-owned via SSH — not part of the shared cloud-init
- * provisioning since it's specific to this one regression.
+ * :8102), created root-owned over SSH by the test itself — not part of the shared
+ * cloud-init provisioning since it's specific to this one regression. It used to be
+ * assumed to already exist, which only held on a VM where it had once been created
+ * by hand; a freshly provisioned VM has no such directory. (It also used to sit on
+ * :8099, which stable-tag_prunetest already publishes.)
  */
 test('Compose file owned by root: Administrative access lets Up escalate and actually start it', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'fedora-full', 'needs a VM with a genuine rootless Docker socket — only fedora-full has one configured');
   test.setTimeout(60_000);
-  await loginWithAdminAccess(page);
-  await baseData(page);
-  await ensureDown(page, 'superuser-test');
+  const vm = testInfo.project.name;
+  await sshExec(vm,
+    `sudo rm -rf ${SUPERUSER_DIR} && sudo mkdir -p ${SUPERUSER_DIR} && `
+    + `printf 'services:\\n  web:\\n    image: nginx:alpine\\n    ports:\\n      - "8102:80"\\n' | sudo tee ${SUPERUSER_DIR}/docker-compose.yml >/dev/null && `
+    + `sudo chown -R root:root ${SUPERUSER_DIR}`);
 
-  const downed = page.locator('[data-status="down"]').filter({ has: page.locator('#dss-name-superuser-test') });
-  await expect(downed).toBeVisible({ timeout: 10000 });
-  await downed.getByRole('button', { name: 'Up', exact: true }).click();
-  await page.getByRole('dialog', { name: /Confirm up.*superuser-test/ }).getByRole('button', { name: 'Up', exact: true }).click();
-  const progress = page.getByRole('dialog', { name: /^Up.*superuser-test/ });
-  await progress.getByRole('button', { name: 'Close' }).click({ timeout: 30000 });
+  try {
+    await loginWithAdminAccess(page);
+    await baseData(page);
+    await ensureDown(page, 'superuser-test');
 
-  // Real effect: the container actually started under the escalated command
-  // against the root-owned compose directory — not just a UI success message
-  // papering over a silent failure.
-  await expect(stackRow(page, 'superuser-test')).toHaveAttribute('data-status', /running|partial/, { timeout: 15000 });
-  await downStack(page, 'superuser-test');
+    const downed = page.locator('[data-status="down"]').filter({ has: page.locator('#dss-name-superuser-test') });
+    await expect(downed).toBeVisible({ timeout: 10000 });
+    await downed.getByRole('button', { name: 'Up', exact: true }).click();
+    await page.getByRole('dialog', { name: /Confirm up.*superuser-test/ }).getByRole('button', { name: 'Up', exact: true }).click();
+    const progress = page.getByRole('dialog', { name: /^Up.*superuser-test/ });
+    await closeUpProgress(progress);
+
+    // Real effect: the container actually started under the escalated command
+    // against the root-owned compose directory — not just a UI success message
+    // papering over a silent failure.
+    await expect(stackRow(page, 'superuser-test')).toHaveAttribute('data-status', /running|partial/, { timeout: 15000 });
+    await downStack(page, 'superuser-test');
+  } finally {
+    await sshExec(vm, `sudo rm -rf ${SUPERUSER_DIR}`).catch(() => {});
+  }
 });

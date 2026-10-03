@@ -312,12 +312,23 @@ pre_staged_files() {
             NGINX_HOST: localhost
           labels:
             test: override-label
+  # postgres is pinned to 17-alpine throughout, deliberately. From 18 the official
+  # images store data in major-version-specific directories, and a volume mounted at
+  # /var/lib/postgresql/data (as the fixtures below do) makes the container refuse to
+  # start: "in 18+, these Docker images are configured to store database data in a
+  # format which is compatible with pg_ctlcluster ... there appears to be PostgreSQL
+  # data in: /var/lib/postgresql/data (unused mount/volume)".
+  # See https://github.com/docker-library/postgres/pull/1259.
+  # `postgres:alpine` floated to 18 on its own and silently broke every fixture with a
+  # pgdata volume — the db exited(1), the stack never reached running, and the specs
+  # that use those fixtures failed as though the app were at fault. Moving to 18 needs
+  # the mount point changed too, not just the tag.
   - path: /home/test/testcompose/volumes-test/docker-compose.yml
     permissions: '0644'
     content: |
       services:
         db:
-          image: postgres:alpine
+          image: postgres:17-alpine
           environment:
             POSTGRES_PASSWORD: secret
           volumes:
@@ -367,7 +378,7 @@ pre_staged_files() {
     content: |
       services:
         db:
-          image: postgres:alpine
+          image: postgres:17-alpine
           environment:
             POSTGRES_PASSWORD: secret
             POSTGRES_DB: app
@@ -420,7 +431,7 @@ pre_staged_files() {
           networks:
             - backend
         db:
-          image: postgres:alpine
+          image: postgres:17-alpine
           environment:
             POSTGRES_PASSWORD: secret
           networks:
@@ -506,7 +517,7 @@ pre_staged_files() {
           networks:
             - data
         db:
-          image: postgres:alpine
+          image: postgres:17-alpine
           environment:
             POSTGRES_PASSWORD: secret
           networks:
@@ -545,7 +556,7 @@ pre_staged_files() {
     content: |
       services:
         db:
-          image: postgres:alpine
+          image: postgres:17-alpine
           environment:
             POSTGRES_PASSWORD: secret
           volumes:
@@ -618,7 +629,7 @@ pre_staged_files() {
     content: |
       services:
         db:
-          image: postgres:alpine
+          image: postgres:17-alpine
           environment:
             POSTGRES_PASSWORD: secret
           volumes:

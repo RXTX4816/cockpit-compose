@@ -164,7 +164,7 @@ export function ScaleModal({ stack, onClose, onSuccess }: Props) {
         onClose={() => { if (!scaling) onClose(); }}
         aria-label={t("scale_modal.aria_label")}
       >
-        <ModalHeader title={t("scale_modal.confirm_title")} />
+        <ModalHeader title={t("scale_modal.confirm_title", { name: stack.Name })} />
         <ModalBody>
           <Alert
             variant="info"

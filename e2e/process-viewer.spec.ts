@@ -26,14 +26,19 @@ test('Top shows real per-service process output (docker/podman compose top equiv
     // worker runs `sh -c "while true; do echo worker-tick; ..."`, so `sh`
     // (or the busybox `sleep`/`echo` it spawns) should show up as a real
     // command, not a placeholder or empty table.
-    await expect(modal.getByText('worker', { exact: true })).toBeVisible({ timeout: 10000 });
-    await expect(modal.getByText('web', { exact: true })).toBeVisible();
+    // .first(): a service gets one row per process, so these match several cells —
+    // `worker` its `sh` loop plus the `sleep` it spawns, `web` nginx's master plus every
+    // worker process. toBeVisible() on a multi-match locator is a strict-mode error, and
+    // it surfaced as a hook timeout rather than as itself, because the failure left this
+    // modal open and cleanup then could not click through it.
+    await expect(modal.getByText('worker', { exact: true }).first()).toBeVisible({ timeout: 10000 });
+    await expect(modal.getByText('web', { exact: true }).first()).toBeVisible();
     await expect(modal.getByText('No running processes found.')).toHaveCount(0);
     await expect(modal.getByRole('columnheader', { name: 'PID' }).first()).toBeVisible();
 
     // Refresh re-fetches without erroring.
     await modal.getByRole('button', { name: 'Refresh' }).click();
-    await expect(modal.getByText('worker', { exact: true })).toBeVisible({ timeout: 10000 });
+    await expect(modal.getByText('worker', { exact: true }).first()).toBeVisible({ timeout: 10000 });
 
     await modal.getByRole('contentinfo').getByRole('button', { name: 'Close' }).click();
     await expect(modal).not.toBeVisible();

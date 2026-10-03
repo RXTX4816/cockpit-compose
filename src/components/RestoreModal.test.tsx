@@ -361,6 +361,83 @@ describe("RestoreModal — restore execution", () => {
   });
 });
 
+describe("RestoreModal — overwriting an existing target under a new name", () => {
+  const TARGET = "/home/user/stacks/otherapp-restored";
+  const EXTRACTED = "/tmp/restore-test/otherapp";
+
+  // Archive root "otherapp" collides with a running stack, so the dialog renames it to
+  // "otherapp-restored" — and that target directory already exists too.
+  function renderOverwrite(spawnMock: ReturnType<typeof vi.fn>, onRestored = vi.fn()) {
+    mockListArchiveContents.mockResolvedValue(["otherapp/", "otherapp/docker-compose.yml"]);
+    mockReadFileFromArchive.mockResolvedValue("services:\n  web:\n");
+    mockFindComposeFiles.mockImplementation(() => mockProcess(`${EXTRACTED}/docker-compose.yml\n`));
+    vi.stubGlobal("cockpit", { spawn: spawnMock });
+    render(
+      <RestoreModal
+        existingStacks={existingStacks}
+        defaultScanDir="/home/user/stacks"
+        onClose={vi.fn()}
+        onRestored={onRestored}
+      />
+    );
+    return onRestored;
+  }
+
+  async function confirmAndRestore() {
+    await waitFor(() => screen.getByText(/myapp-2026-06-12/));
+    fireEvent.click(screen.getByRole("radio"));
+    await waitFor(() => screen.getByText(/already exists/i));
+    fireEvent.click(screen.getByRole("checkbox", { name: /I understand/i }));
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: /^Restore$/i })).not.toBeDisabled()
+    );
+    fireEvent.click(screen.getByRole("button", { name: /^Restore$/i }));
+  }
+
+  const isDisplaced = (p: string | undefined) => (p ?? "").startsWith(`${TARGET}.restore-displaced-`);
+
+  it("replaces the existing directory once the overwrite is acknowledged, instead of aborting", async () => {
+    const spawnMock = vi.fn().mockImplementation((args: string[]) => {
+      if (args[0] === "ls") return mockProcess(args[args.length - 1] ?? "");
+      if (args[0] === "mktemp") return mockProcess("/tmp/restore-test\n");
+      if (args[0] === "cat") return mockProcess("services:\n");
+      return mockProcess("");
+    });
+    const onRestored = renderOverwrite(spawnMock);
+    await confirmAndRestore();
+    await waitFor(() => expect(onRestored).toHaveBeenCalledOnce());
+    expect(screen.queryByText(/aborting to prevent overwrite/i)).not.toBeInTheDocument();
+
+    // Old directory moved aside, restored copy moved into place, and only then the old
+    // one removed — so a failed move can never lose it.
+    const calls = spawnMock.mock.calls.map(c => c[0] as string[]);
+    const displace = calls.findIndex(a => a[0] === "mv" && a[2] === TARGET && isDisplaced(a[3]));
+    const moveIn = calls.findIndex(a => a[0] === "mv" && a[2] === EXTRACTED && a[3] === TARGET);
+    const removeOld = calls.findIndex(a => a[0] === "rm" && isDisplaced(a[3]));
+    expect(displace).toBeGreaterThan(-1);
+    expect(moveIn).toBeGreaterThan(displace);
+    expect(removeOld).toBeGreaterThan(moveIn);
+  });
+
+  it("puts the original directory back if moving the restored copy into place fails", async () => {
+    const spawnMock = vi.fn().mockImplementation((args: string[]) => {
+      if (args[0] === "ls") return mockProcess(args[args.length - 1] ?? "");
+      if (args[0] === "mktemp") return mockProcess("/tmp/restore-test\n");
+      if (args[0] === "cat") return mockProcess("services:\n");
+      if (args[0] === "mv" && args[2] === EXTRACTED) return mockProcess("", "mv: cannot move");
+      return mockProcess("");
+    });
+    const onRestored = renderOverwrite(spawnMock);
+    await confirmAndRestore();
+    await waitFor(() => expect(screen.getByText(/cannot move/i)).toBeInTheDocument());
+    expect(onRestored).not.toHaveBeenCalled();
+
+    const calls = spawnMock.mock.calls.map(c => c[0] as string[]);
+    expect(calls.some(a => a[0] === "mv" && isDisplaced(a[2]) && a[3] === TARGET)).toBe(true);
+    expect(calls.some(a => a[0] === "rm" && isDisplaced(a[3]))).toBe(false);
+  });
+});
+
 describe("RestoreModal — scan error and rescan", () => {
   it("shows scan error alert when findBackupArchives fails", async () => {
     mockFindBackupArchives.mockRejectedValue(new Error("permission denied"));

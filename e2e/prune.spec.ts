@@ -1,6 +1,7 @@
 import { test, expect } from '@rxtx4816/cockpit-plugin-base-react/e2e';
 import { baseData } from './helpers/base';
-import { downedCard, downStack, ensureDown, stackRow, upStack } from './helpers/stacks';
+import { closeUpProgress, downedCard, downStack, ensureDown, stackRow, upStack } from './helpers/stacks';
+import { containerName, engineCli, sshExec } from './helpers/vm';
 
 // `volumes-test` (db+app, db uses a named volume `pgdata` — see
 // scripts/test-vm.config.sh) is brought up then Stopped (not removed) so it
@@ -23,12 +24,14 @@ test.afterEach(async ({ pluginPage: page }) => {
   }
 });
 
-test('Prune removes real stopped containers, not just closes the dialog', async ({ pluginPage: page }) => {
+test('Prune removes real stopped containers, not just closes the dialog', async ({ pluginPage: page }, testInfo) => {
   // Runs on Podman again since #274 was fixed. This test always asserted the correct
   // behaviour rather than being weakened to match the bug, so removing the skip is all
   // that was needed.
-  // See logs.spec.ts for why: Up alone can eat most of the default 30s.
-  test.setTimeout(120_000);
+  // See logs.spec.ts for why: Up alone can eat most of the default 30s. This one also
+  // downs, ups, stops, prunes and then reads Stack Info back, and downStack now waits
+  // for the down to genuinely finish rather than for the row to be hidden optimistically.
+  test.setTimeout(180_000);
   await baseData(page);
   const row = stackRow(page, 'volumes-test');
 
@@ -52,29 +55,34 @@ test('Prune removes real stopped containers, not just closes the dialog', async 
 
     const previewModal = page.getByRole('dialog', { name: /Confirm prune — volumes-test/ });
     await expect(previewModal).toBeVisible();
-    // Real effect target: the stopped db container listed by name, not just a
-    // generic count. Podman container names use underscores as the
-    // service/index separators (project name's own hyphen is untouched).
-    await expect(previewModal.getByText('volumes-test_db_1', { exact: false })).toBeVisible({ timeout: 10000 });
+    // Real effect target: the stopped db container listed by name, not just a generic
+    // count. The service/index separator differs by runtime — podman-compose spells it
+    // `volumes-test_db_1`, Docker Compose `volumes-test-db-1` — so derive it rather
+    // than hardcoding either. (The project name's own hyphen is untouched by both.)
+    const dbContainer = containerName(testInfo.project.name, 'volumes-test', 'db');
+    await expect(previewModal.getByText(dbContainer, { exact: false })).toBeVisible({ timeout: 10000 });
     await previewModal.getByRole('button', { name: 'Prune selected' }).click();
     await expect(previewModal).not.toBeVisible({ timeout: 20000 });
 
-    // Real effect check: the stack itself does NOT drop out of the
-    // running-stacks list — `compose ls` (podman and docker alike) still
-    // lists a known project even with zero containers, so it stays visible
-    // here as "stopped". Its "N services" count also doesn't change (that
-    // reflects the compose *file's* defined services, not live container
-    // count). (Earlier versions of this test assumed the row would
-    // disappear, or that the services count would drop to 0 — both verified
-    // false against the real DOM/app behavior.) Stack Info is the one place
-    // that actually reflects live container state, so that's what proves
-    // the containers are really gone.
-    await expect(row).toHaveAttribute('data-status', 'stopped', { timeout: 15000 });
-    await row.getByRole('button', { name: 'Stack info' }).click();
-    const infoModal = page.getByRole('dialog', { name: /Info — volumes-test/ });
-    await expect(infoModal).toBeVisible();
-    await expect(infoModal.locator('.sim-no-containers')).toBeVisible({ timeout: 10000 });
-    await infoModal.getByRole('button', { name: 'Close' }).click();
+    // Real effect: the containers are genuinely gone from the engine, not merely absent
+    // from a dialog that closed.
+    //
+    // Asked of the runtime, and the stack is expected to leave the running-stacks list.
+    // An earlier version of this test asserted the opposite — that the row stays as
+    // "stopped" because `compose ls` still lists a project with zero containers. That no
+    // longer holds: listStacks() reads containers over the engine socket and groups them
+    // by project label (api/stacks/query.ts), so a project with no containers left has
+    // nothing to group and drops out. The old assertion did not fail cleanly either — the
+    // follow-up click on the vanished row's "Stack info" button waited out the entire
+    // test budget, which surfaced as a timeout with no indication of the real cause.
+    await expect(row).toHaveCount(0, { timeout: 20000 });
+    await expect
+      .poll(
+        async () => (await sshExec(testInfo.project.name,
+          `${engineCli(testInfo.project.name)} ps -a --filter label=com.docker.compose.project=volumes-test -q || true`)).trim(),
+        { timeout: 15000, intervals: [1000] },
+      )
+      .toBe('');
   } finally {
     if (await row.count()) {
       await downStack(page, 'volumes-test').catch(() => {});
@@ -152,7 +160,7 @@ test('Prune does not offer to remove an image another stack is still using', asy
 // `exited-containers_prunetest` (testing guide §6.16.6) exits immediately
 // (restart: "no"), giving Prune's Containers section a real stopped
 // container to list and remove by name.
-test('Prune removes a real one-shot exited container by name', async ({ pluginPage: page }) => {
+test('Prune removes a real one-shot exited container by name', async ({ pluginPage: page }, testInfo) => {
   // Runs on Podman too since #274 was fixed: `podman container prune` silently skips
   // pod-member containers (which every podman-compose stack's containers are), so
   // pruneContainers() now lists and `podman rm`s them directly. The final assertion
@@ -172,7 +180,7 @@ test('Prune removes a real one-shot exited container by name', async ({ pluginPa
   const confirm = page.getByRole('dialog', { name: /Confirm up.*exited-containers_prunetest/ });
   await confirm.getByRole('button', { name: 'Up', exact: true }).click();
   const progress = page.getByRole('dialog', { name: /^Up.*exited-containers_prunetest/ });
-  await progress.getByRole('button', { name: 'Close' }).click({ timeout: 30000 });
+  await closeUpProgress(progress);
 
   const row = stackRow(page, 'exited-containers_prunetest');
   await expect(row).toBeVisible({ timeout: 15000 });
@@ -186,14 +194,99 @@ test('Prune removes a real one-shot exited container by name', async ({ pluginPa
 
   const previewModal = page.getByRole('dialog', { name: /Confirm prune — exited-containers_prunetest/ });
   await expect(previewModal).toBeVisible();
-  await expect(previewModal.getByText('exited-containers_prunetest_job_1', { exact: false })).toBeVisible({ timeout: 10000 });
+  // Docker Compose spells this `…-job-1`, podman-compose `…_job_1` — derive it from
+  // the runtime rather than hardcoding either.
+  const jobContainer = containerName(testInfo.project.name, 'exited-containers_prunetest', 'job');
+  await expect(previewModal.getByText(jobContainer, { exact: false })).toBeVisible({ timeout: 10000 });
   await previewModal.getByRole('button', { name: 'Prune selected' }).click();
   await expect(previewModal).not.toBeVisible({ timeout: 20000 });
 
   // Real effect: the container is actually gone, not just the modal closed.
-  await row.getByRole('button', { name: 'Stack info' }).click();
-  const infoModal = page.getByRole('dialog', { name: /Info — exited-containers_prunetest/ });
-  await expect(infoModal).toBeVisible();
-  await expect(infoModal.locator('.sim-no-containers')).toBeVisible({ timeout: 10000 });
-  await infoModal.getByRole('button', { name: 'Close' }).click();
+  //
+  // Asked of the runtime rather than read back through Stack Info. Pruning this
+  // project's only container leaves it with none, and the row is then not reliably
+  // still in the running-stacks table where the Stack info button lives — so going
+  // through the UI here tested the table's post-prune bookkeeping as much as the
+  // prune itself, and hung on the button when the row had moved.
+  await expect
+    .poll(
+      async () => (await sshExec(testInfo.project.name, `${engineCli(testInfo.project.name)} ps -a --filter name=${jobContainer} --format '{{.Names}}' || true`)).trim(),
+      { timeout: 15000, intervals: [1000] },
+    )
+    .toBe('');
+});
+
+// Wave 5 (#227): the host-wide "Prune images" button (GlobalPruneModal), which is
+// a different flow from every other test in this file — those all go through a
+// stack row's ⋮ → Prune. This one is not scoped to a project at all, and is gated
+// behind an explicit "I understand" checkbox rather than a preview/confirm step.
+//
+// `gotify` uses gotify/server, an image no other fixture stack shares, so once
+// gotify is fully down its image is unambiguously unused and must show up in the
+// host-wide scan.
+test('Global Prune images removes a genuinely unused image host-wide', async ({ pluginPage: page }, testInfo) => {
+  test.setTimeout(120_000);
+  const vm = testInfo.project.name;
+  await baseData(page);
+
+  // Bring gotify up then fully down, so its image exists locally but no container
+  // references it — the exact condition the global scan looks for.
+  await ensureDown(page, 'gotify');
+  await upStack(page, 'gotify');
+  await downStack(page, 'gotify');
+
+  // Precondition, asserted rather than assumed: the image really is on the host.
+  const before = await sshExec(vm, `${engineCli(vm)} images --format "{{.Repository}}"`);
+  expect(before).toContain('gotify/server');
+
+  await page.getByRole('button', { name: 'Prune images' }).first().click();
+
+  const modal = page.getByRole('dialog', { name: 'Prune unused images (all stacks)' });
+  await expect(modal).toBeVisible();
+
+  // The scan is real work against the host — it lists actual repo:tags.
+  await expect(modal.getByText('Scanning for unused images', { exact: false })).not.toBeVisible({ timeout: 30000 });
+  await expect(modal.getByText('gotify/server', { exact: false })).toBeVisible({ timeout: 30000 });
+
+  // The destructive button is gated on the acknowledgement checkbox, not merely
+  // styled as dangerous — assert the gate before satisfying it.
+  const pruneButton = modal.getByRole('button', { name: 'Prune', exact: true });
+  await expect(pruneButton).toBeDisabled();
+  await modal.locator('#prune-global-confirm').check();
+  await expect(pruneButton).toBeEnabled();
+
+  await pruneButton.click();
+  await expect(modal.getByText('Done', { exact: false })).toBeVisible({ timeout: 60000 });
+  await modal.getByRole('contentinfo').getByRole('button', { name: 'Close' }).click();
+  await expect(modal).not.toBeVisible();
+
+  // Real effect: the image is genuinely gone from the host, not just absent from
+  // a re-rendered list.
+  const after = await sshExec(vm, `${engineCli(vm)} images --format "{{.Repository}}"`);
+  expect(after).not.toContain('gotify/server');
+});
+
+// The checkbox gate is the only thing standing between a misclick and deleting
+// every unused image on the host, so it gets its own assertion independent of the
+// happy path above (which could stop testing it if the flow is ever reordered).
+test('Global Prune refuses to run until the acknowledgement checkbox is checked', async ({ pluginPage: page }) => {
+  test.setTimeout(60_000);
+  await baseData(page);
+
+  await page.getByRole('button', { name: 'Prune images' }).first().click();
+  const modal = page.getByRole('dialog', { name: 'Prune unused images (all stacks)' });
+  await expect(modal).toBeVisible();
+  await expect(modal.getByText('Scanning for unused images', { exact: false })).not.toBeVisible({ timeout: 30000 });
+
+  // With nothing unused the modal says so and offers no destructive action at
+  // all; with something unused the button exists but stays disabled. Both are
+  // valid states here — what must never happen is an enabled Prune button while
+  // the checkbox is unchecked.
+  const nothingFound = await modal.getByText('No unused images found', { exact: false }).isVisible();
+  if (!nothingFound) {
+    await expect(modal.getByRole('button', { name: 'Prune', exact: true })).toBeDisabled();
+  }
+
+  await modal.getByRole('button', { name: 'Cancel' }).click();
+  await expect(modal).not.toBeVisible();
 });

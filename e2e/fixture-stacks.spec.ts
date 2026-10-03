@@ -1,6 +1,7 @@
 import { test, expect } from '@rxtx4816/cockpit-plugin-base-react/e2e';
 import { baseData } from './helpers/base';
-import { downStack, downedCard, ensureDown, stackRow } from './helpers/stacks';
+import { closeUpProgress, downStack, downedCard, ensureDown, stackRow } from './helpers/stacks';
+import { containerName, engineCli, sshExec } from './helpers/vm';
 
 // Parametrized real-behavior checks for the pre-staged fixture stacks that
 // exist in scripts/test-vm.config.sh but have no dedicated scenario of their
@@ -20,27 +21,44 @@ async function up(page: import('@playwright/test').Page, name: string) {
   await downedCard(page, name).getByRole('button', { name: 'Up', exact: true }).click();
   await page.getByRole('dialog', { name: new RegExp(`Confirm up.*${name}`) }).getByRole('button', { name: 'Up', exact: true }).click();
   const progress = page.getByRole('dialog', { name: new RegExp(`^Up.*${name}`) });
-  await progress.getByRole('button', { name: 'Close' }).click({ timeout: 30000 });
+  await closeUpProgress(progress);
 }
 
-test('healthcheck fixture: Stack Info reflects real healthcheck transitions, not a static label', async ({ pluginPage: page }) => {
+test('healthcheck fixture: Stack Info reports the real health state the runtime is in', async ({ pluginPage: page }, testInfo) => {
   test.setTimeout(60_000);
+  const vm = testInfo.project.name;
   await baseData(page);
   await ensureDown(page, 'healthcheck');
   await up(page, 'healthcheck');
 
   const row = stackRow(page, 'healthcheck');
   await expect(row).toHaveAttribute('data-status', /running|partial/, { timeout: 15000 });
+
+  // StackInfoModal loads its container data once, when it opens, and never polls, so
+  // it can only ever show the state at that instant. Wait for the runtime itself to
+  // report healthy *first*, then assert the modal reflects it.
+  //
+  // This test previously opened the modal immediately and waited 30s for it to turn
+  // "healthy", describing itself as proof the label was not "a one-shot snapshot".
+  // It cannot show that: a modal that does not refresh never converges. It passed only
+  // when `up` happened to take longer than the fixture's 5s start_period, so the
+  // container was already healthy before the modal opened — and failed whenever the
+  // machine was fast enough to open it first.
+  const web = containerName(vm, 'healthcheck', 'web');
+  await expect
+    .poll(async () => (await sshExec(vm, `${engineCli(vm)} ps --filter name=${web} --format '{{.Status}}' || true`)).trim(), {
+      timeout: 30000,
+      intervals: [1000],
+    })
+    .toContain('healthy');
+
   await row.getByRole('button', { name: 'Stack info' }).click();
   const modal = page.getByRole('dialog', { name: /Info — healthcheck/ });
   await expect(modal).toBeVisible();
 
-  // Real effect: the compose file's healthcheck (start_period 5s, 10s
-  // interval) genuinely converges to "healthy" — not a one-shot snapshot
-  // frozen at whatever it showed on first render. Podman folds the health
-  // state directly into the uptime text ("Up 1 second (healthy)") rather
-  // than a separate "Health" row.
-  await expect(modal.getByText('healthy', { exact: false })).toBeVisible({ timeout: 30000 });
+  // Both runtimes fold the health state into the uptime text ("Up 20 seconds (healthy)")
+  // rather than exposing a separate Health row.
+  await expect(modal.getByText('healthy', { exact: false })).toBeVisible({ timeout: 15000 });
   await modal.getByRole('button', { name: 'Close' }).click();
 });
 
@@ -87,17 +105,30 @@ test('named-networks fixture: Stack Info lists each real network the compose fil
   await modal.getByRole('button', { name: 'Close' }).click();
 });
 
-test('crash-loop fixture: the crashing service actually keeps crashing, the sidecar keeps running', async ({ pluginPage: page }) => {
+test('crash-loop fixture: the crashing service actually keeps crashing, the sidecar keeps running', async ({ pluginPage: page }, testInfo) => {
   test.setTimeout(60_000);
+  const vm = testInfo.project.name;
   await baseData(page);
   await ensureDown(page, 'crash-loop');
   await up(page, 'crash-loop');
 
   const row = stackRow(page, 'crash-loop');
-  // Real effect: `crasher` (restart: on-failure, exits immediately) never
-  // reaches a steady "running" state, so the stack settles into "partial"
-  // (sidecar up, crasher cycling) rather than "running".
-  await expect(row).toHaveAttribute('data-status', 'partial', { timeout: 20000 });
+  // The aggregate badge is deliberately not asserted to be "partial" here.
+  // parseStackStatus() derives it from the compose Status string, where a
+  // crash-looping container reads "restarting" — which matches neither "running" nor
+  // "exit", so a Docker crash-loop aggregates to "running", not "partial". Whether it
+  // *should* surface as something else is an app question, not this test's; pinning an
+  // exact label made this test assert a runtime-and-timing-specific accident.
+  await expect(row).toHaveAttribute('data-status', /running|partial/, { timeout: 20000 });
+
+  // What this test actually claims — that the crasher really is cycling rather than
+  // sitting dead — checked against the runtime, which is the only place the restart
+  // count is visible at all.
+  const crasher = containerName(vm, 'crash-loop', 'crasher');
+  const restartsOf = async () =>
+    Number((await sshExec(vm, `${engineCli(vm)} inspect -f '{{.RestartCount}}' ${crasher} 2>/dev/null || echo 0`)).trim()) || 0;
+  const before = await restartsOf();
+  await expect.poll(restartsOf, { timeout: 30000, intervals: [2000] }).toBeGreaterThan(before);
 
   await row.getByRole('button', { name: 'Stack info' }).click();
   const modal = page.getByRole('dialog', { name: /Info — crash-loop/ });
