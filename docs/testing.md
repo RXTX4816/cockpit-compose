@@ -1149,12 +1149,13 @@ All features work identically to rootful Docker.
 
 ---
 
-## 9. E2E Coverage — Wave 5 Written, Not Yet Run
+## 9. E2E Coverage — Wave 5
 
-Full detail lives in [`docs/wiki/E2E-Test-Inventory.md`](wiki/E2E-Test-Inventory.md#wave-5--written-not-yet-run-on-the-vm-matrix)
+Full detail lives in [`docs/wiki/E2E-Test-Inventory.md`](wiki/E2E-Test-Inventory.md#wave-5--passing-on-fedora-full-and-arch-both)
 ("Wave 5") — this section is a pointer/summary so it's discoverable from the manual
 testing guide too. All ten gaps found by the systematic cross-check now have specs,
-**but none has been run on the VM matrix yet**, so expect a fix-up pass on first run:
+and they pass on `fedora-full` and `arch-both` (run one VM at a time, `VM_MEM=2048`,
+`--workers=1`; several VMs at once can exhaust a laptop's memory):
 
 - Global image prune (`GlobalPruneModal`) — `e2e/prune.spec.ts`
 - Pause / Unpause — `e2e/stack-lifecycle.spec.ts`

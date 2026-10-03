@@ -84,17 +84,27 @@ scenarios).
 | Layout selector (4 layouts) | [Stacks-Dashboard.md](Stacks-Dashboard#layout-options) | fold into `e2e/stacks.spec.ts` | ✅ |
 | Status filter chips + auto-refresh degrade/Retry | [Stacks-Dashboard.md](Stacks-Dashboard) | fold into `e2e/stacks.spec.ts` | ✅ (auto-refresh degrade/Retry verified against a real broken `podman` binary on the VM, not a mock — see Notes) |
 
-## Wave 5 — Written, not yet run on the VM matrix
+## Wave 5 — Passing on fedora-full and arch-both
 
 Found via a final systematic audit (cross-referencing every `src/components/*.tsx`
 against every `e2e/*.spec.ts`, and every documented sub-flow in `docs/wiki/*.md`
 against actual test assertions, not just "a spec file with this feature's name
 exists").
 
-**All ten are now written as specs, but none has been run against a VM yet.** They
-parse, enumerate for every project (`playwright test --list`), and type-check apart
-from the pre-existing untyped-fixture noise — but selectors and timings are
-unproven, so expect a fix-up pass on the first real run. Status is ⚠️ until then.
+**All ten are written as specs and pass on real VMs.** Full-suite runs on 2026-10-03,
+one VM at a time with `VM_MEM=2048` and `--workers=1`:
+
+- `fedora-full`: 88 passed, 0 failed, 0 retries, 9 skipped (VM-specific skips plus the
+  `test.fixme` waiting on #319)
+- `arch-both`: 83 passed, 0 failed, 13 skipped; the one flaky test (scale port conflict,
+  closing the dialog before Apply had settled) was fixed and then passed 3/3 with retries off
+
+The first real runs needed a fix-up pass, and found four app bugs. Three are fixed on this
+branch: the backup archive written under a different name than previewed, Restore
+ignoring its overwrite confirmation (#320), and the Scale confirm heading showing a raw
+`{{name}}` placeholder. The fourth, Run in Background reporting Failed for a stack that
+was running (#319, same root cause as #272), is fixed separately; its spec stays
+`test.fixme` until that lands.
 
 Each asserts a real backend effect (engine state or files over SSH), in keeping with
 the rest of the suite. SSH-side engine checks go through the new
@@ -104,17 +114,17 @@ itself ends up using on that VM (podman on podman-only VMs, `sudo podman` on
 
 | Feature | Doc | Spec | Status |
 |---|---|---|---|
-| Global image prune (`GlobalPruneModal` — the host-wide "Prune images" button) | [Prune-Resources.md](Prune-Resources#global-image-prune-all-stacks) | `e2e/prune.spec.ts` — 2 tests: removes gotify/server once gotify is fully down (verified via `images` over SSH); the acknowledgement checkbox gates the Prune button | ⚠️ written |
-| Pause / Unpause | [Managing-Stacks.md](Managing-Stacks#pause--unpause) | `e2e/stack-lifecycle.spec.ts` — every `multi` container reports `paused`, the menu flips to Unpause, then all report `running` | ⚠️ written |
-| Scale's port-conflict warning | [Scaling-Services.md](Scaling-Services) | `e2e/scale.spec.ts` — `scale-test`'s `web` (8085:80): inline warning, confirm-step alert + icon naming only `web`, Apply not blocked, never >1 running `web`, port-less `worker` still scales to 2 | ⚠️ written — **see correction 1** |
-| Command history (`HistoryDatalist`) | [Running-Commands.md](Running-Commands), [Shell-Access.md](Shell-Access) | `e2e/exec.spec.ts` + `e2e/run-command.spec.ts` — history cleared, command used, modal reopened, `<datalist>` `<option>` present and wired via the input's `list` attribute | ⚠️ written |
-| YAML editor "Import" | [Editing-Configuration.md](Editing-Configuration#importing-an-existing-file) | `e2e/yaml-editor.spec.ts` — file staged over SSH, imported as a second tab, and an edit saved in that tab lands at the same path on disk | ⚠️ written |
-| Backup archive deletion | [Backup-and-Restore.md](Backup-and-Restore#deleting-a-backup) | `e2e/backup-restore.spec.ts` — 2 tests: both confirmations then archive gone from disk; cancelling confirmation 2 keeps it | ⚠️ written |
-| Restore's "Target already exists" gate | [Backup-and-Restore.md](Backup-and-Restore#target-already-exists) | `e2e/backup-restore.spec.ts` — Restore disabled until `#rm-target-confirm` is ticked, then the colliding `docker-compose.yml` is really replaced | ⚠️ written |
-| Restore's "Name conflict" | [Backup-and-Restore.md](Backup-and-Restore#name-conflict) | `e2e/backup-restore.spec.ts` — with gotify existing, restoring its backup warns and pre-fills `gotify-restored`, which lands beside the original | ⚠️ written — **see correction 2** |
-| "Find best match" | [Importing-Stacks.md](Importing-Stacks) | `e2e/find-best-match.spec.ts` (new) — 3 tests: resolves the real compose root and a scan of it finds stacks; disabled with nothing running; same inference from Create Stack | ⚠️ written |
-| Selective recreation after edit + re-Up | [Editing-Configuration.md](Editing-Configuration#applying-configuration-changes) | `e2e/yaml-editor.spec.ts` — only `cache` gets a new container ID after its definition changes; `web` and `worker` keep theirs; new container carries the change | ⚠️ written — **see correction 3** |
-| Run Command's `--rm` unchecked | [Running-Commands.md](Running-Commands) | `e2e/run-command.spec.ts` — exactly one new *exited* container for `multi` afterward (its worker never exits, so only the one-off can be) | ⚠️ written |
+| Global image prune (`GlobalPruneModal` — the host-wide "Prune images" button) | [Prune-Resources.md](Prune-Resources#global-image-prune-all-stacks) | `e2e/prune.spec.ts` — 2 tests: removes gotify/server once gotify is fully down (verified via `images` over SSH); the acknowledgement checkbox gates the Prune button | ✅ passing on `fedora-full` + `arch-both` |
+| Pause / Unpause | [Managing-Stacks.md](Managing-Stacks#pause--unpause) | `e2e/stack-lifecycle.spec.ts` — every `multi` container reports `paused`, the menu flips to Unpause, then all report `running` | ✅ passing on `fedora-full` + `arch-both` |
+| Scale's port-conflict warning | [Scaling-Services.md](Scaling-Services) | `e2e/scale.spec.ts` — `scale-test`'s `web` (8085:80): inline warning, confirm-step alert + icon naming only `web`, Apply not blocked, never >1 running `web`, port-less `worker` still scales to 2 | ✅ passing on `fedora-full` + `arch-both` — **see correction 1** |
+| Command history (`HistoryDatalist`) | [Running-Commands.md](Running-Commands), [Shell-Access.md](Shell-Access) | `e2e/exec.spec.ts` + `e2e/run-command.spec.ts` — history cleared, command used, modal reopened, `<datalist>` `<option>` present and wired via the input's `list` attribute | ✅ passing on `fedora-full` + `arch-both` |
+| YAML editor "Import" | [Editing-Configuration.md](Editing-Configuration#importing-an-existing-file) | `e2e/yaml-editor.spec.ts` — file staged over SSH, imported as a second tab, and an edit saved in that tab lands at the same path on disk | ✅ passing on `fedora-full` + `arch-both` |
+| Backup archive deletion | [Backup-and-Restore.md](Backup-and-Restore#deleting-a-backup) | `e2e/backup-restore.spec.ts` — 2 tests: both confirmations then archive gone from disk; cancelling confirmation 2 keeps it | ✅ passing on `fedora-full` + `arch-both` |
+| Restore's "Target already exists" gate | [Backup-and-Restore.md](Backup-and-Restore#target-already-exists) | `e2e/backup-restore.spec.ts` — Restore disabled until `#rm-target-confirm` is ticked, then the colliding `docker-compose.yml` is really replaced | ✅ passing on `fedora-full` + `arch-both` |
+| Restore's "Name conflict" | [Backup-and-Restore.md](Backup-and-Restore#name-conflict) | `e2e/backup-restore.spec.ts` — with gotify existing, restoring its backup warns and pre-fills `gotify-restored`, which lands beside the original | ✅ passing on `fedora-full` + `arch-both` — **see correction 2** |
+| "Find best match" | [Importing-Stacks.md](Importing-Stacks) | `e2e/find-best-match.spec.ts` (new) — 3 tests: resolves the real compose root and a scan of it finds stacks; disabled with nothing running; same inference from Create Stack | ✅ passing on `fedora-full` + `arch-both` |
+| Selective recreation after edit + re-Up | [Editing-Configuration.md](Editing-Configuration#applying-configuration-changes) | `e2e/yaml-editor.spec.ts` — only `cache` gets a new container ID after its definition changes; `web` and `worker` keep theirs; new container carries the change | ✅ passing on `fedora-full` + `arch-both` — **see correction 3** |
+| Run Command's `--rm` unchecked | [Running-Commands.md](Running-Commands) | `e2e/run-command.spec.ts` — exactly one new *exited* container for `multi` afterward (its worker never exits, so only the one-off can be) | ✅ passing on `fedora-full` + `arch-both` |
 
 ### Where the written specs deliberately differ from the plan above
 
