@@ -1,13 +1,30 @@
 version: 2
+# Weekly and grouped, so routine bumps arrive as one or two PRs a week instead
+# of one per package per day. Majors still get their own PR, since they tend to
+# need migration work. Security updates are not bound to this schedule:
+# Dependabot opens them as soon as an advisory lands, grouped the same way.
 updates:
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+      day: "monday"
     target-branch: "main"
+    open-pull-requests-limit: 5
+    groups:
+      npm-minor-and-patch:
+        applies-to: version-updates
+        update-types: ["minor", "patch"]
+      npm-security:
+        applies-to: security-updates
+        patterns: ["*"]
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+      day: "monday"
     target-branch: "main"
+    groups:
+      github-actions:
+        patterns: ["*"]
