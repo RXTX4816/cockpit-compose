@@ -51,7 +51,7 @@ When the operation finishes:
 - **✓ Pull complete** — all images were pulled or were already up to date
 - **✗ Pull failed** — an error occurred; the error is shown below the status
 
-Click **Close** when done. Click **Cancel** to abort a pull that is still in progress. Alternatively, click **Run in Background** to close the modal and keep the pull running — see [Background Tasks](Background-Tasks).
+Click **Close** when done. Click **Cancel** to abort a pull that is still in progress. Alternatively, click **Run in Background** (or close the modal with its **✕**) to close it and keep the pull running — see [Background Tasks](Background-Tasks).
 
 > **Pulling for multiple stacks at once?** Select several stacks and use the bulk **Pull** action — see [Bulk Actions](Bulk-Actions).
 

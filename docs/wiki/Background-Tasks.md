@@ -19,7 +19,9 @@ While an **Up** or **Pull** modal is streaming output, click **Run in Background
 └──────────────────────────────────────────┘
 ```
 
-The modal closes immediately and the same action keeps running behind the scenes.
+The modal closes immediately and the same action keeps running behind the scenes. It is the very same process, not a restart, and its output so far carries over into the task's log. Sending a task to the background takes it straight to the panel even if another background task is running.
+
+Closing the modal any other way while the action is still running (the **✕** in its corner, or **Escape**) does the same thing. Only **Cancel** aborts it.
 
 Bulk actions (see [Bulk Actions](Bulk-Actions)) always run as background tasks — there is no foreground modal for them.
 

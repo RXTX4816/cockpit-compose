@@ -8,8 +8,9 @@ vi.mock("../hooks/usePullStream", () => ({
 }));
 
 const mockEnqueue = vi.fn();
+const mockAdopt = vi.fn();
 vi.mock("../hooks/useBackgroundTasks", () => ({
-  useBackgroundTasks: () => ({ enqueue: mockEnqueue, tasks: [], stop: vi.fn(), remove: vi.fn() }),
+  useBackgroundTasks: () => ({ enqueue: mockEnqueue, adopt: mockAdopt, tasks: [], stop: vi.fn(), remove: vi.fn() }),
 }));
 
 import { usePullStream } from "../hooks/usePullStream";
@@ -28,8 +29,10 @@ beforeEach(() => {
     failed: false,
     errorMsg: "",
     cancel: vi.fn(),
+    detach: vi.fn(() => null),
   });
   mockEnqueue.mockReset();
+  mockAdopt.mockReset();
 });
 
 describe("PullModal", () => {
@@ -56,6 +59,7 @@ describe("PullModal", () => {
       failed: false,
       errorMsg: "",
       cancel: vi.fn(),
+      detach: vi.fn(() => null),
     });
     render(<PullModal stack={stack} onClose={vi.fn()} />);
     expect(screen.getByText(/Pull complete/i)).toBeInTheDocument();
@@ -71,6 +75,7 @@ describe("PullModal", () => {
       failed: true,
       errorMsg: "image not found",
       cancel: vi.fn(),
+      detach: vi.fn(() => null),
     });
     render(<PullModal stack={stack} onClose={vi.fn()} />);
     expect(screen.getByText(/Pull failed/i)).toBeInTheDocument();
@@ -89,6 +94,7 @@ describe("PullModal", () => {
       failed: false,
       errorMsg: "",
       cancel: vi.fn(),
+      detach: vi.fn(() => null),
     });
     render(<PullModal stack={stack} onClose={vi.fn()} />);
     expect(screen.getByText("Pulling nginx")).toBeInTheDocument();
@@ -97,7 +103,7 @@ describe("PullModal", () => {
   it("calls cancel() and onClose() when Cancel clicked", () => {
     const cancel = vi.fn();
     const onClose = vi.fn();
-    mockUsePullStream.mockReturnValue({ lines: [], done: false, failed: false, errorMsg: "", cancel });
+    mockUsePullStream.mockReturnValue({ lines: [], done: false, failed: false, errorMsg: "", cancel, detach: vi.fn(() => null) });
     render(<PullModal stack={stack} onClose={onClose} />);
     fireEvent.click(screen.getByRole("button", { name: /Cancel/i }));
     expect(cancel).toHaveBeenCalledOnce();
@@ -106,7 +112,7 @@ describe("PullModal", () => {
 
   it("passes all ConfigFiles from comma-separated list to usePullStream", () => {
     const multiStack: ComposeStack = { ...stack, ConfigFiles: "/a.yml, /b.yml" };
-    mockUsePullStream.mockReturnValue({ lines: [], done: false, failed: false, errorMsg: "", cancel: vi.fn() });
+    mockUsePullStream.mockReturnValue({ lines: [], done: false, failed: false, errorMsg: "", cancel: vi.fn(), detach: vi.fn(() => null) });
     render(<PullModal stack={multiStack} onClose={vi.fn()} />);
     expect(mockUsePullStream).toHaveBeenCalledWith("myapp", ["/a.yml", "/b.yml"]);
   });
@@ -117,15 +123,43 @@ describe("PullModal", () => {
   });
 
   it("does not show Run in Background button when done", () => {
-    mockUsePullStream.mockReturnValue({ lines: [], done: true, failed: false, errorMsg: "", cancel: vi.fn() });
+    mockUsePullStream.mockReturnValue({ lines: [], done: true, failed: false, errorMsg: "", cancel: vi.fn(), detach: vi.fn(() => null) });
     render(<PullModal stack={stack} onClose={vi.fn()} />);
     expect(screen.queryByRole("button", { name: /Run in Background/i })).not.toBeInTheDocument();
   });
 
-  it("clicking Run in Background cancels the foreground stream, enqueues a task, and closes", () => {
+  it("Run in Background adopts the running pull instead of downloading it again", () => {
     const cancel = vi.fn();
     const onClose = vi.fn();
-    mockUsePullStream.mockReturnValue({ lines: [], done: false, failed: false, errorMsg: "", cancel });
+    const proc = {} as CockpitProcess;
+    mockUsePullStream.mockReturnValue({
+      lines: [{ text: "Pulling web", kind: "info" }], done: false, failed: false, errorMsg: "", cancel,
+      detach: vi.fn(() => ({ proc, pending: "Downl" })),
+    } as unknown as ReturnType<typeof usePullStream>);
+    render(<PullModal stack={stack} onClose={onClose} />);
+    fireEvent.click(screen.getByRole("button", { name: /Run in Background/i }));
+    expect(mockAdopt).toHaveBeenCalledWith("myapp", "pull", expect.stringContaining("myapp"), proc, ["Pulling web"], "Downl");
+    expect(cancel).not.toHaveBeenCalled();
+    expect(mockEnqueue).not.toHaveBeenCalled();
+    expect(onClose).toHaveBeenCalledOnce();
+  });
+
+  it("dismissing the dialog while pulling backgrounds the pull rather than cancelling it", () => {
+    const cancel = vi.fn();
+    const proc = {} as CockpitProcess;
+    mockUsePullStream.mockReturnValue({
+      lines: [], done: false, failed: false, errorMsg: "", cancel, detach: vi.fn(() => ({ proc, pending: "" })),
+    });
+    render(<PullModal stack={stack} onClose={vi.fn()} />);
+    fireEvent.click(screen.getAllByRole("button", { name: /Close/i })[0]);
+    expect(cancel).not.toHaveBeenCalled();
+    expect(mockAdopt).toHaveBeenCalled();
+  });
+
+  it("Run in Background before the pull has launched cancels and enqueues a fresh one", () => {
+    const cancel = vi.fn();
+    const onClose = vi.fn();
+    mockUsePullStream.mockReturnValue({ lines: [], done: false, failed: false, errorMsg: "", cancel, detach: vi.fn(() => null) });
     render(<PullModal stack={stack} onClose={onClose} />);
     fireEvent.click(screen.getByRole("button", { name: /Run in Background/i }));
     expect(cancel).toHaveBeenCalledOnce();

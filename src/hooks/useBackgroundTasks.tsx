@@ -34,6 +34,15 @@ export interface BackgroundTasksContextValue {
    * `onSuccess`, if given, fires once the task settles with status "success".
    */
   enqueue: (stackName: string, action: string, label: string, start: TaskStarter, onSuccess?: () => void) => void;
+  /**
+   * Takes over a process that is already running (detached from a modal's stream),
+   * instead of launching the command again. Relaunching is not safe for every
+   * command: a second `compose up` collides with containers the first one already
+   * created (#319). The task starts as "running" with `lines` as its log so far;
+   * `pending` is output after the last newline that has not become a line yet.
+   * It bypasses the queue, since the work is already underway.
+   */
+  adopt: (stackName: string, action: string, label: string, proc: CockpitProcess, lines: string[], pending: string, onSuccess?: () => void) => void;
   /** Closes the underlying process of a running task (or marks a not-yet-started one to stop as soon as it starts). */
   stop: (id: number) => void;
   /** Removes a task from the list. No-op while the task is still running. */
@@ -55,6 +64,7 @@ const BackgroundTasksContext = createContext<BackgroundTasksContextValue | null>
 const NOOP_BACKGROUND_TASKS: BackgroundTasksContextValue = {
   tasks: [],
   enqueue: () => {},
+  adopt: () => {},
   stop: () => {},
   remove: () => {},
   clearPending: () => 0,
@@ -78,6 +88,48 @@ export function BackgroundTasksProvider({ children }: { children: ReactNode }) {
   const runningRef = useRef(false);
   const settledRef = useRef(new Set<number>());
 
+  // Streams a task's process into its log and settles the task when it exits.
+  // Shared by queued tasks and adopted ones; `onSettled` lets the queue release
+  // its single runner slot, which an adopted task never held.
+  const supervise = useCallback((id: number, onSettled: () => void) => {
+    const finish = (status: "success" | "error" | "stopped", errorMsg?: string) => {
+      if (settledRef.current.has(id)) return;
+      settledRef.current.add(id);
+      setTasks(prev => prev.map(t => (t.id === id ? { ...t, status, errorMsg } : t)));
+      if (status === "success") onSuccessRef.current.get(id)?.();
+      procsRef.current.delete(id);
+      startersRef.current.delete(id);
+      onSuccessRef.current.delete(id);
+      stoppedRef.current.delete(id);
+      bufsRef.current.delete(id);
+      settledRef.current.delete(id);
+      onSettled();
+    };
+
+    const appendLine = (chunk: string) => {
+      const clean = stripAnsi(chunk);
+      const buffered = (bufsRef.current.get(id) ?? "") + clean;
+      const parts = buffered.split("\n");
+      bufsRef.current.set(id, parts.pop() ?? "");
+      const newLines = parts.map(l => l.split("\r").pop() ?? "").filter(l => l.trim() !== "");
+      if (newLines.length > 0) {
+        setTasks(prev => prev.map(t => (t.id === id ? { ...t, lines: [...t.lines, ...newLines] } : t)));
+      }
+    };
+
+    const track = (proc: CockpitProcess) => {
+      proc.stream(appendLine);
+      proc
+        .then(() => finish(stoppedRef.current.has(id) ? "stopped" : "success"))
+        .catch((ex: unknown) => finish(
+          stoppedRef.current.has(id) ? "stopped" : "error",
+          ex instanceof Error ? ex.message : String(ex),
+        ));
+    };
+
+    return { finish, track };
+  }, []);
+
   // Picks the next pending task once the previous one finishes (or on enqueue).
   // Re-fires whenever `tasks` changes, including the status updates this same
   // effect makes — that's what lets it chain through the whole queue.
@@ -90,41 +142,12 @@ export function BackgroundTasksProvider({ children }: { children: ReactNode }) {
     setTasks(prev => prev.map(t => (t.id === next.id ? { ...t, status: "running" } : t)));
 
     const starter = startersRef.current.get(next.id);
-    const finish = (status: "success" | "error" | "stopped", errorMsg?: string) => {
-      if (settledRef.current.has(next.id)) return;
-      settledRef.current.add(next.id);
-      setTasks(prev => prev.map(t => (t.id === next.id ? { ...t, status, errorMsg } : t)));
-      if (status === "success") onSuccessRef.current.get(next.id)?.();
-      procsRef.current.delete(next.id);
-      startersRef.current.delete(next.id);
-      onSuccessRef.current.delete(next.id);
-      stoppedRef.current.delete(next.id);
-      bufsRef.current.delete(next.id);
-      settledRef.current.delete(next.id);
-      runningRef.current = false;
-    };
-
-    const appendLine = (chunk: string) => {
-      const clean = stripAnsi(chunk);
-      const buffered = (bufsRef.current.get(next.id) ?? "") + clean;
-      const parts = buffered.split("\n");
-      bufsRef.current.set(next.id, parts.pop() ?? "");
-      const newLines = parts.map(l => l.split("\r").pop() ?? "").filter(l => l.trim() !== "");
-      if (newLines.length > 0) {
-        setTasks(prev => prev.map(t => (t.id === next.id ? { ...t, lines: [...t.lines, ...newLines] } : t)));
-      }
-    };
+    const { finish, track } = supervise(next.id, () => { runningRef.current = false; });
 
     const setupResult = starter?.(proc => {
       procsRef.current.set(next.id, proc);
       if (stoppedRef.current.has(next.id)) { proc.close(); return; }
-      proc.stream(appendLine);
-      proc
-        .then(() => finish(stoppedRef.current.has(next.id) ? "stopped" : "success"))
-        .catch((ex: unknown) => finish(
-          stoppedRef.current.has(next.id) ? "stopped" : "error",
-          ex instanceof Error ? ex.message : String(ex),
-        ));
+      track(proc);
     });
 
     // If the starter's own setup work (before `launch` is called) rejects,
@@ -132,7 +155,7 @@ export function BackgroundTasksProvider({ children }: { children: ReactNode }) {
     if (setupResult && typeof setupResult.then === "function") {
       setupResult.catch((ex: unknown) => finish("error", ex instanceof Error ? ex.message : String(ex)));
     }
-  }, [tasks]);
+  }, [tasks, supervise]);
 
   const enqueue = useCallback((stackName: string, action: string, label: string, start: TaskStarter, onSuccess?: () => void) => {
     const id = ++countersRef.current;
@@ -140,6 +163,18 @@ export function BackgroundTasksProvider({ children }: { children: ReactNode }) {
     if (onSuccess) onSuccessRef.current.set(id, onSuccess);
     setTasks(prev => [...prev, { id, stackName, action, label, status: "pending", lines: [], createdAt: Date.now() }]);
   }, []);
+
+  const adopt = useCallback((
+    stackName: string, action: string, label: string,
+    proc: CockpitProcess, lines: string[], pending: string, onSuccess?: () => void,
+  ) => {
+    const id = ++countersRef.current;
+    if (onSuccess) onSuccessRef.current.set(id, onSuccess);
+    procsRef.current.set(id, proc);
+    bufsRef.current.set(id, stripAnsi(pending));
+    setTasks(prev => [...prev, { id, stackName, action, label, status: "running", lines, createdAt: Date.now() }]);
+    supervise(id, () => {}).track(proc);
+  }, [supervise]);
 
   const stop = useCallback((id: number) => {
     stoppedRef.current.add(id);
@@ -164,7 +199,7 @@ export function BackgroundTasksProvider({ children }: { children: ReactNode }) {
   }, [tasks]);
 
   return (
-    <BackgroundTasksContext.Provider value={{ tasks, enqueue, stop, remove, clearPending }}>
+    <BackgroundTasksContext.Provider value={{ tasks, enqueue, adopt, stop, remove, clearPending }}>
       {children}
     </BackgroundTasksContext.Provider>
   );
