@@ -86,7 +86,14 @@ const composeSchema = {
     volumes: { type: "object" },
     secrets: { type: "object" },
     configs: { type: "object" },
+    // Not validated in depth, only recognised: Compose itself is the authority on their
+    // contents, and flagging them made every save of a valid file ask "save anyway?".
+    include: { type: "array" },  // Compose 2.20
+    models: { type: "object" },  // Compose 2.38
+    jobs: { type: "object" },    // Compose 5.6.0
   },
+  // Extension fields, typically holding YAML anchors (`x-common: &default`).
+  patternProperties: { "^x-": {} },
   additionalProperties: false,
 };
 
