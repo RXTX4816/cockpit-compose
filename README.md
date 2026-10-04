@@ -92,6 +92,10 @@ Requires Node.js 22+. Built on [`@rxtx4816/cockpit-plugin-base-react`](https://g
 
 Bugs and feature requests go to [GitHub Issues](https://github.com/RXTX4816/cockpit-compose/issues). Security issues: please report privately — see [SECURITY.md](SECURITY.md).
 
+## Versioning
+
+Releases follow [semantic versioning](https://semver.org): patch releases fix bugs, minor releases add features, and anything that breaks existing setups waits for a new major version. See [Releases](https://github.com/RXTX4816/cockpit-compose/releases) for what changed in each version.
+
 ## License
 
 [AGPL-3.0-only](LICENSE) © 2025–2026 RXTX4816. Earlier releases were MIT — see [LICENSE-HISTORY.md](LICENSE-HISTORY.md). Bundled third-party licenses are listed in [THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt).
