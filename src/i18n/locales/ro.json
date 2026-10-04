@@ -407,6 +407,9 @@
     "complete": "✓ Pornire finalizată",
     "failed": "✗ Pornire eșuată"
   },
+  "compose_warnings": {
+    "title": "Docker Compose a raportat avertismente"
+  },
   "up_confirm_modal": {
     "aria_label": "Confirmare pornire — {{name}}",
     "title": "Pornire — {{name}}",

@@ -407,6 +407,9 @@
     "complete": "✓ 启动完成",
     "failed": "✗ 启动失败"
   },
+  "compose_warnings": {
+    "title": "Docker Compose 报告了警告"
+  },
   "up_confirm_modal": {
     "aria_label": "确认启动 — {{name}}",
     "title": "启动 — {{name}}",

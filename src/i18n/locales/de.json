@@ -407,6 +407,9 @@
     "complete": "✓ Hochfahren abgeschlossen",
     "failed": "✗ Hochfahren fehlgeschlagen"
   },
+  "compose_warnings": {
+    "title": "Docker Compose hat Warnungen gemeldet"
+  },
   "up_confirm_modal": {
     "aria_label": "Hochfahren bestätigen — {{name}}",
     "title": "Hochfahren — {{name}}",

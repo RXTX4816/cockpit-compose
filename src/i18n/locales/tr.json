@@ -407,6 +407,9 @@
     "complete": "✓ Başlatma tamamlandı",
     "failed": "✗ Başlatma başarısız"
   },
+  "compose_warnings": {
+    "title": "Docker Compose uyarılar bildirdi"
+  },
   "up_confirm_modal": {
     "aria_label": "Başlatmayı onayla — {{name}}",
     "title": "Başlatma — {{name}}",

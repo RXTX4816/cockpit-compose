@@ -407,6 +407,9 @@
     "complete": "✓ 시작 완료",
     "failed": "✗ 시작 실패"
   },
+  "compose_warnings": {
+    "title": "Docker Compose가 경고를 보고했습니다"
+  },
   "up_confirm_modal": {
     "aria_label": "시작 확인 — {{name}}",
     "title": "시작 — {{name}}",

@@ -407,6 +407,9 @@
     "complete": "✓ اكتمل التشغيل",
     "failed": "✗ فشل التشغيل"
   },
+  "compose_warnings": {
+    "title": "أبلغ Docker Compose عن تحذيرات"
+  },
   "up_confirm_modal": {
     "aria_label": "تأكيد التشغيل — {{name}}",
     "title": "تشغيل — {{name}}",

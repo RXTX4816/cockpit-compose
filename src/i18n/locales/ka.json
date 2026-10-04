@@ -407,6 +407,9 @@
     "complete": "✓ გაშვება დასრულდა",
     "failed": "✗ გაშვება ვერ მოხერხდა"
   },
+  "compose_warnings": {
+    "title": "Docker Compose-მა გაფრთხილებები შეატყობინა"
+  },
   "up_confirm_modal": {
     "aria_label": "გაშვების დადასტურება — {{name}}",
     "title": "გაშვება — {{name}}",

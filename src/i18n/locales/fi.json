@@ -407,6 +407,9 @@
     "complete": "✓ Käynnistys valmis",
     "failed": "✗ Käynnistys epäonnistui"
   },
+  "compose_warnings": {
+    "title": "Docker Compose ilmoitti varoituksista"
+  },
   "up_confirm_modal": {
     "aria_label": "Vahvista käynnistys — {{name}}",
     "title": "Käynnistä — {{name}}",

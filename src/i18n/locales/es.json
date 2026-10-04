@@ -407,6 +407,9 @@
     "complete": "✓ Inicio completado",
     "failed": "✗ Inicio fallido"
   },
+  "compose_warnings": {
+    "title": "Docker Compose informó advertencias"
+  },
   "up_confirm_modal": {
     "aria_label": "Confirmar inicio — {{name}}",
     "title": "Iniciar — {{name}}",

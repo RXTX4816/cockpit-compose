@@ -407,6 +407,9 @@
     "complete": "✓ Запуск завершено",
     "failed": "✗ Запуск не вдався"
   },
+  "compose_warnings": {
+    "title": "Docker Compose повідомив про попередження"
+  },
   "up_confirm_modal": {
     "aria_label": "Підтвердження запуску — {{name}}",
     "title": "Запуск — {{name}}",
