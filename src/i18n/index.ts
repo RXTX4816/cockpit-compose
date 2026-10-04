@@ -1,4 +1,4 @@
-import { initCockpitI18n, buildLocaleResources } from "@rxtx4816/cockpit-plugin-base-react/i18n";
+import { initCockpitI18n, buildLocaleResources, withBaseTranslations } from "@rxtx4816/cockpit-plugin-base-react/i18n";
 import en from "./locales/en.json";
 import ar from "./locales/ar.json";
 import cs from "./locales/cs.json";
@@ -25,7 +25,7 @@ import zhCN from "./locales/zh-CN.json";
 import zhTW from "./locales/zh-TW.json";
 
 initCockpitI18n(
-  buildLocaleResources({
+  buildLocaleResources(withBaseTranslations({
     en,
     ar,
     cs,
@@ -50,7 +50,7 @@ initCockpitI18n(
     uk,
     "zh-CN": zhCN,
     "zh-TW": zhTW,
-  }),
+  })),
 );
 
 export { i18n } from "@rxtx4816/cockpit-plugin-base-react/i18n";
