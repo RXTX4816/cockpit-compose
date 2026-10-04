@@ -25,7 +25,13 @@
     "aria_label": "Compose-Stacks",
     "empty_title": "Keine Compose-Stacks gefunden",
     "empty_body": "Starte ein Projekt mit docker/podman compose up -d und es erscheint hier.",
+    "empty_create": "Stack erstellen",
+    "empty_import": "Vorhandenen importieren",
+    "no_results_title": "Keine Stacks gefunden",
+    "no_results_body": "Probieren Sie einen anderen Namen oder entfernen Sie aktive Filter.",
+    "clear_filters": "Filter leeren",
     "load_failed": "Stacks konnten nicht geladen werden",
+    "refreshing": "Stacks werden aktualisiert",
     "service_count_one": "{{count}} Dienst",
     "service_count_other": "{{count}} Dienste",
     "status_running": "läuft",
@@ -33,12 +39,6 @@
     "status_stopped": "gestoppt",
     "status_paused": "pausiert",
     "status_unknown": "unbekannt",
-    "empty_create": "Stack erstellen",
-    "empty_import": "Vorhandenen importieren",
-    "no_results_title": "Keine Stacks gefunden",
-    "no_results_body": "Probieren Sie einen anderen Namen oder entfernen Sie aktive Filter.",
-    "clear_filters": "Filter leeren",
-    "refreshing": "Stacks werden aktualisiert",
     "search_placeholder": "Stacks durchsuchen…",
     "filter_tooltip_running": "Nur laufende Stacks anzeigen",
     "filter_tooltip_partial": "Nur teilweise laufende Stacks anzeigen",
@@ -46,8 +46,11 @@
     "filter_tooltip_paused": "Nur pausierte Stacks anzeigen",
     "select_stack": "{{name}} auswählen",
     "select_all": "Alle auswählen",
+    "deselect_all": "Auswahl aufheben",
     "bulk_selected": "{{count}} ausgewählt",
-    "bulk_clear": "Auswahl aufheben"
+    "bulk_clear": "Auswahl aufheben",
+    "runtime_switch_cancelled_tasks_one": "{{count}} ausstehende Hintergrundaufgabe abgebrochen, weil sich die Laufzeitumgebung geändert hat",
+    "runtime_switch_cancelled_tasks_other": "{{count}} ausstehende Hintergrundaufgaben abgebrochen, weil sich die Laufzeitumgebung geändert hat"
   },
   "actions": {
     "up": "Hochfahren",
@@ -96,6 +99,9 @@
     "rootless": "Rootlos",
     "rootless_help_title": "Rootless-Modus",
     "rootless_help_body": "Docker oder Podman läuft im Rootless-Modus — Container laufen als Ihr Benutzer, nicht als root. Dies verbessert die Sicherheit, kann aber einige Funktionen einschränken, wie das Binden privilegierter Ports (<1024), den Zugriff auf Systempfade oder die Verwendung bestimmter Netzwerktreiber.",
+    "rootful": "Rootful",
+    "rootful_help_title": "Rootful-Modus",
+    "rootful_help_body": "Docker oder Podman läuft im Rootful-Modus (systemweit) — Container laufen als root. Aktionen werden bei Bedarf über den administrativen Zugriff von Cockpit erhöht.",
     "help": "Hilfe",
     "feedback": "Feedback / Fehler melden",
     "source": "Quellcode",
@@ -119,7 +125,28 @@
     "not_installed": "{{runtime}} nicht gefunden — installieren Sie es, um zu wechseln",
     "podman_confirm_title": "Zu Podman wechseln",
     "podman_confirm_body": "Die Podman-Unterstützung ist experimentell. Je nach Konfiguration funktionieren einige Funktionen möglicherweise nicht wie erwartet — darunter Stack-Erkennung, Log-Streaming und bestimmte Compose-Befehle.",
-    "podman_suggest_docker_missing": "Docker wurde auf diesem System nicht gefunden. Wechseln Sie zu Podman, um Ihre Container zu verwalten."
+    "podman_suggest_docker_missing": "Docker wurde auf diesem System nicht gefunden. Wechseln Sie zu Podman, um Ihre Container zu verwalten.",
+    "rootless": "Rootlos",
+    "rootful": "Rootful",
+    "socket_mode_toggle_label": "Socket-Modus",
+    "rootless_help": "Den benutzereigenen (rootlosen) Socket verwenden. Container laufen als Ihr eigener Benutzer.",
+    "rootful_help": "Den systemweiten (Rootful-)Socket verwenden. Container laufen als root, erhöht über den administrativen Zugriff von Cockpit.",
+    "socket_not_detected": "Socket nicht gefunden",
+    "rootful_needs_admin_access": "Rootful-Socket gefunden, konnte aber nicht bestätigt werden — aktivieren Sie den administrativen Zugriff in Cockpit und klicken Sie dann auf „Erneut prüfen“",
+    "recheck_sockets": "Socket-Verfügbarkeit erneut prüfen",
+    "no_socket_detected": "Kein {{runtime}}-Engine-Socket gefunden. Stellen Sie sicher, dass {{runtime}} installiert ist und läuft.",
+    "no_socket_needs_admin_access": "Kein {{runtime}}-Engine-Socket bestätigt — ein Rootful-Socket wurde gefunden, benötigt aber den administrativen Zugriff von Cockpit. Aktivieren Sie ihn und klicken Sie dann auf „Erneut prüfen“."
+  },
+  "layout": {
+    "toggle_label": "Anzeigelayout",
+    "minimal": "Minimal",
+    "minimal_tooltip": "Kompaktmodus: Fußzeile ausblenden, weniger Abstände, symbolorientiert",
+    "poweruser": "PowerUser",
+    "poweruser_tooltip": "Standardlayout mit allen Bedienelementen",
+    "pretty": "Schick",
+    "pretty_tooltip": "Großzügiges Layout mit weichen Schatten und ausdrucksstarker Typografie",
+    "unix": "Unix",
+    "unix_tooltip": "Terminal-Stil mit Monospace-Schrift und Rahmenzeichen"
   },
   "error_boundary": {
     "load_stacks_error": "Fehler beim Laden der Stacks"
@@ -133,7 +160,8 @@
     "confirm_button": "Herunterfahren (entfernen)",
     "checking_networks": "Gemeinsame Netzwerke werden geprüft…",
     "shared_networks_title": "Gemeinsame Netzwerke erkannt",
-    "shared_with": "wird ebenfalls verwendet von"
+    "shared_with": "wird ebenfalls verwendet von",
+    "background_label": "Herunterfahren — {{name}}"
   },
   "kill_modal": {
     "aria_label": "Beenden bestätigen",
@@ -141,7 +169,8 @@
     "body_prefix": "Das Ausführen von",
     "body_sigkill": "sendet SIGKILL an alle Container in",
     "body_suffix": " und beendet sie sofort. Im Gegensatz zu Stoppen haben Prozesse keine Möglichkeit zum Aufräumen. Nur verwenden, wenn Stoppen nicht reagiert.",
-    "confirm_button": "Alle Container beenden"
+    "confirm_button": "Alle Container beenden",
+    "background_label": "Beenden — {{name}}"
   },
   "leftovers": {
     "remaining_title": "Docker listet noch Container für {{name}}",
@@ -164,7 +193,8 @@
     "aria_label": "Neustart bestätigen",
     "title": "\"{{name}}\" neu starten?",
     "body": "Alle laufenden Dienste werden neu gestartet. Die Dienste sind kurzzeitig nicht verfügbar.",
-    "confirm_button": "Neu starten"
+    "confirm_button": "Neu starten",
+    "background_label": "Neu starten — {{name}}"
   },
   "delete_modal": {
     "aria_label": "Compose-Stack löschen — {{name}}",
@@ -183,6 +213,7 @@
     "target_folder": "den Ordner {{folder}}",
     "target_file": "die Datei {{file}}",
     "error_default": "Löschen fehlgeschlagen",
+    "retry_sudo_button": "Mit sudo erneut versuchen?",
     "checking_networks": "Gemeinsame Netzwerke werden geprüft…",
     "shared_networks_title": "Gemeinsame Netzwerke erkannt",
     "shared_with": "wird ebenfalls verwendet von"
@@ -286,7 +317,7 @@
     "delete_file_confirm_button": "Datei löschen",
     "restore_snapshot_confirm_aria": "Bestätigung zum Wiederherstellen des Snapshots",
     "restore_snapshot_confirm_title": "Snapshot „{{name}}“ wiederherstellen?",
-    "restore_snapshot_confirm_body": "Du hast ungespeicherte Änderungen in dieser Datei. Beim Wiederherstellen wird der Editorinhalt durch den Snapshot ersetzt, und deine ungespeicherten Änderungen gehen verloren.",
+    "restore_snapshot_confirm_body": "Sie haben ungespeicherte Änderungen in dieser Datei. Beim Wiederherstellen wird der Editorinhalt durch den Snapshot ersetzt, und Ihre ungespeicherten Änderungen gehen verloren.",
     "restore_snapshot_confirm_button": "Änderungen verwerfen und wiederherstellen",
     "delete_snapshot_confirm_aria": "Bestätigung zum Löschen des Snapshots",
     "delete_snapshot_confirm_title": "Snapshot „{{name}}“ löschen?",
@@ -335,6 +366,7 @@
     "level_warn": "Warnung",
     "level_info": "Information",
     "download_tooltip": "Protokolle herunterladen",
+    "download_saved": "Protokolle gespeichert unter {{path}} (Firefox kann aus dieser Oberfläche keine Dateien direkt herunterladen)",
     "timestamps_tooltip": "Zeitstempel umschalten",
     "scroll_top": "Zum Anfang springen",
     "scroll_bottom": "Zum Ende springen",
@@ -352,6 +384,10 @@
     "group_jobs": "Jobs",
     "field_command": "Befehl",
     "field_command_placeholder": "echo hello",
+    "field_command_help_args": "Wird als Argumente an den Entrypoint des Images übergeben (z. B. „--help“ eingeben).",
+    "field_command_help_override": "Das erste Wort ersetzt den Entrypoint des Images vollständig (z. B. einen vollständigen Programmpfad eingeben, wie bei einem exec im Terminal). Der Rest wird als dessen Argumente übergeben.",
+    "field_command_job_hint": "Bei einem Job leer lassen, um den im Job definierten Befehl auszuführen.",
+    "field_override_entrypoint": "Entrypoint überschreiben",
     "field_rm": "Container nach Ausführung entfernen (--rm)",
     "run_button": "Ausführen",
     "running": "Befehl wird in {{name}} ausgeführt…",
@@ -359,8 +395,7 @@
     "complete": "✓ Befehl abgeschlossen",
     "failed": "✗ Befehl fehlgeschlagen",
     "force_kill_button": "Container erzwingen entfernen",
-    "force_kill_tooltip": "Erzwingt das Entfernen des hängen gebliebenen One-Off-Containers. Verwenden, wenn der Dienst nicht von selbst beendet wird.",
-    "field_command_job_hint": "Bei einem Job leer lassen, um den im Job definierten Befehl auszuführen."
+    "force_kill_tooltip": "Erzwingt das Entfernen des hängen gebliebenen One-Off-Containers. Verwenden, wenn der Dienst nicht von selbst beendet wird."
   },
   "exec_modal": {
     "aria_label": "Terminal — {{name}}",
@@ -404,7 +439,9 @@
     "pulling": "Images für {{name}} werden geladen…",
     "complete": "✓ Images geladen",
     "failed": "✗ Images laden fehlgeschlagen",
-    "starting": "Laden wird gestartet…"
+    "starting": "Laden wird gestartet…",
+    "background_button": "Im Hintergrund ausführen",
+    "background_label": "Images laden — {{name}}"
   },
   "pull_confirm_modal": {
     "aria_label": "Images laden bestätigen — {{name}}",
@@ -423,7 +460,9 @@
     "starting": "{{name}} wird gestartet…",
     "initializing": "Wird gestartet…",
     "complete": "✓ Hochfahren abgeschlossen",
-    "failed": "✗ Hochfahren fehlgeschlagen"
+    "failed": "✗ Hochfahren fehlgeschlagen",
+    "background_button": "Im Hintergrund ausführen",
+    "background_label": "Hochfahren — {{name}}"
   },
   "compose_warnings": {
     "title": "Docker Compose hat Warnungen gemeldet"
@@ -441,7 +480,7 @@
     "jobs_title": "Jobs",
     "jobs_hint": "Up startet keine Jobs. Starte einen über das ⋮-Menü des Stacks → Ausführen.",
     "scheduled_jobs_title": "Docker Compose wird diesen Stack nicht starten",
-    "scheduled_jobs_body": "Geplante Jobs werden noch nicht unterstützt, und diese sind aktiv: {{jobs}}. Wähle ihr Profil ab oder entferne den Zeitplan, bevor du Up ausführst.",
+    "scheduled_jobs_body": "Geplante Jobs werden noch nicht unterstützt, und diese sind aktiv: {{jobs}}. Wählen Sie ihr Profil ab oder entfernen Sie den Zeitplan, bevor Sie Up ausführen.",
     "profiles_title": "Optionale Profile",
     "profiles_hint": "Nur Dienste, die einem ausgewählten Profil zugeordnet sind, werden gestartet.",
     "up_button": "Hochfahren"
@@ -505,6 +544,26 @@
     "prune_button": "Auswahl bereinigen",
     "nothing_to_remove": "Nichts zu entfernen."
   },
+  "prune_global": {
+    "button": "Images bereinigen",
+    "aria_label": "Ungenutzte Images bereinigen (alle Stacks)",
+    "title": "Ungenutzte Images bereinigen",
+    "body_intro": "Sucht nach Images, die derzeit von keinem Container verwendet werden — auf dem gesamten Host, nicht nur in einem Stack. Dazu gehören Images vollständig heruntergefahrener Stacks (kein Container hält sie „in Verwendung“) und alte Versionen, die übrig bleiben, wenn ein gleitender Tag wie :latest neu geladen wird.",
+    "loading": "Suche nach ungenutzten Images…",
+    "nothing_found": "Keine ungenutzten Images gefunden — nichts freizugeben.",
+    "column_id": "ID",
+    "column_repo_tag": "Repository:Tag",
+    "column_size": "Größe",
+    "column_age": "Erstellt",
+    "total_reclaimable": "Insgesamt freizugeben: {{size}}",
+    "confirm_title": "Diese Images werden dauerhaft gelöscht",
+    "confirm_body": "{{count}} Image(s) werden entfernt. Gehört eines davon zu einem gerade heruntergefahrenen Stack, muss dieser es beim nächsten Hochfahren erneut laden. Dies kann nicht rückgängig gemacht werden.",
+    "confirm_checkbox": "Mir ist bewusst, dass die oben aufgeführten Images dauerhaft gelöscht werden",
+    "prune_button": "Bereinigen",
+    "pruning": "Bereinige…",
+    "result_title": "Fertig",
+    "error_title": "Bereinigen fehlgeschlagen"
+  },
   "downed_section": {
     "create_button": "Erstellen",
     "import_button": "Importieren",
@@ -522,7 +581,9 @@
     "depth_aria": "Maximale Suchtiefe",
     "depth_minus_aria": "Suchtiefe verringern",
     "depth_plus_aria": "Suchtiefe erhöhen",
-    "restore_button": "Wiederherstellen"
+    "restore_button": "Wiederherstellen",
+    "admin_mismatch_badge": "Cockpit-Adminmodus passt nicht",
+    "admin_mismatch_tooltip": "Das Suchverzeichnis liegt in Ihrem Home-Ordner, aber Cockpit ist im administrativen Modus. Hier erstellte Dateien können root gehören und Berechtigungsfehler verursachen."
   },
   "stack_row": {
     "no_containers": "Keine Container gefunden.",
@@ -592,23 +653,6 @@
     "col_image": "Abbild",
     "col_uptime": "Laufzeit"
   },
-  "scale_modal": {
-    "title": "Dienste skalieren – {{name}}",
-    "confirm_title": "Skalierung bestätigen – {{name}}",
-    "aria_label": "Dienste skalieren",
-    "sideeffects_title": "Skalierung ändert laufende Instanzen",
-    "sideeffects_body": "Jedes Replikat ist ein separater Container mit demselben Image und derselben Konfiguration. Hochskalieren startet neue Container sofort. Herunterskalieren stoppt und entfernt überschüssige Container. Host-Port-Bindungen, Volume-Mounts oder Netzwerk-Aliases können dabei zu Konflikten führen.",
-    "what_is_scale_title": "So funktioniert docker compose Skalierung",
-    "what_is_scale_body": "Dies führt \"docker compose up -d --scale <Dienst>=<n>\" aus. Docker Compose startet oder stoppt Container, um die gewünschte Anzahl zu erreichen. Bestehende Container werden nicht neu erstellt, es sei denn, Image oder Konfiguration haben sich geändert.",
-    "apply_button": "Übernehmen",
-    "service_label": "Replikatanzahl für {{service}}",
-    "minus_aria": "Replikate für {{service}} verringern",
-    "plus_aria": "Replikate für {{service}} erhöhen",
-    "port_conflict_inline": "Dieser Dienst hat statische Host-Port-Bindungen – mehr als 1 Replikat schlägt fehl, da ein Host-Port immer nur von einem Container belegt werden kann.",
-    "port_conflict_title": "Port-Konflikt wahrscheinlich",
-    "port_conflict_body": "Die folgenden Dienste haben statische Host-Port-Bindungen. Docker kann nicht mehr als ein Replikat starten, da ein Host-Port nur von einem einzelnen Container belegt werden kann:",
-    "port_conflict_icon_title": "Hat statische Host-Port-Bindungen"
-  },
   "settings": {
     "title": "Einstellungen",
     "open_button": "Einstellungen",
@@ -648,5 +692,62 @@
     "stop": "Dienst stoppen",
     "restart": "Dienst neu starten",
     "logs": "Dienst-Logs"
+  },
+  "scale_modal": {
+    "title": "Dienste skalieren – {{name}}",
+    "confirm_title": "Skalierung bestätigen – {{name}}",
+    "aria_label": "Dienste skalieren",
+    "sideeffects_title": "Skalierung ändert laufende Instanzen",
+    "sideeffects_body": "Jedes Replikat ist ein separater Container mit demselben Image und derselben Konfiguration. Hochskalieren startet neue Container sofort. Herunterskalieren stoppt und entfernt überschüssige Container. Host-Port-Bindungen, Volume-Mounts oder Netzwerk-Aliases können dabei zu Konflikten führen.",
+    "what_is_scale_title": "So funktioniert docker compose Skalierung",
+    "what_is_scale_body": "Dies führt \"docker compose up -d --scale <Dienst>=<n>\" aus. Docker Compose startet oder stoppt Container, um die gewünschte Anzahl zu erreichen. Bestehende Container werden nicht neu erstellt, es sei denn, Image oder Konfiguration haben sich geändert.",
+    "apply_button": "Übernehmen",
+    "service_label": "Replikatanzahl für {{service}}",
+    "minus_aria": "Replikate für {{service}} verringern",
+    "plus_aria": "Replikate für {{service}} erhöhen",
+    "port_conflict_inline": "Dieser Dienst hat statische Host-Port-Bindungen – mehr als 1 Replikat schlägt fehl, da ein Host-Port immer nur von einem Container belegt werden kann.",
+    "port_conflict_title": "Port-Konflikt wahrscheinlich",
+    "port_conflict_body": "Die folgenden Dienste haben statische Host-Port-Bindungen. Docker kann nicht mehr als ein Replikat starten, da ein Host-Port nur von einem einzelnen Container belegt werden kann:",
+    "port_conflict_icon_title": "Hat statische Host-Port-Bindungen"
+  },
+  "background_tasks": {
+    "toggle_button": "Hintergrundaufgaben",
+    "title": "Hintergrundaufgaben",
+    "empty_title": "Keine Hintergrundaufgaben",
+    "empty_body": "In den Hintergrund verschobene Aufgaben erscheinen hier.",
+    "status_pending": "Ausstehend",
+    "status_running": "Läuft",
+    "status_success": "Abgeschlossen",
+    "status_error": "Fehlgeschlagen",
+    "status_stopped": "Gestoppt",
+    "stop_button": "Stoppen",
+    "remove_button": "Entfernen",
+    "log_empty": "Warte auf Ausgabe…"
+  },
+  "bulk_confirm_modal": {
+    "aria_label": "Sammelaktion bestätigen",
+    "title_up_one": "{{count}} Stack hochfahren?",
+    "title_up_other": "{{count}} Stacks hochfahren?",
+    "title_pull_one": "Images für {{count}} Stack laden?",
+    "title_pull_other": "Images für {{count}} Stacks laden?",
+    "title_restart_one": "{{count}} Stack neu starten?",
+    "title_restart_other": "{{count}} Stacks neu starten?",
+    "title_down_one": "{{count}} Stack herunterfahren?",
+    "title_down_other": "{{count}} Stacks herunterfahren?",
+    "title_kill_one": "{{count}} Stack beenden?",
+    "title_kill_other": "{{count}} Stacks beenden?",
+    "background_notice": "Dies läuft als Hintergrundaufgaben. Sie können sie im Bereich „Hintergrundaufgaben“ überwachen, stoppen oder entfernen.",
+    "warning_up": "Dabei können Container neu gestartet und neue Images geladen werden, falls sich die Konfiguration eines Dienstes geändert hat.",
+    "warning_restart": "Laufende Dienste der ausgewählten Stacks sind während des Neustarts kurz nicht erreichbar.",
+    "warning_down_title": "Dies stoppt und entfernt alle Container jedes ausgewählten Stacks",
+    "warning_down_body": "Volumes bleiben erhalten, aber jeder Zustand außerhalb davon (z. B. In-Memory-Caches) geht verloren. Die Stacks verschwinden aus der Liste, bis sie wieder hochgefahren werden.",
+    "warning_kill_title": "Dies beendet jeden Container in jedem ausgewählten Stack gewaltsam",
+    "warning_kill_body": "Beenden sendet sofort SIGKILL — anders als bei Stoppen haben Prozesse keine Gelegenheit aufzuräumen oder Daten zu schreiben. Nur verwenden, wenn Stoppen nicht reagiert.",
+    "stacks_label": "Betroffene Stacks:",
+    "confirm_button_up": "Hochfahren",
+    "confirm_button_pull": "Images laden",
+    "confirm_button_restart": "Neu starten",
+    "confirm_button_down": "Herunterfahren",
+    "confirm_button_kill": "Beenden"
   }
 }

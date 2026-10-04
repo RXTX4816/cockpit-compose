@@ -25,7 +25,13 @@
     "aria_label": "Compose-stacks",
     "empty_title": "Geen compose-stacks gevonden",
     "empty_body": "Start een project met docker/podman compose up -d en het verschijnt hier.",
+    "empty_create": "Stack aanmaken",
+    "empty_import": "Bestaande importeren",
+    "no_results_title": "Geen stacks gevonden",
+    "no_results_body": "Probeer een andere naam of verwijder de actieve filters.",
+    "clear_filters": "Filters wissen",
     "load_failed": "Laden van stacks mislukt",
+    "refreshing": "Stacks worden vernieuwd",
     "service_count_one": "{{count}} service",
     "service_count_other": "{{count}} services",
     "status_running": "actief",
@@ -33,12 +39,6 @@
     "status_stopped": "gestopt",
     "status_paused": "gepauzeerd",
     "status_unknown": "onbekend",
-    "empty_create": "Stack aanmaken",
-    "empty_import": "Bestaande importeren",
-    "no_results_title": "Geen stacks gevonden",
-    "no_results_body": "Probeer een andere naam of verwijder de actieve filters.",
-    "clear_filters": "Filters wissen",
-    "refreshing": "Stacks worden vernieuwd",
     "search_placeholder": "Stacks zoeken…",
     "filter_tooltip_running": "Alleen actieve stacks tonen",
     "filter_tooltip_partial": "Alleen gedeeltelijk actieve stacks tonen",
@@ -46,13 +46,16 @@
     "filter_tooltip_paused": "Alleen gepauzeerde stacks tonen",
     "select_stack": "{{name}} selecteren",
     "select_all": "Alles selecteren",
+    "deselect_all": "Alles deselecteren",
     "bulk_selected": "{{count}} geselecteerd",
-    "bulk_clear": "Selectie wissen"
+    "bulk_clear": "Selectie wissen",
+    "runtime_switch_cancelled_tasks_one": "{{count}} wachtende achtergrondtaak geannuleerd omdat de runtime is gewijzigd",
+    "runtime_switch_cancelled_tasks_other": "{{count}} wachtende achtergrondtaken geannuleerd omdat de runtime is gewijzigd"
   },
   "actions": {
     "up": "Starten",
     "up_title": "Stack starten of gewijzigde containers opnieuw aanmaken",
-    "up_paused_title": "Hervat de stack voordat je Up uitvoert",
+    "up_paused_title": "Hervat de stack voordat u Up uitvoert",
     "down": "Stoppen",
     "down_title": "Stoppen (containers verwijderen)",
     "stop": "Stoppen",
@@ -96,6 +99,9 @@
     "rootless": "Rootloos",
     "rootless_help_title": "Rootless-modus",
     "rootless_help_body": "Docker of Podman wordt uitgevoerd in rootless-modus — containers draaien als uw gebruiker, niet als root. Dit verbetert de beveiliging, maar kan sommige functies beperken zoals het binden van geprivilegieerde poorten (<1024), toegang tot systeempaden of het gebruik van bepaalde netwerkstuurprogramma's.",
+    "rootful": "Rootful",
+    "rootful_help_title": "Rootful-modus",
+    "rootful_help_body": "Docker of Podman draait in rootful-modus (systeembreed) — containers draaien als root. Acties worden indien nodig verhoogd via de beheerderstoegang van Cockpit.",
     "help": "Hulp",
     "feedback": "Feedback / Bug melden",
     "source": "Broncode",
@@ -119,7 +125,28 @@
     "not_installed": "{{runtime}} niet gevonden — installeer het om te wisselen",
     "podman_confirm_title": "Overschakelen naar Podman",
     "podman_confirm_body": "Podman-ondersteuning is experimenteel. Afhankelijk van uw configuratie werken sommige functies mogelijk niet zoals verwacht — inclusief stack-detectie, log-streaming en bepaalde compose-opdrachten.",
-    "podman_suggest_docker_missing": "Docker is niet gevonden op dit systeem. Schakel over naar Podman om uw containers te beheren."
+    "podman_suggest_docker_missing": "Docker is niet gevonden op dit systeem. Schakel over naar Podman om uw containers te beheren.",
+    "rootless": "Rootloos",
+    "rootful": "Rootful",
+    "socket_mode_toggle_label": "Socketmodus",
+    "rootless_help": "Gebruik de socket per gebruiker (rootloos). Containers draaien als uw eigen gebruiker.",
+    "rootful_help": "Gebruik de systeembrede (rootful) socket. Containers draaien als root, verhoogd via de beheerderstoegang van Cockpit.",
+    "socket_not_detected": "Socket niet gedetecteerd",
+    "rootful_needs_admin_access": "Rootful-socket gedetecteerd maar kon niet worden bevestigd — schakel de beheerderstoegang van Cockpit in en klik daarna op Opnieuw controleren",
+    "recheck_sockets": "Beschikbaarheid van sockets opnieuw controleren",
+    "no_socket_detected": "Geen {{runtime}}-engine-socket gedetecteerd. Controleer of {{runtime}} geïnstalleerd is en draait.",
+    "no_socket_needs_admin_access": "Geen {{runtime}}-engine-socket bevestigd — er is een rootful-socket gevonden, maar daarvoor is de beheerderstoegang van Cockpit nodig. Schakel die in en klik daarna op Opnieuw controleren."
+  },
+  "layout": {
+    "toggle_label": "Weergave-indeling",
+    "minimal": "Minimaal",
+    "minimal_tooltip": "Compacte modus: voettekst verborgen, minder witruimte, gericht op pictogrammen",
+    "poweruser": "PowerUser",
+    "poweruser_tooltip": "Standaardindeling met alle bedieningselementen",
+    "pretty": "Fraai",
+    "pretty_tooltip": "Ruime indeling met zachte schaduwen en verzorgde typografie",
+    "unix": "Unix",
+    "unix_tooltip": "Terminalstijl met monospace-lettertype en kadertekens"
   },
   "error_boundary": {
     "load_stacks_error": "Fout bij het laden van stacks"
@@ -133,7 +160,8 @@
     "confirm_button": "Stoppen (verwijderen)",
     "checking_networks": "Gedeelde netwerken controleren…",
     "shared_networks_title": "Gedeelde netwerken gedetecteerd",
-    "shared_with": "ook gebruikt door"
+    "shared_with": "ook gebruikt door",
+    "background_label": "Stoppen — {{name}}"
   },
   "kill_modal": {
     "aria_label": "Geforceerd stoppen bevestigen",
@@ -141,7 +169,8 @@
     "body_prefix": "Uitvoeren van",
     "body_sigkill": "stuurt SIGKILL naar alle containers in",
     "body_suffix": ", waardoor ze onmiddellijk geforceerd worden beëindigd. In tegenstelling tot Stoppen krijgen processen geen kans om op te ruimen. Gebruik dit alleen als Stoppen niet reageert.",
-    "confirm_button": "Alle containers geforceerd stoppen"
+    "confirm_button": "Alle containers geforceerd stoppen",
+    "background_label": "Geforceerd stoppen — {{name}}"
   },
   "leftovers": {
     "remaining_title": "Docker toont nog containers voor {{name}}",
@@ -164,7 +193,8 @@
     "aria_label": "Opnieuw starten bevestigen",
     "title": "\"{{name}}\" opnieuw starten?",
     "body": "Dit start alle actieve services opnieuw. Services zijn kort niet beschikbaar.",
-    "confirm_button": "Opnieuw starten"
+    "confirm_button": "Opnieuw starten",
+    "background_label": "Opnieuw starten — {{name}}"
   },
   "delete_modal": {
     "aria_label": "Compose-stack verwijderen — {{name}}",
@@ -183,6 +213,7 @@
     "target_folder": "map {{folder}}",
     "target_file": "bestand {{file}}",
     "error_default": "Verwijderen mislukt",
+    "retry_sudo_button": "Opnieuw proberen met sudo?",
     "checking_networks": "Gedeelde netwerken controleren…",
     "shared_networks_title": "Gedeelde netwerken gedetecteerd",
     "shared_with": "ook gebruikt door"
@@ -245,6 +276,7 @@
   "yaml_modal": {
     "aria_label": "Compose-bestand — {{name}}",
     "title": "{{name}} — compose-bestand",
+    "unsaved_changes": "Niet-opgeslagen wijzigingen",
     "env_file_button": "Env-bestand",
     "history_button": "Geschiedenis ({{count}})",
     "edit_button": "Bewerken",
@@ -285,7 +317,7 @@
     "delete_file_confirm_button": "Bestand verwijderen",
     "restore_snapshot_confirm_aria": "Bevestiging snapshot herstellen",
     "restore_snapshot_confirm_title": "Snapshot \"{{name}}\" herstellen?",
-    "restore_snapshot_confirm_body": "Je hebt niet-opgeslagen wijzigingen in dit bestand. Herstellen vervangt de inhoud van de editor door de snapshot, en je niet-opgeslagen wijzigingen gaan verloren.",
+    "restore_snapshot_confirm_body": "U hebt niet-opgeslagen wijzigingen in dit bestand. Herstellen vervangt de inhoud van de editor door de snapshot, en uw niet-opgeslagen wijzigingen gaan verloren.",
     "restore_snapshot_confirm_button": "Wijzigingen verwerpen en herstellen",
     "delete_snapshot_confirm_aria": "Bevestiging snapshot verwijderen",
     "delete_snapshot_confirm_title": "Snapshot \"{{name}}\" verwijderen?",
@@ -295,8 +327,7 @@
     "import_file_title": "Bestaand bestand importeren",
     "import_file_select_label": "Beschikbare bestanden",
     "import_file_none": "Geen extra YAML-bestanden gevonden in deze map.",
-    "import_file_confirm_button": "Importeren",
-    "unsaved_changes": "Niet-opgeslagen wijzigingen"
+    "import_file_confirm_button": "Importeren"
   },
   "env_modal": {
     "aria_label": "Env-bestand — {{name}}",
@@ -335,6 +366,7 @@
     "level_warn": "Waarschuwing",
     "level_info": "Informatie",
     "download_tooltip": "Logboeken downloaden",
+    "download_saved": "Logboeken opgeslagen in {{path}} (Firefox kan vanuit deze interface geen bestanden rechtstreeks downloaden)",
     "timestamps_tooltip": "Tijdstempels in-/uitschakelen",
     "scroll_top": "Naar boven springen",
     "scroll_bottom": "Naar beneden springen",
@@ -344,23 +376,26 @@
   "run_modal": {
     "aria_label": "Uitvoeren — {{name}}",
     "title": "Uitvoeren — {{name}}",
+    "warning_title": "Langlopende services zullen blokkeren",
+    "warning_body": "compose run start een nieuwe container voor de geselecteerde service. Als die service geen overschrijvend commando heeft (bijv. een webserver of database), start de container de service en blijft actief — deze sluit niet vanzelf. Mogelijk moet u hier annuleren en vervolgens de stack geforceerd stoppen om te herstellen.",
     "field_service": "Dienst",
     "field_service_placeholder": "servicenaam",
     "group_services": "Services",
     "group_jobs": "Jobs",
     "field_command": "Opdracht",
     "field_command_placeholder": "echo hello",
+    "field_command_help_args": "Wordt als argumenten doorgegeven aan het entrypoint van de image (typ bijv. \"--help\").",
+    "field_command_help_override": "Het eerste woord vervangt het entrypoint van de image volledig (typ bijv. een volledig pad naar een programma, zoals bij een exec in een terminal). De rest wordt als argumenten doorgegeven.",
+    "field_command_job_hint": "Laat dit bij een job leeg om het eigen commando van de job uit te voeren.",
+    "field_override_entrypoint": "Entrypoint overschrijven",
     "field_rm": "Container verwijderen na uitvoering (--rm)",
     "run_button": "Uitvoeren",
     "running": "Opdracht uitvoeren in {{name}}…",
     "initializing": "Starten…",
     "complete": "✓ Opdracht voltooid",
     "failed": "✗ Opdracht mislukt",
-    "warning_title": "Langlopende services zullen blokkeren",
-    "warning_body": "compose run start een nieuwe container voor de geselecteerde service. Als die service geen overschrijvend commando heeft (bijv. een webserver of database), start de container de service en blijft actief — deze sluit niet vanzelf. Mogelijk moet u hier annuleren en vervolgens de stack geforceerd stoppen om te herstellen.",
     "force_kill_button": "Container geforceerd verwijderen",
-    "force_kill_tooltip": "Verwijdert geforceerd de vastgelopen eenmalige container. Gebruik dit wanneer de service niet vanzelf sluit.",
-    "field_command_job_hint": "Laat dit bij een job leeg om het eigen commando van de job uit te voeren."
+    "force_kill_tooltip": "Verwijdert geforceerd de vastgelopen eenmalige container. Gebruik dit wanneer de service niet vanzelf sluit."
   },
   "exec_modal": {
     "aria_label": "Terminal — {{name}}",
@@ -404,7 +439,9 @@
     "pulling": "Images ophalen voor {{name}}…",
     "complete": "✓ Ophalen voltooid",
     "failed": "✗ Ophalen mislukt",
-    "starting": "Ophalen starten…"
+    "starting": "Ophalen starten…",
+    "background_button": "Op de achtergrond uitvoeren",
+    "background_label": "Ophalen — {{name}}"
   },
   "pull_confirm_modal": {
     "aria_label": "Ophalen bevestigen — {{name}}",
@@ -423,7 +460,9 @@
     "starting": "{{name}} starten…",
     "initializing": "Starten…",
     "complete": "✓ Starten voltooid",
-    "failed": "✗ Starten mislukt"
+    "failed": "✗ Starten mislukt",
+    "background_button": "Op de achtergrond uitvoeren",
+    "background_label": "Starten — {{name}}"
   },
   "compose_warnings": {
     "title": "Docker Compose meldde waarschuwingen"
@@ -441,7 +480,7 @@
     "jobs_title": "Jobs",
     "jobs_hint": "Up start geen jobs. Start er een via het ⋮-menu van de stack → Uitvoeren.",
     "scheduled_jobs_title": "Docker Compose zal deze stack niet starten",
-    "scheduled_jobs_body": "Geplande jobs worden nog niet ondersteund, en deze zijn actief: {{jobs}}. Deselecteer hun profiel of verwijder het schema voordat je Up uitvoert.",
+    "scheduled_jobs_body": "Geplande jobs worden nog niet ondersteund, en deze zijn actief: {{jobs}}. Deselecteer hun profiel of verwijder het schema voordat u Up uitvoert.",
     "profiles_title": "Optionele profielen",
     "profiles_hint": "Alleen services die zijn getagd met een geselecteerd profiel worden gestart.",
     "up_button": "Starten"
@@ -505,6 +544,26 @@
     "prune_button": "Geselecteerde opruimen",
     "nothing_to_remove": "Niets te verwijderen."
   },
+  "prune_global": {
+    "button": "Images opruimen",
+    "aria_label": "Ongebruikte images opruimen (alle stacks)",
+    "title": "Ongebruikte images opruimen",
+    "body_intro": "Zoekt naar images die door geen enkele container worden gebruikt, op de hele host — niet alleen in één stack. Dit omvat images van volledig gestopte stacks (geen container houdt ze \"in gebruik\") en oude versies die achterblijven wanneer een zwevende tag zoals :latest opnieuw wordt opgehaald.",
+    "loading": "Zoeken naar ongebruikte images…",
+    "nothing_found": "Geen ongebruikte images gevonden — niets vrij te maken.",
+    "column_id": "ID",
+    "column_repo_tag": "Repository:Tag",
+    "column_size": "Grootte",
+    "column_age": "Aangemaakt",
+    "total_reclaimable": "Totaal vrij te maken: {{size}}",
+    "confirm_title": "Deze images worden permanent verwijderd",
+    "confirm_body": "{{count}} image(s) worden verwijderd. Als er een bij een momenteel gestopte stack hoort, moet die stack ze opnieuw ophalen wanneer hij weer wordt gestart. Dit kan niet ongedaan worden gemaakt.",
+    "confirm_checkbox": "Ik begrijp dat de hierboven vermelde images permanent worden verwijderd",
+    "prune_button": "Opruimen",
+    "pruning": "Opruimen…",
+    "result_title": "Klaar",
+    "error_title": "Opruimen mislukt"
+  },
   "downed_section": {
     "create_button": "Aanmaken",
     "import_button": "Importeren",
@@ -522,7 +581,9 @@
     "depth_aria": "Maximale scandiepte",
     "depth_minus_aria": "Scandiepte verminderen",
     "depth_plus_aria": "Scandiepte verhogen",
-    "restore_button": "Herstellen"
+    "restore_button": "Herstellen",
+    "admin_mismatch_badge": "Beheerdersmodus van Cockpit komt niet overeen",
+    "admin_mismatch_tooltip": "De scanmap staat in uw thuismap, maar Cockpit staat in beheerdersmodus. Bestanden die hier worden aangemaakt kunnen eigendom van root worden en rechtenfouten veroorzaken."
   },
   "stack_row": {
     "no_containers": "Geen containers gevonden.",
@@ -592,23 +653,6 @@
     "col_image": "Afbeelding",
     "col_uptime": "Uptime"
   },
-  "scale_modal": {
-    "title": "Services schalen — {{name}}",
-    "confirm_title": "Schalen bevestigen — {{name}}",
-    "aria_label": "Dialoogvenster voor schalen van services",
-    "sideeffects_title": "Schalen wijzigt actieve instanties",
-    "sideeffects_body": "Elke servicereplica is een afzonderlijke container die dezelfde image en configuratie deelt. Opschalen start onmiddellijk nieuwe containers. Afschalen stopt en verwijdert de overtollige containers. Wijzigingen in hostpoortbindingen, volumekoppelingen of netwerkaliasen kunnen conflicten veroorzaken.",
-    "what_is_scale_title": "Hoe docker compose schalen werkt",
-    "what_is_scale_body": "Dit voert \"docker compose up -d --scale <service>=<n>\" uit. Docker Compose start of stopt containers om het gevraagde aantal te bereiken. Bestaande containers worden niet opnieuw aangemaakt tenzij de image of configuratie is gewijzigd.",
-    "apply_button": "Toepassen",
-    "service_label": "Aantal replica's van {{service}}",
-    "minus_aria": "Replica's verminderen voor {{service}}",
-    "plus_aria": "Replica's verhogen voor {{service}}",
-    "port_conflict_inline": "Deze service heeft statische hostpoortbindingen — schalen voorbij 1 replica mislukt omdat slechts één container tegelijk een hostpoort kan binden.",
-    "port_conflict_title": "Waarschijnlijk poortconflict",
-    "port_conflict_body": "De volgende services hebben statische hostpoortbindingen. Docker kan niet meer dan één replica starten omdat een hostpoort slechts door één container kan worden gebonden:",
-    "port_conflict_icon_title": "Heeft statische hostpoortbindingen"
-  },
   "settings": {
     "title": "Instellingen",
     "open_button": "Instellingen",
@@ -635,6 +679,75 @@
     "pause_success": "{{name}} gepauzeerd",
     "pause_failed": "Pauzeren van {{name}} mislukt",
     "unpause_success": "{{name}} hervat",
-    "unpause_failed": "Hervatten van {{name}} mislukt"
+    "unpause_failed": "Hervatten van {{name}} mislukt",
+    "service_start_success": "Service {{name}} gestart",
+    "service_start_failed": "Starten van service {{name}} mislukt",
+    "service_stop_success": "Service {{name}} gestopt",
+    "service_stop_failed": "Stoppen van service {{name}} mislukt",
+    "service_restart_success": "Service {{name}} opnieuw gestart",
+    "service_restart_failed": "Opnieuw starten van service {{name}} mislukt"
+  },
+  "service_actions": {
+    "start": "Service starten",
+    "stop": "Service stoppen",
+    "restart": "Service opnieuw starten",
+    "logs": "Servicelogboeken"
+  },
+  "scale_modal": {
+    "title": "Services schalen — {{name}}",
+    "confirm_title": "Schalen bevestigen — {{name}}",
+    "aria_label": "Dialoogvenster voor schalen van services",
+    "sideeffects_title": "Schalen wijzigt actieve instanties",
+    "sideeffects_body": "Elke servicereplica is een afzonderlijke container die dezelfde image en configuratie deelt. Opschalen start onmiddellijk nieuwe containers. Afschalen stopt en verwijdert de overtollige containers. Wijzigingen in hostpoortbindingen, volumekoppelingen of netwerkaliasen kunnen conflicten veroorzaken.",
+    "what_is_scale_title": "Hoe docker compose schalen werkt",
+    "what_is_scale_body": "Dit voert \"docker compose up -d --scale <service>=<n>\" uit. Docker Compose start of stopt containers om het gevraagde aantal te bereiken. Bestaande containers worden niet opnieuw aangemaakt tenzij de image of configuratie is gewijzigd.",
+    "apply_button": "Toepassen",
+    "service_label": "Aantal replica's van {{service}}",
+    "minus_aria": "Replica's verminderen voor {{service}}",
+    "plus_aria": "Replica's verhogen voor {{service}}",
+    "port_conflict_inline": "Deze service heeft statische hostpoortbindingen — schalen voorbij 1 replica mislukt omdat slechts één container tegelijk een hostpoort kan binden.",
+    "port_conflict_title": "Waarschijnlijk poortconflict",
+    "port_conflict_body": "De volgende services hebben statische hostpoortbindingen. Docker kan niet meer dan één replica starten omdat een hostpoort slechts door één container kan worden gebonden:",
+    "port_conflict_icon_title": "Heeft statische hostpoortbindingen"
+  },
+  "background_tasks": {
+    "toggle_button": "Achtergrondtaken",
+    "title": "Achtergrondtaken",
+    "empty_title": "Geen achtergrondtaken",
+    "empty_body": "Taken die naar de achtergrond zijn verplaatst, verschijnen hier.",
+    "status_pending": "Wachtend",
+    "status_running": "Bezig",
+    "status_success": "Voltooid",
+    "status_error": "Mislukt",
+    "status_stopped": "Gestopt",
+    "stop_button": "Stoppen",
+    "remove_button": "Verwijderen",
+    "log_empty": "Wachten op uitvoer…"
+  },
+  "bulk_confirm_modal": {
+    "aria_label": "Bulkactie bevestigen",
+    "title_up_one": "{{count}} stack starten?",
+    "title_up_other": "{{count}} stacks starten?",
+    "title_pull_one": "Images voor {{count}} stack ophalen?",
+    "title_pull_other": "Images voor {{count}} stacks ophalen?",
+    "title_restart_one": "{{count}} stack opnieuw starten?",
+    "title_restart_other": "{{count}} stacks opnieuw starten?",
+    "title_down_one": "{{count}} stack stoppen?",
+    "title_down_other": "{{count}} stacks stoppen?",
+    "title_kill_one": "{{count}} stack geforceerd stoppen?",
+    "title_kill_other": "{{count}} stacks geforceerd stoppen?",
+    "background_notice": "Dit wordt uitgevoerd als achtergrondtaken. U kunt ze volgen, stoppen of verwijderen in het paneel met achtergrondtaken.",
+    "warning_up": "Hierbij kunnen containers opnieuw worden gestart en nieuwe images worden opgehaald als de configuratie van een service is gewijzigd.",
+    "warning_restart": "Draaiende services in de geselecteerde stacks zijn kort onbereikbaar terwijl ze opnieuw starten.",
+    "warning_down_title": "Dit stopt en verwijdert alle containers van elke geselecteerde stack",
+    "warning_down_body": "Volumes blijven behouden, maar alle status daarbuiten (bijv. caches in het geheugen) gaat verloren. De stacks verdwijnen uit de lijst tot ze weer worden gestart.",
+    "warning_kill_title": "Dit beëindigt geforceerd elke container in elke geselecteerde stack",
+    "warning_kill_body": "Geforceerd stoppen stuurt meteen SIGKILL — anders dan bij Stoppen krijgen processen geen kans om op te ruimen of gegevens weg te schrijven. Gebruik dit alleen als Stoppen niet reageert.",
+    "stacks_label": "Betrokken stacks:",
+    "confirm_button_up": "Starten",
+    "confirm_button_pull": "Ophalen",
+    "confirm_button_restart": "Opnieuw starten",
+    "confirm_button_down": "Stoppen",
+    "confirm_button_kill": "Geforceerd stoppen"
   }
 }

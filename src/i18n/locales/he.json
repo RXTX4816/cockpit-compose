@@ -25,20 +25,21 @@
     "aria_label": "ערימות Compose",
     "empty_title": "לא נמצאו ערימות compose",
     "empty_body": "הפעל פרויקט עם docker/podman compose up -d והוא יופיע כאן.",
+    "empty_create": "צור ערימה",
+    "empty_import": "ייבא קיים",
+    "no_results_title": "לא נמצאו ערימות תואמות",
+    "no_results_body": "נסה שם אחר או נקה את הפילטרים הפעילים.",
+    "clear_filters": "נקה פילטרים",
     "load_failed": "טעינת הערימות נכשלה",
+    "refreshing": "מרענן ערימות",
     "service_count_one": "שירות {{count}}",
+    "service_count_two": "{{count}} שירותים",
     "service_count_other": "{{count}} שירותים",
     "status_running": "פועל",
     "status_partial": "חלקי",
     "status_stopped": "עצור",
     "status_paused": "מושהה",
     "status_unknown": "לא ידוע",
-    "empty_create": "צור ערימה",
-    "empty_import": "ייבא קיים",
-    "no_results_title": "לא נמצאו ערימות תואמות",
-    "no_results_body": "נסה שם אחר או נקה את הפילטרים הפעילים.",
-    "clear_filters": "נקה פילטרים",
-    "refreshing": "מרענן ערימות",
     "search_placeholder": "חפש ערימות…",
     "filter_tooltip_running": "הצג רק ערימות פעילות",
     "filter_tooltip_partial": "הצג רק ערימות חלקיות",
@@ -46,8 +47,12 @@
     "filter_tooltip_paused": "הצג רק ערימות מושהות",
     "select_stack": "בחר {{name}}",
     "select_all": "בחר הכל",
+    "deselect_all": "בטל בחירה",
     "bulk_selected": "{{count}} נבחרו",
-    "bulk_clear": "נקה בחירה"
+    "bulk_clear": "נקה בחירה",
+    "runtime_switch_cancelled_tasks_one": "בוטלה משימת רקע ממתינה אחת ({{count}}) כי סביבת ההרצה השתנתה",
+    "runtime_switch_cancelled_tasks_two": "בוטלו {{count}} משימות רקע ממתינות כי סביבת ההרצה השתנתה",
+    "runtime_switch_cancelled_tasks_other": "בוטלו {{count}} משימות רקע ממתינות כי סביבת ההרצה השתנתה"
   },
   "actions": {
     "up": "הפעלה",
@@ -96,6 +101,9 @@
     "rootless": "ללא הרשאות root",
     "rootless_help_title": "מצב ללא הרשאות root",
     "rootless_help_body": "Docker או Podman פועל במצב ללא הרשאות root — מכולות פועלות כמשתמש שלך, לא כ-root. זה משפר את האבטחה אך עלול להגביל חלק מהתכונות כגון כריכת פורטים מועדפים (<1024), גישה לנתיבי מערכת, או שימוש בנהגי רשת מסוימים.",
+    "rootful": "עם הרשאות root",
+    "rootful_help_title": "מצב עם הרשאות root",
+    "rootful_help_body": "Docker או Podman פועל במצב עם הרשאות root (ברמת המערכת) — המכולות רצות כ-root. פעולות מוסלמות דרך הגישה הניהולית של Cockpit בעת הצורך.",
     "help": "עזרה",
     "feedback": "משוב / דווח על באג",
     "source": "קוד מקור",
@@ -119,7 +127,28 @@
     "not_installed": "{{runtime}} לא נמצא — התקן אותו כדי לעבור",
     "podman_confirm_title": "מעבר ל-Podman",
     "podman_confirm_body": "תמיכת Podman היא ניסיונית. בהתאם להגדרות שלך, חלק מהתכונות עשויות לא לעבוד כצפוי — כולל גילוי ערימות, שידור יומנים ופקודות compose מסוימות.",
-    "podman_suggest_docker_missing": "Docker לא נמצא במערכת זו. עבור ל-Podman לניהול המכולות שלך."
+    "podman_suggest_docker_missing": "Docker לא נמצא במערכת זו. עבור ל-Podman לניהול המכולות שלך.",
+    "rootless": "ללא הרשאות root",
+    "rootful": "עם הרשאות root",
+    "socket_mode_toggle_label": "מצב שקע",
+    "rootless_help": "שימוש בשקע של המשתמש (ללא root). המכולות רצות כמשתמש שלך.",
+    "rootful_help": "שימוש בשקע של המערכת (עם root). המכולות רצות כ-root, עם הסלמה דרך הגישה הניהולית של Cockpit.",
+    "socket_not_detected": "לא זוהה שקע",
+    "rootful_needs_admin_access": "זוהה שקע עם הרשאות root אך לא ניתן היה לאמת אותו — הפעל את הגישה הניהולית ב-Cockpit ואז לחץ על „בדוק שוב”",
+    "recheck_sockets": "בדוק שוב את זמינות השקעים",
+    "no_socket_detected": "לא זוהה שקע של מנוע {{runtime}}. ודא ש-{{runtime}} מותקן ופועל.",
+    "no_socket_needs_admin_access": "לא אומת שקע של מנוע {{runtime}} — נמצא שקע עם הרשאות root אך הוא דורש את הגישה הניהולית של Cockpit. הפעל אותה ואז לחץ על „בדוק שוב”."
+  },
+  "layout": {
+    "toggle_label": "פריסת תצוגה",
+    "minimal": "מינימלי",
+    "minimal_tooltip": "מצב קומפקטי: הסתרת הכותרת התחתונה, פחות ריווח, דגש על סמלים",
+    "poweruser": "PowerUser",
+    "poweruser_tooltip": "פריסת ברירת המחדל עם כל הפקדים",
+    "pretty": "מעוצב",
+    "pretty_tooltip": "פריסה מרווחת עם צללים רכים וטיפוגרפיה עשירה",
+    "unix": "Unix",
+    "unix_tooltip": "בהשראת המסוף, עם גופן ברוחב קבוע ותווי מסגרת"
   },
   "error_boundary": {
     "load_stacks_error": "שגיאה בטעינת הערימות"
@@ -133,7 +162,8 @@
     "confirm_button": "כיבוי (הסרה)",
     "checking_networks": "בודק רשתות משותפות…",
     "shared_networks_title": "זוהו רשתות משותפות",
-    "shared_with": "בשימוש גם על ידי"
+    "shared_with": "בשימוש גם על ידי",
+    "background_label": "כיבוי — {{name}}"
   },
   "kill_modal": {
     "aria_label": "אישור סיום כפוי",
@@ -141,7 +171,8 @@
     "body_prefix": "הפעלת",
     "body_sigkill": "שולחת SIGKILL לכל המכולות ב-",
     "body_suffix": ", ומסיימת אותן מיידית בכפייה. בניגוד לעצירה, לתהליכים אין הזדמנות לנקות. השתמש רק כאשר עצירה לא מגיבה.",
-    "confirm_button": "סיים כפוי את כל המכולות"
+    "confirm_button": "סיים כפוי את כל המכולות",
+    "background_label": "סיום כפוי — {{name}}"
   },
   "leftovers": {
     "remaining_title": "Docker עדיין מציג מכולות עבור {{name}}",
@@ -164,7 +195,8 @@
     "aria_label": "אישור הפעלה מחדש",
     "title": "להפעיל מחדש את \"{{name}}\"?",
     "body": "פעולה זו תפעיל מחדש את כל השירותים הפועלים. השירותים יהיו לא זמינים לזמן קצר.",
-    "confirm_button": "הפעל מחדש"
+    "confirm_button": "הפעל מחדש",
+    "background_label": "הפעלה מחדש — {{name}}"
   },
   "delete_modal": {
     "aria_label": "מחק ערימת compose — {{name}}",
@@ -183,6 +215,7 @@
     "target_folder": "תיקייה {{folder}}",
     "target_file": "קובץ {{file}}",
     "error_default": "המחיקה נכשלה",
+    "retry_sudo_button": "לנסות שוב עם sudo?",
     "checking_networks": "בודק רשתות משותפות…",
     "shared_networks_title": "זוהו רשתות משותפות",
     "shared_with": "בשימוש גם על ידי"
@@ -217,8 +250,10 @@
     "errors_found_title": "נמצאו שגיאות",
     "warnings_found_title": "נמצאו אזהרות",
     "error_count_one": "יש {{count}} שגיאה בקובץ ה-compose.",
+    "error_count_two": "יש {{count}} שגיאות בקובץ ה-compose.",
     "error_count_other": "יש {{count}} שגיאות בקובץ ה-compose.",
     "warning_count_one": "יש {{count}} אזהרה בקובץ ה-compose.",
+    "warning_count_two": "יש {{count}} אזהרות בקובץ ה-compose.",
     "warning_count_other": "יש {{count}} אזהרות בקובץ ה-compose.",
     "validation_name_required": "שם הוא שדה חובה",
     "validation_name_slashes": "השם לא יכול להכיל לוכסנים",
@@ -266,8 +301,10 @@
     "errors_found_title": "נמצאו שגיאות",
     "warnings_found_title": "נמצאו אזהרות",
     "error_count_one": "יש {{count}} שגיאה בקובץ ה-compose שלך.",
+    "error_count_two": "יש {{count}} שגיאות בקובץ ה-compose שלך.",
     "error_count_other": "יש {{count}} שגיאות בקובץ ה-compose שלך.",
     "warning_count_one": "יש {{count}} אזהרה בקובץ ה-compose שלך.",
+    "warning_count_two": "יש {{count}} אזהרות בקובץ ה-compose שלך.",
     "warning_count_other": "יש {{count}} אזהרות בקובץ ה-compose שלך.",
     "file_tab_aria": "ערוך {{name}}",
     "add_file_button": "הוסף",
@@ -335,6 +372,7 @@
     "level_warn": "אזהרה",
     "level_info": "מידע",
     "download_tooltip": "הורד יומנים",
+    "download_saved": "היומנים נשמרו ב-{{path}} (Firefox אינו יכול להוריד קבצים ישירות מממשק זה)",
     "timestamps_tooltip": "הפעל חותמות זמן",
     "scroll_top": "עבור לראש",
     "scroll_bottom": "עבור לתחתית",
@@ -344,23 +382,26 @@
   "run_modal": {
     "aria_label": "הרצה — {{name}}",
     "title": "הרצה — {{name}}",
+    "warning_title": "שירותים ממושכים יחסמו",
+    "warning_body": "הפקודה compose run מפעילה מכולה חדשה עבור השירות הנבחר. אם לשירות אין פקודה עוקפת (למשל שרת אינטרנט או מסד נתונים), המכולה תפעיל את השירות ותישאר פועלת — היא לא תצא מעצמה. ייתכן שתצטרך לבטל כאן ואז לכבות את הערימה בכפייה כדי להתאושש.",
     "field_service": "שירות",
     "field_service_placeholder": "שם שירות",
     "group_services": "שירותים",
     "group_jobs": "משימות",
     "field_command": "פקודה",
     "field_command_placeholder": "echo hello",
+    "field_command_help_args": "מועבר כארגומנטים לנקודת הכניסה של התמונה (למשל הקלד „--help”).",
+    "field_command_help_override": "המילה הראשונה מחליפה לחלוטין את נקודת הכניסה של התמונה (למשל הקלד נתיב מלא לקובץ הרצה, כמו ב-exec במסוף). השאר מועבר כארגומנטים שלה.",
+    "field_command_job_hint": "עבור משימה, השאר ריק כדי להריץ את הפקודה שלה עצמה.",
+    "field_override_entrypoint": "עקוף את נקודת הכניסה",
     "field_rm": "הסר מכולה לאחר הרצה (--rm)",
     "run_button": "הרץ",
     "running": "מריץ פקודה ב-{{name}}…",
     "initializing": "מפעיל…",
     "complete": "✓ הפקודה הושלמה",
     "failed": "✗ הפקודה נכשלה",
-    "warning_title": "שירותים ממושכים יחסמו",
-    "warning_body": "הפקודה compose run מפעילה מכולה חדשה עבור השירות הנבחר. אם לשירות אין פקודה עוקפת (למשל שרת אינטרנט או מסד נתונים), המכולה תפעיל את השירות ותישאר פועלת — היא לא תצא מעצמה. ייתכן שתצטרך לבטל כאן ואז לכבות את הערימה בכפייה כדי להתאושש.",
     "force_kill_button": "הסר מכולה בכפייה",
-    "force_kill_tooltip": "מסיר בכפייה את המכולה החד-פעמית התקועה. השתמש כאשר השירות לא יוצא מעצמו.",
-    "field_command_job_hint": "עבור משימה, השאר ריק כדי להריץ את הפקודה שלה עצמה."
+    "force_kill_tooltip": "מסיר בכפייה את המכולה החד-פעמית התקועה. השתמש כאשר השירות לא יוצא מעצמו."
   },
   "exec_modal": {
     "aria_label": "מסוף — {{name}}",
@@ -404,7 +445,9 @@
     "pulling": "מושך תמונות עבור {{name}}…",
     "complete": "✓ המשיכה הושלמה",
     "failed": "✗ המשיכה נכשלה",
-    "starting": "מתחיל משיכה…"
+    "starting": "מתחיל משיכה…",
+    "background_button": "הרץ ברקע",
+    "background_label": "משיכה — {{name}}"
   },
   "pull_confirm_modal": {
     "aria_label": "אשר משיכה — {{name}}",
@@ -423,7 +466,9 @@
     "starting": "מפעיל את {{name}}…",
     "initializing": "מפעיל…",
     "complete": "✓ ההפעלה הושלמה",
-    "failed": "✗ ההפעלה נכשלה"
+    "failed": "✗ ההפעלה נכשלה",
+    "background_button": "הרץ ברקע",
+    "background_label": "הפעלה — {{name}}"
   },
   "compose_warnings": {
     "title": "Docker Compose דיווח על אזהרות"
@@ -505,6 +550,26 @@
     "prune_button": "נקה נבחרים",
     "nothing_to_remove": "אין מה להסיר."
   },
+  "prune_global": {
+    "button": "נקה תמונות",
+    "aria_label": "נקה תמונות שאינן בשימוש (כל הערימות)",
+    "title": "ניקוי תמונות שאינן בשימוש",
+    "body_intro": "מחפש תמונות שאף מכולה אינה משתמשת בהן כרגע, בכל המארח — לא רק בערימה אחת. כולל תמונות של ערימות כבויות לגמרי (אין מכולה שמחזיקה אותן „בשימוש”) וגרסאות ישנות שנותרות כאשר תגית צפה כמו :latest נמשכת מחדש.",
+    "loading": "מחפש תמונות שאינן בשימוש…",
+    "nothing_found": "לא נמצאו תמונות שאינן בשימוש — אין מה לפנות.",
+    "column_id": "מזהה",
+    "column_repo_tag": "מאגר:תגית",
+    "column_size": "גודל",
+    "column_age": "נוצרה",
+    "total_reclaimable": "סה״כ ניתן לפינוי: {{size}}",
+    "confirm_title": "פעולה זו תמחק את התמונות האלה לצמיתות",
+    "confirm_body": "{{count}} תמונות יוסרו. אם חלק מהן שייכות לערימה כבויה כרגע, הערימה תצטרך למשוך אותן שוב בפעם הבאה שתופעל. לא ניתן לבטל פעולה זו.",
+    "confirm_checkbox": "אני מבין/ה שפעולה זו תמחק לצמיתות את התמונות המפורטות למעלה",
+    "prune_button": "נקה",
+    "pruning": "מנקה…",
+    "result_title": "הסתיים",
+    "error_title": "הניקוי נכשל"
+  },
   "downed_section": {
     "create_button": "צור",
     "import_button": "ייבא",
@@ -522,7 +587,9 @@
     "depth_aria": "עומק סריקה מרבי",
     "depth_minus_aria": "הפחת עומק סריקה",
     "depth_plus_aria": "הגדל עומק סריקה",
-    "restore_button": "שחזר"
+    "restore_button": "שחזר",
+    "admin_mismatch_badge": "אי-התאמה במצב הניהולי של Cockpit",
+    "admin_mismatch_tooltip": "תיקיית הסריקה נמצאת בתיקיית הבית שלך אך Cockpit במצב ניהולי. קבצים שייווצרו כאן עשויים להיות בבעלות root ולגרום לשגיאות הרשאה."
   },
   "stack_row": {
     "no_containers": "לא נמצאו מכולות.",
@@ -592,23 +659,6 @@
     "col_image": "תמונה",
     "col_uptime": "זמן פעילות"
   },
-  "scale_modal": {
-    "title": "שנה קנה מידה לשירותים — {{name}}",
-    "confirm_title": "אשר שינוי קנה מידה — {{name}}",
-    "aria_label": "חלון שינוי קנה מידה לשירותים",
-    "sideeffects_title": "שינוי קנה מידה משנה מופעים פעילים",
-    "sideeffects_body": "כל רפליקת שירות היא מכולה נפרדת השיתוף אותה תמונה ותצורה. הגדלת קנה המידה מפעילה מכולות חדשות מיידית. הקטנת קנה המידה עוצרת ומסירה את העודפות. שינויים בקישורי פורטים של המארח, הרכבות אחסון או כינויי רשת עלולים לגרום לקונפליקטים.",
-    "what_is_scale_title": "כיצד פועל שינוי קנה מידה ב-docker compose",
-    "what_is_scale_body": "פעולה זו מריצה \"docker compose up -d --scale <service>=<n>\". Docker Compose יפעיל או יעצור מכולות כדי להגיע למספר המבוקש. מכולות קיימות לא ייווצרו מחדש אלא אם התמונה או התצורה השתנו.",
-    "apply_button": "החל",
-    "service_label": "מספר רפליקות של {{service}}",
-    "minus_aria": "הפחת רפליקות עבור {{service}}",
-    "plus_aria": "הגדל רפליקות עבור {{service}}",
-    "port_conflict_inline": "לשירות זה יש קישורי פורטים סטטיים של המארח — הגדלה מעבר לרפליקה אחת תיכשל מאחר שרק מכולה אחת יכולה לקשור פורט מארח בו זמנית.",
-    "port_conflict_title": "קונפליקט פורטים סביר",
-    "port_conflict_body": "לשירותים הבאים יש קישורי פורטים סטטיים של המארח. Docker לא יוכל להפעיל יותר מרפליקה אחת מאחר שפורט מארח יכול להיות מחובר רק על ידי מכולה בודדת:",
-    "port_conflict_icon_title": "יש לו קישורי פורטים סטטיים של המארח"
-  },
   "settings": {
     "title": "הגדרות",
     "open_button": "הגדרות",
@@ -635,6 +685,80 @@
     "pause_success": "{{name}} הושהה",
     "pause_failed": "ההשהיה של {{name}} נכשלה",
     "unpause_success": "{{name}} הוסר מהשהיה",
-    "unpause_failed": "הסרת ההשהיה של {{name}} נכשלה"
+    "unpause_failed": "הסרת ההשהיה של {{name}} נכשלה",
+    "service_start_success": "השירות {{name}} הופעל",
+    "service_start_failed": "הפעלת השירות {{name}} נכשלה",
+    "service_stop_success": "השירות {{name}} נעצר",
+    "service_stop_failed": "עצירת השירות {{name}} נכשלה",
+    "service_restart_success": "השירות {{name}} הופעל מחדש",
+    "service_restart_failed": "הפעלה מחדש של השירות {{name}} נכשלה"
+  },
+  "service_actions": {
+    "start": "הפעל שירות",
+    "stop": "עצור שירות",
+    "restart": "הפעל שירות מחדש",
+    "logs": "יומני השירות"
+  },
+  "scale_modal": {
+    "title": "שנה קנה מידה לשירותים — {{name}}",
+    "confirm_title": "אשר שינוי קנה מידה — {{name}}",
+    "aria_label": "חלון שינוי קנה מידה לשירותים",
+    "sideeffects_title": "שינוי קנה מידה משנה מופעים פעילים",
+    "sideeffects_body": "כל רפליקת שירות היא מכולה נפרדת השיתוף אותה תמונה ותצורה. הגדלת קנה המידה מפעילה מכולות חדשות מיידית. הקטנת קנה המידה עוצרת ומסירה את העודפות. שינויים בקישורי פורטים של המארח, הרכבות אחסון או כינויי רשת עלולים לגרום לקונפליקטים.",
+    "what_is_scale_title": "כיצד פועל שינוי קנה מידה ב-docker compose",
+    "what_is_scale_body": "פעולה זו מריצה \"docker compose up -d --scale <service>=<n>\". Docker Compose יפעיל או יעצור מכולות כדי להגיע למספר המבוקש. מכולות קיימות לא ייווצרו מחדש אלא אם התמונה או התצורה השתנו.",
+    "apply_button": "החל",
+    "service_label": "מספר רפליקות של {{service}}",
+    "minus_aria": "הפחת רפליקות עבור {{service}}",
+    "plus_aria": "הגדל רפליקות עבור {{service}}",
+    "port_conflict_inline": "לשירות זה יש קישורי פורטים סטטיים של המארח — הגדלה מעבר לרפליקה אחת תיכשל מאחר שרק מכולה אחת יכולה לקשור פורט מארח בו זמנית.",
+    "port_conflict_title": "קונפליקט פורטים סביר",
+    "port_conflict_body": "לשירותים הבאים יש קישורי פורטים סטטיים של המארח. Docker לא יוכל להפעיל יותר מרפליקה אחת מאחר שפורט מארח יכול להיות מחובר רק על ידי מכולה בודדת:",
+    "port_conflict_icon_title": "יש לו קישורי פורטים סטטיים של המארח"
+  },
+  "background_tasks": {
+    "toggle_button": "משימות רקע",
+    "title": "משימות רקע",
+    "empty_title": "אין משימות רקע",
+    "empty_body": "משימות שנשלחו לרקע יופיעו כאן.",
+    "status_pending": "ממתינה",
+    "status_running": "פועלת",
+    "status_success": "הושלמה",
+    "status_error": "נכשלה",
+    "status_stopped": "נעצרה",
+    "stop_button": "עצור",
+    "remove_button": "הסר",
+    "log_empty": "ממתין לפלט…"
+  },
+  "bulk_confirm_modal": {
+    "aria_label": "אישור פעולה מרובה",
+    "title_up_one": "להפעיל ערימה אחת ({{count}})?",
+    "title_up_two": "להפעיל {{count}} ערימות?",
+    "title_up_other": "להפעיל {{count}} ערימות?",
+    "title_pull_one": "למשוך תמונות לערימה אחת ({{count}})?",
+    "title_pull_two": "למשוך תמונות ל-{{count}} ערימות?",
+    "title_pull_other": "למשוך תמונות ל-{{count}} ערימות?",
+    "title_restart_one": "להפעיל מחדש ערימה אחת ({{count}})?",
+    "title_restart_two": "להפעיל מחדש {{count}} ערימות?",
+    "title_restart_other": "להפעיל מחדש {{count}} ערימות?",
+    "title_down_one": "לכבות ערימה אחת ({{count}})?",
+    "title_down_two": "לכבות {{count}} ערימות?",
+    "title_down_other": "לכבות {{count}} ערימות?",
+    "title_kill_one": "לסיים בכפייה ערימה אחת ({{count}})?",
+    "title_kill_two": "לסיים בכפייה {{count}} ערימות?",
+    "title_kill_other": "לסיים בכפייה {{count}} ערימות?",
+    "background_notice": "הפעולה תרוץ כמשימות רקע. אפשר לעקוב אחריהן, לעצור או להסיר אותן מחלונית משימות הרקע.",
+    "warning_up": "ייתכן שמכולות יופעלו מחדש ותמונות חדשות יימשכו אם תצורת שירות כלשהו השתנתה.",
+    "warning_restart": "שירותים פעילים בערימות שנבחרו לא יהיו זמינים לזמן קצר בזמן ההפעלה מחדש.",
+    "warning_down_title": "פעולה זו עוצרת ומסירה את כל המכולות של כל ערימה שנבחרה",
+    "warning_down_body": "אמצעי האחסון נשמרים, אך כל מצב מחוצה להם (למשל מטמונים בזיכרון) יאבד. הערימות ייעלמו מהרשימה עד שיופעלו שוב.",
+    "warning_kill_title": "פעולה זו מסיימת בכפייה כל מכולה בכל ערימה שנבחרה",
+    "warning_kill_body": "סיום כפוי שולח SIGKILL מיד — בניגוד לעצירה, לתהליכים אין הזדמנות לנקות או לשמור נתונים. השתמש רק כאשר עצירה אינה מגיבה.",
+    "stacks_label": "ערימות מושפעות:",
+    "confirm_button_up": "הפעלה",
+    "confirm_button_pull": "משיכה",
+    "confirm_button_restart": "הפעלה מחדש",
+    "confirm_button_down": "כיבוי",
+    "confirm_button_kill": "סיום כפוי"
   }
 }

@@ -25,7 +25,13 @@
     "aria_label": "Compose Yığınları",
     "empty_title": "Hiç compose yığını bulunamadı",
     "empty_body": "docker/podman compose up -d komutuyla bir proje başlatın, burada görünecek.",
+    "empty_create": "Yığın oluştur",
+    "empty_import": "Mevcut olanı içe aktar",
+    "no_results_title": "Eşleşen yığın yok",
+    "no_results_body": "Farklı bir ad deneyin veya aktif filtreleri temizleyin.",
+    "clear_filters": "Filtreleri temizle",
     "load_failed": "Yığınlar yüklenemedi",
+    "refreshing": "Yığınlar yenileniyor",
     "service_count_one": "{{count}} hizmet",
     "service_count_other": "{{count}} hizmet",
     "status_running": "çalışıyor",
@@ -33,12 +39,6 @@
     "status_stopped": "durduruldu",
     "status_paused": "duraklatıldı",
     "status_unknown": "bilinmiyor",
-    "empty_create": "Yığın oluştur",
-    "empty_import": "Mevcut olanı içe aktar",
-    "no_results_title": "Eşleşen yığın yok",
-    "no_results_body": "Farklı bir ad deneyin veya aktif filtreleri temizleyin.",
-    "clear_filters": "Filtreleri temizle",
-    "refreshing": "Yığınlar yenileniyor",
     "search_placeholder": "Yığın ara…",
     "filter_tooltip_running": "Yalnızca çalışan yığınları göster",
     "filter_tooltip_partial": "Yalnızca kısmen çalışan yığınları göster",
@@ -46,8 +46,11 @@
     "filter_tooltip_paused": "Yalnızca duraklatılan yığınları göster",
     "select_stack": "{{name}} seç",
     "select_all": "Tümünü seç",
+    "deselect_all": "Seçimi kaldır",
     "bulk_selected": "{{count}} seçildi",
-    "bulk_clear": "Seçimi temizle"
+    "bulk_clear": "Seçimi temizle",
+    "runtime_switch_cancelled_tasks_one": "Çalışma ortamı değiştiği için bekleyen {{count}} arka plan görevi iptal edildi",
+    "runtime_switch_cancelled_tasks_other": "Çalışma ortamı değiştiği için bekleyen {{count}} arka plan görevi iptal edildi"
   },
   "actions": {
     "up": "Başlat",
@@ -96,6 +99,9 @@
     "rootless": "Rootsuz",
     "rootless_help_title": "Rootless modu",
     "rootless_help_body": "Docker veya Podman rootless modda çalışıyor — konteynerler root olarak değil, sizin kullanıcınız olarak çalışıyor. Bu güvenliği artırır ancak ayrıcalıklı bağlantı noktaları (<1024) bağlama, sistem yollarına erişim veya belirli ağ sürücülerini kullanma gibi bazı özellikleri kısıtlayabilir.",
+    "rootful": "Root ile",
+    "rootful_help_title": "Root modu",
+    "rootful_help_body": "Docker veya Podman root modunda (sistem genelinde) çalışıyor — konteynerler root olarak çalışır. Gerektiğinde işlemler Cockpit'in yönetici erişimiyle yükseltilir.",
     "help": "Yardım",
     "feedback": "Geri Bildirim / Hata Bildir",
     "source": "Kaynak kodu",
@@ -119,7 +125,28 @@
     "not_installed": "{{runtime}} bulunamadı — geçiş yapmak için yükleyin",
     "podman_confirm_title": "Podman'a Geç",
     "podman_confirm_body": "Podman desteği deneyseldir. Yapılandırmanıza bağlı olarak bazı özellikler beklendiği gibi çalışmayabilir — yığın keşfi, günlük akışı ve belirli compose komutları dahil.",
-    "podman_suggest_docker_missing": "Bu sistemde Docker bulunamadı. Konteynerlerinizi yönetmek için Podman'a geçin."
+    "podman_suggest_docker_missing": "Bu sistemde Docker bulunamadı. Konteynerlerinizi yönetmek için Podman'a geçin.",
+    "rootless": "Rootsuz",
+    "rootful": "Root ile",
+    "socket_mode_toggle_label": "Soket modu",
+    "rootless_help": "Kullanıcıya özel (rootsuz) soketi kullanın. Konteynerler kendi kullanıcınızla çalışır.",
+    "rootful_help": "Sistem genelindeki (root) soketi kullanın. Konteynerler root olarak çalışır ve Cockpit'in yönetici erişimiyle yükseltilir.",
+    "socket_not_detected": "Soket algılanmadı",
+    "rootful_needs_admin_access": "Root soketi algılandı ancak doğrulanamadı — Cockpit'in yönetici erişimini açın, ardından Yeniden denetle'ye tıklayın",
+    "recheck_sockets": "Soket kullanılabilirliğini yeniden denetle",
+    "no_socket_detected": "{{runtime}} motor soketi algılanmadı. {{runtime}} kurulu ve çalışır durumda olduğundan emin olun.",
+    "no_socket_needs_admin_access": "{{runtime}} motor soketi doğrulanamadı — bir root soketi bulundu ancak Cockpit'in yönetici erişimini gerektiriyor. Erişimi açın, ardından Yeniden denetle'ye tıklayın."
+  },
+  "layout": {
+    "toggle_label": "Görünüm düzeni",
+    "minimal": "Minimal",
+    "minimal_tooltip": "Kompakt mod: alt bilgi gizli, daha az boşluk, simge odaklı",
+    "poweruser": "PowerUser",
+    "poweruser_tooltip": "Tüm denetimleri içeren varsayılan düzen",
+    "pretty": "Şık",
+    "pretty_tooltip": "Yumuşak gölgeler ve zengin tipografiyle ferah düzen",
+    "unix": "Unix",
+    "unix_tooltip": "Terminalden esinlenmiş; eş aralıklı yazı tipi ve çerçeve karakterleri"
   },
   "error_boundary": {
     "load_stacks_error": "Yığınlar yüklenemedi"
@@ -133,7 +160,8 @@
     "confirm_button": "Durdur (kaldır)",
     "checking_networks": "Paylaşılan ağlar kontrol ediliyor…",
     "shared_networks_title": "Paylaşılan ağlar tespit edildi",
-    "shared_with": "aynı zamanda şu tarafından kullanılıyor"
+    "shared_with": "aynı zamanda şu tarafından kullanılıyor",
+    "background_label": "Durdur — {{name}}"
   },
   "kill_modal": {
     "aria_label": "Zorla sonlandırmayı onayla",
@@ -141,7 +169,8 @@
     "body_prefix": "Çalıştırma",
     "body_sigkill": "içindeki tüm konteynerlere SIGKILL gönderir",
     "body_suffix": ", anında zorla sonlandırır. Durdur'un aksine, süreçlerin temizlik yapma şansı olmaz. Yalnızca Durdur yanıt vermediğinde kullanın.",
-    "confirm_button": "Tüm konteynerleri sonlandır"
+    "confirm_button": "Tüm konteynerleri sonlandır",
+    "background_label": "Sonlandır — {{name}}"
   },
   "leftovers": {
     "remaining_title": "Docker hâlâ {{name}} için konteynerler listeliyor",
@@ -164,7 +193,8 @@
     "aria_label": "Yeniden başlatmayı onayla",
     "title": "\"{{name}}\" yeniden başlatılsın mı?",
     "body": "Bu işlem tüm çalışan hizmetleri yeniden başlatacak. Hizmetler kısa süreliğine kullanılamaz hale gelecek.",
-    "confirm_button": "Yeniden Başlat"
+    "confirm_button": "Yeniden Başlat",
+    "background_label": "Yeniden başlat — {{name}}"
   },
   "delete_modal": {
     "aria_label": "Compose yığınını sil — {{name}}",
@@ -183,6 +213,7 @@
     "target_folder": "{{folder}} klasörü",
     "target_file": "{{file}} dosyası",
     "error_default": "Silme başarısız",
+    "retry_sudo_button": "sudo ile yeniden denensin mi?",
     "checking_networks": "Paylaşılan ağlar kontrol ediliyor…",
     "shared_networks_title": "Paylaşılan ağlar tespit edildi",
     "shared_with": "aynı zamanda şu tarafından kullanılıyor"
@@ -335,6 +366,7 @@
     "level_warn": "Uyarı",
     "level_info": "Bilgi",
     "download_tooltip": "Günlükleri indir",
+    "download_saved": "Günlükler {{path}} konumuna kaydedildi (Firefox bu arayüzden doğrudan dosya indiremez)",
     "timestamps_tooltip": "Zaman damgalarını aç/kapat",
     "scroll_top": "En üste git",
     "scroll_bottom": "En alta git",
@@ -344,23 +376,26 @@
   "run_modal": {
     "aria_label": "Çalıştır — {{name}}",
     "title": "Çalıştır — {{name}}",
+    "warning_title": "Uzun süre çalışan hizmetler bloke olacak",
+    "warning_body": "compose run, seçili hizmet için yeni bir konteyner başlatır. Bu hizmetin geçersiz kılma komutu yoksa (örn. bir web sunucusu veya veritabanı), konteyner hizmeti başlatıp çalışmaya devam edecek — kendiliğinden çıkmayacak. Kurtarmak için burada iptal edip ardından yığını zorla durdurmanız gerekebilir.",
     "field_service": "Hizmet",
     "field_service_placeholder": "hizmet adı",
     "group_services": "Servisler",
     "group_jobs": "İşler",
     "field_command": "Komut",
     "field_command_placeholder": "echo hello",
+    "field_command_help_args": "İmajın giriş noktasına argüman olarak geçirilir (ör. \"--help\" yazın).",
+    "field_command_help_override": "İlk kelime imajın giriş noktasını tamamen değiştirir (ör. terminaldeki bir exec gibi tam bir program yolu yazın). Geri kalanı onun argümanları olarak geçirilir.",
+    "field_command_job_hint": "Bir iş için, işin kendi komutunu çalıştırmak üzere boş bırakın.",
+    "field_override_entrypoint": "Giriş noktasını geçersiz kıl",
     "field_rm": "Çalıştırmadan sonra konteyneri kaldır (--rm)",
     "run_button": "Çalıştır",
     "running": "{{name}} içinde komut çalıştırılıyor…",
     "initializing": "Başlatılıyor…",
     "complete": "✓ Komut tamamlandı",
     "failed": "✗ Komut başarısız",
-    "warning_title": "Uzun süre çalışan hizmetler bloke olacak",
-    "warning_body": "compose run, seçili hizmet için yeni bir konteyner başlatır. Bu hizmetin geçersiz kılma komutu yoksa (örn. bir web sunucusu veya veritabanı), konteyner hizmeti başlatıp çalışmaya devam edecek — kendiliğinden çıkmayacak. Kurtarmak için burada iptal edip ardından yığını zorla durdurmanız gerekebilir.",
     "force_kill_button": "Konteyneri zorla kaldır",
-    "force_kill_tooltip": "Takılı kalmış tek seferlik konteyneri zorla kaldırır. Hizmet kendiliğinden çıkmadığında kullanın.",
-    "field_command_job_hint": "Bir iş için, işin kendi komutunu çalıştırmak üzere boş bırakın."
+    "force_kill_tooltip": "Takılı kalmış tek seferlik konteyneri zorla kaldırır. Hizmet kendiliğinden çıkmadığında kullanın."
   },
   "exec_modal": {
     "aria_label": "Terminal — {{name}}",
@@ -404,7 +439,9 @@
     "pulling": "{{name}} için imajlar indiriliyor…",
     "complete": "✓ İndirme tamamlandı",
     "failed": "✗ İndirme başarısız",
-    "starting": "İndirme başlatılıyor…"
+    "starting": "İndirme başlatılıyor…",
+    "background_button": "Arka planda çalıştır",
+    "background_label": "İndir — {{name}}"
   },
   "pull_confirm_modal": {
     "aria_label": "İndirmeyi onayla — {{name}}",
@@ -423,7 +460,9 @@
     "starting": "{{name}} başlatılıyor…",
     "initializing": "Başlatılıyor…",
     "complete": "✓ Başlatma tamamlandı",
-    "failed": "✗ Başlatma başarısız"
+    "failed": "✗ Başlatma başarısız",
+    "background_button": "Arka planda çalıştır",
+    "background_label": "Başlat — {{name}}"
   },
   "compose_warnings": {
     "title": "Docker Compose uyarılar bildirdi"
@@ -505,6 +544,26 @@
     "prune_button": "Seçilenleri temizle",
     "nothing_to_remove": "Kaldırılacak hiçbir şey yok."
   },
+  "prune_global": {
+    "button": "İmajları temizle",
+    "aria_label": "Kullanılmayan imajları temizle (tüm yığınlar)",
+    "title": "Kullanılmayan imajları temizle",
+    "body_intro": "Şu anda hiçbir konteyner tarafından kullanılmayan imajları tüm ana makinede arar — yalnızca bir yığında değil. Tamamen durdurulmuş yığınlara ait imajlar (hiçbir konteyner onları \"kullanımda\" tutmaz) ve :latest gibi değişken bir etiket yeniden indirildiğinde geride kalan eski sürümler de buna dahildir.",
+    "loading": "Kullanılmayan imajlar aranıyor…",
+    "nothing_found": "Kullanılmayan imaj bulunamadı — geri kazanılacak bir şey yok.",
+    "column_id": "ID",
+    "column_repo_tag": "Depo:Etiket",
+    "column_size": "Boyut",
+    "column_age": "Oluşturulma",
+    "total_reclaimable": "Toplam geri kazanılabilir: {{size}}",
+    "confirm_title": "Bu imajlar kalıcı olarak silinecek",
+    "confirm_body": "{{count}} imaj kaldırılacak. Bunlardan biri şu anda durdurulmuş bir yığına aitse, o yığın bir sonraki başlatılışında imajı yeniden indirmek zorunda kalır. Bu işlem geri alınamaz.",
+    "confirm_checkbox": "Yukarıda listelenen imajların kalıcı olarak silineceğini anlıyorum",
+    "prune_button": "Temizle",
+    "pruning": "Temizleniyor…",
+    "result_title": "Tamamlandı",
+    "error_title": "Temizleme başarısız oldu"
+  },
   "downed_section": {
     "create_button": "Oluştur",
     "import_button": "İçe Aktar",
@@ -522,7 +581,9 @@
     "depth_aria": "Maksimum tarama derinliği",
     "depth_minus_aria": "Tarama derinliğini azalt",
     "depth_plus_aria": "Tarama derinliğini artır",
-    "restore_button": "Geri Yükle"
+    "restore_button": "Geri Yükle",
+    "admin_mismatch_badge": "Cockpit yönetici modu uyuşmuyor",
+    "admin_mismatch_tooltip": "Tarama dizini ev klasörünüzde, ancak Cockpit yönetici modunda. Burada oluşturulan dosyalar root'a ait olabilir ve izin hatalarına yol açabilir."
   },
   "stack_row": {
     "no_containers": "Hiç konteyner bulunamadı.",
@@ -592,23 +653,6 @@
     "col_image": "İmaj",
     "col_uptime": "Çalışma Süresi"
   },
-  "scale_modal": {
-    "title": "Hizmetleri ölçeklendir — {{name}}",
-    "confirm_title": "Ölçeklendirmeyi onayla — {{name}}",
-    "aria_label": "Hizmet ölçeklendirme modalı",
-    "sideeffects_title": "Ölçeklendirme çalışan örnekleri değiştirir",
-    "sideeffects_body": "Her hizmet replikası, aynı imajı ve yapılandırmayı paylaşan ayrı bir konteynerdir. Ölçeği artırmak anında yeni konteynerler başlatır. Ölçeği azaltmak fazlalıkları durdurur ve kaldırır. Ana bilgisayar port bağlamalarındaki, birim montajlarındaki veya ağ takma adlarındaki değişiklikler çakışmalara neden olabilir.",
-    "what_is_scale_title": "Docker compose ölçeklendirmesi nasıl çalışır",
-    "what_is_scale_body": "Bu \"docker compose up -d --scale <service>=<n>\" komutunu çalıştırır. Docker Compose istenen sayıya ulaşmak için konteynerleri başlatır veya durdurur. Mevcut konteynerler, imaj veya yapılandırma değişmedikçe yeniden oluşturulmaz.",
-    "apply_button": "Uygula",
-    "service_label": "{{service}} replika sayısı",
-    "minus_aria": "{{service}} için replika azalt",
-    "plus_aria": "{{service}} için replika artır",
-    "port_conflict_inline": "Bu hizmetin statik ana bilgisayar port bağlamaları var — 1 replikadan fazlasına ölçeklendirmek başarısız olacak çünkü bir seferde yalnızca bir konteyner ana bilgisayar portuna bağlanabilir.",
-    "port_conflict_title": "Olası port çakışması",
-    "port_conflict_body": "Aşağıdaki hizmetlerin statik ana bilgisayar port bağlamaları var. Docker, bir ana bilgisayar portu yalnızca tek bir konteyner tarafından bağlanabildiğinden birden fazla replika başlatamaz:",
-    "port_conflict_icon_title": "Statik ana bilgisayar port bağlamaları var"
-  },
   "settings": {
     "title": "Ayarlar",
     "open_button": "Ayarlar",
@@ -635,6 +679,75 @@
     "pause_success": "{{name}} duraklatıldı",
     "pause_failed": "{{name}} duraklatılamadı",
     "unpause_success": "{{name}} devam ettirildi",
-    "unpause_failed": "{{name}} devam ettirilemedi"
+    "unpause_failed": "{{name}} devam ettirilemedi",
+    "service_start_success": "{{name}} hizmeti başlatıldı",
+    "service_start_failed": "{{name}} hizmeti başlatılamadı",
+    "service_stop_success": "{{name}} hizmeti durduruldu",
+    "service_stop_failed": "{{name}} hizmeti durdurulamadı",
+    "service_restart_success": "{{name}} hizmeti yeniden başlatıldı",
+    "service_restart_failed": "{{name}} hizmeti yeniden başlatılamadı"
+  },
+  "service_actions": {
+    "start": "Hizmeti başlat",
+    "stop": "Hizmeti durdur",
+    "restart": "Hizmeti yeniden başlat",
+    "logs": "Hizmet günlükleri"
+  },
+  "scale_modal": {
+    "title": "Hizmetleri ölçeklendir — {{name}}",
+    "confirm_title": "Ölçeklendirmeyi onayla — {{name}}",
+    "aria_label": "Hizmet ölçeklendirme modalı",
+    "sideeffects_title": "Ölçeklendirme çalışan örnekleri değiştirir",
+    "sideeffects_body": "Her hizmet replikası, aynı imajı ve yapılandırmayı paylaşan ayrı bir konteynerdir. Ölçeği artırmak anında yeni konteynerler başlatır. Ölçeği azaltmak fazlalıkları durdurur ve kaldırır. Ana bilgisayar port bağlamalarındaki, birim montajlarındaki veya ağ takma adlarındaki değişiklikler çakışmalara neden olabilir.",
+    "what_is_scale_title": "Docker compose ölçeklendirmesi nasıl çalışır",
+    "what_is_scale_body": "Bu \"docker compose up -d --scale <service>=<n>\" komutunu çalıştırır. Docker Compose istenen sayıya ulaşmak için konteynerleri başlatır veya durdurur. Mevcut konteynerler, imaj veya yapılandırma değişmedikçe yeniden oluşturulmaz.",
+    "apply_button": "Uygula",
+    "service_label": "{{service}} replika sayısı",
+    "minus_aria": "{{service}} için replika azalt",
+    "plus_aria": "{{service}} için replika artır",
+    "port_conflict_inline": "Bu hizmetin statik ana bilgisayar port bağlamaları var — 1 replikadan fazlasına ölçeklendirmek başarısız olacak çünkü bir seferde yalnızca bir konteyner ana bilgisayar portuna bağlanabilir.",
+    "port_conflict_title": "Olası port çakışması",
+    "port_conflict_body": "Aşağıdaki hizmetlerin statik ana bilgisayar port bağlamaları var. Docker, bir ana bilgisayar portu yalnızca tek bir konteyner tarafından bağlanabildiğinden birden fazla replika başlatamaz:",
+    "port_conflict_icon_title": "Statik ana bilgisayar port bağlamaları var"
+  },
+  "background_tasks": {
+    "toggle_button": "Arka plan görevleri",
+    "title": "Arka plan görevleri",
+    "empty_title": "Arka plan görevi yok",
+    "empty_body": "Arka plana gönderilen görevler burada görünür.",
+    "status_pending": "Bekliyor",
+    "status_running": "Çalışıyor",
+    "status_success": "Tamamlandı",
+    "status_error": "Başarısız",
+    "status_stopped": "Durduruldu",
+    "stop_button": "Durdur",
+    "remove_button": "Kaldır",
+    "log_empty": "Çıktı bekleniyor…"
+  },
+  "bulk_confirm_modal": {
+    "aria_label": "Toplu işlemi onayla",
+    "title_up_one": "{{count}} yığın başlatılsın mı?",
+    "title_up_other": "{{count}} yığın başlatılsın mı?",
+    "title_pull_one": "{{count}} yığının imajları indirilsin mi?",
+    "title_pull_other": "{{count}} yığının imajları indirilsin mi?",
+    "title_restart_one": "{{count}} yığın yeniden başlatılsın mı?",
+    "title_restart_other": "{{count}} yığın yeniden başlatılsın mı?",
+    "title_down_one": "{{count}} yığın durdurulsun mu?",
+    "title_down_other": "{{count}} yığın durdurulsun mu?",
+    "title_kill_one": "{{count}} yığın sonlandırılsın mı?",
+    "title_kill_other": "{{count}} yığın sonlandırılsın mı?",
+    "background_notice": "Bu işlem arka plan görevleri olarak çalışacak. Bunları arka plan görevleri panelinden izleyebilir, durdurabilir veya kaldırabilirsiniz.",
+    "warning_up": "Herhangi bir hizmetin yapılandırması değiştiyse konteynerler yeniden başlatılabilir ve yeni imajlar indirilebilir.",
+    "warning_restart": "Seçili yığınlardaki çalışan hizmetler yeniden başlatılırken kısa süreliğine erişilemez olur.",
+    "warning_down_title": "Bu, seçili her yığının tüm konteynerlerini durdurur ve kaldırır",
+    "warning_down_body": "Birimler korunur, ancak bunların dışındaki her durum (ör. bellek içi önbellekler) kaybolur. Yığınlar yeniden başlatılana kadar listeden kaybolur.",
+    "warning_kill_title": "Bu, seçili her yığındaki her konteyneri zorla sonlandırır",
+    "warning_kill_body": "Sonlandır hemen SIGKILL gönderir — Durdur'un aksine süreçler temizlik yapma veya verileri yazma fırsatı bulamaz. Yalnızca Durdur yanıt vermediğinde kullanın.",
+    "stacks_label": "Etkilenen yığınlar:",
+    "confirm_button_up": "Başlat",
+    "confirm_button_pull": "İndir",
+    "confirm_button_restart": "Yeniden Başlat",
+    "confirm_button_down": "Durdur",
+    "confirm_button_kill": "Sonlandır"
   }
 }

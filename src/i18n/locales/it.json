@@ -25,20 +25,21 @@
     "aria_label": "Stack Compose",
     "empty_title": "Nessuno stack compose trovato",
     "empty_body": "Avvia un progetto con docker/podman compose up -d e apparirà qui.",
+    "empty_create": "Crea stack",
+    "empty_import": "Importa esistente",
+    "no_results_title": "Nessuno stack corrisponde",
+    "no_results_body": "Prova un nome diverso o rimuovi i filtri attivi.",
+    "clear_filters": "Rimuovi filtri",
     "load_failed": "Caricamento degli stack non riuscito",
+    "refreshing": "Aggiornamento stack",
     "service_count_one": "{{count}} servizio",
+    "service_count_many": "{{count}} servizi",
     "service_count_other": "{{count}} servizi",
     "status_running": "in esecuzione",
     "status_partial": "parziale",
     "status_stopped": "fermo",
     "status_paused": "in pausa",
     "status_unknown": "sconosciuto",
-    "empty_create": "Crea stack",
-    "empty_import": "Importa esistente",
-    "no_results_title": "Nessuno stack corrisponde",
-    "no_results_body": "Prova un nome diverso o rimuovi i filtri attivi.",
-    "clear_filters": "Rimuovi filtri",
-    "refreshing": "Aggiornamento stack",
     "search_placeholder": "Cerca stack…",
     "filter_tooltip_running": "Mostra solo stack in esecuzione",
     "filter_tooltip_partial": "Mostra solo stack parzialmente in esecuzione",
@@ -46,8 +47,12 @@
     "filter_tooltip_paused": "Mostra solo stack in pausa",
     "select_stack": "Seleziona {{name}}",
     "select_all": "Seleziona tutto",
+    "deselect_all": "Deseleziona tutto",
     "bulk_selected": "{{count}} selezionati",
-    "bulk_clear": "Annulla selezione"
+    "bulk_clear": "Annulla selezione",
+    "runtime_switch_cancelled_tasks_one": "Annullata {{count}} attività in background in sospeso perché il runtime è cambiato",
+    "runtime_switch_cancelled_tasks_many": "Annullate {{count}} attività in background in sospeso perché il runtime è cambiato",
+    "runtime_switch_cancelled_tasks_other": "Annullate {{count}} attività in background in sospeso perché il runtime è cambiato"
   },
   "actions": {
     "up": "Avvia",
@@ -96,6 +101,9 @@
     "rootless": "Senza root",
     "rootless_help_title": "Modalità senza root",
     "rootless_help_body": "Docker o Podman è in esecuzione in modalità senza root — i container vengono eseguiti come il tuo utente, non come root. Questo migliora la sicurezza ma può limitare alcune funzionalità come l'associazione di porte privilegiate (<1024), l'accesso ai percorsi di sistema o l'utilizzo di determinati driver di rete.",
+    "rootful": "Con root",
+    "rootful_help_title": "Modalità con root",
+    "rootful_help_body": "Docker o Podman è in esecuzione in modalità con root (a livello di sistema) — i container vengono eseguiti come root. Le azioni vengono elevate tramite l'accesso amministrativo di Cockpit quando necessario.",
     "help": "Aiuto",
     "feedback": "Feedback / Segnala un bug",
     "source": "Codice sorgente",
@@ -119,7 +127,28 @@
     "not_installed": "{{runtime}} non trovato — installalo per cambiare",
     "podman_confirm_title": "Passa a Podman",
     "podman_confirm_body": "Il supporto di Podman è sperimentale. A seconda della tua configurazione, alcune funzionalità potrebbero non funzionare come previsto — incluse la scoperta degli stack, lo streaming dei log e alcuni comandi compose.",
-    "podman_suggest_docker_missing": "Docker non è stato trovato su questo sistema. Passa a Podman per gestire i tuoi container."
+    "podman_suggest_docker_missing": "Docker non è stato trovato su questo sistema. Passa a Podman per gestire i tuoi container.",
+    "rootless": "Senza root",
+    "rootful": "Con root",
+    "socket_mode_toggle_label": "Modalità socket",
+    "rootless_help": "Usa il socket per utente (senza root). I container vengono eseguiti come il tuo utente.",
+    "rootful_help": "Usa il socket di sistema (con root). I container vengono eseguiti come root, con elevazione tramite l'accesso amministrativo di Cockpit.",
+    "socket_not_detected": "Socket non rilevato",
+    "rootful_needs_admin_access": "Socket con root rilevato ma non confermato — attiva l'accesso amministrativo di Cockpit, poi fai clic su Ricontrolla",
+    "recheck_sockets": "Ricontrolla la disponibilità dei socket",
+    "no_socket_detected": "Nessun socket del motore {{runtime}} rilevato. Assicurati che {{runtime}} sia installato e in esecuzione.",
+    "no_socket_needs_admin_access": "Nessun socket del motore {{runtime}} confermato — è stato trovato un socket con root, ma richiede l'accesso amministrativo di Cockpit. Attivalo, poi fai clic su Ricontrolla."
+  },
+  "layout": {
+    "toggle_label": "Layout di visualizzazione",
+    "minimal": "Minimale",
+    "minimal_tooltip": "Modalità compatta: nasconde il piè di pagina, riduce i margini, incentrata sulle icone",
+    "poweruser": "PowerUser",
+    "poweruser_tooltip": "Layout predefinito con tutti i controlli",
+    "pretty": "Elegante",
+    "pretty_tooltip": "Layout arioso con ombre morbide e tipografia curata",
+    "unix": "Unix",
+    "unix_tooltip": "Ispirato al terminale, con carattere a spaziatura fissa e caratteri di riquadro"
   },
   "error_boundary": {
     "load_stacks_error": "Errore durante il caricamento degli stack"
@@ -133,7 +162,8 @@
     "confirm_button": "Arresta (rimuovi)",
     "checking_networks": "Verifica delle reti condivise…",
     "shared_networks_title": "Reti condivise rilevate",
-    "shared_with": "utilizzato anche da"
+    "shared_with": "utilizzato anche da",
+    "background_label": "Arresta — {{name}}"
   },
   "kill_modal": {
     "aria_label": "Conferma terminazione forzata",
@@ -141,7 +171,8 @@
     "body_prefix": "L'esecuzione di",
     "body_sigkill": "invia SIGKILL a tutti i container in",
     "body_suffix": ", terminandoli immediatamente con la forza. A differenza di Ferma, i processi non hanno la possibilità di pulire. Usa solo quando Ferma non risponde.",
-    "confirm_button": "Termina forzatamente tutti i container"
+    "confirm_button": "Termina forzatamente tutti i container",
+    "background_label": "Termina forzatamente — {{name}}"
   },
   "leftovers": {
     "remaining_title": "Docker elenca ancora container per {{name}}",
@@ -164,7 +195,8 @@
     "aria_label": "Conferma riavvio",
     "title": "Riavviare \"{{name}}\"?",
     "body": "Questo riavvierà tutti i servizi in esecuzione. I servizi saranno brevemente non disponibili.",
-    "confirm_button": "Riavvia"
+    "confirm_button": "Riavvia",
+    "background_label": "Riavvia — {{name}}"
   },
   "delete_modal": {
     "aria_label": "Elimina stack compose — {{name}}",
@@ -183,6 +215,7 @@
     "target_folder": "cartella {{folder}}",
     "target_file": "file {{file}}",
     "error_default": "Eliminazione non riuscita",
+    "retry_sudo_button": "Riprovare con sudo?",
     "checking_networks": "Verifica delle reti condivise…",
     "shared_networks_title": "Reti condivise rilevate",
     "shared_with": "utilizzato anche da"
@@ -217,8 +250,10 @@
     "errors_found_title": "Errori trovati",
     "warnings_found_title": "Avvertimenti trovati",
     "error_count_one": "C'è {{count}} errore nel file compose.",
+    "error_count_many": "Ci sono {{count}} errori nel file compose.",
     "error_count_other": "Ci sono {{count}} errori nel file compose.",
     "warning_count_one": "C'è {{count}} avvertimento nel file compose.",
+    "warning_count_many": "Ci sono {{count}} avvertimenti nel file compose.",
     "warning_count_other": "Ci sono {{count}} avvertimenti nel file compose.",
     "validation_name_required": "Il nome è obbligatorio",
     "validation_name_slashes": "Il nome non deve contenere barre",
@@ -266,8 +301,10 @@
     "errors_found_title": "Errori trovati",
     "warnings_found_title": "Avvertimenti trovati",
     "error_count_one": "C'è {{count}} errore nel tuo file compose.",
+    "error_count_many": "Ci sono {{count}} errori nel tuo file compose.",
     "error_count_other": "Ci sono {{count}} errori nel tuo file compose.",
     "warning_count_one": "C'è {{count}} avvertimento nel tuo file compose.",
+    "warning_count_many": "Ci sono {{count}} avvertimenti nel tuo file compose.",
     "warning_count_other": "Ci sono {{count}} avvertimenti nel tuo file compose.",
     "file_tab_aria": "Modifica {{name}}",
     "add_file_button": "Aggiungi",
@@ -335,6 +372,7 @@
     "level_warn": "Avviso",
     "level_info": "Informazioni",
     "download_tooltip": "Scarica log",
+    "download_saved": "Log salvati in {{path}} (Firefox non può scaricare file direttamente da questa interfaccia)",
     "timestamps_tooltip": "Attiva timestamp",
     "scroll_top": "Vai all'inizio",
     "scroll_bottom": "Vai alla fine",
@@ -344,23 +382,26 @@
   "run_modal": {
     "aria_label": "Esegui — {{name}}",
     "title": "Esegui — {{name}}",
+    "warning_title": "I servizi a lunga esecuzione bloccheranno",
+    "warning_body": "compose run avvia un nuovo container per il servizio selezionato. Se quel servizio non ha un comando di override (ad esempio un server web o un database), il container avvierà il servizio e rimarrà in esecuzione — non si chiuderà da solo. Potrebbe essere necessario annullare qui e poi forzare lo stop dello stack per ripristinare.",
     "field_service": "Servizio",
     "field_service_placeholder": "nome servizio",
     "group_services": "Servizi",
     "group_jobs": "Job",
     "field_command": "Comando",
     "field_command_placeholder": "echo hello",
+    "field_command_help_args": "Passato come argomenti all'entrypoint dell'immagine (ad es. digita \"--help\").",
+    "field_command_help_override": "La prima parola sostituisce completamente l'entrypoint dell'immagine (ad es. digita il percorso completo di un binario, come in un exec da terminale). Il resto viene passato come suoi argomenti.",
+    "field_command_job_hint": "Per un job, lascia vuoto per eseguire il suo comando.",
+    "field_override_entrypoint": "Sostituisci entrypoint",
     "field_rm": "Rimuovi container dopo l'esecuzione (--rm)",
     "run_button": "Esegui",
     "running": "Esecuzione del comando in {{name}}…",
     "initializing": "Avvio in corso…",
     "complete": "✓ Comando completato",
     "failed": "✗ Comando non riuscito",
-    "warning_title": "I servizi a lunga esecuzione bloccheranno",
-    "warning_body": "compose run avvia un nuovo container per il servizio selezionato. Se quel servizio non ha un comando di override (ad esempio un server web o un database), il container avvierà il servizio e rimarrà in esecuzione — non si chiuderà da solo. Potrebbe essere necessario annullare qui e poi forzare lo stop dello stack per ripristinare.",
     "force_kill_button": "Rimuovi forzatamente il container",
-    "force_kill_tooltip": "Rimuove forzatamente il container one-off bloccato. Usare quando il servizio non si chiude da solo.",
-    "field_command_job_hint": "Per un job, lascia vuoto per eseguire il suo comando."
+    "force_kill_tooltip": "Rimuove forzatamente il container one-off bloccato. Usare quando il servizio non si chiude da solo."
   },
   "exec_modal": {
     "aria_label": "Terminale — {{name}}",
@@ -404,7 +445,9 @@
     "pulling": "Download delle immagini per {{name}}…",
     "complete": "✓ Download completato",
     "failed": "✗ Download non riuscito",
-    "starting": "Avvio del download…"
+    "starting": "Avvio del download…",
+    "background_button": "Esegui in background",
+    "background_label": "Scarica — {{name}}"
   },
   "pull_confirm_modal": {
     "aria_label": "Conferma download — {{name}}",
@@ -423,7 +466,9 @@
     "starting": "Avvio di {{name}}…",
     "initializing": "Avvio in corso…",
     "complete": "✓ Avvio completato",
-    "failed": "✗ Avvio non riuscito"
+    "failed": "✗ Avvio non riuscito",
+    "background_button": "Esegui in background",
+    "background_label": "Avvia — {{name}}"
   },
   "compose_warnings": {
     "title": "Docker Compose ha segnalato degli avvisi"
@@ -505,6 +550,26 @@
     "prune_button": "Pulisci selezionati",
     "nothing_to_remove": "Niente da rimuovere."
   },
+  "prune_global": {
+    "button": "Pulisci immagini",
+    "aria_label": "Pulisci immagini inutilizzate (tutti gli stack)",
+    "title": "Pulisci immagini inutilizzate",
+    "body_intro": "Cerca le immagini non usate attualmente da alcun container, su tutto l'host — non solo in uno stack. Include le immagini di stack completamente arrestati (nessun container le mantiene \"in uso\") e le vecchie versioni rimaste quando un tag mobile come :latest viene riscaricato.",
+    "loading": "Ricerca di immagini inutilizzate…",
+    "nothing_found": "Nessuna immagine inutilizzata — niente da recuperare.",
+    "column_id": "ID",
+    "column_repo_tag": "Repository:Tag",
+    "column_size": "Dimensione",
+    "column_age": "Creata",
+    "total_reclaimable": "Totale recuperabile: {{size}}",
+    "confirm_title": "Queste immagini verranno eliminate definitivamente",
+    "confirm_body": "Verranno rimosse {{count}} immagini. Se qualcuna appartiene a uno stack attualmente arrestato, quello stack dovrà riscaricarla al prossimo avvio. L'operazione non può essere annullata.",
+    "confirm_checkbox": "Ho capito che le immagini elencate sopra verranno eliminate definitivamente",
+    "prune_button": "Pulisci",
+    "pruning": "Pulizia in corso…",
+    "result_title": "Fatto",
+    "error_title": "Pulizia non riuscita"
+  },
   "downed_section": {
     "create_button": "Crea",
     "import_button": "Importa",
@@ -522,7 +587,9 @@
     "depth_aria": "Profondità massima di scansione",
     "depth_minus_aria": "Diminuisci profondità di scansione",
     "depth_plus_aria": "Aumenta profondità di scansione",
-    "restore_button": "Ripristina"
+    "restore_button": "Ripristina",
+    "admin_mismatch_badge": "Modalità amministrativa di Cockpit non corrispondente",
+    "admin_mismatch_tooltip": "La directory di scansione si trova nella tua cartella home, ma Cockpit è in modalità amministrativa. I file creati qui potrebbero appartenere a root e causare errori di permessi."
   },
   "stack_row": {
     "no_containers": "Nessun container trovato.",
@@ -592,23 +659,6 @@
     "col_image": "Immagine",
     "col_uptime": "Tempo di attività"
   },
-  "scale_modal": {
-    "title": "Scala servizi — {{name}}",
-    "confirm_title": "Conferma scalatura — {{name}}",
-    "aria_label": "Finestra di scalatura servizi",
-    "sideeffects_title": "La scalatura modifica le istanze in esecuzione",
-    "sideeffects_body": "Ogni replica del servizio è un container separato che condivide la stessa immagine e configurazione. Aumentare la scala avvia nuovi container immediatamente. Ridurre la scala ferma e rimuove quelli in eccesso. Le modifiche ai binding delle porte host, ai montaggi dei volumi o agli alias di rete possono causare conflitti.",
-    "what_is_scale_title": "Come funziona la scalatura di docker compose",
-    "what_is_scale_body": "Questo esegue \"docker compose up -d --scale <service>=<n>\". Docker Compose avvierà o fermerà container per raggiungere il numero richiesto. I container esistenti non vengono ricreati a meno che l'immagine o la configurazione non sia cambiata.",
-    "apply_button": "Applica",
-    "service_label": "Numero di repliche di {{service}}",
-    "minus_aria": "Diminuisci repliche per {{service}}",
-    "plus_aria": "Aumenta repliche per {{service}}",
-    "port_conflict_inline": "Questo servizio ha binding di porte host statici — scalare oltre 1 replica fallirà perché solo un container può associare una porta host alla volta.",
-    "port_conflict_title": "Conflitto di porte probabile",
-    "port_conflict_body": "I seguenti servizi hanno binding di porte host statici. Docker non sarà in grado di avviare più di una replica perché una porta host può essere associata solo da un singolo container:",
-    "port_conflict_icon_title": "Ha binding di porte host statici"
-  },
   "settings": {
     "title": "Impostazioni",
     "open_button": "Impostazioni",
@@ -635,6 +685,80 @@
     "pause_success": "{{name}} in pausa",
     "pause_failed": "Messa in pausa di {{name}} non riuscita",
     "unpause_success": "{{name}} ripreso",
-    "unpause_failed": "Ripresa di {{name}} non riuscita"
+    "unpause_failed": "Ripresa di {{name}} non riuscita",
+    "service_start_success": "Servizio {{name}} avviato",
+    "service_start_failed": "Impossibile avviare il servizio {{name}}",
+    "service_stop_success": "Servizio {{name}} arrestato",
+    "service_stop_failed": "Impossibile arrestare il servizio {{name}}",
+    "service_restart_success": "Servizio {{name}} riavviato",
+    "service_restart_failed": "Impossibile riavviare il servizio {{name}}"
+  },
+  "service_actions": {
+    "start": "Avvia servizio",
+    "stop": "Arresta servizio",
+    "restart": "Riavvia servizio",
+    "logs": "Log del servizio"
+  },
+  "scale_modal": {
+    "title": "Scala servizi — {{name}}",
+    "confirm_title": "Conferma scalatura — {{name}}",
+    "aria_label": "Finestra di scalatura servizi",
+    "sideeffects_title": "La scalatura modifica le istanze in esecuzione",
+    "sideeffects_body": "Ogni replica del servizio è un container separato che condivide la stessa immagine e configurazione. Aumentare la scala avvia nuovi container immediatamente. Ridurre la scala ferma e rimuove quelli in eccesso. Le modifiche ai binding delle porte host, ai montaggi dei volumi o agli alias di rete possono causare conflitti.",
+    "what_is_scale_title": "Come funziona la scalatura di docker compose",
+    "what_is_scale_body": "Questo esegue \"docker compose up -d --scale <service>=<n>\". Docker Compose avvierà o fermerà container per raggiungere il numero richiesto. I container esistenti non vengono ricreati a meno che l'immagine o la configurazione non sia cambiata.",
+    "apply_button": "Applica",
+    "service_label": "Numero di repliche di {{service}}",
+    "minus_aria": "Diminuisci repliche per {{service}}",
+    "plus_aria": "Aumenta repliche per {{service}}",
+    "port_conflict_inline": "Questo servizio ha binding di porte host statici — scalare oltre 1 replica fallirà perché solo un container può associare una porta host alla volta.",
+    "port_conflict_title": "Conflitto di porte probabile",
+    "port_conflict_body": "I seguenti servizi hanno binding di porte host statici. Docker non sarà in grado di avviare più di una replica perché una porta host può essere associata solo da un singolo container:",
+    "port_conflict_icon_title": "Ha binding di porte host statici"
+  },
+  "background_tasks": {
+    "toggle_button": "Attività in background",
+    "title": "Attività in background",
+    "empty_title": "Nessuna attività in background",
+    "empty_body": "Le attività inviate in background compariranno qui.",
+    "status_pending": "In attesa",
+    "status_running": "In esecuzione",
+    "status_success": "Completata",
+    "status_error": "Non riuscita",
+    "status_stopped": "Arrestata",
+    "stop_button": "Arresta",
+    "remove_button": "Rimuovi",
+    "log_empty": "In attesa di output…"
+  },
+  "bulk_confirm_modal": {
+    "aria_label": "Conferma azione multipla",
+    "title_up_one": "Avviare {{count}} stack?",
+    "title_up_many": "Avviare {{count}} stack?",
+    "title_up_other": "Avviare {{count}} stack?",
+    "title_pull_one": "Scaricare le immagini di {{count}} stack?",
+    "title_pull_many": "Scaricare le immagini di {{count}} stack?",
+    "title_pull_other": "Scaricare le immagini di {{count}} stack?",
+    "title_restart_one": "Riavviare {{count}} stack?",
+    "title_restart_many": "Riavviare {{count}} stack?",
+    "title_restart_other": "Riavviare {{count}} stack?",
+    "title_down_one": "Arrestare {{count}} stack?",
+    "title_down_many": "Arrestare {{count}} stack?",
+    "title_down_other": "Arrestare {{count}} stack?",
+    "title_kill_one": "Terminare forzatamente {{count}} stack?",
+    "title_kill_many": "Terminare forzatamente {{count}} stack?",
+    "title_kill_other": "Terminare forzatamente {{count}} stack?",
+    "background_notice": "Verrà eseguito come attività in background. Puoi monitorarle, arrestarle o rimuoverle dal pannello delle attività in background.",
+    "warning_up": "Potrebbe riavviare container e scaricare nuove immagini se la configurazione di qualche servizio è cambiata.",
+    "warning_restart": "I servizi in esecuzione degli stack selezionati non saranno disponibili per un breve periodo durante il riavvio.",
+    "warning_down_title": "Arresta e rimuove tutti i container di ogni stack selezionato",
+    "warning_down_body": "I volumi vengono mantenuti, ma qualsiasi stato al di fuori di essi (ad es. cache in memoria) va perso. Gli stack scompariranno dall'elenco finché non verranno riavviati.",
+    "warning_kill_title": "Termina forzatamente ogni container di ogni stack selezionato",
+    "warning_kill_body": "La terminazione forzata invia subito SIGKILL — a differenza di Arresta, i processi non hanno modo di ripulire o salvare i dati. Usala solo quando Arresta non risponde.",
+    "stacks_label": "Stack interessati:",
+    "confirm_button_up": "Avvia",
+    "confirm_button_pull": "Scarica",
+    "confirm_button_restart": "Riavvia",
+    "confirm_button_down": "Arresta",
+    "confirm_button_kill": "Termina forzatamente"
   }
 }

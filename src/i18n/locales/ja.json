@@ -25,7 +25,13 @@
     "aria_label": "Compose スタック",
     "empty_title": "Compose スタックが見つかりません",
     "empty_body": "docker/podman compose up -d でプロジェクトを起動すると、ここに表示されます。",
+    "empty_create": "スタックを作成",
+    "empty_import": "既存をインポート",
+    "no_results_title": "一致するスタックがありません",
+    "no_results_body": "別の名前を試すか、アクティブなフィルターを解除してください。",
+    "clear_filters": "フィルターをクリア",
     "load_failed": "スタックの読み込みに失敗しました",
+    "refreshing": "スタックを更新中",
     "service_count_one": "{{count}} 個のサービス",
     "service_count_other": "{{count}} 個のサービス",
     "status_running": "実行中",
@@ -33,12 +39,6 @@
     "status_stopped": "停止",
     "status_paused": "一時停止",
     "status_unknown": "不明",
-    "empty_create": "スタックを作成",
-    "empty_import": "既存をインポート",
-    "no_results_title": "一致するスタックがありません",
-    "no_results_body": "別の名前を試すか、アクティブなフィルターを解除してください。",
-    "clear_filters": "フィルターをクリア",
-    "refreshing": "スタックを更新中",
     "search_placeholder": "スタックを検索…",
     "filter_tooltip_running": "実行中のスタックのみ表示",
     "filter_tooltip_partial": "一部実行中のスタックのみ表示",
@@ -46,8 +46,11 @@
     "filter_tooltip_paused": "一時停止中のスタックのみ表示",
     "select_stack": "{{name}} を選択",
     "select_all": "すべて選択",
+    "deselect_all": "すべて選択解除",
     "bulk_selected": "{{count}} 件選択中",
-    "bulk_clear": "選択をクリア"
+    "bulk_clear": "選択をクリア",
+    "runtime_switch_cancelled_tasks_one": "ランタイムが変更されたため、保留中のバックグラウンドタスク {{count}} 件をキャンセルしました",
+    "runtime_switch_cancelled_tasks_other": "ランタイムが変更されたため、保留中のバックグラウンドタスク {{count}} 件をキャンセルしました"
   },
   "actions": {
     "up": "起動",
@@ -96,6 +99,9 @@
     "rootless": "rootless",
     "rootless_help_title": "ルートレスモード",
     "rootless_help_body": "DockerまたはPodmanがルートレスモードで実行されています — コンテナはrootではなくあなたのユーザーとして実行されます。これによりセキュリティが向上しますが、特権ポート（<1024）のバインド、システムパスへのアクセス、特定のネットワークドライバーの使用など、一部の機能が制限される場合があります。",
+    "rootful": "rootful",
+    "rootful_help_title": "ルートフルモード",
+    "rootful_help_body": "Docker または Podman はルートフル（システム全体）モードで動作しています — コンテナは root として実行されます。必要に応じて、Cockpit の管理者アクセスで操作の権限が昇格されます。",
     "help": "ヘルプ",
     "feedback": "フィードバック / バグ報告",
     "source": "ソースコード",
@@ -119,7 +125,28 @@
     "not_installed": "{{runtime}} が見つかりません — 切り替えるにはインストールしてください",
     "podman_confirm_title": "Podman に切り替え",
     "podman_confirm_body": "Podman のサポートは実験的です。設定によっては、スタックの検出、ログのストリーミング、一部の compose コマンドなどが期待通りに動作しない場合があります。",
-    "podman_suggest_docker_missing": "このシステムにDockerが見つかりませんでした。コンテナを管理するにはPodmanに切り替えてください。"
+    "podman_suggest_docker_missing": "このシステムにDockerが見つかりませんでした。コンテナを管理するにはPodmanに切り替えてください。",
+    "rootless": "ルートレス",
+    "rootful": "ルートフル",
+    "socket_mode_toggle_label": "ソケットモード",
+    "rootless_help": "ユーザーごとの（ルートレス）ソケットを使用します。コンテナはあなた自身のユーザーとして実行されます。",
+    "rootful_help": "システム全体の（ルートフル）ソケットを使用します。コンテナは root として実行され、Cockpit の管理者アクセスで権限が昇格されます。",
+    "socket_not_detected": "ソケットが検出されません",
+    "rootful_needs_admin_access": "ルートフルソケットが検出されましたが確認できませんでした — Cockpit の管理者アクセスを有効にしてから、「再確認」をクリックしてください",
+    "recheck_sockets": "ソケットの利用可否を再確認",
+    "no_socket_detected": "{{runtime}} エンジンのソケットが検出されません。{{runtime}} がインストールされ、実行中であることを確認してください。",
+    "no_socket_needs_admin_access": "{{runtime}} エンジンのソケットを確認できません — ルートフルソケットが見つかりましたが、Cockpit の管理者アクセスが必要です。有効にしてから、「再確認」をクリックしてください。"
+  },
+  "layout": {
+    "toggle_label": "表示レイアウト",
+    "minimal": "ミニマル",
+    "minimal_tooltip": "コンパクトモード：フッターを非表示にし、余白を減らしたアイコン中心の表示",
+    "poweruser": "PowerUser",
+    "poweruser_tooltip": "すべてのコントロールを備えた標準レイアウト",
+    "pretty": "プリティ",
+    "pretty_tooltip": "柔らかな影と豊かなタイポグラフィのゆったりしたレイアウト",
+    "unix": "Unix",
+    "unix_tooltip": "等幅フォントと罫線文字を使ったターミナル風の表示"
   },
   "error_boundary": {
     "load_stacks_error": "スタックの読み込みエラー"
@@ -133,7 +160,8 @@
     "confirm_button": "停止（削除）",
     "checking_networks": "共有ネットワークを確認中…",
     "shared_networks_title": "共有ネットワークが検出されました",
-    "shared_with": "他にも使用中："
+    "shared_with": "他にも使用中：",
+    "background_label": "停止 — {{name}}"
   },
   "kill_modal": {
     "aria_label": "強制終了の確認",
@@ -141,7 +169,8 @@
     "body_prefix": "実行すると",
     "body_sigkill": "のすべてのコンテナに SIGKILL が送信されます：",
     "body_suffix": "、強制的に即座に終了させます。停止とは異なり、プロセスにクリーンアップの機会はありません。停止が応答しない場合にのみ使用してください。",
-    "confirm_button": "すべてのコンテナを強制終了"
+    "confirm_button": "すべてのコンテナを強制終了",
+    "background_label": "強制終了 — {{name}}"
   },
   "leftovers": {
     "remaining_title": "Docker には {{name}} のコンテナがまだ残っています",
@@ -164,7 +193,8 @@
     "aria_label": "再起動の確認",
     "title": "\"{{name}}\" を再起動しますか？",
     "body": "実行中のすべてのサービスを再起動します。サービスは一時的に利用できなくなります。",
-    "confirm_button": "再起動"
+    "confirm_button": "再起動",
+    "background_label": "再起動 — {{name}}"
   },
   "delete_modal": {
     "aria_label": "compose スタックを削除 — {{name}}",
@@ -183,6 +213,7 @@
     "target_folder": "フォルダ {{folder}}",
     "target_file": "ファイル {{file}}",
     "error_default": "削除に失敗しました",
+    "retry_sudo_button": "sudo で再試行しますか？",
     "checking_networks": "共有ネットワークを確認中…",
     "shared_networks_title": "共有ネットワークが検出されました",
     "shared_with": "他にも使用中："
@@ -335,6 +366,7 @@
     "level_warn": "警告",
     "level_info": "情報",
     "download_tooltip": "ログをダウンロード",
+    "download_saved": "ログを {{path}} に保存しました（Firefox はこのインターフェースから直接ファイルをダウンロードできません）",
     "timestamps_tooltip": "タイムスタンプを切り替え",
     "scroll_top": "先頭に移動",
     "scroll_bottom": "末尾に移動",
@@ -344,23 +376,26 @@
   "run_modal": {
     "aria_label": "実行 — {{name}}",
     "title": "実行 — {{name}}",
+    "warning_title": "長時間実行のサービスはブロックします",
+    "warning_body": "compose run は選択したサービス用に新しいコンテナを起動します。そのサービスにオーバーライドコマンドがない場合（例: ウェブサーバーやデータベース）、コンテナはサービスを起動したまま実行し続け、自動的に終了しません。ここでキャンセルし、スタックを強制停止して復旧する必要がある場合があります。",
     "field_service": "サービス",
     "field_service_placeholder": "サービス名",
     "group_services": "サービス",
     "group_jobs": "ジョブ",
     "field_command": "コマンド",
     "field_command_placeholder": "echo hello",
+    "field_command_help_args": "イメージのエントリーポイントへの引数として渡されます（例：「--help」と入力）。",
+    "field_command_help_override": "最初の単語がイメージのエントリーポイントを完全に置き換えます（例：ターミナルでの exec のように、バイナリのフルパスを入力）。残りはその引数として渡されます。",
+    "field_command_job_hint": "ジョブの場合は空のままにすると、ジョブ自身のコマンドを実行します。",
+    "field_override_entrypoint": "エントリーポイントを上書き",
     "field_rm": "実行後にコンテナを削除 (--rm)",
     "run_button": "実行",
     "running": "{{name}} でコマンドを実行中…",
     "initializing": "起動中…",
     "complete": "✓ コマンド完了",
     "failed": "✗ コマンド失敗",
-    "warning_title": "長時間実行のサービスはブロックします",
-    "warning_body": "compose run は選択したサービス用に新しいコンテナを起動します。そのサービスにオーバーライドコマンドがない場合（例: ウェブサーバーやデータベース）、コンテナはサービスを起動したまま実行し続け、自動的に終了しません。ここでキャンセルし、スタックを強制停止して復旧する必要がある場合があります。",
     "force_kill_button": "コンテナを強制削除",
-    "force_kill_tooltip": "スタックした one-off コンテナを強制削除します。サービスが自動的に終了しない場合に使用してください。",
-    "field_command_job_hint": "ジョブの場合は空のままにすると、ジョブ自身のコマンドを実行します。"
+    "force_kill_tooltip": "スタックした one-off コンテナを強制削除します。サービスが自動的に終了しない場合に使用してください。"
   },
   "exec_modal": {
     "aria_label": "シェル — {{name}}",
@@ -404,7 +439,9 @@
     "pulling": "{{name}} のイメージをプル中…",
     "complete": "✓ プル完了",
     "failed": "✗ プル失敗",
-    "starting": "プルを開始中…"
+    "starting": "プルを開始中…",
+    "background_button": "バックグラウンドで実行",
+    "background_label": "プル — {{name}}"
   },
   "pull_confirm_modal": {
     "aria_label": "プルを確認 — {{name}}",
@@ -423,7 +460,9 @@
     "starting": "{{name}} を起動中…",
     "initializing": "起動中…",
     "complete": "✓ 起動完了",
-    "failed": "✗ 起動失敗"
+    "failed": "✗ 起動失敗",
+    "background_button": "バックグラウンドで実行",
+    "background_label": "起動 — {{name}}"
   },
   "compose_warnings": {
     "title": "Docker Compose が警告を報告しました"
@@ -505,6 +544,26 @@
     "prune_button": "選択したものをクリーンアップ",
     "nothing_to_remove": "削除するものがありません。"
   },
+  "prune_global": {
+    "button": "イメージをクリーンアップ",
+    "aria_label": "未使用のイメージをクリーンアップ（すべてのスタック）",
+    "title": "未使用のイメージをクリーンアップ",
+    "body_intro": "現在どのコンテナにも使用されていないイメージを、1 つのスタックだけでなくホスト全体で検索します。完全に停止したスタックのイメージ（「使用中」に保つコンテナがない）や、:latest のような可変タグを再度プルしたときに残る古いバージョンも含まれます。",
+    "loading": "未使用のイメージを検索中…",
+    "nothing_found": "未使用のイメージは見つかりませんでした — 解放できる容量はありません。",
+    "column_id": "ID",
+    "column_repo_tag": "リポジトリ:タグ",
+    "column_size": "サイズ",
+    "column_age": "作成日時",
+    "total_reclaimable": "解放可能な合計：{{size}}",
+    "confirm_title": "これらのイメージは完全に削除されます",
+    "confirm_body": "{{count}} 個のイメージが削除されます。停止中のスタックに属するものがある場合、そのスタックは次回起動時にイメージを再度プルする必要があります。この操作は元に戻せません。",
+    "confirm_checkbox": "上記のイメージが完全に削除されることを理解しました",
+    "prune_button": "クリーンアップ",
+    "pruning": "クリーンアップ中…",
+    "result_title": "完了",
+    "error_title": "クリーンアップに失敗しました"
+  },
   "downed_section": {
     "create_button": "作成",
     "import_button": "インポート",
@@ -522,7 +581,9 @@
     "depth_aria": "最大スキャン深度",
     "depth_minus_aria": "スキャン深度を減らす",
     "depth_plus_aria": "スキャン深度を増やす",
-    "restore_button": "復元"
+    "restore_button": "復元",
+    "admin_mismatch_badge": "Cockpit の管理者モードの不一致",
+    "admin_mismatch_tooltip": "スキャン対象のディレクトリはホームフォルダー内にありますが、Cockpit は管理者モードです。ここで作成したファイルは root の所有になり、権限エラーの原因になる場合があります。"
   },
   "stack_row": {
     "no_containers": "コンテナが見つかりません。",
@@ -592,23 +653,6 @@
     "col_image": "イメージ",
     "col_uptime": "稼働時間"
   },
-  "scale_modal": {
-    "title": "サービスをスケール — {{name}}",
-    "confirm_title": "スケールを確認 — {{name}}",
-    "aria_label": "サービスのスケールダイアログ",
-    "sideeffects_title": "スケールは実行中のインスタンスを変更します",
-    "sideeffects_body": "各サービスレプリカは同じイメージと設定を共有する独立したコンテナです。スケールアップすると新しいコンテナが即座に起動します。スケールダウンすると余分なコンテナが停止・削除されます。ホストポートバインディング、ボリュームマウント、またはネットワークエイリアスの変更は競合を引き起こす可能性があります。",
-    "what_is_scale_title": "docker compose スケールの仕組み",
-    "what_is_scale_body": "これは \"docker compose up -d --scale <service>=<n>\" を実行します。Docker Compose は要求された数に達するようにコンテナを起動または停止します。イメージまたは設定が変更されない限り、既存のコンテナは再作成されません。",
-    "apply_button": "適用",
-    "service_label": "{{service}} のレプリカ数",
-    "minus_aria": "{{service}} のレプリカを減らす",
-    "plus_aria": "{{service}} のレプリカを増やす",
-    "port_conflict_inline": "このサービスには静的なホストポートバインディングがあります — 1 つ以上のレプリカにスケールするとホストポートを同時にバインドできるのは 1 つのコンテナだけなので失敗します。",
-    "port_conflict_title": "ポートの競合の可能性",
-    "port_conflict_body": "次のサービスには静的なホストポートバインディングがあります。ホストポートは 1 つのコンテナしかバインドできないため、Docker は複数のレプリカを起動できません:",
-    "port_conflict_icon_title": "静的なホストポートバインディングがあります"
-  },
   "settings": {
     "title": "設定",
     "open_button": "設定",
@@ -635,6 +679,75 @@
     "pause_success": "{{name}} を一時停止しました",
     "pause_failed": "{{name}} の一時停止に失敗しました",
     "unpause_success": "{{name}} を再開しました",
-    "unpause_failed": "{{name}} の再開に失敗しました"
+    "unpause_failed": "{{name}} の再開に失敗しました",
+    "service_start_success": "サービス {{name}} を起動しました",
+    "service_start_failed": "サービス {{name}} の起動に失敗しました",
+    "service_stop_success": "サービス {{name}} を停止しました",
+    "service_stop_failed": "サービス {{name}} の停止に失敗しました",
+    "service_restart_success": "サービス {{name}} を再起動しました",
+    "service_restart_failed": "サービス {{name}} の再起動に失敗しました"
+  },
+  "service_actions": {
+    "start": "サービスを起動",
+    "stop": "サービスを停止",
+    "restart": "サービスを再起動",
+    "logs": "サービスのログ"
+  },
+  "scale_modal": {
+    "title": "サービスをスケール — {{name}}",
+    "confirm_title": "スケールを確認 — {{name}}",
+    "aria_label": "サービスのスケールダイアログ",
+    "sideeffects_title": "スケールは実行中のインスタンスを変更します",
+    "sideeffects_body": "各サービスレプリカは同じイメージと設定を共有する独立したコンテナです。スケールアップすると新しいコンテナが即座に起動します。スケールダウンすると余分なコンテナが停止・削除されます。ホストポートバインディング、ボリュームマウント、またはネットワークエイリアスの変更は競合を引き起こす可能性があります。",
+    "what_is_scale_title": "docker compose スケールの仕組み",
+    "what_is_scale_body": "これは \"docker compose up -d --scale <service>=<n>\" を実行します。Docker Compose は要求された数に達するようにコンテナを起動または停止します。イメージまたは設定が変更されない限り、既存のコンテナは再作成されません。",
+    "apply_button": "適用",
+    "service_label": "{{service}} のレプリカ数",
+    "minus_aria": "{{service}} のレプリカを減らす",
+    "plus_aria": "{{service}} のレプリカを増やす",
+    "port_conflict_inline": "このサービスには静的なホストポートバインディングがあります — 1 つ以上のレプリカにスケールするとホストポートを同時にバインドできるのは 1 つのコンテナだけなので失敗します。",
+    "port_conflict_title": "ポートの競合の可能性",
+    "port_conflict_body": "次のサービスには静的なホストポートバインディングがあります。ホストポートは 1 つのコンテナしかバインドできないため、Docker は複数のレプリカを起動できません:",
+    "port_conflict_icon_title": "静的なホストポートバインディングがあります"
+  },
+  "background_tasks": {
+    "toggle_button": "バックグラウンドタスク",
+    "title": "バックグラウンドタスク",
+    "empty_title": "バックグラウンドタスクはありません",
+    "empty_body": "バックグラウンドに送ったタスクがここに表示されます。",
+    "status_pending": "保留中",
+    "status_running": "実行中",
+    "status_success": "完了",
+    "status_error": "失敗",
+    "status_stopped": "停止済み",
+    "stop_button": "停止",
+    "remove_button": "削除",
+    "log_empty": "出力を待機中…"
+  },
+  "bulk_confirm_modal": {
+    "aria_label": "一括操作の確認",
+    "title_up_one": "{{count}} 個のスタックを起動しますか？",
+    "title_up_other": "{{count}} 個のスタックを起動しますか？",
+    "title_pull_one": "{{count}} 個のスタックのイメージをプルしますか？",
+    "title_pull_other": "{{count}} 個のスタックのイメージをプルしますか？",
+    "title_restart_one": "{{count}} 個のスタックを再起動しますか？",
+    "title_restart_other": "{{count}} 個のスタックを再起動しますか？",
+    "title_down_one": "{{count}} 個のスタックを停止しますか？",
+    "title_down_other": "{{count}} 個のスタックを停止しますか？",
+    "title_kill_one": "{{count}} 個のスタックを強制終了しますか？",
+    "title_kill_other": "{{count}} 個のスタックを強制終了しますか？",
+    "background_notice": "これはバックグラウンドタスクとして実行されます。バックグラウンドタスクパネルから監視、停止、削除ができます。",
+    "warning_up": "サービスの設定が変更されている場合、コンテナが再起動され、新しいイメージがプルされることがあります。",
+    "warning_restart": "選択したスタックで実行中のサービスは、再起動中に一時的に利用できなくなります。",
+    "warning_down_title": "選択した各スタックのすべてのコンテナを停止して削除します",
+    "warning_down_body": "ボリュームは保持されますが、それ以外の状態（メモリ内キャッシュなど）は失われます。スタックは再び起動するまで一覧から消えます。",
+    "warning_kill_title": "選択した各スタックのすべてのコンテナを強制終了します",
+    "warning_kill_body": "強制終了は直ちに SIGKILL を送信します — 停止とは異なり、プロセスには後片付けやデータの書き出しを行う機会がありません。停止が応答しない場合にのみ使用してください。",
+    "stacks_label": "対象のスタック：",
+    "confirm_button_up": "起動",
+    "confirm_button_pull": "プル",
+    "confirm_button_restart": "再起動",
+    "confirm_button_down": "停止",
+    "confirm_button_kill": "強制終了"
   }
 }

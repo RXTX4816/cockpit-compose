@@ -25,7 +25,13 @@
     "aria_label": "Compose 스택",
     "empty_title": "Compose 스택을 찾을 수 없습니다",
     "empty_body": "docker/podman compose up -d로 프로젝트를 시작하면 여기에 표시됩니다.",
+    "empty_create": "스택 만들기",
+    "empty_import": "기존 가져오기",
+    "no_results_title": "일치하는 스택 없음",
+    "no_results_body": "다른 이름을 시도하거나 활성 필터를 지워보세요.",
+    "clear_filters": "필터 지우기",
     "load_failed": "스택 로드에 실패했습니다",
+    "refreshing": "스택 새로 고침 중",
     "service_count_one": "{{count}}개 서비스",
     "service_count_other": "{{count}}개 서비스",
     "status_running": "실행 중",
@@ -33,12 +39,6 @@
     "status_stopped": "중지됨",
     "status_paused": "일시 중지됨",
     "status_unknown": "알 수 없음",
-    "empty_create": "스택 만들기",
-    "empty_import": "기존 가져오기",
-    "no_results_title": "일치하는 스택 없음",
-    "no_results_body": "다른 이름을 시도하거나 활성 필터를 지워보세요.",
-    "clear_filters": "필터 지우기",
-    "refreshing": "스택 새로 고침 중",
     "search_placeholder": "스택 검색…",
     "filter_tooltip_running": "실행 중인 스택만 표시",
     "filter_tooltip_partial": "부분 실행 중인 스택만 표시",
@@ -46,8 +46,11 @@
     "filter_tooltip_paused": "일시 중지된 스택만 표시",
     "select_stack": "{{name}} 선택",
     "select_all": "모두 선택",
+    "deselect_all": "모두 선택 해제",
     "bulk_selected": "{{count}}개 선택됨",
-    "bulk_clear": "선택 지우기"
+    "bulk_clear": "선택 지우기",
+    "runtime_switch_cancelled_tasks_one": "런타임이 변경되어 대기 중인 백그라운드 작업 {{count}}개를 취소했습니다",
+    "runtime_switch_cancelled_tasks_other": "런타임이 변경되어 대기 중인 백그라운드 작업 {{count}}개를 취소했습니다"
   },
   "actions": {
     "up": "시작",
@@ -96,6 +99,9 @@
     "rootless": "루트리스",
     "rootless_help_title": "루트리스 모드",
     "rootless_help_body": "Docker 또는 Podman이 루트리스 모드에서 실행 중입니다 — 컨테이너는 root가 아닌 사용자로 실행됩니다. 이는 보안을 향상시키지만 권한 포트(<1024) 바인딩, 시스템 경로 접근 또는 특정 네트워크 드라이버 사용과 같은 일부 기능이 제한될 수 있습니다.",
+    "rootful": "루트풀",
+    "rootful_help_title": "루트풀 모드",
+    "rootful_help_body": "Docker 또는 Podman이 루트풀(시스템 전체) 모드로 실행 중입니다 — 컨테이너는 root로 실행됩니다. 필요할 때 Cockpit의 관리자 액세스를 통해 작업 권한이 상승됩니다.",
     "help": "도움말",
     "feedback": "피드백 / 버그 보고",
     "source": "소스 코드",
@@ -119,7 +125,28 @@
     "not_installed": "{{runtime}}을(를) 찾을 수 없습니다 — 전환하려면 설치하세요",
     "podman_confirm_title": "Podman으로 전환",
     "podman_confirm_body": "Podman 지원은 실험적입니다. 설정에 따라 스택 검색, 로그 스트리밍, 일부 compose 명령 등 일부 기능이 예상대로 작동하지 않을 수 있습니다.",
-    "podman_suggest_docker_missing": "이 시스템에서 Docker를 찾을 수 없습니다. 컨테이너를 관리하려면 Podman으로 전환하세요."
+    "podman_suggest_docker_missing": "이 시스템에서 Docker를 찾을 수 없습니다. 컨테이너를 관리하려면 Podman으로 전환하세요.",
+    "rootless": "루트리스",
+    "rootful": "루트풀",
+    "socket_mode_toggle_label": "소켓 모드",
+    "rootless_help": "사용자별(루트리스) 소켓을 사용합니다. 컨테이너는 사용자 본인 계정으로 실행됩니다.",
+    "rootful_help": "시스템 전체(루트풀) 소켓을 사용합니다. 컨테이너는 root로 실행되며, Cockpit의 관리자 액세스를 통해 권한이 상승됩니다.",
+    "socket_not_detected": "소켓이 감지되지 않음",
+    "rootful_needs_admin_access": "루트풀 소켓이 감지되었지만 확인할 수 없습니다 — Cockpit의 관리자 액세스를 켠 다음 다시 확인을 클릭하세요",
+    "recheck_sockets": "소켓 사용 가능 여부 다시 확인",
+    "no_socket_detected": "{{runtime}} 엔진 소켓이 감지되지 않았습니다. {{runtime}}이(가) 설치되어 실행 중인지 확인하세요.",
+    "no_socket_needs_admin_access": "{{runtime}} 엔진 소켓을 확인할 수 없습니다 — 루트풀 소켓을 찾았지만 Cockpit의 관리자 액세스가 필요합니다. 관리자 액세스를 켠 다음 다시 확인을 클릭하세요."
+  },
+  "layout": {
+    "toggle_label": "화면 레이아웃",
+    "minimal": "미니멀",
+    "minimal_tooltip": "컴팩트 모드: 푸터 숨김, 여백 축소, 아이콘 중심",
+    "poweruser": "PowerUser",
+    "poweruser_tooltip": "모든 컨트롤이 있는 기본 레이아웃",
+    "pretty": "프리티",
+    "pretty_tooltip": "부드러운 그림자와 풍부한 타이포그래피의 여유로운 레이아웃",
+    "unix": "Unix",
+    "unix_tooltip": "고정폭 글꼴과 상자 그리기 문자를 사용하는 터미널 스타일"
   },
   "error_boundary": {
     "load_stacks_error": "스택 로드 오류"
@@ -133,7 +160,8 @@
     "confirm_button": "중지 (제거)",
     "checking_networks": "공유 네트워크 확인 중…",
     "shared_networks_title": "공유 네트워크가 감지되었습니다",
-    "shared_with": "다음에서도 사용 중:"
+    "shared_with": "다음에서도 사용 중:",
+    "background_label": "중지 — {{name}}"
   },
   "kill_modal": {
     "aria_label": "강제 종료 확인",
@@ -141,7 +169,8 @@
     "body_prefix": "실행하면",
     "body_sigkill": "의 모든 컨테이너에 SIGKILL을 전송합니다:",
     "body_suffix": ", 즉시 강제로 종료합니다. 정지와 달리 프로세스가 정리할 기회가 없습니다. 정지가 응답하지 않을 때만 사용하세요.",
-    "confirm_button": "모든 컨테이너 강제 종료"
+    "confirm_button": "모든 컨테이너 강제 종료",
+    "background_label": "강제 종료 — {{name}}"
   },
   "leftovers": {
     "remaining_title": "Docker에 {{name}}의 컨테이너가 아직 남아 있습니다",
@@ -164,7 +193,8 @@
     "aria_label": "재시작 확인",
     "title": "\"{{name}}\"을(를) 재시작하시겠습니까?",
     "body": "실행 중인 모든 서비스가 재시작됩니다. 서비스는 잠시 동안 사용할 수 없습니다.",
-    "confirm_button": "재시작"
+    "confirm_button": "재시작",
+    "background_label": "재시작 — {{name}}"
   },
   "delete_modal": {
     "aria_label": "compose 스택 삭제 — {{name}}",
@@ -183,6 +213,7 @@
     "target_folder": "폴더 {{folder}}",
     "target_file": "파일 {{file}}",
     "error_default": "삭제에 실패했습니다",
+    "retry_sudo_button": "sudo로 다시 시도하시겠습니까?",
     "checking_networks": "공유 네트워크 확인 중…",
     "shared_networks_title": "공유 네트워크가 감지되었습니다",
     "shared_with": "다음에서도 사용 중:"
@@ -335,6 +366,7 @@
     "level_warn": "경고",
     "level_info": "정보",
     "download_tooltip": "로그 다운로드",
+    "download_saved": "로그를 {{path}}에 저장했습니다 (Firefox는 이 인터페이스에서 파일을 직접 다운로드할 수 없습니다)",
     "timestamps_tooltip": "타임스탬프 전환",
     "scroll_top": "맨 위로 이동",
     "scroll_bottom": "맨 아래로 이동",
@@ -344,23 +376,26 @@
   "run_modal": {
     "aria_label": "실행 — {{name}}",
     "title": "실행 — {{name}}",
+    "warning_title": "장시간 실행되는 서비스는 차단됩니다",
+    "warning_body": "compose run은 선택한 서비스를 위해 새 컨테이너를 시작합니다. 해당 서비스에 재정의 명령이 없는 경우(예: 웹 서버 또는 데이터베이스), 컨테이너는 서비스를 시작하고 계속 실행됩니다 — 자체적으로 종료되지 않습니다. 복구하려면 여기서 취소한 다음 스택을 강제 정지해야 할 수 있습니다.",
     "field_service": "서비스",
     "field_service_placeholder": "서비스 이름",
     "group_services": "서비스",
     "group_jobs": "작업",
     "field_command": "명령",
     "field_command_placeholder": "echo hello",
+    "field_command_help_args": "이미지 엔트리포인트의 인수로 전달됩니다 (예: \"--help\" 입력).",
+    "field_command_help_override": "첫 번째 단어가 이미지의 엔트리포인트를 완전히 대체합니다 (예: 터미널의 exec처럼 실행 파일의 전체 경로 입력). 나머지는 그 인수로 전달됩니다.",
+    "field_command_job_hint": "작업의 경우 비워 두면 작업 자체의 명령이 실행됩니다.",
+    "field_override_entrypoint": "엔트리포인트 재정의",
     "field_rm": "실행 후 컨테이너 제거 (--rm)",
     "run_button": "실행",
     "running": "{{name}}에서 명령 실행 중…",
     "initializing": "시작 중…",
     "complete": "✓ 명령 완료",
     "failed": "✗ 명령 실패",
-    "warning_title": "장시간 실행되는 서비스는 차단됩니다",
-    "warning_body": "compose run은 선택한 서비스를 위해 새 컨테이너를 시작합니다. 해당 서비스에 재정의 명령이 없는 경우(예: 웹 서버 또는 데이터베이스), 컨테이너는 서비스를 시작하고 계속 실행됩니다 — 자체적으로 종료되지 않습니다. 복구하려면 여기서 취소한 다음 스택을 강제 정지해야 할 수 있습니다.",
     "force_kill_button": "컨테이너 강제 제거",
-    "force_kill_tooltip": "멈춘 일회성 컨테이너를 강제로 제거합니다. 서비스가 자체적으로 종료되지 않을 때 사용하세요.",
-    "field_command_job_hint": "작업의 경우 비워 두면 작업 자체의 명령이 실행됩니다."
+    "force_kill_tooltip": "멈춘 일회성 컨테이너를 강제로 제거합니다. 서비스가 자체적으로 종료되지 않을 때 사용하세요."
   },
   "exec_modal": {
     "aria_label": "셸 — {{name}}",
@@ -404,7 +439,9 @@
     "pulling": "{{name}}의 이미지 풀 중…",
     "complete": "✓ 풀 완료",
     "failed": "✗ 풀 실패",
-    "starting": "풀 시작 중…"
+    "starting": "풀 시작 중…",
+    "background_button": "백그라운드에서 실행",
+    "background_label": "풀 — {{name}}"
   },
   "pull_confirm_modal": {
     "aria_label": "풀 확인 — {{name}}",
@@ -423,7 +460,9 @@
     "starting": "{{name}} 시작 중…",
     "initializing": "시작 중…",
     "complete": "✓ 시작 완료",
-    "failed": "✗ 시작 실패"
+    "failed": "✗ 시작 실패",
+    "background_button": "백그라운드에서 실행",
+    "background_label": "시작 — {{name}}"
   },
   "compose_warnings": {
     "title": "Docker Compose가 경고를 보고했습니다"
@@ -505,6 +544,26 @@
     "prune_button": "선택한 항목 정리",
     "nothing_to_remove": "제거할 것이 없습니다."
   },
+  "prune_global": {
+    "button": "이미지 정리",
+    "aria_label": "사용하지 않는 이미지 정리 (모든 스택)",
+    "title": "사용하지 않는 이미지 정리",
+    "body_intro": "스택 하나가 아니라 호스트 전체에서 현재 어떤 컨테이너도 사용하지 않는 이미지를 찾습니다. 완전히 중지된 스택의 이미지(\"사용 중\"으로 유지하는 컨테이너가 없음)와 :latest 같은 유동 태그를 다시 풀할 때 남는 이전 버전도 포함됩니다.",
+    "loading": "사용하지 않는 이미지 찾는 중…",
+    "nothing_found": "사용하지 않는 이미지가 없습니다 — 확보할 공간이 없습니다.",
+    "column_id": "ID",
+    "column_repo_tag": "저장소:태그",
+    "column_size": "크기",
+    "column_age": "생성됨",
+    "total_reclaimable": "확보 가능한 총 용량: {{size}}",
+    "confirm_title": "이 이미지들이 영구적으로 삭제됩니다",
+    "confirm_body": "이미지 {{count}}개가 제거됩니다. 현재 중지된 스택에 속한 이미지가 있으면, 해당 스택은 다음에 시작할 때 이미지를 다시 풀해야 합니다. 이 작업은 되돌릴 수 없습니다.",
+    "confirm_checkbox": "위에 나열된 이미지가 영구적으로 삭제된다는 것을 이해했습니다",
+    "prune_button": "정리",
+    "pruning": "정리 중…",
+    "result_title": "완료",
+    "error_title": "정리 실패"
+  },
   "downed_section": {
     "create_button": "만들기",
     "import_button": "가져오기",
@@ -522,7 +581,9 @@
     "depth_aria": "최대 검색 깊이",
     "depth_minus_aria": "검색 깊이 줄이기",
     "depth_plus_aria": "검색 깊이 늘리기",
-    "restore_button": "복원"
+    "restore_button": "복원",
+    "admin_mismatch_badge": "Cockpit 관리자 모드 불일치",
+    "admin_mismatch_tooltip": "스캔 디렉터리는 홈 폴더에 있지만 Cockpit은 관리자 모드입니다. 여기에서 만든 파일은 root 소유가 되어 권한 오류가 발생할 수 있습니다."
   },
   "stack_row": {
     "no_containers": "컨테이너를 찾을 수 없습니다.",
@@ -592,23 +653,6 @@
     "col_image": "이미지",
     "col_uptime": "가동 시간"
   },
-  "scale_modal": {
-    "title": "서비스 스케일 — {{name}}",
-    "confirm_title": "스케일 확인 — {{name}}",
-    "aria_label": "서비스 스케일 대화 상자",
-    "sideeffects_title": "스케일은 실행 중인 인스턴스를 변경합니다",
-    "sideeffects_body": "각 서비스 복제본은 동일한 이미지와 구성을 공유하는 별도의 컨테이너입니다. 스케일 업은 즉시 새 컨테이너를 시작합니다. 스케일 다운은 초과 컨테이너를 중지하고 제거합니다. 호스트 포트 바인딩, 볼륨 마운트 또는 네트워크 별칭의 변경 사항은 충돌을 일으킬 수 있습니다.",
-    "what_is_scale_title": "docker compose 스케일 작동 방식",
-    "what_is_scale_body": "이 작업은 \"docker compose up -d --scale <service>=<n>\"을 실행합니다. Docker Compose는 요청된 수에 도달하기 위해 컨테이너를 시작하거나 중지합니다. 이미지나 구성이 변경되지 않는 한 기존 컨테이너는 다시 만들어지지 않습니다.",
-    "apply_button": "적용",
-    "service_label": "{{service}} 복제본 수",
-    "minus_aria": "{{service}}의 복제본 줄이기",
-    "plus_aria": "{{service}}의 복제본 늘리기",
-    "port_conflict_inline": "이 서비스에는 정적 호스트 포트 바인딩이 있습니다 — 한 번에 하나의 컨테이너만 호스트 포트를 바인딩할 수 있으므로 1개 이상의 복제본으로 스케일하면 실패합니다.",
-    "port_conflict_title": "포트 충돌 가능성",
-    "port_conflict_body": "다음 서비스에는 정적 호스트 포트 바인딩이 있습니다. 호스트 포트는 단일 컨테이너에서만 바인딩할 수 있으므로 Docker는 복제본을 두 개 이상 시작할 수 없습니다:",
-    "port_conflict_icon_title": "정적 호스트 포트 바인딩이 있습니다"
-  },
   "settings": {
     "title": "설정",
     "open_button": "설정",
@@ -635,6 +679,75 @@
     "pause_success": "{{name}} 일시 중지됨",
     "pause_failed": "{{name}} 일시 중지 실패",
     "unpause_success": "{{name}} 재개됨",
-    "unpause_failed": "{{name}} 재개 실패"
+    "unpause_failed": "{{name}} 재개 실패",
+    "service_start_success": "서비스 {{name}} 시작됨",
+    "service_start_failed": "서비스 {{name}} 시작 실패",
+    "service_stop_success": "서비스 {{name}} 중지됨",
+    "service_stop_failed": "서비스 {{name}} 중지 실패",
+    "service_restart_success": "서비스 {{name}} 재시작됨",
+    "service_restart_failed": "서비스 {{name}} 재시작 실패"
+  },
+  "service_actions": {
+    "start": "서비스 시작",
+    "stop": "서비스 중지",
+    "restart": "서비스 재시작",
+    "logs": "서비스 로그"
+  },
+  "scale_modal": {
+    "title": "서비스 스케일 — {{name}}",
+    "confirm_title": "스케일 확인 — {{name}}",
+    "aria_label": "서비스 스케일 대화 상자",
+    "sideeffects_title": "스케일은 실행 중인 인스턴스를 변경합니다",
+    "sideeffects_body": "각 서비스 복제본은 동일한 이미지와 구성을 공유하는 별도의 컨테이너입니다. 스케일 업은 즉시 새 컨테이너를 시작합니다. 스케일 다운은 초과 컨테이너를 중지하고 제거합니다. 호스트 포트 바인딩, 볼륨 마운트 또는 네트워크 별칭의 변경 사항은 충돌을 일으킬 수 있습니다.",
+    "what_is_scale_title": "docker compose 스케일 작동 방식",
+    "what_is_scale_body": "이 작업은 \"docker compose up -d --scale <service>=<n>\"을 실행합니다. Docker Compose는 요청된 수에 도달하기 위해 컨테이너를 시작하거나 중지합니다. 이미지나 구성이 변경되지 않는 한 기존 컨테이너는 다시 만들어지지 않습니다.",
+    "apply_button": "적용",
+    "service_label": "{{service}} 복제본 수",
+    "minus_aria": "{{service}}의 복제본 줄이기",
+    "plus_aria": "{{service}}의 복제본 늘리기",
+    "port_conflict_inline": "이 서비스에는 정적 호스트 포트 바인딩이 있습니다 — 한 번에 하나의 컨테이너만 호스트 포트를 바인딩할 수 있으므로 1개 이상의 복제본으로 스케일하면 실패합니다.",
+    "port_conflict_title": "포트 충돌 가능성",
+    "port_conflict_body": "다음 서비스에는 정적 호스트 포트 바인딩이 있습니다. 호스트 포트는 단일 컨테이너에서만 바인딩할 수 있으므로 Docker는 복제본을 두 개 이상 시작할 수 없습니다:",
+    "port_conflict_icon_title": "정적 호스트 포트 바인딩이 있습니다"
+  },
+  "background_tasks": {
+    "toggle_button": "백그라운드 작업",
+    "title": "백그라운드 작업",
+    "empty_title": "백그라운드 작업 없음",
+    "empty_body": "백그라운드로 보낸 작업이 여기에 표시됩니다.",
+    "status_pending": "대기 중",
+    "status_running": "실행 중",
+    "status_success": "완료",
+    "status_error": "실패",
+    "status_stopped": "중지됨",
+    "stop_button": "중지",
+    "remove_button": "제거",
+    "log_empty": "출력 대기 중…"
+  },
+  "bulk_confirm_modal": {
+    "aria_label": "일괄 작업 확인",
+    "title_up_one": "스택 {{count}}개를 시작하시겠습니까?",
+    "title_up_other": "스택 {{count}}개를 시작하시겠습니까?",
+    "title_pull_one": "스택 {{count}}개의 이미지를 풀하시겠습니까?",
+    "title_pull_other": "스택 {{count}}개의 이미지를 풀하시겠습니까?",
+    "title_restart_one": "스택 {{count}}개를 재시작하시겠습니까?",
+    "title_restart_other": "스택 {{count}}개를 재시작하시겠습니까?",
+    "title_down_one": "스택 {{count}}개를 중지하시겠습니까?",
+    "title_down_other": "스택 {{count}}개를 중지하시겠습니까?",
+    "title_kill_one": "스택 {{count}}개를 강제 종료하시겠습니까?",
+    "title_kill_other": "스택 {{count}}개를 강제 종료하시겠습니까?",
+    "background_notice": "백그라운드 작업으로 실행됩니다. 백그라운드 작업 패널에서 모니터링, 중지, 제거할 수 있습니다.",
+    "warning_up": "서비스 구성이 변경된 경우 컨테이너가 재시작되고 새 이미지를 풀할 수 있습니다.",
+    "warning_restart": "선택한 스택에서 실행 중인 서비스는 재시작하는 동안 잠시 사용할 수 없습니다.",
+    "warning_down_title": "선택한 모든 스택의 컨테이너를 중지하고 제거합니다",
+    "warning_down_body": "볼륨은 유지되지만 그 밖의 상태(예: 메모리 내 캐시)는 사라집니다. 스택은 다시 시작할 때까지 목록에서 사라집니다.",
+    "warning_kill_title": "선택한 모든 스택의 모든 컨테이너를 강제로 종료합니다",
+    "warning_kill_body": "강제 종료는 즉시 SIGKILL을 보냅니다 — 중지와 달리 프로세스가 정리하거나 데이터를 기록할 기회가 없습니다. 중지가 응답하지 않을 때만 사용하세요.",
+    "stacks_label": "영향받는 스택:",
+    "confirm_button_up": "시작",
+    "confirm_button_pull": "풀",
+    "confirm_button_restart": "재시작",
+    "confirm_button_down": "중지",
+    "confirm_button_kill": "강제 종료"
   }
 }

@@ -25,7 +25,13 @@
     "aria_label": "Tumpukan Compose",
     "empty_title": "Tidak ada tumpukan compose ditemukan",
     "empty_body": "Mulai proyek dengan docker/podman compose up -d dan akan muncul di sini.",
+    "empty_create": "Buat tumpukan",
+    "empty_import": "Impor yang ada",
+    "no_results_title": "Tidak ada tumpukan yang cocok",
+    "no_results_body": "Coba nama yang berbeda atau hapus filter aktif.",
+    "clear_filters": "Hapus filter",
     "load_failed": "Gagal memuat tumpukan",
+    "refreshing": "Memuat ulang tumpukan",
     "service_count_one": "{{count}} layanan",
     "service_count_other": "{{count}} layanan",
     "status_running": "berjalan",
@@ -33,12 +39,6 @@
     "status_stopped": "berhenti",
     "status_paused": "dijeda",
     "status_unknown": "tidak diketahui",
-    "empty_create": "Buat tumpukan",
-    "empty_import": "Impor yang ada",
-    "no_results_title": "Tidak ada tumpukan yang cocok",
-    "no_results_body": "Coba nama yang berbeda atau hapus filter aktif.",
-    "clear_filters": "Hapus filter",
-    "refreshing": "Memuat ulang tumpukan",
     "search_placeholder": "Cari tumpukan…",
     "filter_tooltip_running": "Tampilkan hanya tumpukan yang berjalan",
     "filter_tooltip_partial": "Tampilkan hanya tumpukan yang berjalan sebagian",
@@ -46,8 +46,11 @@
     "filter_tooltip_paused": "Tampilkan hanya tumpukan yang dijeda",
     "select_stack": "Pilih {{name}}",
     "select_all": "Pilih semua",
+    "deselect_all": "Batalkan semua pilihan",
     "bulk_selected": "{{count}} dipilih",
-    "bulk_clear": "Hapus pilihan"
+    "bulk_clear": "Hapus pilihan",
+    "runtime_switch_cancelled_tasks_one": "Membatalkan {{count}} tugas latar belakang yang tertunda karena runtime berubah",
+    "runtime_switch_cancelled_tasks_other": "Membatalkan {{count}} tugas latar belakang yang tertunda karena runtime berubah"
   },
   "actions": {
     "up": "Jalankan",
@@ -96,6 +99,9 @@
     "rootless": "Tanpa root",
     "rootless_help_title": "Mode tanpa root",
     "rootless_help_body": "Docker atau Podman berjalan dalam mode tanpa root — kontainer berjalan sebagai pengguna Anda, bukan root. Ini meningkatkan keamanan tetapi mungkin membatasi beberapa fitur seperti mengikat port istimewa (<1024), mengakses jalur sistem, atau menggunakan driver jaringan tertentu.",
+    "rootful": "Dengan root",
+    "rootful_help_title": "Mode dengan root",
+    "rootful_help_body": "Docker atau Podman berjalan dalam mode dengan root (seluruh sistem) — kontainer berjalan sebagai root. Tindakan dinaikkan haknya melalui akses administratif Cockpit bila diperlukan.",
     "help": "Bantuan",
     "feedback": "Masukan / Laporkan bug",
     "source": "Kode sumber",
@@ -119,7 +125,28 @@
     "not_installed": "{{runtime}} tidak ditemukan — instal untuk beralih",
     "podman_confirm_title": "Beralih ke Podman",
     "podman_confirm_body": "Dukungan Podman masih eksperimental. Tergantung pada pengaturan Anda, beberapa fitur mungkin tidak berfungsi seperti yang diharapkan — termasuk penemuan tumpukan, streaming log, dan perintah compose tertentu.",
-    "podman_suggest_docker_missing": "Docker tidak ditemukan di sistem ini. Beralih ke Podman untuk mengelola kontainer Anda."
+    "podman_suggest_docker_missing": "Docker tidak ditemukan di sistem ini. Beralih ke Podman untuk mengelola kontainer Anda.",
+    "rootless": "Tanpa root",
+    "rootful": "Dengan root",
+    "socket_mode_toggle_label": "Mode socket",
+    "rootless_help": "Gunakan socket per pengguna (tanpa root). Kontainer berjalan sebagai pengguna Anda sendiri.",
+    "rootful_help": "Gunakan socket seluruh sistem (dengan root). Kontainer berjalan sebagai root, dinaikkan haknya melalui akses administratif Cockpit.",
+    "socket_not_detected": "Socket tidak terdeteksi",
+    "rootful_needs_admin_access": "Socket root terdeteksi tetapi tidak dapat dikonfirmasi — aktifkan akses administratif Cockpit, lalu klik Periksa ulang",
+    "recheck_sockets": "Periksa ulang ketersediaan socket",
+    "no_socket_detected": "Tidak ada socket mesin {{runtime}} yang terdeteksi. Pastikan {{runtime}} terpasang dan berjalan.",
+    "no_socket_needs_admin_access": "Tidak ada socket mesin {{runtime}} yang terkonfirmasi — socket root ditemukan tetapi memerlukan akses administratif Cockpit. Aktifkan, lalu klik Periksa ulang."
+  },
+  "layout": {
+    "toggle_label": "Tata letak tampilan",
+    "minimal": "Minimal",
+    "minimal_tooltip": "Mode ringkas: sembunyikan footer, kurangi jarak, fokus pada ikon",
+    "poweruser": "PowerUser",
+    "poweruser_tooltip": "Tata letak bawaan dengan semua kontrol",
+    "pretty": "Elegan",
+    "pretty_tooltip": "Tata letak lega dengan bayangan lembut dan tipografi kaya",
+    "unix": "Unix",
+    "unix_tooltip": "Bergaya terminal dengan font monospace dan karakter bingkai"
   },
   "error_boundary": {
     "load_stacks_error": "Kesalahan saat memuat tumpukan"
@@ -133,7 +160,8 @@
     "confirm_button": "Hentikan (hapus)",
     "checking_networks": "Memeriksa jaringan bersama…",
     "shared_networks_title": "Jaringan bersama terdeteksi",
-    "shared_with": "juga digunakan oleh"
+    "shared_with": "juga digunakan oleh",
+    "background_label": "Hentikan — {{name}}"
   },
   "kill_modal": {
     "aria_label": "Konfirmasi penghentian paksa",
@@ -141,7 +169,8 @@
     "body_prefix": "Menjalankan",
     "body_sigkill": "mengirim SIGKILL ke semua kontainer di",
     "body_suffix": ", menghentikannya secara paksa dan segera. Tidak seperti Stop, proses tidak punya kesempatan untuk membersihkan. Gunakan hanya saat Stop tidak merespons.",
-    "confirm_button": "Paksa hentikan semua kontainer"
+    "confirm_button": "Paksa hentikan semua kontainer",
+    "background_label": "Paksa berhenti — {{name}}"
   },
   "leftovers": {
     "remaining_title": "Docker masih mencantumkan kontainer untuk {{name}}",
@@ -164,7 +193,8 @@
     "aria_label": "Konfirmasi mulai ulang",
     "title": "Mulai ulang \"{{name}}\"?",
     "body": "Ini akan memulai ulang semua layanan yang berjalan. Layanan akan sebentar tidak tersedia.",
-    "confirm_button": "Mulai ulang"
+    "confirm_button": "Mulai ulang",
+    "background_label": "Mulai ulang — {{name}}"
   },
   "delete_modal": {
     "aria_label": "Hapus tumpukan compose — {{name}}",
@@ -183,6 +213,7 @@
     "target_folder": "folder {{folder}}",
     "target_file": "file {{file}}",
     "error_default": "Gagal menghapus",
+    "retry_sudo_button": "Coba lagi dengan sudo?",
     "checking_networks": "Memeriksa jaringan bersama…",
     "shared_networks_title": "Jaringan bersama terdeteksi",
     "shared_with": "juga digunakan oleh"
@@ -269,7 +300,7 @@
     "error_count_other": "Ada {{count}} kesalahan dalam file compose Anda.",
     "warning_count_one": "Ada {{count}} peringatan dalam file compose Anda.",
     "warning_count_other": "Ada {{count}} peringatan dalam file compose Anda.",
-    "file_tab_aria": "Edit {{name}}",
+    "file_tab_aria": "Sunting {{name}}",
     "add_file_button": "Tambah",
     "add_file_title": "Tambah file compose",
     "add_file_filename_label": "Nama file",
@@ -335,6 +366,7 @@
     "level_warn": "Peringatan",
     "level_info": "Informasi",
     "download_tooltip": "Unduh log",
+    "download_saved": "Log disimpan ke {{path}} (Firefox tidak dapat mengunduh berkas langsung dari antarmuka ini)",
     "timestamps_tooltip": "Aktifkan cap waktu",
     "scroll_top": "Loncat ke atas",
     "scroll_bottom": "Loncat ke bawah",
@@ -344,23 +376,26 @@
   "run_modal": {
     "aria_label": "Jalankan — {{name}}",
     "title": "Jalankan — {{name}}",
+    "warning_title": "Layanan yang berjalan lama akan memblokir",
+    "warning_body": "compose run memulai kontainer baru untuk layanan yang dipilih. Jika layanan tersebut tidak memiliki perintah pengganti (misalnya web server atau database), kontainer akan memulai layanan dan tetap berjalan — tidak akan keluar sendiri. Anda mungkin perlu membatalkan di sini lalu menghentikan paksa tumpukan untuk memulihkan.",
     "field_service": "Layanan",
     "field_service_placeholder": "nama layanan",
     "group_services": "Layanan",
     "group_jobs": "Job",
     "field_command": "Perintah",
     "field_command_placeholder": "echo hello",
+    "field_command_help_args": "Diteruskan sebagai argumen ke entrypoint image (mis. ketik \"--help\").",
+    "field_command_help_override": "Kata pertama menggantikan entrypoint image sepenuhnya (mis. ketik path lengkap ke program, seperti exec di terminal). Sisanya diteruskan sebagai argumennya.",
+    "field_command_job_hint": "Untuk job, biarkan kosong untuk menjalankan perintah job itu sendiri.",
+    "field_override_entrypoint": "Timpa entrypoint",
     "field_rm": "Hapus kontainer setelah dijalankan (--rm)",
     "run_button": "Jalankan",
     "running": "Menjalankan perintah di {{name}}…",
     "initializing": "Memulai…",
     "complete": "✓ Perintah selesai",
     "failed": "✗ Perintah gagal",
-    "warning_title": "Layanan yang berjalan lama akan memblokir",
-    "warning_body": "compose run memulai kontainer baru untuk layanan yang dipilih. Jika layanan tersebut tidak memiliki perintah pengganti (misalnya web server atau database), kontainer akan memulai layanan dan tetap berjalan — tidak akan keluar sendiri. Anda mungkin perlu membatalkan di sini lalu menghentikan paksa tumpukan untuk memulihkan.",
     "force_kill_button": "Paksa hapus kontainer",
-    "force_kill_tooltip": "Menghapus paksa kontainer satu kali yang terjebak. Gunakan saat layanan tidak keluar sendiri.",
-    "field_command_job_hint": "Untuk job, biarkan kosong untuk menjalankan perintah job itu sendiri."
+    "force_kill_tooltip": "Menghapus paksa kontainer satu kali yang terjebak. Gunakan saat layanan tidak keluar sendiri."
   },
   "exec_modal": {
     "aria_label": "Terminal — {{name}}",
@@ -404,7 +439,9 @@
     "pulling": "Menarik image untuk {{name}}…",
     "complete": "✓ Penarikan selesai",
     "failed": "✗ Penarikan gagal",
-    "starting": "Memulai penarikan…"
+    "starting": "Memulai penarikan…",
+    "background_button": "Jalankan di latar belakang",
+    "background_label": "Tarik — {{name}}"
   },
   "pull_confirm_modal": {
     "aria_label": "Konfirmasi penarikan — {{name}}",
@@ -423,7 +460,9 @@
     "starting": "Memulai {{name}}…",
     "initializing": "Memulai…",
     "complete": "✓ Berhasil dijalankan",
-    "failed": "✗ Gagal dijalankan"
+    "failed": "✗ Gagal dijalankan",
+    "background_button": "Jalankan di latar belakang",
+    "background_label": "Jalankan — {{name}}"
   },
   "compose_warnings": {
     "title": "Docker Compose melaporkan peringatan"
@@ -505,6 +544,26 @@
     "prune_button": "Bersihkan yang dipilih",
     "nothing_to_remove": "Tidak ada yang perlu dihapus."
   },
+  "prune_global": {
+    "button": "Bersihkan image",
+    "aria_label": "Bersihkan image yang tidak digunakan (semua tumpukan)",
+    "title": "Bersihkan image yang tidak digunakan",
+    "body_intro": "Mencari image yang saat ini tidak digunakan oleh kontainer mana pun, di seluruh host — bukan hanya satu tumpukan. Termasuk image milik tumpukan yang sepenuhnya berhenti (tidak ada kontainer yang membuatnya \"sedang digunakan\") dan versi lama yang tertinggal saat tag mengambang seperti :latest ditarik ulang.",
+    "loading": "Mencari image yang tidak digunakan…",
+    "nothing_found": "Tidak ada image yang tidak digunakan — tidak ada yang perlu dibebaskan.",
+    "column_id": "ID",
+    "column_repo_tag": "Repositori:Tag",
+    "column_size": "Ukuran",
+    "column_age": "Dibuat",
+    "total_reclaimable": "Total yang dapat dibebaskan: {{size}}",
+    "confirm_title": "Ini akan menghapus image berikut secara permanen",
+    "confirm_body": "{{count}} image akan dihapus. Jika ada yang milik tumpukan yang sedang berhenti, tumpukan itu perlu menariknya ulang saat dijalankan berikutnya. Tindakan ini tidak dapat dibatalkan.",
+    "confirm_checkbox": "Saya mengerti bahwa ini akan menghapus image di atas secara permanen",
+    "prune_button": "Bersihkan",
+    "pruning": "Membersihkan…",
+    "result_title": "Selesai",
+    "error_title": "Pembersihan gagal"
+  },
   "downed_section": {
     "create_button": "Buat",
     "import_button": "Impor",
@@ -522,7 +581,9 @@
     "depth_aria": "Kedalaman pemindaian maksimum",
     "depth_minus_aria": "Kurangi kedalaman pemindaian",
     "depth_plus_aria": "Tambah kedalaman pemindaian",
-    "restore_button": "Pulihkan"
+    "restore_button": "Pulihkan",
+    "admin_mismatch_badge": "Mode admin Cockpit tidak sesuai",
+    "admin_mismatch_tooltip": "Direktori pemindaian ada di folder home Anda, tetapi Cockpit dalam mode administratif. Berkas yang dibuat di sini mungkin dimiliki root dan menyebabkan galat izin."
   },
   "stack_row": {
     "no_containers": "Tidak ada kontainer ditemukan.",
@@ -592,23 +653,6 @@
     "col_image": "Image",
     "col_uptime": "Waktu aktif"
   },
-  "scale_modal": {
-    "title": "Skalakan layanan — {{name}}",
-    "confirm_title": "Konfirmasi penskalaan — {{name}}",
-    "aria_label": "Modal penskalaan layanan",
-    "sideeffects_title": "Penskalaan mengubah instans yang berjalan",
-    "sideeffects_body": "Setiap replika layanan adalah kontainer terpisah yang berbagi image dan konfigurasi yang sama. Memperbesar skala segera memulai kontainer baru. Memperkecil skala menghentikan dan menghapus yang berlebih. Perubahan pada binding port host, mount volume, atau alias jaringan dapat menyebabkan konflik.",
-    "what_is_scale_title": "Cara kerja penskalaan docker compose",
-    "what_is_scale_body": "Ini menjalankan \"docker compose up -d --scale <service>=<n>\". Docker Compose akan memulai atau menghentikan kontainer untuk mencapai jumlah yang diminta. Kontainer yang ada tidak dibuat ulang kecuali image atau konfigurasi berubah.",
-    "apply_button": "Terapkan",
-    "service_label": "Jumlah replika {{service}}",
-    "minus_aria": "Kurangi replika untuk {{service}}",
-    "plus_aria": "Tambah replika untuk {{service}}",
-    "port_conflict_inline": "Layanan ini memiliki binding port host statis — penskalaan lebih dari 1 replika akan gagal karena hanya satu kontainer yang dapat mengikat port host sekaligus.",
-    "port_conflict_title": "Kemungkinan konflik port",
-    "port_conflict_body": "Layanan berikut memiliki binding port host statis. Docker tidak akan dapat memulai lebih dari satu replika karena port host hanya dapat diikat oleh satu kontainer:",
-    "port_conflict_icon_title": "Memiliki binding port host statis"
-  },
   "settings": {
     "title": "Pengaturan",
     "open_button": "Pengaturan",
@@ -635,6 +679,75 @@
     "pause_success": "{{name}} dijeda",
     "pause_failed": "Gagal menjeda {{name}}",
     "unpause_success": "{{name}} dilanjutkan",
-    "unpause_failed": "Gagal melanjutkan {{name}}"
+    "unpause_failed": "Gagal melanjutkan {{name}}",
+    "service_start_success": "Layanan {{name}} dimulai",
+    "service_start_failed": "Gagal memulai layanan {{name}}",
+    "service_stop_success": "Layanan {{name}} dihentikan",
+    "service_stop_failed": "Gagal menghentikan layanan {{name}}",
+    "service_restart_success": "Layanan {{name}} dimulai ulang",
+    "service_restart_failed": "Gagal memulai ulang layanan {{name}}"
+  },
+  "service_actions": {
+    "start": "Mulai layanan",
+    "stop": "Hentikan layanan",
+    "restart": "Mulai ulang layanan",
+    "logs": "Log layanan"
+  },
+  "scale_modal": {
+    "title": "Skalakan layanan — {{name}}",
+    "confirm_title": "Konfirmasi penskalaan — {{name}}",
+    "aria_label": "Modal penskalaan layanan",
+    "sideeffects_title": "Penskalaan mengubah instans yang berjalan",
+    "sideeffects_body": "Setiap replika layanan adalah kontainer terpisah yang berbagi image dan konfigurasi yang sama. Memperbesar skala segera memulai kontainer baru. Memperkecil skala menghentikan dan menghapus yang berlebih. Perubahan pada binding port host, mount volume, atau alias jaringan dapat menyebabkan konflik.",
+    "what_is_scale_title": "Cara kerja penskalaan docker compose",
+    "what_is_scale_body": "Ini menjalankan \"docker compose up -d --scale <service>=<n>\". Docker Compose akan memulai atau menghentikan kontainer untuk mencapai jumlah yang diminta. Kontainer yang ada tidak dibuat ulang kecuali image atau konfigurasi berubah.",
+    "apply_button": "Terapkan",
+    "service_label": "Jumlah replika {{service}}",
+    "minus_aria": "Kurangi replika untuk {{service}}",
+    "plus_aria": "Tambah replika untuk {{service}}",
+    "port_conflict_inline": "Layanan ini memiliki binding port host statis — penskalaan lebih dari 1 replika akan gagal karena hanya satu kontainer yang dapat mengikat port host sekaligus.",
+    "port_conflict_title": "Kemungkinan konflik port",
+    "port_conflict_body": "Layanan berikut memiliki binding port host statis. Docker tidak akan dapat memulai lebih dari satu replika karena port host hanya dapat diikat oleh satu kontainer:",
+    "port_conflict_icon_title": "Memiliki binding port host statis"
+  },
+  "background_tasks": {
+    "toggle_button": "Tugas latar belakang",
+    "title": "Tugas latar belakang",
+    "empty_title": "Tidak ada tugas latar belakang",
+    "empty_body": "Tugas yang dikirim ke latar belakang akan muncul di sini.",
+    "status_pending": "Tertunda",
+    "status_running": "Berjalan",
+    "status_success": "Selesai",
+    "status_error": "Gagal",
+    "status_stopped": "Dihentikan",
+    "stop_button": "Hentikan",
+    "remove_button": "Hapus",
+    "log_empty": "Menunggu keluaran…"
+  },
+  "bulk_confirm_modal": {
+    "aria_label": "Konfirmasi tindakan massal",
+    "title_up_one": "Jalankan {{count}} tumpukan?",
+    "title_up_other": "Jalankan {{count}} tumpukan?",
+    "title_pull_one": "Tarik image untuk {{count}} tumpukan?",
+    "title_pull_other": "Tarik image untuk {{count}} tumpukan?",
+    "title_restart_one": "Mulai ulang {{count}} tumpukan?",
+    "title_restart_other": "Mulai ulang {{count}} tumpukan?",
+    "title_down_one": "Hentikan {{count}} tumpukan?",
+    "title_down_other": "Hentikan {{count}} tumpukan?",
+    "title_kill_one": "Paksa berhenti {{count}} tumpukan?",
+    "title_kill_other": "Paksa berhenti {{count}} tumpukan?",
+    "background_notice": "Ini akan berjalan sebagai tugas latar belakang. Anda dapat memantau, menghentikan, atau menghapusnya dari panel tugas latar belakang.",
+    "warning_up": "Ini mungkin memulai ulang kontainer dan menarik image baru jika konfigurasi layanan berubah.",
+    "warning_restart": "Layanan yang berjalan di tumpukan terpilih akan sebentar tidak tersedia saat dimulai ulang.",
+    "warning_down_title": "Ini menghentikan dan menghapus semua kontainer di setiap tumpukan terpilih",
+    "warning_down_body": "Volume tetap disimpan, tetapi semua status di luarnya (mis. cache di memori) akan hilang. Tumpukan akan hilang dari daftar sampai dijalankan kembali.",
+    "warning_kill_title": "Ini menghentikan paksa setiap kontainer di setiap tumpukan terpilih",
+    "warning_kill_body": "Paksa berhenti langsung mengirim SIGKILL — tidak seperti Hentikan, proses tidak sempat membersihkan atau menyimpan data. Gunakan hanya jika Hentikan tidak merespons.",
+    "stacks_label": "Tumpukan yang terdampak:",
+    "confirm_button_up": "Jalankan",
+    "confirm_button_pull": "Tarik",
+    "confirm_button_restart": "Mulai ulang",
+    "confirm_button_down": "Hentikan",
+    "confirm_button_kill": "Paksa berhenti"
   }
 }

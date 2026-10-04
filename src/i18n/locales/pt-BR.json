@@ -25,20 +25,21 @@
     "aria_label": "Pilhas Compose",
     "empty_title": "Nenhuma pilha compose encontrada",
     "empty_body": "Inicie um projeto com docker/podman compose up -d e ele aparecerá aqui.",
+    "empty_create": "Criar pilha",
+    "empty_import": "Importar existente",
+    "no_results_title": "Nenhuma pilha encontrada",
+    "no_results_body": "Tente um nome diferente ou limpe os filtros ativos.",
+    "clear_filters": "Limpar filtros",
     "load_failed": "Falha ao carregar as pilhas",
+    "refreshing": "Atualizando pilhas",
     "service_count_one": "{{count}} serviço",
+    "service_count_many": "{{count}} serviços",
     "service_count_other": "{{count}} serviços",
     "status_running": "em execução",
     "status_partial": "parcial",
     "status_stopped": "parado",
     "status_paused": "pausado",
     "status_unknown": "desconhecido",
-    "empty_create": "Criar pilha",
-    "empty_import": "Importar existente",
-    "no_results_title": "Nenhuma pilha encontrada",
-    "no_results_body": "Tente um nome diferente ou limpe os filtros ativos.",
-    "clear_filters": "Limpar filtros",
-    "refreshing": "Atualizando pilhas",
     "search_placeholder": "Pesquisar pilhas…",
     "filter_tooltip_running": "Mostrar apenas pilhas em execução",
     "filter_tooltip_partial": "Mostrar apenas pilhas parcialmente em execução",
@@ -46,8 +47,12 @@
     "filter_tooltip_paused": "Mostrar apenas pilhas pausadas",
     "select_stack": "Selecionar {{name}}",
     "select_all": "Selecionar tudo",
+    "deselect_all": "Desmarcar tudo",
     "bulk_selected": "{{count}} selecionados",
-    "bulk_clear": "Limpar seleção"
+    "bulk_clear": "Limpar seleção",
+    "runtime_switch_cancelled_tasks_one": "{{count}} tarefa em segundo plano pendente cancelada porque o runtime mudou",
+    "runtime_switch_cancelled_tasks_many": "{{count}} tarefas em segundo plano pendentes canceladas porque o runtime mudou",
+    "runtime_switch_cancelled_tasks_other": "{{count}} tarefas em segundo plano pendentes canceladas porque o runtime mudou"
   },
   "actions": {
     "up": "Iniciar",
@@ -96,6 +101,9 @@
     "rootless": "Sem root",
     "rootless_help_title": "Modo sem root",
     "rootless_help_body": "O Docker ou Podman está sendo executado em modo sem root — os contêineres são executados como seu usuário, não como root. Isso melhora a segurança, mas pode limitar alguns recursos como vincular portas privilegiadas (<1024), acessar caminhos do sistema ou usar determinados drivers de rede.",
+    "rootful": "Com root",
+    "rootful_help_title": "Modo com root",
+    "rootful_help_body": "O Docker ou Podman está sendo executado no modo com root (em todo o sistema) — os contêineres são executados como root. As ações são elevadas pelo acesso administrativo do Cockpit quando necessário.",
     "help": "Ajuda",
     "feedback": "Feedback / Reportar bug",
     "source": "Código-fonte",
@@ -119,7 +127,28 @@
     "not_installed": "{{runtime}} não encontrado — instale-o para alternar",
     "podman_confirm_title": "Alternar para Podman",
     "podman_confirm_body": "O suporte ao Podman é experimental. Dependendo da sua configuração, alguns recursos podem não funcionar conforme esperado — incluindo descoberta de pilhas, streaming de logs e determinados comandos compose.",
-    "podman_suggest_docker_missing": "O Docker não foi encontrado neste sistema. Mude para o Podman para gerenciar seus contêineres."
+    "podman_suggest_docker_missing": "O Docker não foi encontrado neste sistema. Mude para o Podman para gerenciar seus contêineres.",
+    "rootless": "Sem root",
+    "rootful": "Com root",
+    "socket_mode_toggle_label": "Modo do socket",
+    "rootless_help": "Usar o socket por usuário (sem root). Os contêineres são executados como o seu próprio usuário.",
+    "rootful_help": "Usar o socket do sistema (com root). Os contêineres são executados como root, com elevação pelo acesso administrativo do Cockpit.",
+    "socket_not_detected": "Socket não detectado",
+    "rootful_needs_admin_access": "Socket com root detectado, mas não foi possível confirmá-lo — ative o acesso administrativo do Cockpit e clique em Verificar novamente",
+    "recheck_sockets": "Verificar novamente a disponibilidade dos sockets",
+    "no_socket_detected": "Nenhum socket do engine {{runtime}} detectado. Verifique se o {{runtime}} está instalado e em execução.",
+    "no_socket_needs_admin_access": "Nenhum socket do engine {{runtime}} confirmado — um socket com root foi encontrado, mas exige o acesso administrativo do Cockpit. Ative-o e clique em Verificar novamente."
+  },
+  "layout": {
+    "toggle_label": "Layout de exibição",
+    "minimal": "Mínimo",
+    "minimal_tooltip": "Modo compacto: oculta o rodapé, reduz os espaçamentos, focado em ícones",
+    "poweruser": "PowerUser",
+    "poweruser_tooltip": "Layout padrão com todos os controles",
+    "pretty": "Elegante",
+    "pretty_tooltip": "Layout espaçoso com sombras suaves e tipografia caprichada",
+    "unix": "Unix",
+    "unix_tooltip": "Inspirado no terminal, com fonte monoespaçada e caracteres de moldura"
   },
   "error_boundary": {
     "load_stacks_error": "Erro ao carregar as pilhas"
@@ -133,7 +162,8 @@
     "confirm_button": "Parar (remover)",
     "checking_networks": "Verificando redes compartilhadas…",
     "shared_networks_title": "Redes compartilhadas detectadas",
-    "shared_with": "também usado por"
+    "shared_with": "também usado por",
+    "background_label": "Parar — {{name}}"
   },
   "kill_modal": {
     "aria_label": "Confirmar encerramento forçado",
@@ -141,7 +171,8 @@
     "body_prefix": "Executar",
     "body_sigkill": "envia SIGKILL para todos os contêineres em",
     "body_suffix": ", encerrando-os forçosamente de imediato. Ao contrário de Parar, os processos não têm chance de fazer limpeza. Use somente quando Parar não responder.",
-    "confirm_button": "Matar todos os contêineres"
+    "confirm_button": "Matar todos os contêineres",
+    "background_label": "Matar — {{name}}"
   },
   "leftovers": {
     "remaining_title": "O Docker ainda lista contêineres de {{name}}",
@@ -164,7 +195,8 @@
     "aria_label": "Confirmar reinicialização",
     "title": "Reiniciar \"{{name}}\"?",
     "body": "Isso irá reiniciar todos os serviços em execução. Os serviços ficarão brevemente indisponíveis.",
-    "confirm_button": "Reiniciar"
+    "confirm_button": "Reiniciar",
+    "background_label": "Reiniciar — {{name}}"
   },
   "delete_modal": {
     "aria_label": "Excluir pilha compose — {{name}}",
@@ -183,6 +215,7 @@
     "target_folder": "pasta {{folder}}",
     "target_file": "arquivo {{file}}",
     "error_default": "Falha ao excluir",
+    "retry_sudo_button": "Tentar novamente com sudo?",
     "checking_networks": "Verificando redes compartilhadas…",
     "shared_networks_title": "Redes compartilhadas detectadas",
     "shared_with": "também usado por"
@@ -217,8 +250,10 @@
     "errors_found_title": "Erros encontrados",
     "warnings_found_title": "Avisos encontrados",
     "error_count_one": "Há {{count}} erro no arquivo compose.",
+    "error_count_many": "Há {{count}} erros no arquivo compose.",
     "error_count_other": "Há {{count}} erros no arquivo compose.",
     "warning_count_one": "Há {{count}} aviso no arquivo compose.",
+    "warning_count_many": "Há {{count}} avisos no arquivo compose.",
     "warning_count_other": "Há {{count}} avisos no arquivo compose.",
     "validation_name_required": "O nome é obrigatório",
     "validation_name_slashes": "O nome não deve conter barras",
@@ -245,6 +280,7 @@
   "yaml_modal": {
     "aria_label": "Arquivo Compose — {{name}}",
     "title": "{{name}} — arquivo compose",
+    "unsaved_changes": "Alterações não salvas",
     "env_file_button": "Arquivo env",
     "history_button": "Histórico ({{count}})",
     "edit_button": "Editar",
@@ -265,8 +301,10 @@
     "errors_found_title": "Erros encontrados",
     "warnings_found_title": "Avisos encontrados",
     "error_count_one": "Há {{count}} erro no seu arquivo compose.",
+    "error_count_many": "Há {{count}} erros no seu arquivo compose.",
     "error_count_other": "Há {{count}} erros no seu arquivo compose.",
     "warning_count_one": "Há {{count}} aviso no seu arquivo compose.",
+    "warning_count_many": "Há {{count}} avisos no seu arquivo compose.",
     "warning_count_other": "Há {{count}} avisos no seu arquivo compose.",
     "file_tab_aria": "Editar {{name}}",
     "add_file_button": "Adicionar",
@@ -295,8 +333,7 @@
     "import_file_title": "Importar arquivo existente",
     "import_file_select_label": "Arquivos disponíveis",
     "import_file_none": "Nenhum arquivo YAML adicional encontrado neste diretório.",
-    "import_file_confirm_button": "Importar",
-    "unsaved_changes": "Alterações não salvas"
+    "import_file_confirm_button": "Importar"
   },
   "env_modal": {
     "aria_label": "Arquivo env — {{name}}",
@@ -335,6 +372,7 @@
     "level_warn": "Aviso",
     "level_info": "Informações",
     "download_tooltip": "Baixar logs",
+    "download_saved": "Logs salvos em {{path}} (o Firefox não consegue baixar arquivos diretamente desta interface)",
     "timestamps_tooltip": "Alternar timestamps",
     "scroll_top": "Ir para o topo",
     "scroll_bottom": "Ir para o final",
@@ -344,23 +382,26 @@
   "run_modal": {
     "aria_label": "Executar — {{name}}",
     "title": "Executar — {{name}}",
+    "warning_title": "Serviços de longa duração irão bloquear",
+    "warning_body": "compose run inicia um novo contêiner para o serviço selecionado. Se esse serviço não tiver um comando substituto (p. ex. um servidor web ou banco de dados), o contêiner iniciará o serviço e continuará em execução — não encerrará por conta própria. Talvez seja necessário cancelar aqui e depois forçar a parada da pilha para recuperar.",
     "field_service": "Serviço",
     "field_service_placeholder": "nome do serviço",
     "group_services": "Serviços",
     "group_jobs": "Jobs",
     "field_command": "Comando",
     "field_command_placeholder": "echo hello",
+    "field_command_help_args": "Passado como argumentos para o entrypoint da imagem (ex.: digite \"--help\").",
+    "field_command_help_override": "A primeira palavra substitui completamente o entrypoint da imagem (ex.: digite o caminho completo de um binário, como em um exec no terminal). O restante é passado como seus argumentos.",
+    "field_command_job_hint": "Para um job, deixe vazio para executar o comando do próprio job.",
+    "field_override_entrypoint": "Substituir entrypoint",
     "field_rm": "Remover contêiner após a execução (--rm)",
     "run_button": "Executar",
     "running": "Executando comando em {{name}}…",
     "initializing": "Iniciando…",
     "complete": "✓ Comando concluído",
     "failed": "✗ Comando falhou",
-    "warning_title": "Serviços de longa duração irão bloquear",
-    "warning_body": "compose run inicia um novo contêiner para o serviço selecionado. Se esse serviço não tiver um comando substituto (p. ex. um servidor web ou banco de dados), o contêiner iniciará o serviço e continuará em execução — não encerrará por conta própria. Talvez seja necessário cancelar aqui e depois forçar a parada da pilha para recuperar.",
     "force_kill_button": "Forçar remoção do contêiner",
-    "force_kill_tooltip": "Remove forçosamente o contêiner travado. Use quando o serviço não encerrar por conta própria.",
-    "field_command_job_hint": "Para um job, deixe vazio para executar o comando do próprio job."
+    "force_kill_tooltip": "Remove forçosamente o contêiner travado. Use quando o serviço não encerrar por conta própria."
   },
   "exec_modal": {
     "aria_label": "Terminal — {{name}}",
@@ -404,7 +445,9 @@
     "pulling": "Baixando imagens para {{name}}…",
     "complete": "✓ Download concluído",
     "failed": "✗ Download falhou",
-    "starting": "Iniciando download…"
+    "starting": "Iniciando download…",
+    "background_button": "Executar em segundo plano",
+    "background_label": "Baixar — {{name}}"
   },
   "pull_confirm_modal": {
     "aria_label": "Confirmar download — {{name}}",
@@ -423,7 +466,9 @@
     "starting": "Iniciando {{name}}…",
     "initializing": "Iniciando…",
     "complete": "✓ Início concluído",
-    "failed": "✗ Início falhou"
+    "failed": "✗ Início falhou",
+    "background_button": "Executar em segundo plano",
+    "background_label": "Iniciar — {{name}}"
   },
   "compose_warnings": {
     "title": "O Docker Compose relatou avisos"
@@ -505,6 +550,26 @@
     "prune_button": "Limpar selecionados",
     "nothing_to_remove": "Nada a remover."
   },
+  "prune_global": {
+    "button": "Limpar imagens",
+    "aria_label": "Limpar imagens não usadas (todas as pilhas)",
+    "title": "Limpar imagens não usadas",
+    "body_intro": "Procura imagens que nenhum contêiner está usando, em todo o host — não apenas em uma pilha. Inclui imagens de pilhas totalmente paradas (nenhum contêiner as mantém \"em uso\") e versões antigas que sobram quando uma tag flutuante como :latest é baixada novamente.",
+    "loading": "Procurando imagens não usadas…",
+    "nothing_found": "Nenhuma imagem não usada encontrada — nada a recuperar.",
+    "column_id": "ID",
+    "column_repo_tag": "Repositório:Tag",
+    "column_size": "Tamanho",
+    "column_age": "Criada",
+    "total_reclaimable": "Total recuperável: {{size}}",
+    "confirm_title": "Estas imagens serão excluídas permanentemente",
+    "confirm_body": "{{count}} imagem(ns) será(ão) removida(s). Se alguma pertencer a uma pilha parada, essa pilha precisará baixá-la novamente na próxima vez que for iniciada. Isso não pode ser desfeito.",
+    "confirm_checkbox": "Entendo que as imagens listadas acima serão excluídas permanentemente",
+    "prune_button": "Limpar",
+    "pruning": "Limpando…",
+    "result_title": "Concluído",
+    "error_title": "Falha na limpeza"
+  },
   "downed_section": {
     "create_button": "Criar",
     "import_button": "Importar",
@@ -522,7 +587,9 @@
     "depth_aria": "Profundidade máxima de verificação",
     "depth_minus_aria": "Diminuir profundidade de verificação",
     "depth_plus_aria": "Aumentar profundidade de verificação",
-    "restore_button": "Restaurar"
+    "restore_button": "Restaurar",
+    "admin_mismatch_badge": "Modo administrativo do Cockpit não corresponde",
+    "admin_mismatch_tooltip": "O diretório de busca está na sua pasta pessoal, mas o Cockpit está no modo administrativo. Arquivos criados aqui podem pertencer ao root e causar erros de permissão."
   },
   "stack_row": {
     "no_containers": "Nenhum contêiner encontrado.",
@@ -592,23 +659,6 @@
     "col_image": "Imagem",
     "col_uptime": "Tempo ativo"
   },
-  "scale_modal": {
-    "title": "Escalar serviços — {{name}}",
-    "confirm_title": "Confirmar escalamento — {{name}}",
-    "aria_label": "Modal de escalamento de serviços",
-    "sideeffects_title": "O escalamento altera as instâncias em execução",
-    "sideeffects_body": "Cada réplica de serviço é um contêiner separado compartilhando a mesma imagem e configuração. Aumentar a escala inicia novos contêineres imediatamente. Reduzir a escala para e remove os excedentes. Alterações em vinculações de porta do host, montagens de volume ou aliases de rede podem causar conflitos.",
-    "what_is_scale_title": "Como funciona o escalamento do docker compose",
-    "what_is_scale_body": "Isso executa \"docker compose up -d --scale <service>=<n>\". O Docker Compose iniciará ou parará contêineres para atingir o número solicitado. Contêineres existentes não são recriados a menos que a imagem ou configuração tenha mudado.",
-    "apply_button": "Aplicar",
-    "service_label": "Número de réplicas de {{service}}",
-    "minus_aria": "Diminuir réplicas para {{service}}",
-    "plus_aria": "Aumentar réplicas para {{service}}",
-    "port_conflict_inline": "Este serviço tem vinculações de porta do host estáticas — escalar além de 1 réplica falhará porque apenas um contêiner pode vincular uma porta do host por vez.",
-    "port_conflict_title": "Conflito de porta provável",
-    "port_conflict_body": "Os seguintes serviços têm vinculações de porta do host estáticas. O Docker não poderá iniciar mais de uma réplica porque uma porta do host só pode ser vinculada por um único contêiner:",
-    "port_conflict_icon_title": "Tem vinculações de porta do host estáticas"
-  },
   "settings": {
     "title": "Configurações",
     "open_button": "Configurações",
@@ -635,6 +685,80 @@
     "pause_success": "{{name}} pausado",
     "pause_failed": "Falha ao pausar {{name}}",
     "unpause_success": "{{name}} retomado",
-    "unpause_failed": "Falha ao retomar {{name}}"
+    "unpause_failed": "Falha ao retomar {{name}}",
+    "service_start_success": "Serviço {{name}} iniciado",
+    "service_start_failed": "Falha ao iniciar o serviço {{name}}",
+    "service_stop_success": "Serviço {{name}} parado",
+    "service_stop_failed": "Falha ao parar o serviço {{name}}",
+    "service_restart_success": "Serviço {{name}} reiniciado",
+    "service_restart_failed": "Falha ao reiniciar o serviço {{name}}"
+  },
+  "service_actions": {
+    "start": "Iniciar serviço",
+    "stop": "Parar serviço",
+    "restart": "Reiniciar serviço",
+    "logs": "Logs do serviço"
+  },
+  "scale_modal": {
+    "title": "Escalar serviços — {{name}}",
+    "confirm_title": "Confirmar escalamento — {{name}}",
+    "aria_label": "Modal de escalamento de serviços",
+    "sideeffects_title": "O escalamento altera as instâncias em execução",
+    "sideeffects_body": "Cada réplica de serviço é um contêiner separado compartilhando a mesma imagem e configuração. Aumentar a escala inicia novos contêineres imediatamente. Reduzir a escala para e remove os excedentes. Alterações em vinculações de porta do host, montagens de volume ou aliases de rede podem causar conflitos.",
+    "what_is_scale_title": "Como funciona o escalamento do docker compose",
+    "what_is_scale_body": "Isso executa \"docker compose up -d --scale <service>=<n>\". O Docker Compose iniciará ou parará contêineres para atingir o número solicitado. Contêineres existentes não são recriados a menos que a imagem ou configuração tenha mudado.",
+    "apply_button": "Aplicar",
+    "service_label": "Número de réplicas de {{service}}",
+    "minus_aria": "Diminuir réplicas para {{service}}",
+    "plus_aria": "Aumentar réplicas para {{service}}",
+    "port_conflict_inline": "Este serviço tem vinculações de porta do host estáticas — escalar além de 1 réplica falhará porque apenas um contêiner pode vincular uma porta do host por vez.",
+    "port_conflict_title": "Conflito de porta provável",
+    "port_conflict_body": "Os seguintes serviços têm vinculações de porta do host estáticas. O Docker não poderá iniciar mais de uma réplica porque uma porta do host só pode ser vinculada por um único contêiner:",
+    "port_conflict_icon_title": "Tem vinculações de porta do host estáticas"
+  },
+  "background_tasks": {
+    "toggle_button": "Tarefas em segundo plano",
+    "title": "Tarefas em segundo plano",
+    "empty_title": "Nenhuma tarefa em segundo plano",
+    "empty_body": "As tarefas enviadas para segundo plano aparecerão aqui.",
+    "status_pending": "Pendente",
+    "status_running": "Em execução",
+    "status_success": "Concluída",
+    "status_error": "Falhou",
+    "status_stopped": "Parada",
+    "stop_button": "Parar",
+    "remove_button": "Remover",
+    "log_empty": "Aguardando saída…"
+  },
+  "bulk_confirm_modal": {
+    "aria_label": "Confirmar ação em lote",
+    "title_up_one": "Iniciar {{count}} pilha?",
+    "title_up_many": "Iniciar {{count}} pilhas?",
+    "title_up_other": "Iniciar {{count}} pilhas?",
+    "title_pull_one": "Baixar imagens de {{count}} pilha?",
+    "title_pull_many": "Baixar imagens de {{count}} pilhas?",
+    "title_pull_other": "Baixar imagens de {{count}} pilhas?",
+    "title_restart_one": "Reiniciar {{count}} pilha?",
+    "title_restart_many": "Reiniciar {{count}} pilhas?",
+    "title_restart_other": "Reiniciar {{count}} pilhas?",
+    "title_down_one": "Parar {{count}} pilha?",
+    "title_down_many": "Parar {{count}} pilhas?",
+    "title_down_other": "Parar {{count}} pilhas?",
+    "title_kill_one": "Matar {{count}} pilha?",
+    "title_kill_many": "Matar {{count}} pilhas?",
+    "title_kill_other": "Matar {{count}} pilhas?",
+    "background_notice": "Isso será executado como tarefas em segundo plano. Você pode acompanhá-las, pará-las ou removê-las no painel de tarefas em segundo plano.",
+    "warning_up": "Isso pode reiniciar contêineres e baixar novas imagens se a configuração de algum serviço mudou.",
+    "warning_restart": "Os serviços em execução nas pilhas selecionadas ficarão indisponíveis por um breve momento durante a reinicialização.",
+    "warning_down_title": "Isso para e remove todos os contêineres de cada pilha selecionada",
+    "warning_down_body": "Os volumes são mantidos, mas qualquer estado fora deles (ex.: caches em memória) é perdido. As pilhas desaparecerão da lista até serem iniciadas novamente.",
+    "warning_kill_title": "Isso encerra à força todos os contêineres de cada pilha selecionada",
+    "warning_kill_body": "Matar envia SIGKILL imediatamente — ao contrário de Parar, os processos não têm chance de limpar nem gravar dados. Use somente quando Parar não responder.",
+    "stacks_label": "Pilhas afetadas:",
+    "confirm_button_up": "Iniciar",
+    "confirm_button_pull": "Baixar",
+    "confirm_button_restart": "Reiniciar",
+    "confirm_button_down": "Parar",
+    "confirm_button_kill": "Matar"
   }
 }
