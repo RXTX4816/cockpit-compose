@@ -15,7 +15,7 @@ This page covers all the lifecycle actions you can perform on a stack: bringing 
 Before the operation starts, a confirmation modal always appears. It shows:
 
 - A warning that containers with changed configuration will be recreated.
-- A list of every service and its image. Services using unpinned images (`:latest` or no tag) are marked with a **⚠** warning.
+- A list of every service and its image. Services using unpinned images (`:latest` or no tag) are marked with a **⚠** warning — unless their `pull_policy` rules out fetching (`never`, or `missing` for an image already on disk). A service's `pull_policy`, if set, is shown next to it.
 - An **Optional profiles** section — if your compose file defines [profiles](https://docs.docker.com/compose/profiles/), checkboxes appear here so you can select which ones to activate. Only services tagged with a selected profile will start. Services without any profile tag always start regardless.
 - A **Jobs** list, if the file declares jobs (Docker Compose 5.6.0+). Up never starts jobs; trigger them from **⋮ → Run** (see [Running Commands](Running-Commands)). If a job with a `schedule` is active (it has no profile, or one of its profiles is selected), a red warning explains that Compose will refuse to start the stack, because scheduled jobs are not supported yet. The warning follows the profile checkboxes, and it does not block **Up**: the Compose CLI has the final say.
 
@@ -73,6 +73,12 @@ Click **Down (remove)** to proceed or **Cancel** to abort.
 
 After Down completes, the stack may reappear in the **Stopped / offline stacks** section if its compose file still exists on disk.
 
+### When containers are left behind
+
+After Down (and Kill), the plugin checks what Docker still lists for the stack. If anything is left, the dialog stays open and names the leftover containers — also when compose itself failed, for example because the stack's folder was deleted. Click **Force remove** to delete them by their project label; this works without the compose file.
+
+If Docker lists containers it cannot open, their records are damaged (usually after a crash or power loss), and Docker can neither start nor remove them. The dialog shows the exact fix for your setup and a **Repair** button. Repair stops Docker, deletes the damaged records and starts Docker again. While Docker is stopped, **every container on that daemon stops**, and containers without a restart policy stay stopped afterwards. Repair is Docker-only; Podman stores its state differently.
+
 ---
 
 ## Restart
@@ -114,6 +120,8 @@ Found in the **⋮ more** menu. This is a **danger action**.
 
 Click **Kill all containers** (danger button) or **Cancel**.
 
+If containers remain after Kill, the dialog lists them the same way as Down — see [When containers are left behind](#when-containers-are-left-behind).
+
 ---
 
 ## Scale
@@ -126,6 +134,8 @@ Found in the **⋮ more** menu. Only available for running stacks. See [Scaling 
 
 ---
 
-## Action errors
+## Notifications and errors
 
-If any action fails, a red error alert appears directly below the stack row with the error message from Docker. The alert disappears when you close it or trigger another action.
+Start, Stop, Restart, Pause and Unpause — and the per-service Start, Stop and Restart buttons — confirm the result with a short notification in the corner: green when it worked, red with Docker's error message when it didn't.
+
+If an action fails, a red error alert also appears directly below the stack row with the error message from Docker. The alert disappears when you close it or trigger another action.

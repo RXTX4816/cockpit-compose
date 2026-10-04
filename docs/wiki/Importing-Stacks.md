@@ -107,6 +107,8 @@ Choose whether to delete only the compose file or the entire folder (including e
 
 Click **Delete** to proceed to the second confirmation.
 
+If deleting fails with a permission error (for example, files owned by root), the error offers **Try again with sudo?**, which retries through Cockpit's administrative access.
+
 ### Confirmation — step 2
 
 ```

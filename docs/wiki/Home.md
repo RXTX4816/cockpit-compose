@@ -1,30 +1,17 @@
 # Cockpit Compose — User Guide
 
-Cockpit Compose is a web-based UI for managing [Docker Compose](https://docs.docker.com/compose/) stacks, built as a plugin for [Cockpit](https://cockpit-project.org/). It runs inside your browser and communicates directly with Docker on your server — no extra daemons or agents required.
+Cockpit Compose is a web-based UI for managing [Docker Compose](https://docs.docker.com/compose/) stacks, built as a plugin for [Cockpit](https://cockpit-project.org/). It runs inside your browser and communicates directly with Docker or Podman on your server — no extra daemons or agents required.
 
 ## What you can do
 
-- See all your Compose stacks at a glance with live CPU and memory usage
-- Search and filter stacks by name and status
-- Start, stop, restart, pause, or forcefully kill stacks with one click
-- Scale individual services to run multiple replicas
-- Edit compose files in a built-in editor with schema validation, diff view, and snapshots
-- Manage multiple compose files per stack (base + overrides)
-- Stream real-time logs with per-service filtering and text search
-- Run one-off commands inside a service container
-- Open an interactive shell inside any running service container
-- Pull the latest images and preview what will change before applying
-- Clean up unused images, containers, volumes, and networks
-- Create new stacks from a Git URL, a template, or from scratch
-- Import and manage stacks that are stopped or stored on disk
-- Back up a stack to a `.bak.tar.gz` archive and restore it later
-- Switch between Docker and Podman runtimes with one click
-- Works with rootless Docker automatically — no configuration needed
-- Choose between four layout styles for the stack list (Minimal, Power User, Pretty, Unix)
-- Start, stop, restart, or view logs for individual services directly from the expanded stack row
-- Select multiple stacks and run Up, Restart, Pull, Down, or Kill on all of them at once
-- Send long-running actions (Up, Pull) to the background and keep working, tracked in a floating panel
-- Suggested commands from your history when using Run or Shell
+- **See everything at a glance** — every stack with live status, CPU and memory; search, filter, and four layouts.
+- **Control stacks** — Up, Down, Restart, Pause, Pull, Scale, Kill, or start/stop a single service. Select several stacks to act on all of them, and send long actions to the background.
+- **Create and import** — from scratch or a Git URL, or adopt stacks already on disk.
+- **Edit** — compose files (including override files) with validation, diff view and snapshots, plus `.env` files.
+- **Inspect** — live logs, events, processes, containers, images, volumes and networks.
+- **Get inside** — open a shell, run one-off commands or Compose jobs, with suggestions from your history.
+- **Clean up and protect** — prune per stack or host-wide, back up and restore stacks.
+- **Pick your runtime** — Docker or Podman, rootless or rootful; switch when more than one is available.
 
 ## Pages
 
@@ -47,7 +34,7 @@ Cockpit Compose is a web-based UI for managing [Docker Compose](https://docs.doc
 | [Creating Stacks](Creating-Stacks) | Create a new stack from Git, a template, or manually |
 | [Importing Stacks](Importing-Stacks) | Scan a directory to find and manage offline stacks |
 | [Backup and Restore](Backup-and-Restore) | Archive a stack to a `.bak.tar.gz` file and restore it |
-| [Podman Compatibility](Podman-Compatibility) | Use the plugin with Podman instead of Docker |
+| [Podman Compatibility](Podman-Compatibility) | Podman support, and switching between rootless and rootful sockets |
 | [Troubleshooting](Troubleshooting) | Fixes for common installation and runtime problems |
 
 ## Interface conventions

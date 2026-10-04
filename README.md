@@ -9,65 +9,50 @@ Docker and Podman Compose management for [Cockpit](https://cockpit-project.org) 
 
 ## Features
 
-- Dashboard listing all stacks with live status and container stats (auto-refreshing)
-- Search and filter stacks by name and status
-- Select multiple stacks and run Up, Restart, Pull, Down, or Kill on all of them at once
-- Send long-running actions (Up, Pull) to the background and keep working, tracked in a floating panel
-- Create new Compose Stacks or import existing ones directly from the WebUI
-- Start, stop, restart, pause/unpause, pull, prune, scale, and kill stacks with one click
-- Live log viewer per stack with per-service filtering and text search
-- Interactive shell into any running service, with quote-aware command parsing and command history
-- Run one-off commands with an option to override the image's entrypoint when needed
-- YAML editor with syntax validation, diff view, auto-snapshot + .ENV editor
-- Backup and restore stacks as `.bak.tar.gz` archives
-- Docker and Podman support, including rootless and rootful setups, with a manual toggle when both are available
+| | |
+|---|---|
+| **Dashboard** | Every stack with live status, CPU and memory; search, filter, four layouts |
+| **Stack actions** | Up, Down, Restart, Pause, Pull, Scale, Kill — one stack or many at once, optionally in the background |
+| **Create & import** | Start from scratch or a Git URL, or adopt stacks already on disk |
+| **Edit** | YAML editor with validation, diff view and snapshots, plus a `.env` editor |
+| **Inspect** | Live logs with service filter and search, events, processes, stack info |
+| **Shell & run** | Shell into a service or run one-off commands and Compose jobs |
+| **Maintain** | Prune per stack or host-wide, backup and restore as `.bak.tar.gz` |
+| **Runtimes** | Docker and Podman, rootless and rootful, switchable when both exist |
+
+Each feature is described in the [wiki](https://github.com/RXTX4816/cockpit-compose/wiki).
 
 ## Requirements
 
 - Cockpit 300+
-- Docker with the Compose plugin (`docker compose` v2+), **or** Podman with `podman compose` (Can run both at once, also supports rootless)
+- Docker with the Compose plugin (`docker compose` v2+), **or** Podman with `podman compose`
 
-## Prerequisites
-
-Cockpit comes pre-installed on Fedora and most RHEL-based systems. On other distros:
-
-```bash
-sudo systemctl enable --now cockpit.socket
-```
-
-Docker is not installed by default on most distros. Install it and add your user to the docker group:
-
-```bash
-sudo usermod -aG docker $USER
-```
-
-For rootless or rootful Docker/Podman, and the toggle to switch between them when both are detected, see [Podman Compatibility](docs/wiki/Podman-Compatibility.md) in the wiki.
+Cockpit ships with Fedora and most RHEL-based systems; elsewhere, install it and run `sudo systemctl enable --now cockpit.socket`. For rootless Docker or Podman, see [Podman Compatibility](docs/wiki/Podman-Compatibility.md).
 
 ## Installation
 
-### Arch Linux
+**Arch Linux**
 
 ```bash
 paru -S cockpit-compose
 ```
 
-### Fedora / RHEL / CentOS Stream / openSUSE
-
-Every release publishes a `-latest.rpm` alias alongside the versioned one, so you can always grab the newest build without checking the [Releases](https://github.com/RXTX4816/cockpit-compose/releases) page for a version number:
+**Fedora / RHEL / CentOS Stream / openSUSE**
 
 ```bash
 curl -LO https://github.com/RXTX4816/cockpit-compose/releases/latest/download/cockpit-compose-latest.rpm
 sudo rpm -i cockpit-compose-latest.rpm
 ```
 
-### Debian / Ubuntu / Linux Mint / Pop!\_OS
+**Debian / Ubuntu / Linux Mint / Pop!\_OS**
 
 ```bash
 curl -LO https://github.com/RXTX4816/cockpit-compose/releases/latest/download/cockpit-compose-latest.deb
 sudo apt install ./cockpit-compose-latest.deb
 ```
 
-### Manual
+<details>
+<summary><b>Manual install</b></summary>
 
 ```bash
 curl -LO https://github.com/RXTX4816/cockpit-compose/releases/latest/download/cockpit-compose-latest.tar.gz
@@ -78,11 +63,23 @@ sudo mkdir -p /usr/share/cockpit/cockpit-compose
 sudo cp -r cockpit-compose/* /usr/share/cockpit/cockpit-compose/
 ```
 
-Then open Cockpit in your browser or hard-refresh the page — **Docker Compose** appears in the left navigation.
+</details>
+
+Then reload Cockpit — **Docker Compose** appears in the left navigation.
+
+## Translations
+
+The UI follows Cockpit's language setting.
+
+<!-- i18n-coverage-start -->
+| Coverage | Languages |
+|---|---|
+| 100% | English (`en`) — source, `ar`, `cs`, `de`, `es`, `fi`, `fr`, `he`, `id`, `it`, `ja`, `ka`, `ko`, `nl`, `pl`, `pt-BR`, `ro`, `ru`, `sk`, `sv`, `tr`, `uk`, `zh-CN`, `zh-TW` |
+<!-- i18n-coverage-end -->
+
+To add a language, copy `src/i18n/locales/en.json`, translate the values, and register it in `src/i18n/index.ts`.
 
 ## Development
-
-**Requirements:** Node.js 22+, npm
 
 ```bash
 git clone https://github.com/RXTX4816/cockpit-compose.git
@@ -91,110 +88,10 @@ npm install
 npm run build
 ```
 
-To develop with live reload inside Cockpit, symlink the plugin:
+Requires Node.js 22+. Built on [`@rxtx4816/cockpit-plugin-base-react`](https://github.com/RXTX4816/cockpit-plugin-base-react). See [CONTRIBUTING.md](CONTRIBUTING.md) for live reload, tests, commit conventions and working on the base library, and [VM Testing](docs/wiki/VM-Testing.md) for the QEMU test VMs.
 
-```bash
-mkdir -p ~/.local/share/cockpit
-ln -s "$PWD/src" ~/.local/share/cockpit/cockpit-compose
-npm run watch
-```
-
-Open `http://localhost:9090` — **Docker Compose** appears in the sidebar automatically.
-
-| Command | Description |
-|---|---|
-| `npm run build` | Production build |
-| `npm run watch` | Build with file watching |
-| `npm run typecheck` | TypeScript type check |
-| `npm run lint` | ESLint |
-| `npm run test` | Run unit tests |
-| `npm run test:coverage` | Unit test coverage report |
-| `npm run test:e2e` | Run Playwright E2E tests (requires a running VM) |
-| `npm run test:e2e:ui` | Playwright visual test runner |
-| `npm run test:e2e:codegen` | Record new E2E tests by clicking through the UI |
-
-### Base library
-
-This plugin builds on [`@rxtx4816/cockpit-plugin-base-react`](https://github.com/RXTX4816/cockpit-plugin-base-react) — a shared foundation that provides bootstrapping, dark theme sync, i18n setup, reusable hooks and components, shared tooling config (TypeScript, ESLint, Vitest), and the QEMU VM test harness.
-
-If you need to develop the base library and this plugin together locally, use [yalc](https://github.com/wclr/yalc):
-
-```bash
-# In the cockpit-plugin-base-react repo
-yalc publish            # or: yalc push (auto-pushes on change)
-
-# In this repo
-npm run base:add        # links the local yalc version
-# ... make changes and test ...
-npm run base:reset      # restores the npm registry version
-```
-
-### VM Testing
-
-QEMU VMs for testing across Arch, Debian, and Fedora with Docker, Podman, and both-runtime scenarios — plus two Fedora-only scenarios for rootless/rootful-specific bugs (`podman-rootful`: no rootless socket at all; `full`: Docker and Podman each running rootless *and* rootful simultaneously). Your `src/` folder is mounted live so `npm run watch` changes appear in the browser without restarting anything. The VM harness is provided by the base library; plugin-specific config lives in `scripts/test-vm.config.sh`.
-
-```bash
-sudo pacman -S qemu-full cloud-image-utils wget   # one-time
-npm run build
-npm run vm download          # download base images (~500–700 MB each)
-npm run vm start             # start every VM
-# Open https://localhost:9090 — login: test / test
-```
-
-See [docs/wiki/VM-Testing.md](docs/wiki/VM-Testing.md) for the full list of VMs, ports, and scenario details.
-
-### E2E browser tests (Playwright)
-
-Once a VM is running, Playwright drives Chromium against the live Cockpit UI. Each VM is a separate Playwright project — use `--project` to target one or more:
-
-```bash
-npm run vm start debian-podman && npm run vm wait debian-podman
-npm run test:e2e -- --project=debian-podman   # single VM
-npm run test:e2e                              # every VM (all must be running)
-npm run test:e2e:ui                           # visual runner (great for debugging)
-```
-
-Specs needing real Cockpit Administrative access (e.g. rootful Podman with no rootless socket
-available) use `loginWithAdminAccess` from `e2e/helpers/admin.ts` instead of the default
-`pluginPage` fixture — see [E2E Test Reference](docs/wiki/E2E-Test-Reference.md) for why.
-
-Tests live in `e2e/` and cover login, stack list, YAML editor, and more. Check `npm run vm status` for running VMs and their ports.
-
-See [docs/wiki/VM-Testing.md](docs/wiki/VM-Testing.md) for all VM ports, commands, and troubleshooting, and [docs/wiki/E2E-Test-Reference.md](docs/wiki/E2E-Test-Reference.md) for what every test actually covers.
-
-## Translations
-
-The UI language follows Cockpit's language setting.
-
-<!-- i18n-coverage-start -->
-| Coverage | Languages |
-|---|---|
-| 100% | English (`en`) — source, `ar`, `cs`, `de`, `es`, `fi`, `fr`, `he`, `id`, `it`, `ja`, `ka`, `ko`, `nl`, `pl`, `pt-BR`, `ro`, `ru`, `sk`, `sv`, `tr`, `uk`, `zh-CN`, `zh-TW` |
-<!-- i18n-coverage-end -->
-
-To add a new language, copy `src/i18n/locales/en.json`, translate the values, and register the file in `src/i18n/index.ts`.
-
-## Contributing
-
-Bug reports and feature requests: open an issue on [GitHub](https://github.com/RXTX4816/cockpit-compose/issues).
-
-Pull requests are welcome. Please make sure your changes pass CI (lint, typecheck, tests, and build) before submitting. See [CONTRIBUTING.md](CONTRIBUTING.md) for commit conventions and development setup. Open an issue first for significant feature additions.
-
-## Security
-
-Found a security vulnerability? Please report it privately — see [SECURITY.md](SECURITY.md) for the disclosure process. Do not open a public issue for security reports.
-
-This repository has GitHub secret scanning and push protection enabled — do not commit secrets (API keys, tokens, passwords, `.env` files with real credentials, etc.). See [SECURITY.md](SECURITY.md) for the bypass process if a push is blocked by mistake.
+Bugs and feature requests go to [GitHub Issues](https://github.com/RXTX4816/cockpit-compose/issues). Security issues: please report privately — see [SECURITY.md](SECURITY.md).
 
 ## License
 
-[AGPL-3.0-only](LICENSE) © 2025–2026 RXTX4816.
-
-Free and open-source software (copyleft). If you distribute a modified version —
-or run one as a service that users reach over a network — you must make your
-modified source available under the same license (AGPL §13). Earlier releases
-were under the MIT License; see [LICENSE-HISTORY.md](LICENSE-HISTORY.md).
-
-Bundled third-party components and their licenses are listed in
-[THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt), which is generated at build
-time and installed alongside the plugin.
+[AGPL-3.0-only](LICENSE) © 2025–2026 RXTX4816. Earlier releases were MIT — see [LICENSE-HISTORY.md](LICENSE-HISTORY.md). Bundled third-party licenses are listed in [THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt).
