@@ -81,6 +81,8 @@ The **Up** button is highlighted (primary) when the stack is stopped. **Stop** a
 
 Buttons are disabled when they are not applicable. For example, Restart, Pause, Events, Top, Shell, and Run are disabled for a stopped stack.
 
+**Right-click** a running stack's row or card to open its **⋮** menu right where you clicked, in every layout. Each layout shows its own ⋮ items; Minimal, for instance, keeps Stop, Logs and Edit in that menu. The keyboard's context-menu key or **Shift+F10** opens it for the focused stack, and **Escape**, clicking elsewhere or scrolling closes it. Shift+right-click, text fields, editors, links and selected text keep the browser's own menu.
+
 ### Expanded row (container list)
 
 Click the **▶** toggle to expand a stack row. This shows a table of containers belonging to the stack:
