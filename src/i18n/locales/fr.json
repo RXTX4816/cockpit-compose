@@ -143,6 +143,17 @@
     "body_suffix": ", les terminant immédiatement de force. Contrairement à Stopper, les processus n'ont pas la possibilité de se nettoyer. Utilisez uniquement lorsque Stopper ne répond pas.",
     "confirm_button": "Tuer tous les conteneurs"
   },
+  "leftovers": {
+    "remaining_title": "Docker liste encore des conteneurs pour {{name}}",
+    "remaining_body": "Tous les conteneurs de la pile n'ont pas été supprimés, elle reste donc dans la liste. La suppression forcée les efface via leur label de projet, sans avoir besoin du fichier compose.",
+    "force_remove": "Forcer la suppression",
+    "damaged_title": "Les enregistrements Docker de certains de ces conteneurs sont endommagés",
+    "damaged_body": "Docker les liste mais ne peut pas les ouvrir, ils ne peuvent donc être ni démarrés ni supprimés. Cela arrive généralement après un plantage ou une coupure de courant. Supprimer les enregistrements endommagés pendant que Docker est arrêté corrige le problème :",
+    "repair_button": "Réparer",
+    "repair_confirm_title": "Redémarrer Docker pour réparer ?",
+    "repair_confirm_body": "La réparation arrête Docker, supprime les enregistrements endommagés et redémarre Docker. Tant que Docker est arrêté, tous les conteneurs de ce démon Docker s'arrêtent, pas seulement ceux de cette pile. Les conteneurs sans politique de redémarrage restent arrêtés ensuite et doivent être redémarrés.",
+    "repair_confirm_button": "Arrêter Docker et réparer"
+  },
   "stop_modal": {
     "aria_label": "Confirmer l'arrêt",
     "title": "Arrêter \"{{name}}\" ?",

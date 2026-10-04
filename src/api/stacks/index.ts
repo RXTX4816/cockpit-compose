@@ -2,3 +2,4 @@ export { groupPodmanContainers, listStacks, readRunningServiceNames, streamLogs,
 export { startStack, stopStack, startService, stopService, restartStack, downStack, upStackStream, pullStack, pauseStack, unpauseStack, killStack, scaleStack } from "./lifecycle";
 export { pruneContainers, pruneVolumes, pruneNetworks, removeImages, listAllImages, listInUseImageIds, pruneImages } from "./prune";
 export { snapshotProjectContainerIds, forceRemoveOneoffContainers, composeRunStream, type RunCommand } from "./exec";
+export { findStackLeftovers, planDamagedRepair, runDamagedRepair, type StackLeftovers, type RepairPlan } from "./leftovers";

@@ -143,6 +143,17 @@
     "body_suffix": ", čímž je okamžitě násilně ukončí. Na rozdíl od zastavení nemají procesy šanci na vyčištění. Použijte pouze tehdy, když zastavení nereaguje.",
     "confirm_button": "Ukončit všechny kontejnery"
   },
+  "leftovers": {
+    "remaining_title": "Docker stále uvádí kontejnery pro {{name}}",
+    "remaining_body": "Ne všechny kontejnery zásobníku byly odstraněny, proto zůstává v seznamu. Vynucené odstranění je smaže podle štítku projektu, bez potřeby souboru compose.",
+    "force_remove": "Vynutit odstranění",
+    "damaged_title": "Záznamy Dockeru pro některé z těchto kontejnerů jsou poškozené",
+    "damaged_body": "Docker je uvádí, ale nedokáže je otevřít, takže je nelze spustit ani odstranit. Obvykle se to stane po pádu nebo výpadku proudu. Smazání poškozených záznamů při zastaveném Dockeru to opraví:",
+    "repair_button": "Opravit",
+    "repair_confirm_title": "Restartovat Docker kvůli opravě?",
+    "repair_confirm_body": "Oprava zastaví Docker, smaže poškozené záznamy a znovu Docker spustí. Dokud je Docker zastavený, zastaví se všechny kontejnery tohoto démona Dockeru, nejen tohoto zásobníku. Kontejnery bez zásady restartu zůstanou poté zastavené a je třeba je znovu spustit.",
+    "repair_confirm_button": "Zastavit Docker a opravit"
+  },
   "stop_modal": {
     "aria_label": "Potvrdit zastavení",
     "title": "Zastavit \"{{name}}\"?",

@@ -172,6 +172,17 @@
     "confirm_button": "Kill all containers",
     "background_label": "Kill — {{name}}"
   },
+  "leftovers": {
+    "remaining_title": "Docker still lists containers for {{name}}",
+    "remaining_body": "Not all of the stack's containers were removed, so it stays in the list. Force remove deletes them by their project label, without needing the compose file.",
+    "force_remove": "Force remove",
+    "damaged_title": "Docker's records for some of these containers are damaged",
+    "damaged_body": "Docker lists them but cannot open them, so they can be neither started nor removed. This usually happens after a crash or power loss. Deleting the damaged records while Docker is stopped fixes it:",
+    "repair_button": "Repair",
+    "repair_confirm_title": "Restart Docker to repair?",
+    "repair_confirm_body": "Repair stops Docker, deletes the damaged records and starts Docker again. While Docker is stopped, every container on this Docker daemon stops, not just this stack's. Containers without a restart policy stay stopped afterwards and have to be started again.",
+    "repair_confirm_button": "Stop Docker and repair"
+  },
   "stop_modal": {
     "aria_label": "Confirm stop",
     "title": "Stop \"{{name}}\"?",

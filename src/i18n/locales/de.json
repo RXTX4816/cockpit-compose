@@ -143,6 +143,17 @@
     "body_suffix": " und beendet sie sofort. Im Gegensatz zu Stoppen haben Prozesse keine Möglichkeit zum Aufräumen. Nur verwenden, wenn Stoppen nicht reagiert.",
     "confirm_button": "Alle Container beenden"
   },
+  "leftovers": {
+    "remaining_title": "Docker listet noch Container für {{name}}",
+    "remaining_body": "Nicht alle Container des Stacks wurden entfernt, deshalb bleibt er in der Liste. Erzwungenes Entfernen löscht sie anhand ihres Projekt-Labels, ohne die Compose-Datei zu benötigen.",
+    "force_remove": "Erzwungen entfernen",
+    "damaged_title": "Dockers Einträge für einige dieser Container sind beschädigt",
+    "damaged_body": "Docker listet sie, kann sie aber nicht öffnen, daher lassen sie sich weder starten noch entfernen. Das passiert meist nach einem Absturz oder Stromausfall. Das Löschen der beschädigten Einträge bei gestopptem Docker behebt es:",
+    "repair_button": "Reparieren",
+    "repair_confirm_title": "Docker zum Reparieren neu starten?",
+    "repair_confirm_body": "Die Reparatur stoppt Docker, löscht die beschädigten Einträge und startet Docker wieder. Solange Docker gestoppt ist, stoppen alle Container dieses Docker-Daemons, nicht nur die dieses Stacks. Container ohne Neustartrichtlinie bleiben danach gestoppt und müssen erneut gestartet werden.",
+    "repair_confirm_button": "Docker stoppen und reparieren"
+  },
   "stop_modal": {
     "aria_label": "Stoppen bestätigen",
     "title": "\"{{name}}\" stoppen?",

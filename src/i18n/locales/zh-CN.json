@@ -143,6 +143,17 @@
     "body_suffix": "，立即强制终止它们。与停止不同，进程没有机会进行清理。仅在停止无响应时使用。",
     "confirm_button": "终止所有容器"
   },
+  "leftovers": {
+    "remaining_title": "Docker 仍列出 {{name}} 的容器",
+    "remaining_body": "该堆栈的容器未全部移除，因此它仍留在列表中。强制移除会按项目标签删除它们，无需 compose 文件。",
+    "force_remove": "强制移除",
+    "damaged_title": "其中部分容器的 Docker 记录已损坏",
+    "damaged_body": "Docker 会列出它们，但无法打开，因此既不能启动也不能移除。这通常发生在崩溃或断电之后。在 Docker 停止时删除损坏的记录即可修复：",
+    "repair_button": "修复",
+    "repair_confirm_title": "重启 Docker 以修复？",
+    "repair_confirm_body": "修复会停止 Docker、删除损坏的记录，然后重新启动 Docker。Docker 停止期间，此 Docker 守护进程上的所有容器都会停止，而不仅是此堆栈的容器。没有重启策略的容器之后会保持停止状态，需要重新启动。",
+    "repair_confirm_button": "停止 Docker 并修复"
+  },
   "stop_modal": {
     "aria_label": "确认停止",
     "title": "停止「{{name}}」？",

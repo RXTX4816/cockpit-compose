@@ -143,6 +143,17 @@
     "body_suffix": ", waardoor ze onmiddellijk geforceerd worden beëindigd. In tegenstelling tot Stoppen krijgen processen geen kans om op te ruimen. Gebruik dit alleen als Stoppen niet reageert.",
     "confirm_button": "Alle containers geforceerd stoppen"
   },
+  "leftovers": {
+    "remaining_title": "Docker toont nog containers voor {{name}}",
+    "remaining_body": "Niet alle containers van de stack zijn verwijderd, daarom blijft hij in de lijst. Geforceerd verwijderen wist ze via hun projectlabel, zonder het compose-bestand nodig te hebben.",
+    "force_remove": "Geforceerd verwijderen",
+    "damaged_title": "De Docker-records van sommige van deze containers zijn beschadigd",
+    "damaged_body": "Docker toont ze maar kan ze niet openen, dus ze kunnen niet gestart of verwijderd worden. Dit gebeurt meestal na een crash of stroomuitval. De beschadigde records verwijderen terwijl Docker gestopt is lost het op:",
+    "repair_button": "Repareren",
+    "repair_confirm_title": "Docker herstarten om te repareren?",
+    "repair_confirm_body": "Repareren stopt Docker, verwijdert de beschadigde records en start Docker opnieuw. Zolang Docker gestopt is, stoppen alle containers van deze Docker-daemon, niet alleen die van deze stack. Containers zonder herstartbeleid blijven daarna gestopt en moeten opnieuw gestart worden.",
+    "repair_confirm_button": "Docker stoppen en repareren"
+  },
   "stop_modal": {
     "aria_label": "Stoppen bevestigen",
     "title": "\"{{name}}\" stoppen?",

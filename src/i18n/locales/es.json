@@ -143,6 +143,17 @@
     "body_suffix": ", terminándolos inmediatamente por la fuerza. A diferencia de Parar, los procesos no tienen oportunidad de limpiarse. Úsalo solo cuando Parar no responde.",
     "confirm_button": "Matar todos los contenedores"
   },
+  "leftovers": {
+    "remaining_title": "Docker todavía muestra contenedores de {{name}}",
+    "remaining_body": "No se eliminaron todos los contenedores de la pila, por eso sigue en la lista. Forzar eliminación los borra por su etiqueta de proyecto, sin necesitar el archivo compose.",
+    "force_remove": "Forzar eliminación",
+    "damaged_title": "Los registros de Docker de algunos de estos contenedores están dañados",
+    "damaged_body": "Docker los muestra pero no puede abrirlos, así que no se pueden iniciar ni eliminar. Suele ocurrir tras un fallo o un corte de corriente. Borrar los registros dañados con Docker detenido lo soluciona:",
+    "repair_button": "Reparar",
+    "repair_confirm_title": "¿Reiniciar Docker para reparar?",
+    "repair_confirm_body": "La reparación detiene Docker, borra los registros dañados e inicia Docker de nuevo. Mientras Docker esté detenido, se detienen todos los contenedores de este demonio Docker, no solo los de esta pila. Los contenedores sin política de reinicio quedan detenidos y hay que iniciarlos de nuevo.",
+    "repair_confirm_button": "Detener Docker y reparar"
+  },
   "stop_modal": {
     "aria_label": "Confirmar detención",
     "title": "¿Detener \"{{name}}\"?",

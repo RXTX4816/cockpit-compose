@@ -143,6 +143,17 @@
     "body_suffix": ", pakottaen ne lopettamaan välittömästi. Toisin kuin Pysäytys, prosesseilla ei ole mahdollisuutta siivota. Käytä vain, kun Pysäytys ei reagoi.",
     "confirm_button": "Pakota kaikki kontit lopettamaan"
   },
+  "leftovers": {
+    "remaining_title": "Docker luettelee yhä kontteja kohteelle {{name}}",
+    "remaining_body": "Kaikkia pinon kontteja ei poistettu, joten se jää luetteloon. Pakotettu poisto poistaa ne projektitunnisteen perusteella ilman compose-tiedostoa.",
+    "force_remove": "Pakota poisto",
+    "damaged_title": "Dockerin tietueet joillekin näistä konteista ovat vioittuneet",
+    "damaged_body": "Docker luettelee ne mutta ei pysty avaamaan niitä, joten niitä ei voi käynnistää eikä poistaa. Näin käy yleensä kaatumisen tai sähkökatkon jälkeen. Vioittuneiden tietueiden poistaminen Dockerin ollessa pysäytettynä korjaa sen:",
+    "repair_button": "Korjaa",
+    "repair_confirm_title": "Käynnistetäänkö Docker uudelleen korjausta varten?",
+    "repair_confirm_body": "Korjaus pysäyttää Dockerin, poistaa vioittuneet tietueet ja käynnistää Dockerin uudelleen. Kun Docker on pysäytetty, kaikki tämän Docker-daemonin kontit pysähtyvät, eivät vain tämän pinon. Kontit ilman uudelleenkäynnistyskäytäntöä jäävät sen jälkeen pysäytetyiksi ja ne on käynnistettävä uudelleen.",
+    "repair_confirm_button": "Pysäytä Docker ja korjaa"
+  },
   "stop_modal": {
     "aria_label": "Vahvista pysäytys",
     "title": "Pysäytetäänkö \"{{name}}\"?",

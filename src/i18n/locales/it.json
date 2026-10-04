@@ -143,6 +143,17 @@
     "body_suffix": ", terminandoli immediatamente con la forza. A differenza di Ferma, i processi non hanno la possibilità di pulire. Usa solo quando Ferma non risponde.",
     "confirm_button": "Termina forzatamente tutti i container"
   },
+  "leftovers": {
+    "remaining_title": "Docker elenca ancora container per {{name}}",
+    "remaining_body": "Non tutti i container dello stack sono stati rimossi, quindi resta nell'elenco. La rimozione forzata li elimina tramite la loro etichetta di progetto, senza bisogno del file compose.",
+    "force_remove": "Rimozione forzata",
+    "damaged_title": "I record Docker di alcuni di questi container sono danneggiati",
+    "damaged_body": "Docker li elenca ma non riesce ad aprirli, quindi non possono essere né avviati né rimossi. Di solito succede dopo un crash o un'interruzione di corrente. Eliminare i record danneggiati a Docker fermo risolve il problema:",
+    "repair_button": "Ripara",
+    "repair_confirm_title": "Riavviare Docker per riparare?",
+    "repair_confirm_body": "La riparazione ferma Docker, elimina i record danneggiati e riavvia Docker. Finché Docker è fermo, si fermano tutti i container di questo demone Docker, non solo quelli di questo stack. I container senza politica di riavvio restano fermi e vanno riavviati.",
+    "repair_confirm_button": "Ferma Docker e ripara"
+  },
   "stop_modal": {
     "aria_label": "Conferma stop",
     "title": "Fermare \"{{name}}\"?",

@@ -143,6 +143,17 @@
     "body_suffix": "，立即強制終止它們。與停止不同，程序沒有機會進行清理。僅在停止無回應時使用。",
     "confirm_button": "終止所有容器"
   },
+  "leftovers": {
+    "remaining_title": "Docker 仍列出 {{name}} 的容器",
+    "remaining_body": "此堆疊的容器未全部移除，因此仍留在清單中。強制移除會依專案標籤刪除它們，不需要 compose 檔案。",
+    "force_remove": "強制移除",
+    "damaged_title": "其中部分容器的 Docker 紀錄已損毀",
+    "damaged_body": "Docker 會列出它們，但無法開啟，因此既不能啟動也不能移除。這通常發生在當機或斷電之後。在 Docker 停止時刪除損毀的紀錄即可修復：",
+    "repair_button": "修復",
+    "repair_confirm_title": "重新啟動 Docker 以修復？",
+    "repair_confirm_body": "修復會停止 Docker、刪除損毀的紀錄，然後重新啟動 Docker。Docker 停止期間，此 Docker 常駐程式上的所有容器都會停止，而不只是此堆疊的容器。沒有重新啟動原則的容器之後會維持停止狀態，需要重新啟動。",
+    "repair_confirm_button": "停止 Docker 並修復"
+  },
   "stop_modal": {
     "aria_label": "確認停止",
     "title": "停止「{{name}}」？",
