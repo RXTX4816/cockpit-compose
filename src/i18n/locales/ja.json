@@ -143,6 +143,17 @@
     "body_suffix": "、強制的に即座に終了させます。停止とは異なり、プロセスにクリーンアップの機会はありません。停止が応答しない場合にのみ使用してください。",
     "confirm_button": "すべてのコンテナを強制終了"
   },
+  "leftovers": {
+    "remaining_title": "Docker には {{name}} のコンテナがまだ残っています",
+    "remaining_body": "スタックのコンテナがすべて削除されなかったため、一覧に残っています。強制削除は compose ファイルなしで、プロジェクトラベルを基に削除します。",
+    "force_remove": "強制削除",
+    "damaged_title": "これらのコンテナの一部について、Docker の記録が破損しています",
+    "damaged_body": "Docker は一覧に表示しますが開けないため、起動も削除もできません。通常はクラッシュや停電の後に起こります。Docker を停止した状態で破損した記録を削除すると直ります:",
+    "repair_button": "修復",
+    "repair_confirm_title": "修復のために Docker を再起動しますか？",
+    "repair_confirm_body": "修復では Docker を停止し、破損した記録を削除してから Docker を再び起動します。Docker の停止中は、このスタックだけでなく、この Docker デーモン上のすべてのコンテナが停止します。再起動ポリシーのないコンテナはその後も停止したままなので、改めて起動する必要があります。",
+    "repair_confirm_button": "Docker を停止して修復"
+  },
   "stop_modal": {
     "aria_label": "停止の確認",
     "title": "\"{{name}}\" を停止しますか？",

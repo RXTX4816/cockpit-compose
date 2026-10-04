@@ -38,6 +38,7 @@ import { useComposeStacks } from "../../hooks/useComposeStacks";
 import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import { useDownStack } from "../../hooks/useDownStack";
 import { useKillStack } from "../../hooks/useKillStack";
+import { StackLeftoversPanel } from "../StackLeftovers";
 import { LogsModal } from "../LogsModal";
 import { YamlModal } from "../YamlModal";
 import { StackInfoModal } from "../StackInfoModal";
@@ -189,11 +190,15 @@ export function StacksView({ onRuntimeChange, dockerMissing, layout = "poweruser
     modals.close("bulkConfirm");
   }, [modals, enqueue, t, handleDownComplete]);
 
-  const { target: downTarget, downing, error: downError, open: openDown, close: closeDown, execute: performDown }
-    = useDownStack(refresh, onActingChange, handleDownComplete);
+  const {
+    target: downTarget, downing, error: downError, leftovers: downLeftovers, superuser: downSuperuser,
+    forceRemoving, open: openDown, close: closeDown, execute: performDown, forceRemove, recheck: recheckDown,
+  } = useDownStack(refresh, onActingChange, handleDownComplete);
 
-  const { target: killTarget, killing, error: killError, open: openKill, close: closeKill, execute: performKill }
-    = useKillStack(refresh, onActingChange);
+  const {
+    target: killTarget, killing, error: killError, leftovers: killLeftovers, superuser: killSuperuser,
+    open: openKill, close: closeKill, execute: performKill, recheck: recheckKill,
+  } = useKillStack(refresh, onActingChange);
 
   const { sharedNetworks: downSharedNetworks, loading: downNetworksLoading } =
     useSharedNetworks(downTarget?.Name ?? "", downTarget !== null);
@@ -732,14 +737,30 @@ export function StacksView({ onRuntimeChange, dockerMissing, layout = "poweruser
             {downError && (
               <Alert variant="danger" isInline title={downError} style={{ marginTop: "1rem" }} />
             )}
+            {downLeftovers && (
+              <StackLeftoversPanel
+                name={downTarget.Name}
+                leftovers={downLeftovers}
+                superuser={downSuperuser}
+                onForceRemove={() => void forceRemove()}
+                forceRemoving={forceRemoving}
+                onRepaired={recheckDown}
+              />
+            )}
           </ModalBody>
           <ModalFooter>
-            <Button variant="danger" icon={<TimesCircleIcon />} onClick={() => void performDown()} isLoading={downing}>
-              {t("down_modal.confirm_button")}
-            </Button>
-            <Button variant="link" onClick={closeDown} isDisabled={downing}>
-              {t("common.cancel")}
-            </Button>
+            {downLeftovers ? (
+              <Button variant="primary" onClick={closeDown} isDisabled={forceRemoving}>{t("common.close")}</Button>
+            ) : (
+              <>
+                <Button variant="danger" icon={<TimesCircleIcon />} onClick={() => void performDown()} isLoading={downing}>
+                  {t("down_modal.confirm_button")}
+                </Button>
+                <Button variant="link" onClick={closeDown} isDisabled={downing}>
+                  {t("common.cancel")}
+                </Button>
+              </>
+            )}
           </ModalFooter>
         </Modal>
       )}
@@ -760,14 +781,28 @@ export function StacksView({ onRuntimeChange, dockerMissing, layout = "poweruser
             {killError && (
               <Alert variant="danger" isInline title={killError} style={{ marginTop: "1rem" }} />
             )}
+            {killLeftovers && (
+              <StackLeftoversPanel
+                name={killTarget.Name}
+                leftovers={killLeftovers}
+                superuser={killSuperuser}
+                onRepaired={recheckKill}
+              />
+            )}
           </ModalBody>
           <ModalFooter>
-            <Button variant="danger" icon={<BanIcon />} onClick={() => void performKill()} isLoading={killing}>
-              {t("kill_modal.confirm_button")}
-            </Button>
-            <Button variant="link" onClick={closeKill} isDisabled={killing}>
-              {t("common.cancel")}
-            </Button>
+            {killLeftovers ? (
+              <Button variant="primary" onClick={closeKill}>{t("common.close")}</Button>
+            ) : (
+              <>
+                <Button variant="danger" icon={<BanIcon />} onClick={() => void performKill()} isLoading={killing}>
+                  {t("kill_modal.confirm_button")}
+                </Button>
+                <Button variant="link" onClick={closeKill} isDisabled={killing}>
+                  {t("common.cancel")}
+                </Button>
+              </>
+            )}
           </ModalFooter>
         </Modal>
       )}

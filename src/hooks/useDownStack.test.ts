@@ -125,4 +125,57 @@ describe("useDownStack", () => {
     await act(() => result.current.execute());
     await waitFor(() => expect(result.current.error).toBe("plain string error"));
   });
+
+  // #345: Down must never look like it did nothing.
+  describe("leftovers", () => {
+    const LEFT = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+    // Only the leftover check uses --no-trunc; every other call succeeds quietly.
+    const route = (left: () => string, extra?: (a: string[]) => ReturnType<typeof mockProcess> | undefined) =>
+      mockSpawn.mockImplementation((args: string[]) => {
+        if (args.includes("--no-trunc")) return mockProcess(left());
+        return extra?.(args) ?? mockProcess("");
+      });
+
+    it("keeps the dialog open and reports containers Docker still lists after Down", async () => {
+      route(() => `${LEFT}\n`);
+      const onSuccess = vi.fn();
+      const { result } = renderHook(() => useDownStack(onSuccess, vi.fn()));
+      act(() => { result.current.open(stack); });
+      await act(() => result.current.execute());
+      expect(result.current.target).toEqual(stack);
+      expect(result.current.leftovers).toEqual({ ids: [LEFT], damaged: [] });
+      expect(onSuccess).toHaveBeenCalled();
+    });
+
+    it("Force remove deletes the leftovers by label and closes once nothing is left", async () => {
+      let left = `${LEFT}\n`;
+      const onDownComplete = vi.fn();
+      route(() => left, a => {
+        // Kill's own label query lists the same container until rm -f removes it.
+        if (a.includes("ps") && a.includes("{{.ID}}")) return mockProcess(left);
+        if (a.includes("rm") && a.includes("-f")) left = "";
+        return undefined;
+      });
+      const { result } = renderHook(() => useDownStack(vi.fn(), vi.fn(), onDownComplete));
+      act(() => { result.current.open(stack); });
+      await act(() => result.current.execute());
+      expect(result.current.leftovers?.ids).toEqual([LEFT]);
+
+      await act(() => result.current.forceRemove());
+      expect(mockSpawn.mock.calls.some(c => (c[0] as string[]).includes("rm"))).toBe(true);
+      // Not listed under Down: a force-removed stack often has no compose file left.
+      expect(onDownComplete).not.toHaveBeenCalled();
+      expect(result.current.target).toBeNull();
+      expect(result.current.leftovers).toBeNull();
+    });
+
+    it("shows the leftovers next to the error when compose itself fails", async () => {
+      route(() => `${LEFT}\n`, a => a.includes("down") ? mockProcess("", "no configuration file provided: not found") : undefined);
+      const { result } = renderHook(() => useDownStack(vi.fn(), vi.fn()));
+      act(() => { result.current.open(stack); });
+      await act(() => result.current.execute());
+      expect(result.current.error).toContain("no configuration file");
+      expect(result.current.leftovers?.ids).toEqual([LEFT]);
+    });
+  });
 });

@@ -143,6 +143,17 @@
     "body_suffix": ", vilket tvångsstopar dem omedelbart. Till skillnad från Stoppa får processer ingen chans att städa upp. Använd bara när Stoppa inte svarar.",
     "confirm_button": "Avsluta alla containers"
   },
+  "leftovers": {
+    "remaining_title": "Docker listar fortfarande containrar för {{name}}",
+    "remaining_body": "Alla stackens containrar togs inte bort, så den ligger kvar i listan. Tvingad borttagning raderar dem via deras projektetikett, utan att compose-filen behövs.",
+    "force_remove": "Tvinga borttagning",
+    "damaged_title": "Dockers poster för några av dessa containrar är skadade",
+    "damaged_body": "Docker listar dem men kan inte öppna dem, så de kan varken startas eller tas bort. Det händer oftast efter en krasch eller ett strömavbrott. Att ta bort de skadade posterna medan Docker är stoppat löser det:",
+    "repair_button": "Reparera",
+    "repair_confirm_title": "Starta om Docker för att reparera?",
+    "repair_confirm_body": "Reparationen stoppar Docker, tar bort de skadade posterna och startar Docker igen. Medan Docker är stoppat stoppas alla containrar i denna Docker-daemon, inte bara den här stackens. Containrar utan omstartspolicy förblir stoppade efteråt och måste startas igen.",
+    "repair_confirm_button": "Stoppa Docker och reparera"
+  },
   "stop_modal": {
     "aria_label": "Bekräfta stopp",
     "title": "Stoppa \"{{name}}\"?",

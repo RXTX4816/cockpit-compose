@@ -145,6 +145,17 @@
     "body_suffix": ", natychmiast je kończąc. W przeciwieństwie do Zatrzymania, procesy nie mają szansy na posprzątanie. Używaj tylko gdy Zatrzymanie nie odpowiada.",
     "confirm_button": "Zakończ wszystkie kontenery"
   },
+  "leftovers": {
+    "remaining_title": "Docker nadal wyświetla kontenery dla {{name}}",
+    "remaining_body": "Nie wszystkie kontenery stosu zostały usunięte, więc pozostaje on na liście. Wymuszone usunięcie kasuje je według etykiety projektu, bez potrzeby pliku compose.",
+    "force_remove": "Wymuś usunięcie",
+    "damaged_title": "Rekordy Dockera niektórych z tych kontenerów są uszkodzone",
+    "damaged_body": "Docker je wyświetla, ale nie może ich otworzyć, więc nie da się ich ani uruchomić, ani usunąć. Zwykle dzieje się tak po awarii lub zaniku zasilania. Usunięcie uszkodzonych rekordów przy zatrzymanym Dockerze naprawia problem:",
+    "repair_button": "Napraw",
+    "repair_confirm_title": "Uruchomić ponownie Dockera, aby naprawić?",
+    "repair_confirm_body": "Naprawa zatrzymuje Dockera, usuwa uszkodzone rekordy i ponownie uruchamia Dockera. Gdy Docker jest zatrzymany, zatrzymują się wszystkie kontenery tego demona Dockera, nie tylko tego stosu. Kontenery bez zasady ponownego uruchamiania pozostaną potem zatrzymane i trzeba je uruchomić ponownie.",
+    "repair_confirm_button": "Zatrzymaj Dockera i napraw"
+  },
   "stop_modal": {
     "aria_label": "Potwierdź zatrzymanie",
     "title": "Zatrzymać \"{{name}}\"?",

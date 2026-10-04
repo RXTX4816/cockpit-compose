@@ -143,6 +143,17 @@
     "body_suffix": ", 즉시 강제로 종료합니다. 정지와 달리 프로세스가 정리할 기회가 없습니다. 정지가 응답하지 않을 때만 사용하세요.",
     "confirm_button": "모든 컨테이너 강제 종료"
   },
+  "leftovers": {
+    "remaining_title": "Docker에 {{name}}의 컨테이너가 아직 남아 있습니다",
+    "remaining_body": "스택의 컨테이너가 모두 제거되지 않아 목록에 남아 있습니다. 강제 제거는 compose 파일 없이 프로젝트 레이블로 삭제합니다.",
+    "force_remove": "강제 제거",
+    "damaged_title": "이 컨테이너 중 일부에 대한 Docker 기록이 손상되었습니다",
+    "damaged_body": "Docker가 목록에는 표시하지만 열 수 없어 시작도 제거도 할 수 없습니다. 보통 충돌이나 정전 후에 발생합니다. Docker를 중지한 상태에서 손상된 기록을 삭제하면 해결됩니다:",
+    "repair_button": "복구",
+    "repair_confirm_title": "복구를 위해 Docker를 다시 시작할까요?",
+    "repair_confirm_body": "복구는 Docker를 중지하고 손상된 기록을 삭제한 뒤 Docker를 다시 시작합니다. Docker가 중지된 동안에는 이 스택뿐 아니라 이 Docker 데몬의 모든 컨테이너가 중지됩니다. 재시작 정책이 없는 컨테이너는 이후에도 중지된 상태로 남으므로 다시 시작해야 합니다.",
+    "repair_confirm_button": "Docker 중지 후 복구"
+  },
   "stop_modal": {
     "aria_label": "정지 확인",
     "title": "\"{{name}}\"을(를) 정지하시겠습니까?",

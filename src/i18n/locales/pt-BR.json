@@ -143,6 +143,17 @@
     "body_suffix": ", encerrando-os forçosamente de imediato. Ao contrário de Parar, os processos não têm chance de fazer limpeza. Use somente quando Parar não responder.",
     "confirm_button": "Matar todos os contêineres"
   },
+  "leftovers": {
+    "remaining_title": "O Docker ainda lista contêineres de {{name}}",
+    "remaining_body": "Nem todos os contêineres da pilha foram removidos, por isso ela continua na lista. A remoção forçada os exclui pelo rótulo do projeto, sem precisar do arquivo compose.",
+    "force_remove": "Forçar remoção",
+    "damaged_title": "Os registros do Docker de alguns desses contêineres estão danificados",
+    "damaged_body": "O Docker os lista, mas não consegue abri-los, então não podem ser iniciados nem removidos. Isso costuma acontecer após uma falha ou queda de energia. Excluir os registros danificados com o Docker parado resolve:",
+    "repair_button": "Reparar",
+    "repair_confirm_title": "Reiniciar o Docker para reparar?",
+    "repair_confirm_body": "O reparo para o Docker, exclui os registros danificados e inicia o Docker novamente. Enquanto o Docker estiver parado, todos os contêineres deste daemon Docker param, não só os desta pilha. Contêineres sem política de reinício continuam parados depois e precisam ser iniciados de novo.",
+    "repair_confirm_button": "Parar o Docker e reparar"
+  },
   "stop_modal": {
     "aria_label": "Confirmar parada",
     "title": "Parar \"{{name}}\"?",

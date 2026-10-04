@@ -143,6 +143,17 @@
     "body_suffix": ", anında zorla sonlandırır. Durdur'un aksine, süreçlerin temizlik yapma şansı olmaz. Yalnızca Durdur yanıt vermediğinde kullanın.",
     "confirm_button": "Tüm konteynerleri sonlandır"
   },
+  "leftovers": {
+    "remaining_title": "Docker hâlâ {{name}} için konteynerler listeliyor",
+    "remaining_body": "Yığının tüm konteynerleri kaldırılmadı, bu yüzden listede kalıyor. Zorla kaldır, onları compose dosyasına gerek duymadan proje etiketine göre siler.",
+    "force_remove": "Zorla kaldır",
+    "damaged_title": "Bu konteynerlerin bazıları için Docker kayıtları bozuk",
+    "damaged_body": "Docker onları listeliyor ama açamıyor, bu yüzden ne başlatılabilir ne de kaldırılabilirler. Bu genellikle bir çökme ya da elektrik kesintisinden sonra olur. Docker durdurulmuşken bozuk kayıtları silmek sorunu çözer:",
+    "repair_button": "Onar",
+    "repair_confirm_title": "Onarmak için Docker yeniden başlatılsın mı?",
+    "repair_confirm_body": "Onarım Docker'ı durdurur, bozuk kayıtları siler ve Docker'ı yeniden başlatır. Docker durdurulduğu sürece yalnızca bu yığının değil, bu Docker daemon'undaki tüm konteynerler durur. Yeniden başlatma politikası olmayan konteynerler sonrasında durdurulmuş kalır ve yeniden başlatılmaları gerekir.",
+    "repair_confirm_button": "Docker'ı durdur ve onar"
+  },
   "stop_modal": {
     "aria_label": "Durdurmayı onayla",
     "title": "\"{{name}}\" durdurulsun mu?",

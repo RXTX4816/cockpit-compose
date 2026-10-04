@@ -143,6 +143,17 @@
     "body_suffix": ", terminându-le forțat imediat. Spre deosebire de Oprire, procesele nu au șansa de a face curățenie. Folosiți doar când Oprire nu răspunde.",
     "confirm_button": "Terminare toate containerele"
   },
+  "leftovers": {
+    "remaining_title": "Docker încă listează containere pentru {{name}}",
+    "remaining_body": "Nu toate containerele stivei au fost eliminate, așa că rămâne în listă. Eliminarea forțată le șterge după eticheta de proiect, fără a avea nevoie de fișierul compose.",
+    "force_remove": "Forțează eliminarea",
+    "damaged_title": "Înregistrările Docker pentru unele dintre aceste containere sunt deteriorate",
+    "damaged_body": "Docker le listează, dar nu le poate deschide, așa că nu pot fi nici pornite, nici eliminate. De obicei se întâmplă după o cădere sau o pană de curent. Ștergerea înregistrărilor deteriorate cu Docker oprit rezolvă problema:",
+    "repair_button": "Repară",
+    "repair_confirm_title": "Reporniți Docker pentru reparare?",
+    "repair_confirm_body": "Repararea oprește Docker, șterge înregistrările deteriorate și pornește din nou Docker. Cât timp Docker este oprit, se opresc toate containerele acestui daemon Docker, nu doar cele ale acestei stive. Containerele fără politică de repornire rămân oprite după aceea și trebuie pornite din nou.",
+    "repair_confirm_button": "Oprește Docker și repară"
+  },
   "stop_modal": {
     "aria_label": "Confirmare oprire",
     "title": "Oprire \"{{name}}\"?",

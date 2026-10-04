@@ -115,4 +115,38 @@ describe("useKillStack", () => {
     await act(() => result.current.execute());
     await waitFor(() => expect(result.current.error).toBe("plain string error"));
   });
+
+  // #345: Kill reports what even a forced removal could not touch.
+  describe("leftovers", () => {
+    const GHOST = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+
+    it("closes when nothing is left, even if part of the kill reported an error", async () => {
+      mockSpawn.mockImplementation((args: string[]) => {
+        if (args.includes("--no-trunc")) return mockProcess("");
+        if (args.includes("rm")) return mockProcess("", "partial failure");
+        if (args.includes("--format") && args.includes("{{.ID}}")) return mockProcess("abc\n");
+        return mockProcess("");
+      });
+      const { result } = renderHook(() => useKillStack(vi.fn(), vi.fn()));
+      act(() => { result.current.open(stack); });
+      await act(() => result.current.execute());
+      expect(result.current.target).toBeNull();
+      expect(result.current.error).toBeNull();
+    });
+
+    it("keeps the dialog open with a damaged record that rm -f cannot remove", async () => {
+      mockSpawn.mockImplementation((args: string[]) => {
+        if (args.includes("--no-trunc")) return mockProcess(`${GHOST}\n`);
+        if (args.includes("inspect")) return mockProcess("", `Error: No such object: ${GHOST}`);
+        if (args.includes("rm")) return mockProcess("", `No such container: ${GHOST}`);
+        if (args.includes("--format")) return mockProcess(`${GHOST}\n`);
+        return mockProcess("");
+      });
+      const { result } = renderHook(() => useKillStack(vi.fn(), vi.fn()));
+      act(() => { result.current.open(stack); });
+      await act(() => result.current.execute());
+      expect(result.current.target).toEqual(stack);
+      expect(result.current.leftovers).toEqual({ ids: [GHOST], damaged: [GHOST] });
+    });
+  });
 });

@@ -143,6 +143,17 @@
     "body_suffix": ", menghentikannya secara paksa dan segera. Tidak seperti Stop, proses tidak punya kesempatan untuk membersihkan. Gunakan hanya saat Stop tidak merespons.",
     "confirm_button": "Paksa hentikan semua kontainer"
   },
+  "leftovers": {
+    "remaining_title": "Docker masih mencantumkan kontainer untuk {{name}}",
+    "remaining_body": "Tidak semua kontainer tumpukan dihapus, jadi tumpukan tetap ada di daftar. Hapus paksa menghapusnya berdasarkan label proyek, tanpa perlu file compose.",
+    "force_remove": "Hapus paksa",
+    "damaged_title": "Catatan Docker untuk beberapa kontainer ini rusak",
+    "damaged_body": "Docker mencantumkannya tetapi tidak dapat membukanya, jadi tidak bisa dijalankan maupun dihapus. Biasanya terjadi setelah crash atau listrik padam. Menghapus catatan yang rusak saat Docker dihentikan akan memperbaikinya:",
+    "repair_button": "Perbaiki",
+    "repair_confirm_title": "Mulai ulang Docker untuk memperbaiki?",
+    "repair_confirm_body": "Perbaikan menghentikan Docker, menghapus catatan yang rusak, lalu menjalankan Docker lagi. Selama Docker dihentikan, semua kontainer di daemon Docker ini berhenti, bukan hanya milik tumpukan ini. Kontainer tanpa kebijakan restart akan tetap berhenti setelahnya dan harus dijalankan lagi.",
+    "repair_confirm_button": "Hentikan Docker dan perbaiki"
+  },
   "stop_modal": {
     "aria_label": "Konfirmasi penghentian",
     "title": "Hentikan \"{{name}}\"?",

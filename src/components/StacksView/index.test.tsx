@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, act, within } from "@testing-library/react";
-import type { ComposeStack } from "../../api";
+import type { ComposeStack, StackLeftovers } from "../../api";
 import type { DownedStack } from "../../hooks/useDownedStacksScan";
 
 // --- Hook mocks ---
@@ -190,12 +190,14 @@ const stack: ComposeStack = {
 };
 
 const defaultDownStack = {
-  target: null, downing: false, error: null,
-  open: vi.fn(), close: vi.fn(), execute: vi.fn(),
+  target: null as ComposeStack | null, downing: false, error: null as string | null,
+  leftovers: null as StackLeftovers | null, superuser: undefined as "try" | undefined, forceRemoving: false,
+  open: vi.fn(), close: vi.fn(), execute: vi.fn(), forceRemove: vi.fn(), recheck: vi.fn(),
 };
 const defaultKillStack = {
-  target: null, killing: false, error: null,
-  open: vi.fn(), close: vi.fn(), execute: vi.fn(),
+  target: null as ComposeStack | null, killing: false, error: null as string | null,
+  leftovers: null as StackLeftovers | null, superuser: undefined as "try" | undefined,
+  open: vi.fn(), close: vi.fn(), execute: vi.fn(), recheck: vi.fn(),
 };
 
 beforeEach(() => {
