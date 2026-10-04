@@ -157,4 +157,44 @@ describe("UpConfirmModal — pull_policy awareness", () => {
     await screen.findByText("nginx:latest");
     expect(screen.queryByText(/unpinned/)).toBeNull();
   });
+
+  describe("jobs (Compose 5.6.0)", () => {
+    const withJobs = `
+services:
+  web:
+    image: nginx:1.27
+jobs:
+  migrate:
+    image: app:1
+    triggers:
+      manual: true
+  nightly:
+    image: app:1
+    profiles: [ops]
+    triggers:
+      schedule: ["0 3 * * *"]
+`;
+
+    it("lists declared jobs and explains that Up does not start them", async () => {
+      mockReadComposeFile.mockImplementation(() => mockProcess(withJobs));
+      render(<UpConfirmModal stack={stack} onConfirm={vi.fn()} onClose={vi.fn()} />);
+      await waitFor(() => expect(screen.getByText("migrate")).toBeInTheDocument());
+      expect(screen.getByText("nightly")).toBeInTheDocument();
+      expect(screen.getByText(/Up does not start jobs/i)).toBeInTheDocument();
+    });
+
+    it("warns before confirming only while a scheduled job is active, following the profile selection", async () => {
+      mockReadComposeFile.mockImplementation(() => mockProcess(withJobs));
+      render(<UpConfirmModal stack={stack} onConfirm={vi.fn()} onClose={vi.fn()} />);
+      await waitFor(() => screen.getByText("nightly"));
+      // nightly is gated behind the "ops" profile, so it is inactive until that is ticked.
+      expect(screen.queryByText(/will refuse to start this stack/i)).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole("checkbox", { name: "ops" }));
+      expect(screen.getByText(/will refuse to start this stack/i)).toBeInTheDocument();
+      expect(screen.getByText(/active: nightly/i)).toBeInTheDocument();
+      // It warns; it does not block. The CLI stays the authority.
+      expect(screen.getByRole("button", { name: /^Up$/i })).toBeEnabled();
+    });
+  });
 });

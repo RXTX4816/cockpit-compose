@@ -331,6 +331,8 @@
     "title": "Kör — {{name}}",
     "field_service": "Tjänst",
     "field_service_placeholder": "tjänstnamn",
+    "group_services": "Tjänster",
+    "group_jobs": "Jobb",
     "field_command": "Kommando",
     "field_command_placeholder": "echo hello",
     "field_rm": "Ta bort container efter körning (--rm)",
@@ -342,7 +344,8 @@
     "warning_title": "Långvariga tjänster blockerar",
     "warning_body": "compose run startar en ny container för den valda tjänsten. Om tjänsten inte har något överskridande kommando (t.ex. en webbserver eller databas) startar containern tjänsten och fortsätter köra — den avslutar inte sig själv. Du kan behöva avbryta här och sedan tvångsstoppa stacken för att återhämta dig.",
     "force_kill_button": "Tvinga bort container",
-    "force_kill_tooltip": "Tvångstbort den fastnade engångscontainern. Använd när tjänsten inte avslutar sig själv."
+    "force_kill_tooltip": "Tvångstbort den fastnade engångscontainern. Använd när tjänsten inte avslutar sig själv.",
+    "field_command_job_hint": "För ett jobb, lämna tomt för att köra jobbets eget kommando."
   },
   "exec_modal": {
     "aria_label": "Terminal — {{name}}",
@@ -417,6 +420,10 @@
     "services_title": "Tjänster:",
     "unpinned_label": "⚠ ej fastsatt",
     "unpinned_notice": "Ej fastsatta images kan hämta vad registret anser vara \"senaste\" och är mer benägna att oförutsägbart ändra beteende.",
+    "jobs_title": "Jobb",
+    "jobs_hint": "Up startar inte jobb. Starta ett från stackens ⋮-meny → Kör.",
+    "scheduled_jobs_title": "Docker Compose kommer att vägra starta denna stack",
+    "scheduled_jobs_body": "Schemalagda jobb stöds inte ännu, och dessa är aktiva: {{jobs}}. Avmarkera deras profil eller ta bort schemat innan du kör Up.",
     "profiles_title": "Valfria profiler",
     "profiles_hint": "Endast tjänster markerade med en vald profil startas.",
     "up_button": "Starta"
@@ -444,6 +451,10 @@
     "vol_col_driver": "Drivrutin",
     "vol_col_mountpoint": "Monteringspunkt",
     "section_networks": "Nätverk",
+    "section_jobs": "Jobb",
+    "job_trigger_manual": "manuellt (via Kör)",
+    "job_trigger_schedule": "schemalagt: {{schedule}}",
+    "job_trigger_none": "ingen utlösare",
     "no_networks": "Inga nätverk hittades.",
     "network_error_title": "Det gick inte att läsa in nätverk",
     "net_col_name": "Nätverk",

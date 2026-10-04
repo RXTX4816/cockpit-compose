@@ -333,6 +333,8 @@
     "warning_body": "compose run startet einen frischen Container für den ausgewählten Dienst. Wenn dieser Dienst keinen überschreibenden Befehl hat (z.B. ein Webserver oder eine Datenbank), wird der Container den Dienst starten und weiterlaufen — er wird nicht von selbst beendet. Möglicherweise müssen Sie hier abbrechen und dann den Stack erzwingen stoppen, um ihn wiederherzustellen.",
     "field_service": "Dienst",
     "field_service_placeholder": "Dienstname",
+    "group_services": "Dienste",
+    "group_jobs": "Jobs",
     "field_command": "Befehl",
     "field_command_placeholder": "echo hello",
     "field_rm": "Container nach Ausführung entfernen (--rm)",
@@ -342,7 +344,8 @@
     "complete": "✓ Befehl abgeschlossen",
     "failed": "✗ Befehl fehlgeschlagen",
     "force_kill_button": "Container erzwingen entfernen",
-    "force_kill_tooltip": "Erzwingt das Entfernen des hängen gebliebenen One-Off-Containers. Verwenden, wenn der Dienst nicht von selbst beendet wird."
+    "force_kill_tooltip": "Erzwingt das Entfernen des hängen gebliebenen One-Off-Containers. Verwenden, wenn der Dienst nicht von selbst beendet wird.",
+    "field_command_job_hint": "Bei einem Job leer lassen, um den im Job definierten Befehl auszuführen."
   },
   "exec_modal": {
     "aria_label": "Terminal — {{name}}",
@@ -417,6 +420,10 @@
     "services_title": "Dienste:",
     "unpinned_label": "⚠ nicht fixiert",
     "unpinned_notice": "Nicht fixierte Images können das laden, was die Registry als \"latest\" betrachtet, und ändern ihr Verhalten unerwartet.",
+    "jobs_title": "Jobs",
+    "jobs_hint": "Up startet keine Jobs. Starte einen über das ⋮-Menü des Stacks → Ausführen.",
+    "scheduled_jobs_title": "Docker Compose wird diesen Stack nicht starten",
+    "scheduled_jobs_body": "Geplante Jobs werden noch nicht unterstützt, und diese sind aktiv: {{jobs}}. Wähle ihr Profil ab oder entferne den Zeitplan, bevor du Up ausführst.",
     "profiles_title": "Optionale Profile",
     "profiles_hint": "Nur Dienste, die einem ausgewählten Profil zugeordnet sind, werden gestartet.",
     "up_button": "Hochfahren"
@@ -444,6 +451,10 @@
     "vol_col_driver": "Treiber",
     "vol_col_mountpoint": "Einhängepunkt",
     "section_networks": "Netzwerke",
+    "section_jobs": "Jobs",
+    "job_trigger_manual": "manuell (über Ausführen)",
+    "job_trigger_schedule": "geplant: {{schedule}}",
+    "job_trigger_none": "kein Auslöser",
     "no_networks": "Keine Netzwerke gefunden.",
     "network_error_title": "Netzwerke konnten nicht geladen werden",
     "net_col_name": "Netzwerk",

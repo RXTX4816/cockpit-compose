@@ -25,6 +25,8 @@ import {
   listProjectNetworks,
   listNetworkConnectedProjects,
   readComposeFile,
+  getJobsFromCompose,
+  type ComposeJob,
   getServiceProfileMapFromCompose,
   parseJsonOutput,
   parsePortsDetailed,
@@ -83,6 +85,7 @@ export function StackInfoModal({ stack, onClose }: Props) {
   const [networkError, setNetworkError] = useState<string | null>(null);
 
   const [serviceProfileMap, setServiceProfileMap] = useState<Record<string, string[]>>({});
+  const [jobs, setJobs] = useState<ComposeJob[]>([]);
 
   const configFiles = splitConfigFiles(stack.ConfigFiles);
   const configFile = configFiles[0];
@@ -91,7 +94,10 @@ export function StackInfoModal({ stack, onClose }: Props) {
     let content = "";
     const proc = readComposeFile(configFile);
     proc.stream((d: string) => { content += d; });
-    void proc.then(() => setServiceProfileMap(getServiceProfileMapFromCompose(content)));
+    void proc.then(() => {
+      setServiceProfileMap(getServiceProfileMapFromCompose(content));
+      setJobs(getJobsFromCompose(content));
+    });
   }, [configFile]);
 
   useEffect(() => {
@@ -296,6 +302,29 @@ export function StackInfoModal({ stack, onClose }: Props) {
             </div>
           )}
         </section>
+
+        {jobs.length > 0 && (
+          <section className="sim-section">
+            <div className="sim-section-label">{t("info_modal.section_jobs")}</div>
+            <ul className="sim-job-list">
+              {jobs.map(job => (
+                <li key={job.name}>
+                  <code>{job.name}</code>
+                  {" — "}
+                  {job.manual && t("info_modal.job_trigger_manual")}
+                  {job.manual && job.schedules.length > 0 && ", "}
+                  {job.schedules.length > 0 && t("info_modal.job_trigger_schedule", { schedule: job.schedules.join("; ") })}
+                  {!job.manual && job.schedules.length === 0 && t("info_modal.job_trigger_none")}
+                  {job.profiles.length > 0 && (
+                    <span className="sim-job-profiles">
+                      {t("info_modal.profiles_label")}: {job.profiles.join(", ")}
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         <section className="sim-section">
           <div className="sim-section-label">{t("info_modal.section_images")}</div>

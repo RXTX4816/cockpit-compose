@@ -331,6 +331,8 @@
     "title": "Spustiť — {{name}}",
     "field_service": "Služba",
     "field_service_placeholder": "názov služby",
+    "group_services": "Služby",
+    "group_jobs": "Úlohy",
     "field_command": "Príkaz",
     "field_command_placeholder": "echo hello",
     "field_rm": "Odstrániť kontajner po spustení (--rm)",
@@ -342,7 +344,8 @@
     "warning_title": "Dlhodobé služby budú blokovať",
     "warning_body": "compose run spustí nový kontajner pre vybranú službu. Ak táto služba nemá prepisujúci príkaz (napr. webový server alebo databáza), kontajner spustí službu a zostane bežať — sám od seba sa neukončí. Možno bude potrebné zrušiť tu a potom zásobník vynútene zastaviť.",
     "force_kill_button": "Vynútene odstrániť kontajner",
-    "force_kill_tooltip": "Vynútene odstráni uviaznutý jednorazový kontajner. Použite, keď sa služba sama neukončí."
+    "force_kill_tooltip": "Vynútene odstráni uviaznutý jednorazový kontajner. Použite, keď sa služba sama neukončí.",
+    "field_command_job_hint": "Pri úlohe nechajte prázdne, aby sa spustil jej vlastný príkaz."
   },
   "exec_modal": {
     "aria_label": "Terminál — {{name}}",
@@ -417,6 +420,10 @@
     "services_title": "Služby:",
     "unpinned_label": "⚠ nefixovaný",
     "unpinned_notice": "Nefixované obrazy môžu stiahnuť to, čo register považuje za najnovšie a s väčšou pravdepodobnosťou sa neočakávane zmenia.",
+    "jobs_title": "Úlohy",
+    "jobs_hint": "Up nespúšťa úlohy. Spustite ju z ponuky ⋮ zásobníka → Spustiť.",
+    "scheduled_jobs_title": "Docker Compose odmietne tento zásobník spustiť",
+    "scheduled_jobs_body": "Plánované úlohy zatiaľ nie sú podporované a tieto sú aktívne: {{jobs}}. Pred spustením Up zrušte výber ich profilu alebo odstráňte plán.",
     "profiles_title": "Voliteľné profily",
     "profiles_hint": "Spustia sa iba služby označené vybraným profilom.",
     "up_button": "Spustiť"
@@ -444,6 +451,10 @@
     "vol_col_driver": "Ovládač",
     "vol_col_mountpoint": "Bod pripojenia",
     "section_networks": "Siete",
+    "section_jobs": "Úlohy",
+    "job_trigger_manual": "ručne (cez Spustiť)",
+    "job_trigger_schedule": "plánované: {{schedule}}",
+    "job_trigger_none": "bez spúšťača",
     "no_networks": "Nenašli sa žiadne siete.",
     "network_error_title": "Nepodarilo sa načítať siete",
     "net_col_name": "Sieť",

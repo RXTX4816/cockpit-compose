@@ -17,6 +17,7 @@ Before the operation starts, a confirmation modal always appears. It shows:
 - A warning that containers with changed configuration will be recreated.
 - A list of every service and its image. Services using unpinned images (`:latest` or no tag) are marked with a **⚠** warning.
 - An **Optional profiles** section — if your compose file defines [profiles](https://docs.docker.com/compose/profiles/), checkboxes appear here so you can select which ones to activate. Only services tagged with a selected profile will start. Services without any profile tag always start regardless.
+- A **Jobs** list, if the file declares jobs (Docker Compose 5.6.0+). Up never starts jobs; trigger them from **⋮ → Run** (see [Running Commands](Running-Commands)). If a job with a `schedule` is active (it has no profile, or one of its profiles is selected), a red warning explains that Compose will refuse to start the stack, because scheduled jobs are not supported yet. The warning follows the profile checkboxes, and it does not block **Up**: the Compose CLI has the final say.
 
 Click **Up** to proceed or **Cancel** to abort.
 

@@ -331,6 +331,8 @@
     "title": "تشغيل — {{name}}",
     "field_service": "الخدمة",
     "field_service_placeholder": "اسم الخدمة",
+    "group_services": "الخدمات",
+    "group_jobs": "المهام",
     "field_command": "الأمر",
     "field_command_placeholder": "echo hello",
     "field_rm": "إزالة الحاوية بعد التشغيل (--rm)",
@@ -342,7 +344,8 @@
     "warning_title": "تحذير: الحاوية قد تظل عالقة",
     "warning_body": "إذا لم تنتهي الخدمة تلقائياً بعد تنفيذ الأمر، فقد تظل الحاوية قيد التشغيل في الخلفية. في هذه الحالة، ستحتاج إلى إزالتها يدوياً من خلال معلومات الحزمة أو باستخدام زر \"إزالة قسري\" أدناه.",
     "force_kill_button": "إزالة قسري للحاوية",
-    "force_kill_tooltip": "يزيل قسرياً الحاوية العالقة. استخدم هذا عندما لا تنهي الخدمة نفسها تلقائياً."
+    "force_kill_tooltip": "يزيل قسرياً الحاوية العالقة. استخدم هذا عندما لا تنهي الخدمة نفسها تلقائياً.",
+    "field_command_job_hint": "بالنسبة للمهمة، اتركه فارغًا لتشغيل الأمر الخاص بها."
   },
   "exec_modal": {
     "aria_label": "الطرفية — {{name}}",
@@ -417,6 +420,10 @@
     "services_title": "الخدمات:",
     "unpinned_label": "⚠ غير مثبت",
     "unpinned_notice": "قد تسحب الصور غير المثبتة ما تعتبره السجل \"الأحدث\" وهي الأكثر احتمالاً لتغيير السلوك بشكل غير متوقع.",
+    "jobs_title": "المهام",
+    "jobs_hint": "لا يبدأ Up المهام. شغّل واحدة من قائمة ⋮ للحزمة ← تشغيل.",
+    "scheduled_jobs_title": "سيرفض Docker Compose تشغيل هذه الحزمة",
+    "scheduled_jobs_body": "المهام المجدولة غير مدعومة بعد، وهذه نشطة: {{jobs}}. ألغِ تحديد ملفها الشخصي أو أزل الجدولة قبل تشغيل Up.",
     "profiles_title": "ملفات تعريف اختيارية",
     "profiles_hint": "ستبدأ فقط الخدمات المُعلَّمة بملف تعريف مُحدد.",
     "up_button": "تشغيل"
@@ -444,6 +451,10 @@
     "vol_col_driver": "المشغّل",
     "vol_col_mountpoint": "نقطة التوصيل",
     "section_networks": "الشبكات",
+    "section_jobs": "المهام",
+    "job_trigger_manual": "يدويًا (عبر تشغيل)",
+    "job_trigger_schedule": "مجدول: {{schedule}}",
+    "job_trigger_none": "بدون مشغّل",
     "no_networks": "لم يُعثر على شبكات.",
     "network_error_title": "تعذّر تحميل الشبكات",
     "net_col_name": "الشبكة",

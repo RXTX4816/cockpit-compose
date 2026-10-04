@@ -85,6 +85,40 @@ describe("StackInfoModal", () => {
     await act(async () => {});
   });
 
+  it("lists the stack's jobs with their triggers and profiles (Compose 5.6.0)", async () => {
+    mockReadComposeFile.mockImplementation(() => mockProcess(`
+services:
+  web:
+    image: nginx
+jobs:
+  migrate:
+    image: app
+    triggers:
+      manual: true
+  nightly:
+    image: app
+    profiles: [ops]
+    triggers:
+      manual: false
+      schedule: ["0 3 * * *"]
+`));
+    mockSpawnSequence(() => mockProcess(containers), () => mockProcess(images), () => mockProcess(volumes), () => mockProcess(""));
+    render(<StackInfoModal stack={stack} onClose={vi.fn()} />);
+    await waitFor(() => expect(screen.getByText("Jobs")).toBeInTheDocument());
+    expect(screen.getByText("migrate").closest("li")).toHaveTextContent("manual (via Run)");
+    const nightly = screen.getByText("nightly").closest("li");
+    expect(nightly).toHaveTextContent("scheduled: 0 3 * * *");
+    expect(nightly).not.toHaveTextContent("manual");
+    expect(nightly).toHaveTextContent("Profiles: ops");
+  });
+
+  it("shows no Jobs section when the file declares none", async () => {
+    mockSpawnSequence(() => mockProcess(containers), () => mockProcess(images), () => mockProcess(volumes), () => mockProcess(""));
+    render(<StackInfoModal stack={stack} onClose={vi.fn()} />);
+    await act(async () => {});
+    expect(screen.queryByText("Jobs")).not.toBeInTheDocument();
+  });
+
   it("shows spinners while loading", async () => {
     mockSpawnSequence(() => mockProcess(containers), () => mockProcess(images), () => mockProcess(volumes), () => mockProcess(""));
     render(<StackInfoModal stack={stack} onClose={vi.fn()} />);

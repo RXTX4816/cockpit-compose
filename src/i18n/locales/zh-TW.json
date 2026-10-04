@@ -331,6 +331,8 @@
     "title": "執行 — {{name}}",
     "field_service": "服務",
     "field_service_placeholder": "服務名稱",
+    "group_services": "服務",
+    "group_jobs": "作業",
     "field_command": "命令",
     "field_command_placeholder": "echo hello",
     "field_rm": "執行後移除容器（--rm）",
@@ -342,7 +344,8 @@
     "warning_title": "長時間執行的服務將會封鎖",
     "warning_body": "compose run 會為所選服務啟動一個新容器。如果該服務沒有覆寫的命令（例如 Web 伺服器或資料庫），容器將啟動服務並持續執行 — 它不會自行退出。您可能需要在此取消，然後強制停止堆疊以恢復。",
     "force_kill_button": "強制移除容器",
-    "force_kill_tooltip": "強制移除卡住的一次性容器。在服務不會自行退出時使用。"
+    "force_kill_tooltip": "強制移除卡住的一次性容器。在服務不會自行退出時使用。",
+    "field_command_job_hint": "對於作業，留空即可執行作業本身的命令。"
   },
   "exec_modal": {
     "aria_label": "終端機 — {{name}}",
@@ -417,6 +420,10 @@
     "services_title": "服務：",
     "unpinned_label": "⚠ 未固定",
     "unpinned_notice": "未固定的映像可能拉取儲存庫認為「最新」的版本，更可能意外改變行為。",
+    "jobs_title": "作業",
+    "jobs_hint": "Up 不會啟動作業。請透過堆疊的 ⋮ 選單 → 執行 來觸發。",
+    "scheduled_jobs_title": "Docker Compose 將拒絕啟動此堆疊",
+    "scheduled_jobs_body": "尚不支援排程作業，而下列作業處於啟用狀態：{{jobs}}。執行 Up 前請取消選擇其設定檔或移除排程。",
     "profiles_title": "選用設定檔",
     "profiles_hint": "僅啟動標記了所選設定檔的服務。",
     "up_button": "啟動"
@@ -444,6 +451,10 @@
     "vol_col_driver": "驅動程式",
     "vol_col_mountpoint": "掛載點",
     "section_networks": "網路",
+    "section_jobs": "作業",
+    "job_trigger_manual": "手動（透過執行）",
+    "job_trigger_schedule": "排程：{{schedule}}",
+    "job_trigger_none": "無觸發條件",
     "no_networks": "找不到網路。",
     "network_error_title": "無法載入網路",
     "net_col_name": "網路",

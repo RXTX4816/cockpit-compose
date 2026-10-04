@@ -331,6 +331,8 @@
     "title": "Esegui — {{name}}",
     "field_service": "Servizio",
     "field_service_placeholder": "nome servizio",
+    "group_services": "Servizi",
+    "group_jobs": "Job",
     "field_command": "Comando",
     "field_command_placeholder": "echo hello",
     "field_rm": "Rimuovi container dopo l'esecuzione (--rm)",
@@ -342,7 +344,8 @@
     "warning_title": "I servizi a lunga esecuzione bloccheranno",
     "warning_body": "compose run avvia un nuovo container per il servizio selezionato. Se quel servizio non ha un comando di override (ad esempio un server web o un database), il container avvierà il servizio e rimarrà in esecuzione — non si chiuderà da solo. Potrebbe essere necessario annullare qui e poi forzare lo stop dello stack per ripristinare.",
     "force_kill_button": "Rimuovi forzatamente il container",
-    "force_kill_tooltip": "Rimuove forzatamente il container one-off bloccato. Usare quando il servizio non si chiude da solo."
+    "force_kill_tooltip": "Rimuove forzatamente il container one-off bloccato. Usare quando il servizio non si chiude da solo.",
+    "field_command_job_hint": "Per un job, lascia vuoto per eseguire il suo comando."
   },
   "exec_modal": {
     "aria_label": "Terminale — {{name}}",
@@ -417,6 +420,10 @@
     "services_title": "Servizi:",
     "unpinned_label": "⚠ non fissato",
     "unpinned_notice": "Le immagini non fissate potrebbero scaricare ciò che il registry considera \"più recente\" e hanno più probabilità di cambiare comportamento inaspettatamente.",
+    "jobs_title": "Job",
+    "jobs_hint": "Up non avvia i job. Avviane uno dal menu ⋮ dello stack → Esegui.",
+    "scheduled_jobs_title": "Docker Compose si rifiuterà di avviare questo stack",
+    "scheduled_jobs_body": "I job pianificati non sono ancora supportati, e questi sono attivi: {{jobs}}. Deseleziona il loro profilo o rimuovi la pianificazione prima di eseguire Up.",
     "profiles_title": "Profili opzionali",
     "profiles_hint": "Verranno avviati solo i servizi contrassegnati con un profilo selezionato.",
     "up_button": "Avvia"
@@ -444,6 +451,10 @@
     "vol_col_driver": "Driver",
     "vol_col_mountpoint": "Punto di montaggio",
     "section_networks": "Reti",
+    "section_jobs": "Job",
+    "job_trigger_manual": "manuale (tramite Esegui)",
+    "job_trigger_schedule": "pianificato: {{schedule}}",
+    "job_trigger_none": "nessun trigger",
     "no_networks": "Nessuna rete trovata.",
     "network_error_title": "Impossibile caricare le reti",
     "net_col_name": "Rete",
