@@ -167,6 +167,18 @@
   white-space: nowrap;
 }
 
+/* PatternFly draws a secondary button's outline with ::after, which `border: none`
+   above does not reach. Inside the bar it doubled up with the bar's own border and
+   rendered unevenly (the bottom edge blended into the grey line at 1x zoom). The bar
+   is the frame here; the button is a flush segment like the depth stepper. */
+.dss-find-btn.pf-v6-c-button::after {
+  display: none;
+}
+
+.dss-find-btn.pf-v6-c-button:hover:not(:disabled) {
+  background: var(--pf-t--global--background--color--action--plain--hover);
+}
+
 /* Scan button: flush against the right edge */
 .dss-scan-btn.pf-v6-c-button {
   border-radius: 0 !important;
