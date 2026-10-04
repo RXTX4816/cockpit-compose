@@ -424,6 +424,9 @@
     "complete": "✓ Uruchomienie zakończone",
     "failed": "✗ Uruchomienie nie powiodło się"
   },
+  "compose_warnings": {
+    "title": "Docker Compose zgłosił ostrzeżenia"
+  },
   "up_confirm_modal": {
     "aria_label": "Potwierdź uruchomienie — {{name}}",
     "title": "Uruchamianie — {{name}}",

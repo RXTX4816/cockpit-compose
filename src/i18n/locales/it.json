@@ -410,6 +410,9 @@
     "complete": "✓ Avvio completato",
     "failed": "✗ Avvio non riuscito"
   },
+  "compose_warnings": {
+    "title": "Docker Compose ha segnalato degli avvisi"
+  },
   "up_confirm_modal": {
     "aria_label": "Conferma avvio — {{name}}",
     "title": "Avvia — {{name}}",

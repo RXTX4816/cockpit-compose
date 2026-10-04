@@ -410,6 +410,9 @@
     "complete": "✓ Spustenie dokončené",
     "failed": "✗ Spustenie zlyhalo"
   },
+  "compose_warnings": {
+    "title": "Docker Compose nahlásil varovania"
+  },
   "up_confirm_modal": {
     "aria_label": "Potvrdiť spustenie — {{name}}",
     "title": "Spustenie — {{name}}",

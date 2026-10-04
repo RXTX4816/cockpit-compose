@@ -7,6 +7,7 @@ import {
   Spinner,
 } from "@patternfly/react-core";
 import { LogViewer } from "@rxtx4816/cockpit-plugin-base-react/components";
+import { ComposeWarnings } from "./ComposeWarnings";
 import { type ComposeStack } from "../api";
 import { useUpStream } from "../hooks/useUpStream";
 import { useBackgroundTasks } from "../hooks/useBackgroundTasks";
@@ -66,6 +67,8 @@ export function UpModal({ stack, profiles = [], onClose }: Props) {
           {done && !failed && <span className="um-status-ok">{t("up_modal.complete")}</span>}
           {done && failed && <span className="um-status-failed">{t("up_modal.failed")}</span>}
         </div>
+
+        <ComposeWarnings lines={lines.map(l => l.text)} />
 
         <LogViewer
           lines={lines.map(l => l.text)}

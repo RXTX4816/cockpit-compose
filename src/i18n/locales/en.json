@@ -449,6 +449,9 @@
     "background_button": "Run in Background",
     "background_label": "Up — {{name}}"
   },
+  "compose_warnings": {
+    "title": "Docker Compose reported warnings"
+  },
   "up_confirm_modal": {
     "aria_label": "Confirm up — {{name}}",
     "title": "Up — {{name}}",

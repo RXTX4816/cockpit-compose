@@ -28,6 +28,8 @@ A progress modal opens and streams the output of `docker compose up` in real tim
 - **✓ Up complete** — all containers started successfully
 - **✗ Up failed** — an error occurred; the full error is shown below the status
 
+If Docker Compose prints warnings, for example about attributes that have no effect outside Swarm mode (Compose 5.6.0 warns about `deploy.update_config`, `credential_spec`, `ports[].mode: host` and others), they are collected into a **Docker Compose reported warnings** box above the log, as plain messages. A warning does not fail the operation. The Pull progress modal does the same.
+
 Click **Close** when done. If the operation is still running, click **Cancel** to abort it. Alternatively, click **Run in Background** (or close the modal with its **✕**) to close it and keep the operation running — see [Background Tasks](Background-Tasks).
 
 ---

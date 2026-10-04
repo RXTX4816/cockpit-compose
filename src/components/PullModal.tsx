@@ -7,6 +7,7 @@ import {
   Spinner,
 } from "@patternfly/react-core";
 import { LogViewer } from "@rxtx4816/cockpit-plugin-base-react/components";
+import { ComposeWarnings } from "./ComposeWarnings";
 import { type ComposeStack } from "../api";
 import { usePullStream } from "../hooks/usePullStream";
 import { useBackgroundTasks } from "../hooks/useBackgroundTasks";
@@ -60,6 +61,8 @@ export function PullModal({ stack, onClose }: Props) {
           {done && !failed && <span className="pm-status-ok">{t("pull_modal.complete")}</span>}
           {done && failed && <span className="pm-status-failed">{t("pull_modal.failed")}</span>}
         </div>
+
+        <ComposeWarnings lines={lines.map(l => l.text)} />
 
         <LogViewer
           lines={lines.map(l => l.text)}

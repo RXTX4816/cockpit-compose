@@ -220,4 +220,28 @@ describe("UpModal", () => {
     expect(mockEnqueue).toHaveBeenCalledWith("myapp", "up", expect.stringContaining("myapp"), expect.any(Function));
     expect(onClose).toHaveBeenCalledWith(true);
   });
+
+  describe("Compose warnings", () => {
+    it("lifts Compose's warnings out of the log into a readable box", () => {
+      mockUseUpStream.mockReturnValue({
+        lines: [
+          { text: 'time="2026-10-04T10:00:00+02:00" level=warning msg="service \\"web\\": deploy.update_config only applies to rolling updates in Swarm mode"', kind: "info" },
+          { text: " Container myapp-web-1 Started", kind: "success" },
+        ],
+        done: true, failed: false, errorMsg: "", cancel: vi.fn(), detach: vi.fn(() => null),
+      } as unknown as ReturnType<typeof useUpStream>);
+      render(<UpModal stack={stack} onClose={vi.fn()} />);
+      expect(screen.getByText("Docker Compose reported warnings")).toBeInTheDocument();
+      expect(screen.getByText('service "web": deploy.update_config only applies to rolling updates in Swarm mode')).toBeInTheDocument();
+    });
+
+    it("shows no warning box when Compose reported none", () => {
+      mockUseUpStream.mockReturnValue({
+        lines: [{ text: " Container myapp-web-1 Started", kind: "success" }],
+        done: true, failed: false, errorMsg: "", cancel: vi.fn(), detach: vi.fn(() => null),
+      } as unknown as ReturnType<typeof useUpStream>);
+      render(<UpModal stack={stack} onClose={vi.fn()} />);
+      expect(screen.queryByText("Docker Compose reported warnings")).not.toBeInTheDocument();
+    });
+  });
 });

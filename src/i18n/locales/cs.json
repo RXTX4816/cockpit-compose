@@ -410,6 +410,9 @@
     "complete": "✓ Spuštění dokončeno",
     "failed": "✗ Spuštění selhalo"
   },
+  "compose_warnings": {
+    "title": "Docker Compose nahlásil varování"
+  },
   "up_confirm_modal": {
     "aria_label": "Potvrdit spuštění — {{name}}",
     "title": "Spustit — {{name}}",

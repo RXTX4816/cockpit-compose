@@ -410,6 +410,9 @@
     "complete": "✓ ההפעלה הושלמה",
     "failed": "✗ ההפעלה נכשלה"
   },
+  "compose_warnings": {
+    "title": "Docker Compose דיווח על אזהרות"
+  },
   "up_confirm_modal": {
     "aria_label": "אשר הפעלה — {{name}}",
     "title": "הפעלה — {{name}}",

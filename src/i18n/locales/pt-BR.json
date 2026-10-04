@@ -410,6 +410,9 @@
     "complete": "✓ Início concluído",
     "failed": "✗ Início falhou"
   },
+  "compose_warnings": {
+    "title": "O Docker Compose relatou avisos"
+  },
   "up_confirm_modal": {
     "aria_label": "Confirmar início — {{name}}",
     "title": "Iniciar — {{name}}",

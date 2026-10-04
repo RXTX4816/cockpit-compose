@@ -410,6 +410,9 @@
     "complete": "✓ Start slutförd",
     "failed": "✗ Start misslyckades"
   },
+  "compose_warnings": {
+    "title": "Docker Compose rapporterade varningar"
+  },
   "up_confirm_modal": {
     "aria_label": "Bekräfta start — {{name}}",
     "title": "Start — {{name}}",

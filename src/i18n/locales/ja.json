@@ -410,6 +410,9 @@
     "complete": "✓ 起動完了",
     "failed": "✗ 起動失敗"
   },
+  "compose_warnings": {
+    "title": "Docker Compose が警告を報告しました"
+  },
   "up_confirm_modal": {
     "aria_label": "起動を確認 — {{name}}",
     "title": "起動 — {{name}}",

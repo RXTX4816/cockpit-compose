@@ -410,6 +410,9 @@
     "complete": "✓ Démarrage terminé",
     "failed": "✗ Échec du démarrage"
   },
+  "compose_warnings": {
+    "title": "Docker Compose a signalé des avertissements"
+  },
   "up_confirm_modal": {
     "aria_label": "Confirmer le démarrage — {{name}}",
     "title": "Démarrer — {{name}}",

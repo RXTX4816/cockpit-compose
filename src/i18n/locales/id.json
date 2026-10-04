@@ -410,6 +410,9 @@
     "complete": "✓ Berhasil dijalankan",
     "failed": "✗ Gagal dijalankan"
   },
+  "compose_warnings": {
+    "title": "Docker Compose melaporkan peringatan"
+  },
   "up_confirm_modal": {
     "aria_label": "Konfirmasi jalankan — {{name}}",
     "title": "Jalankan — {{name}}",
