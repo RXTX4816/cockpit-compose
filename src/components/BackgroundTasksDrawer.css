@@ -8,12 +8,23 @@
    clicks aimed at the task log modal's Close button (#283). Sitting below the backdrop
    is also the correct behaviour on its own terms: while a modal is up, the backdrop is
    supposed to cover and block the drawer, not sit behind it. */
-.btd-toggle {
+/* Brand-blue and slightly larger than a plain icon button, so it reads as an entry
+   point rather than blending into the page corner. */
+.btd-toggle.pf-v6-c-button {
+  --pf-v6-c-button--m-plain--BackgroundColor: var(--pf-t--global--color--brand--default);
+  --pf-v6-c-button--m-plain--Color: var(--pf-t--global--text--color--on-brand--default, #fff);
+  --pf-v6-c-button--m-plain--hover--BackgroundColor: var(--pf-t--global--color--brand--hover);
+  --pf-v6-c-button--m-plain--hover--Color: var(--pf-t--global--text--color--on-brand--hover, #fff);
   position: fixed;
   bottom: 1rem;
   right: 1rem;
   z-index: var(--pf-t--global--z-index--md, 300);
-  background: var(--pf-t--global--background--color--primary--default);
+  width: 2.75rem;
+  height: 2.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.125rem;
   border-radius: 999px;
   box-shadow: var(--pf-t--global--box-shadow--md);
 }
