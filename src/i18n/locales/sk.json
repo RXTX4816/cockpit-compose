@@ -25,20 +25,22 @@
     "aria_label": "Compose zásobníky",
     "empty_title": "Nenašli sa žiadne compose zásobníky",
     "empty_body": "Spustite projekt príkazom docker/podman compose up -d a zobrazí sa tu.",
+    "empty_create": "Vytvoriť zásobník",
+    "empty_import": "Importovať existujúci",
+    "no_results_title": "Žiadne zásobníky nezodpovedajú",
+    "no_results_body": "Skúste iný názov alebo zrušte aktívne filtre.",
+    "clear_filters": "Zrušiť filtre",
     "load_failed": "Chyba pri načítaní zásobníkov",
+    "refreshing": "Aktualizujem zásobníky",
     "service_count_one": "{{count}} služba",
+    "service_count_few": "{{count}} služby",
+    "service_count_many": "{{count}} služby",
     "service_count_other": "{{count}} služieb",
     "status_running": "beží",
     "status_partial": "čiastočne",
     "status_stopped": "zastavený",
     "status_paused": "pozastavený",
     "status_unknown": "neznámy",
-    "empty_create": "Vytvoriť zásobník",
-    "empty_import": "Importovať existujúci",
-    "no_results_title": "Žiadne zásobníky nezodpovedajú",
-    "no_results_body": "Skúste iný názov alebo zrušte aktívne filtre.",
-    "clear_filters": "Zrušiť filtre",
-    "refreshing": "Aktualizujem zásobníky",
     "search_placeholder": "Hľadať zásobníky…",
     "filter_tooltip_running": "Zobraziť iba bežiace zásobníky",
     "filter_tooltip_partial": "Zobraziť iba čiastočne bežiace zásobníky",
@@ -46,8 +48,13 @@
     "filter_tooltip_paused": "Zobraziť iba pozastavené zásobníky",
     "select_stack": "Vybrať {{name}}",
     "select_all": "Vybrať všetko",
+    "deselect_all": "Zrušiť výber",
     "bulk_selected": "{{count}} vybraných",
-    "bulk_clear": "Zrušiť výber"
+    "bulk_clear": "Zrušiť výber",
+    "runtime_switch_cancelled_tasks_one": "Zrušená {{count}} čakajúca úloha na pozadí, pretože sa zmenilo behové prostredie",
+    "runtime_switch_cancelled_tasks_few": "Zrušené {{count}} čakajúce úlohy na pozadí, pretože sa zmenilo behové prostredie",
+    "runtime_switch_cancelled_tasks_many": "Zrušené {{count}} čakajúcej úlohy na pozadí, pretože sa zmenilo behové prostredie",
+    "runtime_switch_cancelled_tasks_other": "Zrušených {{count}} čakajúcich úloh na pozadí, pretože sa zmenilo behové prostredie"
   },
   "actions": {
     "up": "Spustiť",
@@ -96,6 +103,9 @@
     "rootless": "Bez rootu",
     "rootless_help_title": "Rootless režim",
     "rootless_help_body": "Docker alebo Podman beží v rootless režime — kontajnery bežia ako váš používateľ, nie ako root. Zlepšuje to bezpečnosť, ale môže obmedzovať niektoré funkcie, ako je viazanie privilegovaných portov (<1024), prístup k systémovým cestám alebo používanie určitých sieťových ovládačov.",
+    "rootful": "S rootom",
+    "rootful_help_title": "Režim s rootom",
+    "rootful_help_body": "Docker alebo Podman beží v režime s rootom (celosystémovo) — kontajnery bežia ako root. Akcie sa v prípade potreby vykonávajú so zvýšenými oprávneniami cez administrátorský prístup Cockpitu.",
     "help": "Pomoc",
     "feedback": "Spätná väzba / Nahlásiť chybu",
     "source": "Zdrojový kód",
@@ -119,7 +129,28 @@
     "not_installed": "{{runtime}} sa nenašiel — nainštalujte ho na prepnutie",
     "podman_confirm_title": "Prepnúť na Podman",
     "podman_confirm_body": "Podpora Podmana je experimentálna. V závislosti od vašej konfigurácie niektoré funkcie nemusia fungovať podľa očakávania — vrátane objavovania zásobníkov, streamovania záznamov a určitých compose príkazov.",
-    "podman_suggest_docker_missing": "Docker nebol na tomto systéme nájdený. Prepnite na Podman na správu vašich kontajnerov."
+    "podman_suggest_docker_missing": "Docker nebol na tomto systéme nájdený. Prepnite na Podman na správu vašich kontajnerov.",
+    "rootless": "Bez rootu",
+    "rootful": "S rootom",
+    "socket_mode_toggle_label": "Režim soketu",
+    "rootless_help": "Použiť soket používateľa (bez rootu). Kontajnery bežia pod vaším vlastným používateľom.",
+    "rootful_help": "Použiť celosystémový soket (s rootom). Kontajnery bežia ako root so zvýšením oprávnení cez administrátorský prístup Cockpitu.",
+    "socket_not_detected": "Soket sa nezistil",
+    "rootful_needs_admin_access": "Zistil sa soket s rootom, ale nepodarilo sa ho overiť — zapnite administrátorský prístup v Cockpite a potom kliknite na Znova skontrolovať",
+    "recheck_sockets": "Znova skontrolovať dostupnosť soketov",
+    "no_socket_detected": "Nezistil sa žiadny soket enginu {{runtime}}. Uistite sa, že {{runtime}} je nainštalovaný a spustený.",
+    "no_socket_needs_admin_access": "Neoveril sa žiadny soket enginu {{runtime}} — našiel sa soket s rootom, ale vyžaduje administrátorský prístup Cockpitu. Zapnite ho a potom kliknite na Znova skontrolovať."
+  },
+  "layout": {
+    "toggle_label": "Rozloženie zobrazenia",
+    "minimal": "Minimálne",
+    "minimal_tooltip": "Kompaktný režim: skrytá päta, menšie odsadenie, dôraz na ikony",
+    "poweruser": "PowerUser",
+    "poweruser_tooltip": "Predvolené rozloženie so všetkými ovládacími prvkami",
+    "pretty": "Elegantné",
+    "pretty_tooltip": "Vzdušné rozloženie s jemnými tieňmi a bohatou typografiou",
+    "unix": "Unix",
+    "unix_tooltip": "V štýle terminálu s neproporcionálnym písmom a rámčekovými znakmi"
   },
   "error_boundary": {
     "load_stacks_error": "Chyba pri načítaní zásobníkov"
@@ -133,7 +164,8 @@
     "confirm_button": "Zastaviť (odstrániť)",
     "checking_networks": "Kontrolujem zdieľané siete…",
     "shared_networks_title": "Zistené zdieľané siete",
-    "shared_with": "používa aj"
+    "shared_with": "používa aj",
+    "background_label": "Zastaviť — {{name}}"
   },
   "kill_modal": {
     "aria_label": "Potvrdiť vynútené ukončenie",
@@ -141,7 +173,8 @@
     "body_prefix": "Spustenie",
     "body_sigkill": "odošle SIGKILL všetkým kontajnerom v",
     "body_suffix": ", čo ich okamžite vynútene ukončí. Na rozdiel od Zastaviť, procesy nemajú možnosť vykonať čistenie. Použite iba keď Zastaviť nereaguje.",
-    "confirm_button": "Ukončiť všetky kontajnery"
+    "confirm_button": "Ukončiť všetky kontajnery",
+    "background_label": "Ukončiť — {{name}}"
   },
   "leftovers": {
     "remaining_title": "Docker stále uvádza kontajnery pre {{name}}",
@@ -164,7 +197,8 @@
     "aria_label": "Potvrdiť reštart",
     "title": "Reštartovať \"{{name}}\"?",
     "body": "Toto reštartuje všetky bežiace služby. Služby budú krátko nedostupné.",
-    "confirm_button": "Reštartovať"
+    "confirm_button": "Reštartovať",
+    "background_label": "Reštartovať — {{name}}"
   },
   "delete_modal": {
     "aria_label": "Odstrániť compose zásobník — {{name}}",
@@ -183,6 +217,7 @@
     "target_folder": "priečinok {{folder}}",
     "target_file": "súbor {{file}}",
     "error_default": "Odstránenie zlyhalo",
+    "retry_sudo_button": "Skúsiť znova so sudo?",
     "checking_networks": "Kontrolujem zdieľané siete…",
     "shared_networks_title": "Zistené zdieľané siete",
     "shared_with": "používa aj"
@@ -217,8 +252,12 @@
     "errors_found_title": "Nájdené chyby",
     "warnings_found_title": "Nájdené upozornenia",
     "error_count_one": "V compose súbore je {{count}} chyba.",
+    "error_count_few": "V compose súbore sú {{count}} chyby.",
+    "error_count_many": "V compose súbore je {{count}} chyby.",
     "error_count_other": "V compose súbore je {{count}} chýb.",
     "warning_count_one": "V compose súbore je {{count}} upozornenie.",
+    "warning_count_few": "V compose súbore sú {{count}} upozornenia.",
+    "warning_count_many": "V compose súbore je {{count}} upozornenia.",
     "warning_count_other": "V compose súbore je {{count}} upozornení.",
     "validation_name_required": "Názov je povinný",
     "validation_name_slashes": "Názov nesmie obsahovať lomky",
@@ -245,6 +284,7 @@
   "yaml_modal": {
     "aria_label": "Compose súbor — {{name}}",
     "title": "{{name}} — compose súbor",
+    "unsaved_changes": "Neuložené zmeny",
     "env_file_button": "Env súbor",
     "history_button": "História ({{count}})",
     "edit_button": "Upraviť",
@@ -265,8 +305,12 @@
     "errors_found_title": "Nájdené chyby",
     "warnings_found_title": "Nájdené upozornenia",
     "error_count_one": "V compose súbore je {{count}} chyba.",
+    "error_count_few": "V compose súbore sú {{count}} chyby.",
+    "error_count_many": "V compose súbore je {{count}} chyby.",
     "error_count_other": "V compose súbore je {{count}} chýb.",
     "warning_count_one": "V compose súbore je {{count}} upozornenie.",
+    "warning_count_few": "V compose súbore sú {{count}} upozornenia.",
+    "warning_count_many": "V compose súbore je {{count}} upozornenia.",
     "warning_count_other": "V compose súbore je {{count}} upozornení.",
     "file_tab_aria": "Upraviť {{name}}",
     "add_file_button": "Pridať",
@@ -295,8 +339,7 @@
     "import_file_title": "Importovať existujúci súbor",
     "import_file_select_label": "Dostupné súbory",
     "import_file_none": "V tomto adresári sa nenašli žiadne ďalšie YAML súbory.",
-    "import_file_confirm_button": "Importovať",
-    "unsaved_changes": "Neuložené zmeny"
+    "import_file_confirm_button": "Importovať"
   },
   "env_modal": {
     "aria_label": "Env súbor — {{name}}",
@@ -335,6 +378,7 @@
     "level_warn": "Varovanie",
     "level_info": "Info",
     "download_tooltip": "Stiahnuť záznamy",
+    "download_saved": "Záznamy uložené do {{path}} (Firefox nemôže z tohto rozhrania sťahovať súbory priamo)",
     "timestamps_tooltip": "Prepnúť časové pečiatky",
     "scroll_top": "Prejsť na začiatok",
     "scroll_bottom": "Prejsť na koniec",
@@ -344,23 +388,26 @@
   "run_modal": {
     "aria_label": "Spustiť — {{name}}",
     "title": "Spustiť — {{name}}",
+    "warning_title": "Dlhodobé služby budú blokovať",
+    "warning_body": "compose run spustí nový kontajner pre vybranú službu. Ak táto služba nemá prepisujúci príkaz (napr. webový server alebo databáza), kontajner spustí službu a zostane bežať — sám od seba sa neukončí. Možno bude potrebné zrušiť tu a potom zásobník vynútene zastaviť.",
     "field_service": "Služba",
     "field_service_placeholder": "názov služby",
     "group_services": "Služby",
     "group_jobs": "Úlohy",
     "field_command": "Príkaz",
     "field_command_placeholder": "echo hello",
+    "field_command_help_args": "Odovzdá sa ako argumenty vstupnému bodu obrazu (napr. zadajte „--help“).",
+    "field_command_help_override": "Prvé slovo úplne nahradí vstupný bod obrazu (napr. zadajte úplnú cestu k programu, ako pri exec v termináli). Zvyšok sa mu odovzdá ako argumenty.",
+    "field_command_job_hint": "Pri úlohe nechajte prázdne, aby sa spustil jej vlastný príkaz.",
+    "field_override_entrypoint": "Prepísať vstupný bod",
     "field_rm": "Odstrániť kontajner po spustení (--rm)",
     "run_button": "Spustiť",
     "running": "Spúšťam príkaz v {{name}}…",
     "initializing": "Inicializujem…",
     "complete": "✓ Príkaz dokončený",
     "failed": "✗ Príkaz zlyhal",
-    "warning_title": "Dlhodobé služby budú blokovať",
-    "warning_body": "compose run spustí nový kontajner pre vybranú službu. Ak táto služba nemá prepisujúci príkaz (napr. webový server alebo databáza), kontajner spustí službu a zostane bežať — sám od seba sa neukončí. Možno bude potrebné zrušiť tu a potom zásobník vynútene zastaviť.",
     "force_kill_button": "Vynútene odstrániť kontajner",
-    "force_kill_tooltip": "Vynútene odstráni uviaznutý jednorazový kontajner. Použite, keď sa služba sama neukončí.",
-    "field_command_job_hint": "Pri úlohe nechajte prázdne, aby sa spustil jej vlastný príkaz."
+    "force_kill_tooltip": "Vynútene odstráni uviaznutý jednorazový kontajner. Použite, keď sa služba sama neukončí."
   },
   "exec_modal": {
     "aria_label": "Terminál — {{name}}",
@@ -404,7 +451,9 @@
     "pulling": "Sťahujem obrazy pre {{name}}…",
     "complete": "✓ Stiahnutie dokončené",
     "failed": "✗ Stiahnutie zlyhalo",
-    "starting": "Spúšťam stiahnutie…"
+    "starting": "Spúšťam stiahnutie…",
+    "background_button": "Spustiť na pozadí",
+    "background_label": "Stiahnuť — {{name}}"
   },
   "pull_confirm_modal": {
     "aria_label": "Potvrdiť stiahnutie — {{name}}",
@@ -423,7 +472,9 @@
     "starting": "Spúšťam {{name}}…",
     "initializing": "Inicializujem…",
     "complete": "✓ Spustenie dokončené",
-    "failed": "✗ Spustenie zlyhalo"
+    "failed": "✗ Spustenie zlyhalo",
+    "background_button": "Spustiť na pozadí",
+    "background_label": "Spustiť — {{name}}"
   },
   "compose_warnings": {
     "title": "Docker Compose nahlásil varovania"
@@ -505,6 +556,26 @@
     "prune_button": "Vyčistiť vybrané",
     "nothing_to_remove": "Nič na odstránenie."
   },
+  "prune_global": {
+    "button": "Vyčistiť obrazy",
+    "aria_label": "Vyčistiť nepoužívané obrazy (všetky zásobníky)",
+    "title": "Vyčistiť nepoužívané obrazy",
+    "body_intro": "Vyhľadá obrazy, ktoré momentálne nepoužíva žiadny kontajner, na celom hostiteľovi — nielen v jednom zásobníku. Patria sem obrazy úplne zastavených zásobníkov (žiadny kontajner ich nedrží „v používaní“) a staré verzie, ktoré zostanú po opätovnom stiahnutí plávajúceho tagu, ako je :latest.",
+    "loading": "Hľadajú sa nepoužívané obrazy…",
+    "nothing_found": "Nenašli sa žiadne nepoužívané obrazy — nie je čo uvoľniť.",
+    "column_id": "ID",
+    "column_repo_tag": "Repozitár:Tag",
+    "column_size": "Veľkosť",
+    "column_age": "Vytvorené",
+    "total_reclaimable": "Celkom na uvoľnenie: {{size}}",
+    "confirm_title": "Tieto obrazy budú natrvalo odstránené",
+    "confirm_body": "Počet odstraňovaných obrazov: {{count}}. Ak niektorý patrí k práve zastavenému zásobníku, tento zásobník ho bude musieť pri ďalšom spustení stiahnuť znova. Túto akciu nemožno vrátiť späť.",
+    "confirm_checkbox": "Rozumiem, že vyššie uvedené obrazy budú natrvalo odstránené",
+    "prune_button": "Vyčistiť",
+    "pruning": "Čistí sa…",
+    "result_title": "Hotovo",
+    "error_title": "Čistenie zlyhalo"
+  },
   "downed_section": {
     "create_button": "Vytvoriť",
     "import_button": "Importovať",
@@ -522,7 +593,9 @@
     "depth_aria": "Maximálna hĺbka skenovania",
     "depth_minus_aria": "Znížiť hĺbku skenovania",
     "depth_plus_aria": "Zvýšiť hĺbku skenovania",
-    "restore_button": "Obnoviť"
+    "restore_button": "Obnoviť",
+    "admin_mismatch_badge": "Nesúlad administrátorského režimu Cockpitu",
+    "admin_mismatch_tooltip": "Prehľadávaný adresár je vo vašom domovskom priečinku, ale Cockpit je v administrátorskom režime. Súbory vytvorené tu môžu patriť používateľovi root a spôsobovať chyby oprávnení."
   },
   "stack_row": {
     "no_containers": "Nenašli sa žiadne kontajnery.",
@@ -592,23 +665,6 @@
     "col_image": "Obraz",
     "col_uptime": "Doba behu"
   },
-  "scale_modal": {
-    "title": "Škálovanie služieb — {{name}}",
-    "confirm_title": "Potvrdiť škálovanie — {{name}}",
-    "aria_label": "Modálne okno škálovania služieb",
-    "sideeffects_title": "Škálovanie mení bežiace inštancie",
-    "sideeffects_body": "Každá replika služby je samostatný kontajner zdieľajúci rovnaký obraz a konfiguráciu. Zvýšenie škály okamžite spúšťa nové kontajnery. Zníženie škály zastavuje a odstraňuje prebytočné. Zmeny v väzbách portov hostiteľa, pripojeniach zväzkov alebo sieťových aliasoch môžu spôsobiť konflikty.",
-    "what_is_scale_title": "Ako funguje škálovanie docker compose",
-    "what_is_scale_body": "Spustí sa „docker compose up -d --scale <service>=<n> Docker Compose spustí alebo zastaví kontajnery na dosiahnutie požadovaného počtu. Existujúce kontajnery nie sú znova vytvorené, pokiaľ sa nezmenili obraz alebo konfigurácia.",
-    "apply_button": "Použiť",
-    "service_label": "Počet replík {{service}}",
-    "minus_aria": "Znížiť repliky pre {{service}}",
-    "plus_aria": "Zvýšiť repliky pre {{service}}",
-    "port_conflict_inline": "Táto služba má statické väzby portov hostiteľa — škálovanie nad 1 repliku zlyhá, pretože iba jeden kontajner môže naraz viazať port hostiteľa.",
-    "port_conflict_title": "Pravdepodobný konflikt portov",
-    "port_conflict_body": "Nasledujúce služby majú statické väzby portov hostiteľa. Docker nebude môcť spustiť viac ako jednu repliku, pretože port hostiteľa môže viazať iba jeden kontajner:",
-    "port_conflict_icon_title": "Má statické väzby portov hostiteľa"
-  },
   "settings": {
     "title": "Nastavenia",
     "open_button": "Nastavenia",
@@ -635,6 +691,85 @@
     "pause_success": "{{name}} pozastavený",
     "pause_failed": "Pozastavenie {{name}} zlyhalo",
     "unpause_success": "{{name}} obnovený",
-    "unpause_failed": "Obnovenie {{name}} zlyhalo"
+    "unpause_failed": "Obnovenie {{name}} zlyhalo",
+    "service_start_success": "Služba {{name}} spustená",
+    "service_start_failed": "Službu {{name}} sa nepodarilo spustiť",
+    "service_stop_success": "Služba {{name}} zastavená",
+    "service_stop_failed": "Službu {{name}} sa nepodarilo zastaviť",
+    "service_restart_success": "Služba {{name}} reštartovaná",
+    "service_restart_failed": "Službu {{name}} sa nepodarilo reštartovať"
+  },
+  "service_actions": {
+    "start": "Spustiť službu",
+    "stop": "Zastaviť službu",
+    "restart": "Reštartovať službu",
+    "logs": "Záznamy služby"
+  },
+  "scale_modal": {
+    "title": "Škálovanie služieb — {{name}}",
+    "confirm_title": "Potvrdiť škálovanie — {{name}}",
+    "aria_label": "Modálne okno škálovania služieb",
+    "sideeffects_title": "Škálovanie mení bežiace inštancie",
+    "sideeffects_body": "Každá replika služby je samostatný kontajner zdieľajúci rovnaký obraz a konfiguráciu. Zvýšenie škály okamžite spúšťa nové kontajnery. Zníženie škály zastavuje a odstraňuje prebytočné. Zmeny v väzbách portov hostiteľa, pripojeniach zväzkov alebo sieťových aliasoch môžu spôsobiť konflikty.",
+    "what_is_scale_title": "Ako funguje škálovanie docker compose",
+    "what_is_scale_body": "Spustí sa „docker compose up -d --scale <service>=<n> Docker Compose spustí alebo zastaví kontajnery na dosiahnutie požadovaného počtu. Existujúce kontajnery nie sú znova vytvorené, pokiaľ sa nezmenili obraz alebo konfigurácia.",
+    "apply_button": "Použiť",
+    "service_label": "Počet replík {{service}}",
+    "minus_aria": "Znížiť repliky pre {{service}}",
+    "plus_aria": "Zvýšiť repliky pre {{service}}",
+    "port_conflict_inline": "Táto služba má statické väzby portov hostiteľa — škálovanie nad 1 repliku zlyhá, pretože iba jeden kontajner môže naraz viazať port hostiteľa.",
+    "port_conflict_title": "Pravdepodobný konflikt portov",
+    "port_conflict_body": "Nasledujúce služby majú statické väzby portov hostiteľa. Docker nebude môcť spustiť viac ako jednu repliku, pretože port hostiteľa môže viazať iba jeden kontajner:",
+    "port_conflict_icon_title": "Má statické väzby portov hostiteľa"
+  },
+  "background_tasks": {
+    "toggle_button": "Úlohy na pozadí",
+    "title": "Úlohy na pozadí",
+    "empty_title": "Žiadne úlohy na pozadí",
+    "empty_body": "Tu sa zobrazia úlohy odoslané na pozadie.",
+    "status_pending": "Čaká",
+    "status_running": "Beží",
+    "status_success": "Dokončené",
+    "status_error": "Zlyhalo",
+    "status_stopped": "Zastavené",
+    "stop_button": "Zastaviť",
+    "remove_button": "Odobrať",
+    "log_empty": "Čaká sa na výstup…"
+  },
+  "bulk_confirm_modal": {
+    "aria_label": "Potvrdiť hromadnú akciu",
+    "title_up_one": "Spustiť {{count}} zásobník?",
+    "title_up_few": "Spustiť {{count}} zásobníky?",
+    "title_up_many": "Spustiť {{count}} zásobníka?",
+    "title_up_other": "Spustiť {{count}} zásobníkov?",
+    "title_pull_one": "Stiahnuť obrazy pre {{count}} zásobník?",
+    "title_pull_few": "Stiahnuť obrazy pre {{count}} zásobníky?",
+    "title_pull_many": "Stiahnuť obrazy pre {{count}} zásobníka?",
+    "title_pull_other": "Stiahnuť obrazy pre {{count}} zásobníkov?",
+    "title_restart_one": "Reštartovať {{count}} zásobník?",
+    "title_restart_few": "Reštartovať {{count}} zásobníky?",
+    "title_restart_many": "Reštartovať {{count}} zásobníka?",
+    "title_restart_other": "Reštartovať {{count}} zásobníkov?",
+    "title_down_one": "Zastaviť {{count}} zásobník?",
+    "title_down_few": "Zastaviť {{count}} zásobníky?",
+    "title_down_many": "Zastaviť {{count}} zásobníka?",
+    "title_down_other": "Zastaviť {{count}} zásobníkov?",
+    "title_kill_one": "Ukončiť {{count}} zásobník?",
+    "title_kill_few": "Ukončiť {{count}} zásobníky?",
+    "title_kill_many": "Ukončiť {{count}} zásobníka?",
+    "title_kill_other": "Ukončiť {{count}} zásobníkov?",
+    "background_notice": "Spustí sa ako úlohy na pozadí. Môžete ich sledovať, zastaviť alebo odobrať na paneli úloh na pozadí.",
+    "warning_up": "Môže reštartovať kontajnery a stiahnuť nové obrazy, ak sa zmenila konfigurácia niektorej služby.",
+    "warning_restart": "Bežiace služby vo vybraných zásobníkoch budú počas reštartu krátko nedostupné.",
+    "warning_down_title": "Zastaví a odstráni všetky kontajnery každého vybraného zásobníka",
+    "warning_down_body": "Zväzky sa zachovajú, ale všetok stav mimo nich (napr. vyrovnávacie pamäte v RAM) sa stratí. Zásobníky zmiznú zo zoznamu, kým sa znova nespustia.",
+    "warning_kill_title": "Násilne ukončí každý kontajner v každom vybranom zásobníku",
+    "warning_kill_body": "Ukončenie okamžite odošle SIGKILL — na rozdiel od zastavenia nemajú procesy možnosť upratať ani zapísať údaje. Používajte, len keď zastavenie nereaguje.",
+    "stacks_label": "Dotknuté zásobníky:",
+    "confirm_button_up": "Spustiť",
+    "confirm_button_pull": "Stiahnuť",
+    "confirm_button_restart": "Reštartovať",
+    "confirm_button_down": "Zastaviť",
+    "confirm_button_kill": "Ukončiť"
   }
 }

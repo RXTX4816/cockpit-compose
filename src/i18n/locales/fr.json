@@ -25,20 +25,21 @@
     "aria_label": "Piles Compose",
     "empty_title": "Aucune pile compose trouvée",
     "empty_body": "Démarrez un projet avec docker/podman compose up -d et il apparaîtra ici.",
+    "empty_create": "Créer une pile",
+    "empty_import": "Importer l'existant",
+    "no_results_title": "Aucune pile ne correspond",
+    "no_results_body": "Essayez un nom différent ou supprimez les filtres actifs.",
+    "clear_filters": "Effacer les filtres",
     "load_failed": "Échec du chargement des piles",
+    "refreshing": "Actualisation des piles",
     "service_count_one": "{{count}} service",
+    "service_count_many": "{{count}} services",
     "service_count_other": "{{count}} services",
     "status_running": "en cours",
     "status_partial": "partiel",
     "status_stopped": "arrêté",
     "status_paused": "en pause",
     "status_unknown": "inconnu",
-    "empty_create": "Créer une pile",
-    "empty_import": "Importer l'existant",
-    "no_results_title": "Aucune pile ne correspond",
-    "no_results_body": "Essayez un nom différent ou supprimez les filtres actifs.",
-    "clear_filters": "Effacer les filtres",
-    "refreshing": "Actualisation des piles",
     "search_placeholder": "Rechercher des piles…",
     "filter_tooltip_running": "Afficher uniquement les piles en cours",
     "filter_tooltip_partial": "Afficher uniquement les piles partiellement en cours",
@@ -46,8 +47,12 @@
     "filter_tooltip_paused": "Afficher uniquement les piles en pause",
     "select_stack": "Sélectionner {{name}}",
     "select_all": "Tout sélectionner",
+    "deselect_all": "Tout désélectionner",
     "bulk_selected": "{{count}} sélectionné(s)",
-    "bulk_clear": "Effacer la sélection"
+    "bulk_clear": "Effacer la sélection",
+    "runtime_switch_cancelled_tasks_one": "{{count}} tâche d'arrière-plan en attente annulée car l'environnement d'exécution a changé",
+    "runtime_switch_cancelled_tasks_many": "{{count}} tâches d'arrière-plan en attente annulées car l'environnement d'exécution a changé",
+    "runtime_switch_cancelled_tasks_other": "{{count}} tâches d'arrière-plan en attente annulées car l'environnement d'exécution a changé"
   },
   "actions": {
     "up": "Démarrer",
@@ -96,6 +101,9 @@
     "rootless": "Sans root",
     "rootless_help_title": "Mode sans root",
     "rootless_help_body": "Docker ou Podman fonctionne en mode sans root — les conteneurs s'exécutent en tant que votre utilisateur, pas en tant que root. Cela améliore la sécurité mais peut limiter certaines fonctionnalités telles que la liaison de ports privilégiés (<1024), l'accès aux chemins système ou l'utilisation de certains pilotes réseau.",
+    "rootful": "Avec root",
+    "rootful_help_title": "Mode avec root",
+    "rootful_help_body": "Docker ou Podman fonctionne en mode avec root (à l'échelle du système) — les conteneurs s'exécutent en tant que root. Les actions sont élevées via l'accès administrateur de Cockpit si nécessaire.",
     "help": "Aide",
     "feedback": "Retour / Signaler un bug",
     "source": "Code source",
@@ -119,7 +127,28 @@
     "not_installed": "{{runtime}} introuvable — installez-le pour changer",
     "podman_confirm_title": "Basculer vers Podman",
     "podman_confirm_body": "La prise en charge de Podman est expérimentale. Selon votre configuration, certaines fonctionnalités peuvent ne pas fonctionner comme prévu — notamment la découverte de piles, la diffusion de journaux et certaines commandes compose.",
-    "podman_suggest_docker_missing": "Docker n'a pas été trouvé sur ce système. Basculez vers Podman pour gérer vos conteneurs."
+    "podman_suggest_docker_missing": "Docker n'a pas été trouvé sur ce système. Basculez vers Podman pour gérer vos conteneurs.",
+    "rootless": "Sans root",
+    "rootful": "Avec root",
+    "socket_mode_toggle_label": "Mode du socket",
+    "rootless_help": "Utiliser le socket par utilisateur (sans root). Les conteneurs s'exécutent sous votre propre utilisateur.",
+    "rootful_help": "Utiliser le socket système (avec root). Les conteneurs s'exécutent en tant que root, avec élévation via l'accès administrateur de Cockpit.",
+    "socket_not_detected": "Socket non détecté",
+    "rootful_needs_admin_access": "Socket root détecté mais impossible à confirmer — activez l'accès administrateur de Cockpit, puis cliquez sur Revérifier",
+    "recheck_sockets": "Revérifier la disponibilité des sockets",
+    "no_socket_detected": "Aucun socket du moteur {{runtime}} détecté. Vérifiez que {{runtime}} est installé et en cours d'exécution.",
+    "no_socket_needs_admin_access": "Aucun socket du moteur {{runtime}} confirmé — un socket root a été trouvé mais nécessite l'accès administrateur de Cockpit. Activez-le, puis cliquez sur Revérifier."
+  },
+  "layout": {
+    "toggle_label": "Disposition de l'affichage",
+    "minimal": "Minimal",
+    "minimal_tooltip": "Mode compact : pied de page masqué, marges réduites, centré sur les icônes",
+    "poweruser": "PowerUser",
+    "poweruser_tooltip": "Disposition par défaut avec tous les contrôles",
+    "pretty": "Élégant",
+    "pretty_tooltip": "Disposition aérée avec ombres douces et typographie soignée",
+    "unix": "Unix",
+    "unix_tooltip": "Inspiré du terminal, avec police à chasse fixe et caractères de cadre"
   },
   "error_boundary": {
     "load_stacks_error": "Erreur lors du chargement des piles"
@@ -133,7 +162,8 @@
     "confirm_button": "Arrêter (supprimer)",
     "checking_networks": "Vérification des réseaux partagés…",
     "shared_networks_title": "Réseaux partagés détectés",
-    "shared_with": "également utilisé par"
+    "shared_with": "également utilisé par",
+    "background_label": "Arrêter — {{name}}"
   },
   "kill_modal": {
     "aria_label": "Confirmer la terminaison forcée",
@@ -141,7 +171,8 @@
     "body_prefix": "Exécuter",
     "body_sigkill": "envoie SIGKILL à tous les conteneurs dans",
     "body_suffix": ", les terminant immédiatement de force. Contrairement à Stopper, les processus n'ont pas la possibilité de se nettoyer. Utilisez uniquement lorsque Stopper ne répond pas.",
-    "confirm_button": "Tuer tous les conteneurs"
+    "confirm_button": "Tuer tous les conteneurs",
+    "background_label": "Tuer — {{name}}"
   },
   "leftovers": {
     "remaining_title": "Docker liste encore des conteneurs pour {{name}}",
@@ -164,7 +195,8 @@
     "aria_label": "Confirmer le redémarrage",
     "title": "Redémarrer \"{{name}}\" ?",
     "body": "Cela redémarrera tous les services en cours d'exécution. Les services seront brièvement indisponibles.",
-    "confirm_button": "Redémarrer"
+    "confirm_button": "Redémarrer",
+    "background_label": "Redémarrer — {{name}}"
   },
   "delete_modal": {
     "aria_label": "Supprimer la pile compose — {{name}}",
@@ -183,6 +215,7 @@
     "target_folder": "dossier {{folder}}",
     "target_file": "fichier {{file}}",
     "error_default": "Échec de la suppression",
+    "retry_sudo_button": "Réessayer avec sudo ?",
     "checking_networks": "Vérification des réseaux partagés…",
     "shared_networks_title": "Réseaux partagés détectés",
     "shared_with": "également utilisé par"
@@ -217,8 +250,10 @@
     "errors_found_title": "Erreurs trouvées",
     "warnings_found_title": "Avertissements trouvés",
     "error_count_one": "Il y a {{count}} erreur dans le fichier compose.",
+    "error_count_many": "Il y a {{count}} erreurs dans le fichier compose.",
     "error_count_other": "Il y a {{count}} erreurs dans le fichier compose.",
     "warning_count_one": "Il y a {{count}} avertissement dans le fichier compose.",
+    "warning_count_many": "Il y a {{count}} avertissements dans le fichier compose.",
     "warning_count_other": "Il y a {{count}} avertissements dans le fichier compose.",
     "validation_name_required": "Le nom est obligatoire",
     "validation_name_slashes": "Le nom ne doit pas contenir de barres obliques",
@@ -266,8 +301,10 @@
     "errors_found_title": "Erreurs trouvées",
     "warnings_found_title": "Avertissements trouvés",
     "error_count_one": "Il y a {{count}} erreur dans votre fichier compose.",
+    "error_count_many": "Il y a {{count}} erreurs dans votre fichier compose.",
     "error_count_other": "Il y a {{count}} erreurs dans votre fichier compose.",
     "warning_count_one": "Il y a {{count}} avertissement dans votre fichier compose.",
+    "warning_count_many": "Il y a {{count}} avertissements dans votre fichier compose.",
     "warning_count_other": "Il y a {{count}} avertissements dans votre fichier compose.",
     "file_tab_aria": "Modifier {{name}}",
     "add_file_button": "Ajouter",
@@ -335,6 +372,7 @@
     "level_warn": "Avertissement",
     "level_info": "Information",
     "download_tooltip": "Télécharger les journaux",
+    "download_saved": "Journaux enregistrés dans {{path}} (Firefox ne peut pas télécharger directement de fichiers depuis cette interface)",
     "timestamps_tooltip": "Activer les horodatages",
     "scroll_top": "Aller en haut",
     "scroll_bottom": "Aller en bas",
@@ -344,23 +382,26 @@
   "run_modal": {
     "aria_label": "Exécuter — {{name}}",
     "title": "Exécuter — {{name}}",
+    "warning_title": "Les services de longue durée bloqueront",
+    "warning_body": "compose run démarre un nouveau conteneur pour le service sélectionné. Si ce service n'a pas de commande de remplacement (par ex. un serveur web ou une base de données), le conteneur démarrera le service et restera actif — il ne se terminera pas de lui-même. Vous devrez peut-être annuler ici puis forcer l'arrêt de la pile pour récupérer.",
     "field_service": "Service",
     "field_service_placeholder": "nom du service",
     "group_services": "Services",
     "group_jobs": "Tâches",
     "field_command": "Commande",
     "field_command_placeholder": "echo hello",
+    "field_command_help_args": "Passée comme arguments au point d'entrée de l'image (par ex. saisissez « --help »).",
+    "field_command_help_override": "Le premier mot remplace entièrement le point d'entrée de l'image (par ex. saisissez un chemin complet vers un binaire, comme pour un exec dans un terminal). Le reste lui est passé comme arguments.",
+    "field_command_job_hint": "Pour une tâche, laissez vide pour exécuter sa propre commande.",
+    "field_override_entrypoint": "Remplacer le point d'entrée",
     "field_rm": "Supprimer le conteneur après l'exécution (--rm)",
     "run_button": "Exécuter",
     "running": "Exécution de la commande dans {{name}}…",
     "initializing": "Démarrage…",
     "complete": "✓ Commande terminée",
     "failed": "✗ Commande échouée",
-    "warning_title": "Les services de longue durée bloqueront",
-    "warning_body": "compose run démarre un nouveau conteneur pour le service sélectionné. Si ce service n'a pas de commande de remplacement (par ex. un serveur web ou une base de données), le conteneur démarrera le service et restera actif — il ne se terminera pas de lui-même. Vous devrez peut-être annuler ici puis forcer l'arrêt de la pile pour récupérer.",
     "force_kill_button": "Forcer la suppression du conteneur",
-    "force_kill_tooltip": "Force la suppression du conteneur ponctuel bloqué. À utiliser quand le service ne se termine pas de lui-même.",
-    "field_command_job_hint": "Pour une tâche, laissez vide pour exécuter sa propre commande."
+    "force_kill_tooltip": "Force la suppression du conteneur ponctuel bloqué. À utiliser quand le service ne se termine pas de lui-même."
   },
   "exec_modal": {
     "aria_label": "Terminal — {{name}}",
@@ -404,7 +445,9 @@
     "pulling": "Téléchargement des images pour {{name}}…",
     "complete": "✓ Téléchargement terminé",
     "failed": "✗ Échec du téléchargement",
-    "starting": "Démarrage du téléchargement…"
+    "starting": "Démarrage du téléchargement…",
+    "background_button": "Exécuter en arrière-plan",
+    "background_label": "Télécharger — {{name}}"
   },
   "pull_confirm_modal": {
     "aria_label": "Confirmer le téléchargement — {{name}}",
@@ -423,7 +466,9 @@
     "starting": "Démarrage de {{name}}…",
     "initializing": "Démarrage…",
     "complete": "✓ Démarrage terminé",
-    "failed": "✗ Échec du démarrage"
+    "failed": "✗ Échec du démarrage",
+    "background_button": "Exécuter en arrière-plan",
+    "background_label": "Démarrer — {{name}}"
   },
   "compose_warnings": {
     "title": "Docker Compose a signalé des avertissements"
@@ -505,6 +550,26 @@
     "prune_button": "Nettoyer la sélection",
     "nothing_to_remove": "Rien à supprimer."
   },
+  "prune_global": {
+    "button": "Nettoyer les images",
+    "aria_label": "Nettoyer les images inutilisées (toutes les piles)",
+    "title": "Nettoyer les images inutilisées",
+    "body_intro": "Recherche les images qu'aucun conteneur n'utilise actuellement, sur tout l'hôte — pas seulement une pile. Cela inclut les images des piles entièrement arrêtées (aucun conteneur ne les maintient « utilisées ») et les anciennes versions laissées lorsqu'un tag flottant comme :latest est téléchargé à nouveau.",
+    "loading": "Recherche des images inutilisées…",
+    "nothing_found": "Aucune image inutilisée — rien à récupérer.",
+    "column_id": "ID",
+    "column_repo_tag": "Dépôt:Tag",
+    "column_size": "Taille",
+    "column_age": "Créée",
+    "total_reclaimable": "Total récupérable : {{size}}",
+    "confirm_title": "Ces images seront supprimées définitivement",
+    "confirm_body": "{{count}} image(s) seront supprimées. Si certaines appartiennent à une pile actuellement arrêtée, celle-ci devra les télécharger à nouveau lors de son prochain démarrage. Cette action est irréversible.",
+    "confirm_checkbox": "Je comprends que les images listées ci-dessus seront supprimées définitivement",
+    "prune_button": "Nettoyer",
+    "pruning": "Nettoyage…",
+    "result_title": "Terminé",
+    "error_title": "Échec du nettoyage"
+  },
   "downed_section": {
     "create_button": "Créer",
     "import_button": "Importer",
@@ -522,7 +587,9 @@
     "depth_aria": "Profondeur de scan maximale",
     "depth_minus_aria": "Diminuer la profondeur de scan",
     "depth_plus_aria": "Augmenter la profondeur de scan",
-    "restore_button": "Restaurer"
+    "restore_button": "Restaurer",
+    "admin_mismatch_badge": "Mode administrateur de Cockpit incohérent",
+    "admin_mismatch_tooltip": "Le répertoire analysé se trouve dans votre dossier personnel, mais Cockpit est en mode administrateur. Les fichiers créés ici peuvent appartenir à root et provoquer des erreurs de permissions."
   },
   "stack_row": {
     "no_containers": "Aucun conteneur trouvé.",
@@ -592,23 +659,6 @@
     "col_image": "Image",
     "col_uptime": "Durée de fonctionnement"
   },
-  "scale_modal": {
-    "title": "Mettre à l'échelle les services — {{name}}",
-    "confirm_title": "Confirmer la mise à l'échelle — {{name}}",
-    "aria_label": "Fenêtre de mise à l'échelle des services",
-    "sideeffects_title": "La mise à l'échelle modifie les instances en cours d'exécution",
-    "sideeffects_body": "Chaque réplique de service est un conteneur séparé partageant la même image et la même configuration. Augmenter l'échelle démarre immédiatement de nouveaux conteneurs. Réduire l'échelle arrête et supprime les excédents. Les modifications des liaisons de ports hôte, des montages de volumes ou des alias réseau peuvent provoquer des conflits.",
-    "what_is_scale_title": "Comment fonctionne la mise à l'échelle docker compose",
-    "what_is_scale_body": "Cela exécute \"docker compose up -d --scale <service>=<n>\". Docker Compose démarrera ou arrêtera des conteneurs pour atteindre le nombre demandé. Les conteneurs existants ne sont pas recréés sauf si l'image ou la configuration a changé.",
-    "apply_button": "Appliquer",
-    "service_label": "Nombre de répliques de {{service}}",
-    "minus_aria": "Diminuer les répliques pour {{service}}",
-    "plus_aria": "Augmenter les répliques pour {{service}}",
-    "port_conflict_inline": "Ce service a des liaisons de port hôte statiques — la mise à l'échelle au-delà d'1 réplique échouera car un seul conteneur peut lier un port hôte à la fois.",
-    "port_conflict_title": "Conflit de ports probable",
-    "port_conflict_body": "Les services suivants ont des liaisons de port hôte statiques. Docker ne pourra pas démarrer plus d'une réplique car un port hôte ne peut être lié que par un seul conteneur :",
-    "port_conflict_icon_title": "A des liaisons de port hôte statiques"
-  },
   "settings": {
     "title": "Paramètres",
     "open_button": "Paramètres",
@@ -635,6 +685,80 @@
     "pause_success": "{{name}} mis en pause",
     "pause_failed": "Échec de la mise en pause de {{name}}",
     "unpause_success": "{{name}} repris",
-    "unpause_failed": "Échec de la reprise de {{name}}"
+    "unpause_failed": "Échec de la reprise de {{name}}",
+    "service_start_success": "Service {{name}} démarré",
+    "service_start_failed": "Échec du démarrage du service {{name}}",
+    "service_stop_success": "Service {{name}} arrêté",
+    "service_stop_failed": "Échec de l'arrêt du service {{name}}",
+    "service_restart_success": "Service {{name}} redémarré",
+    "service_restart_failed": "Échec du redémarrage du service {{name}}"
+  },
+  "service_actions": {
+    "start": "Démarrer le service",
+    "stop": "Arrêter le service",
+    "restart": "Redémarrer le service",
+    "logs": "Journaux du service"
+  },
+  "scale_modal": {
+    "title": "Mettre à l'échelle les services — {{name}}",
+    "confirm_title": "Confirmer la mise à l'échelle — {{name}}",
+    "aria_label": "Fenêtre de mise à l'échelle des services",
+    "sideeffects_title": "La mise à l'échelle modifie les instances en cours d'exécution",
+    "sideeffects_body": "Chaque réplique de service est un conteneur séparé partageant la même image et la même configuration. Augmenter l'échelle démarre immédiatement de nouveaux conteneurs. Réduire l'échelle arrête et supprime les excédents. Les modifications des liaisons de ports hôte, des montages de volumes ou des alias réseau peuvent provoquer des conflits.",
+    "what_is_scale_title": "Comment fonctionne la mise à l'échelle docker compose",
+    "what_is_scale_body": "Cela exécute \"docker compose up -d --scale <service>=<n>\". Docker Compose démarrera ou arrêtera des conteneurs pour atteindre le nombre demandé. Les conteneurs existants ne sont pas recréés sauf si l'image ou la configuration a changé.",
+    "apply_button": "Appliquer",
+    "service_label": "Nombre de répliques de {{service}}",
+    "minus_aria": "Diminuer les répliques pour {{service}}",
+    "plus_aria": "Augmenter les répliques pour {{service}}",
+    "port_conflict_inline": "Ce service a des liaisons de port hôte statiques — la mise à l'échelle au-delà d'1 réplique échouera car un seul conteneur peut lier un port hôte à la fois.",
+    "port_conflict_title": "Conflit de ports probable",
+    "port_conflict_body": "Les services suivants ont des liaisons de port hôte statiques. Docker ne pourra pas démarrer plus d'une réplique car un port hôte ne peut être lié que par un seul conteneur :",
+    "port_conflict_icon_title": "A des liaisons de port hôte statiques"
+  },
+  "background_tasks": {
+    "toggle_button": "Tâches d'arrière-plan",
+    "title": "Tâches d'arrière-plan",
+    "empty_title": "Aucune tâche d'arrière-plan",
+    "empty_body": "Les tâches envoyées en arrière-plan apparaîtront ici.",
+    "status_pending": "En attente",
+    "status_running": "En cours",
+    "status_success": "Terminée",
+    "status_error": "Échouée",
+    "status_stopped": "Arrêtée",
+    "stop_button": "Arrêter",
+    "remove_button": "Retirer",
+    "log_empty": "En attente de sortie…"
+  },
+  "bulk_confirm_modal": {
+    "aria_label": "Confirmer l'action groupée",
+    "title_up_one": "Démarrer {{count}} pile ?",
+    "title_up_many": "Démarrer {{count}} piles ?",
+    "title_up_other": "Démarrer {{count}} piles ?",
+    "title_pull_one": "Télécharger les images de {{count}} pile ?",
+    "title_pull_many": "Télécharger les images de {{count}} piles ?",
+    "title_pull_other": "Télécharger les images de {{count}} piles ?",
+    "title_restart_one": "Redémarrer {{count}} pile ?",
+    "title_restart_many": "Redémarrer {{count}} piles ?",
+    "title_restart_other": "Redémarrer {{count}} piles ?",
+    "title_down_one": "Arrêter {{count}} pile ?",
+    "title_down_many": "Arrêter {{count}} piles ?",
+    "title_down_other": "Arrêter {{count}} piles ?",
+    "title_kill_one": "Tuer {{count}} pile ?",
+    "title_kill_many": "Tuer {{count}} piles ?",
+    "title_kill_other": "Tuer {{count}} piles ?",
+    "background_notice": "Ceci s'exécutera sous forme de tâches d'arrière-plan. Vous pouvez les suivre, les arrêter ou les retirer depuis le panneau des tâches d'arrière-plan.",
+    "warning_up": "Des conteneurs peuvent être redémarrés et de nouvelles images téléchargées si la configuration d'un service a changé.",
+    "warning_restart": "Les services en cours d'exécution des piles sélectionnées seront brièvement indisponibles pendant leur redémarrage.",
+    "warning_down_title": "Ceci arrête et supprime tous les conteneurs de chaque pile sélectionnée",
+    "warning_down_body": "Les volumes sont conservés, mais tout état en dehors de ceux-ci (par ex. caches en mémoire) est perdu. Les piles disparaîtront de la liste jusqu'à leur prochain démarrage.",
+    "warning_kill_title": "Ceci termine de force chaque conteneur de chaque pile sélectionnée",
+    "warning_kill_body": "Tuer envoie immédiatement SIGKILL — contrairement à Arrêter, les processus n'ont aucune chance de nettoyer ou d'écrire leurs données. À utiliser uniquement si Arrêter ne répond pas.",
+    "stacks_label": "Piles concernées :",
+    "confirm_button_up": "Démarrer",
+    "confirm_button_pull": "Télécharger",
+    "confirm_button_restart": "Redémarrer",
+    "confirm_button_down": "Arrêter",
+    "confirm_button_kill": "Tuer"
   }
 }

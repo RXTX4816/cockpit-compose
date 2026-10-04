@@ -25,7 +25,13 @@
     "aria_label": "Compose-stackar",
     "empty_title": "Inga compose-stackar hittades",
     "empty_body": "Starta ett projekt med docker/podman compose up -d så visas det här.",
+    "empty_create": "Skapa stack",
+    "empty_import": "Importera befintlig",
+    "no_results_title": "Inga stackar matchar",
+    "no_results_body": "Prova ett annat namn eller rensa de aktiva filtren.",
+    "clear_filters": "Rensa filter",
     "load_failed": "Det gick inte att läsa in stackar",
+    "refreshing": "Uppdaterar stackar",
     "service_count_one": "{{count}} tjänst",
     "service_count_other": "{{count}} tjänster",
     "status_running": "körs",
@@ -33,12 +39,6 @@
     "status_stopped": "stoppad",
     "status_paused": "pausad",
     "status_unknown": "okänd",
-    "empty_create": "Skapa stack",
-    "empty_import": "Importera befintlig",
-    "no_results_title": "Inga stackar matchar",
-    "no_results_body": "Prova ett annat namn eller rensa de aktiva filtren.",
-    "clear_filters": "Rensa filter",
-    "refreshing": "Uppdaterar stackar",
     "search_placeholder": "Sök stackar…",
     "filter_tooltip_running": "Visa bara körande stackar",
     "filter_tooltip_partial": "Visa bara delvis körande stackar",
@@ -46,8 +46,11 @@
     "filter_tooltip_paused": "Visa bara pausade stackar",
     "select_stack": "Välj {{name}}",
     "select_all": "Välj alla",
+    "deselect_all": "Avmarkera alla",
     "bulk_selected": "{{count}} valda",
-    "bulk_clear": "Rensa urval"
+    "bulk_clear": "Rensa urval",
+    "runtime_switch_cancelled_tasks_one": "Avbröt {{count}} väntande bakgrundsuppgift eftersom körmiljön ändrades",
+    "runtime_switch_cancelled_tasks_other": "Avbröt {{count}} väntande bakgrundsuppgifter eftersom körmiljön ändrades"
   },
   "actions": {
     "up": "Starta",
@@ -96,6 +99,9 @@
     "rootless": "Rootlös",
     "rootless_help_title": "Rootless-läge",
     "rootless_help_body": "Docker eller Podman körs i rootless-läge — containers körs som din användare, inte root. Detta förbättrar säkerheten men kan begränsa vissa funktioner som att binda privilegierade portar (<1024), komma åt systemsökvägar eller använda vissa nätverksdrivrutiner.",
+    "rootful": "Med root",
+    "rootful_help_title": "Rootful-läge",
+    "rootful_help_body": "Docker eller Podman körs i rootful-läge (systemomfattande) — containrar körs som root. Åtgärder höjs via Cockpits administrativa åtkomst vid behov.",
     "help": "Hjälp",
     "feedback": "Feedback / Rapportera bugg",
     "source": "Källkod",
@@ -119,7 +125,28 @@
     "not_installed": "{{runtime}} hittades inte — installera det för att växla",
     "podman_confirm_title": "Byt till Podman",
     "podman_confirm_body": "Podman-stöd är experimentellt. Beroende på din konfiguration kanske vissa funktioner inte fungerar som förväntat — inklusive stackupptäckt, loggströmning och vissa compose-kommandon.",
-    "podman_suggest_docker_missing": "Docker hittades inte på det här systemet. Byt till Podman för att hantera dina containers."
+    "podman_suggest_docker_missing": "Docker hittades inte på det här systemet. Byt till Podman för att hantera dina containers.",
+    "rootless": "Rootlös",
+    "rootful": "Med root",
+    "socket_mode_toggle_label": "Socketläge",
+    "rootless_help": "Använd socketen per användare (rootlös). Containrar körs som din egen användare.",
+    "rootful_help": "Använd den systemomfattande (rootful) socketen. Containrar körs som root, med höjning via Cockpits administrativa åtkomst.",
+    "socket_not_detected": "Socket hittades inte",
+    "rootful_needs_admin_access": "Rootful-socket hittades men kunde inte bekräftas — slå på Cockpits administrativa åtkomst och klicka sedan på Kontrollera igen",
+    "recheck_sockets": "Kontrollera tillgängliga socketar igen",
+    "no_socket_detected": "Ingen socket för {{runtime}}-motorn hittades. Kontrollera att {{runtime}} är installerat och körs.",
+    "no_socket_needs_admin_access": "Ingen socket för {{runtime}}-motorn bekräftad — en rootful-socket hittades men kräver Cockpits administrativa åtkomst. Slå på den och klicka sedan på Kontrollera igen."
+  },
+  "layout": {
+    "toggle_label": "Visningslayout",
+    "minimal": "Minimal",
+    "minimal_tooltip": "Kompakt läge: dold sidfot, mindre utfyllnad, ikonfokuserat",
+    "poweruser": "PowerUser",
+    "poweruser_tooltip": "Standardlayout med alla kontroller",
+    "pretty": "Snygg",
+    "pretty_tooltip": "Luftig layout med mjuka skuggor och rik typografi",
+    "unix": "Unix",
+    "unix_tooltip": "Terminalinspirerad med teckensnitt med fast bredd och ramtecken"
   },
   "error_boundary": {
     "load_stacks_error": "Det gick inte att läsa in stackar"
@@ -133,7 +160,8 @@
     "confirm_button": "Stoppa (ta bort)",
     "checking_networks": "Kontrollerar delade nätverk…",
     "shared_networks_title": "Delade nätverk hittades",
-    "shared_with": "används också av"
+    "shared_with": "används också av",
+    "background_label": "Stoppa — {{name}}"
   },
   "kill_modal": {
     "aria_label": "Bekräfta forcerat avslut",
@@ -141,7 +169,8 @@
     "body_prefix": "Att köra",
     "body_sigkill": "skickar SIGKILL till alla containers i",
     "body_suffix": ", vilket tvångsstopar dem omedelbart. Till skillnad från Stoppa får processer ingen chans att städa upp. Använd bara när Stoppa inte svarar.",
-    "confirm_button": "Avsluta alla containers"
+    "confirm_button": "Avsluta alla containers",
+    "background_label": "Avsluta — {{name}}"
   },
   "leftovers": {
     "remaining_title": "Docker listar fortfarande containrar för {{name}}",
@@ -164,7 +193,8 @@
     "aria_label": "Bekräfta omstart",
     "title": "Starta om \"{{name}}\"?",
     "body": "Det här startar om alla körande tjänster. Tjänsterna kommer kort att vara otillgängliga.",
-    "confirm_button": "Starta om"
+    "confirm_button": "Starta om",
+    "background_label": "Starta om — {{name}}"
   },
   "delete_modal": {
     "aria_label": "Ta bort compose-stack — {{name}}",
@@ -183,6 +213,7 @@
     "target_folder": "mappen {{folder}}",
     "target_file": "filen {{file}}",
     "error_default": "Borttagning misslyckades",
+    "retry_sudo_button": "Försöka igen med sudo?",
     "checking_networks": "Kontrollerar delade nätverk…",
     "shared_networks_title": "Delade nätverk hittades",
     "shared_with": "används också av"
@@ -335,6 +366,7 @@
     "level_warn": "Varning",
     "level_info": "Information",
     "download_tooltip": "Ladda ner loggar",
+    "download_saved": "Loggar sparade i {{path}} (Firefox kan inte ladda ner filer direkt från det här gränssnittet)",
     "timestamps_tooltip": "Växla tidsstämplar",
     "scroll_top": "Hoppa till toppen",
     "scroll_bottom": "Hoppa till botten",
@@ -344,23 +376,26 @@
   "run_modal": {
     "aria_label": "Kör — {{name}}",
     "title": "Kör — {{name}}",
+    "warning_title": "Långvariga tjänster blockerar",
+    "warning_body": "compose run startar en ny container för den valda tjänsten. Om tjänsten inte har något överskridande kommando (t.ex. en webbserver eller databas) startar containern tjänsten och fortsätter köra — den avslutar inte sig själv. Du kan behöva avbryta här och sedan tvångsstoppa stacken för att återhämta dig.",
     "field_service": "Tjänst",
     "field_service_placeholder": "tjänstnamn",
     "group_services": "Tjänster",
     "group_jobs": "Jobb",
     "field_command": "Kommando",
     "field_command_placeholder": "echo hello",
+    "field_command_help_args": "Skickas som argument till avbildens entrypoint (skriv t.ex. \"--help\").",
+    "field_command_help_override": "Det första ordet ersätter avbildens entrypoint helt (skriv t.ex. en fullständig sökväg till ett program, som vid exec i en terminal). Resten skickas som dess argument.",
+    "field_command_job_hint": "För ett jobb, lämna tomt för att köra jobbets eget kommando.",
+    "field_override_entrypoint": "Åsidosätt entrypoint",
     "field_rm": "Ta bort container efter körning (--rm)",
     "run_button": "Kör",
     "running": "Kör kommando i {{name}}…",
     "initializing": "Initierar…",
     "complete": "✓ Kommando slutfört",
     "failed": "✗ Kommando misslyckades",
-    "warning_title": "Långvariga tjänster blockerar",
-    "warning_body": "compose run startar en ny container för den valda tjänsten. Om tjänsten inte har något överskridande kommando (t.ex. en webbserver eller databas) startar containern tjänsten och fortsätter köra — den avslutar inte sig själv. Du kan behöva avbryta här och sedan tvångsstoppa stacken för att återhämta dig.",
     "force_kill_button": "Tvinga bort container",
-    "force_kill_tooltip": "Tvångstbort den fastnade engångscontainern. Använd när tjänsten inte avslutar sig själv.",
-    "field_command_job_hint": "För ett jobb, lämna tomt för att köra jobbets eget kommando."
+    "force_kill_tooltip": "Tvångstbort den fastnade engångscontainern. Använd när tjänsten inte avslutar sig själv."
   },
   "exec_modal": {
     "aria_label": "Terminal — {{name}}",
@@ -404,7 +439,9 @@
     "pulling": "Hämtar images för {{name}}…",
     "complete": "✓ Hämtning slutförd",
     "failed": "✗ Hämtning misslyckades",
-    "starting": "Startar hämtning…"
+    "starting": "Startar hämtning…",
+    "background_button": "Kör i bakgrunden",
+    "background_label": "Hämta — {{name}}"
   },
   "pull_confirm_modal": {
     "aria_label": "Bekräfta hämtning — {{name}}",
@@ -423,7 +460,9 @@
     "starting": "Startar {{name}}…",
     "initializing": "Initierar…",
     "complete": "✓ Start slutförd",
-    "failed": "✗ Start misslyckades"
+    "failed": "✗ Start misslyckades",
+    "background_button": "Kör i bakgrunden",
+    "background_label": "Starta — {{name}}"
   },
   "compose_warnings": {
     "title": "Docker Compose rapporterade varningar"
@@ -505,6 +544,26 @@
     "prune_button": "Rensa valda",
     "nothing_to_remove": "Inget att ta bort."
   },
+  "prune_global": {
+    "button": "Rensa avbilder",
+    "aria_label": "Rensa oanvända avbilder (alla stackar)",
+    "title": "Rensa oanvända avbilder",
+    "body_intro": "Söker efter avbilder som ingen container använder just nu, på hela värden — inte bara i en stack. Det omfattar avbilder från helt stoppade stackar (ingen container håller dem \"i bruk\") och gamla versioner som blir kvar när en flytande tagg som :latest hämtas på nytt.",
+    "loading": "Söker efter oanvända avbilder…",
+    "nothing_found": "Inga oanvända avbilder hittades — inget att frigöra.",
+    "column_id": "ID",
+    "column_repo_tag": "Förråd:Tagg",
+    "column_size": "Storlek",
+    "column_age": "Skapad",
+    "total_reclaimable": "Totalt att frigöra: {{size}}",
+    "confirm_title": "Detta raderar dessa avbilder permanent",
+    "confirm_body": "{{count}} avbild(er) tas bort. Om någon hör till en stack som är stoppad måste den stacken hämta den igen nästa gång den startas. Detta kan inte ångras.",
+    "confirm_checkbox": "Jag förstår att avbilderna ovan raderas permanent",
+    "prune_button": "Rensa",
+    "pruning": "Rensar…",
+    "result_title": "Klart",
+    "error_title": "Rensningen misslyckades"
+  },
   "downed_section": {
     "create_button": "Skapa",
     "import_button": "Importera",
@@ -522,7 +581,9 @@
     "depth_aria": "Maximalt skanningsdjup",
     "depth_minus_aria": "Minska skanningsdjup",
     "depth_plus_aria": "Öka skanningsdjup",
-    "restore_button": "Återställ"
+    "restore_button": "Återställ",
+    "admin_mismatch_badge": "Cockpits administratörsläge stämmer inte",
+    "admin_mismatch_tooltip": "Sökkatalogen ligger i din hemmapp, men Cockpit är i administrativt läge. Filer som skapas här kan ägas av root och orsaka behörighetsfel."
   },
   "stack_row": {
     "no_containers": "Inga containers hittades.",
@@ -592,23 +653,6 @@
     "col_image": "Avbild",
     "col_uptime": "Drifttid"
   },
-  "scale_modal": {
-    "title": "Skala tjänster — {{name}}",
-    "confirm_title": "Bekräfta skalning — {{name}}",
-    "aria_label": "Modal för tjänstskalning",
-    "sideeffects_title": "Skalning ändrar körande instanser",
-    "sideeffects_body": "Varje tjänstreplika är en separat container som delar samma image och konfiguration. Att öka skalan startar nya containers omedelbart. Att minska skalan stoppar och tar bort överskott. Ändringar i värd-portbindningar, volymmonteringar eller nätverksalias kan orsaka konflikter.",
-    "what_is_scale_title": "Hur docker compose-skalning fungerar",
-    "what_is_scale_body": "Det här kör \"docker compose up -d --scale <service>=<n>\". Docker Compose startar eller stoppar containers för att nå det begärda antalet. Befintliga containers återskapas inte om inte image eller konfiguration har ändrats.",
-    "apply_button": "Tillämpa",
-    "service_label": "Antal replikor av {{service}}",
-    "minus_aria": "Minska replikor för {{service}}",
-    "plus_aria": "Öka replikor för {{service}}",
-    "port_conflict_inline": "Den här tjänsten har statiska värd-portbindningar — att skala över 1 replika misslyckas eftersom bara en container kan binda en värdport åt gången.",
-    "port_conflict_title": "Trolig portkonflikter",
-    "port_conflict_body": "Följande tjänster har statiska värd-portbindningar. Docker kan inte starta mer än en replika eftersom en värdport bara kan bindas av en enda container:",
-    "port_conflict_icon_title": "Har statiska värd-portbindningar"
-  },
   "settings": {
     "title": "Inställningar",
     "open_button": "Inställningar",
@@ -635,6 +679,75 @@
     "pause_success": "{{name}} pausad",
     "pause_failed": "Det gick inte att pausa {{name}}",
     "unpause_success": "{{name}} återupptagen",
-    "unpause_failed": "Det gick inte att återuppta {{name}}"
+    "unpause_failed": "Det gick inte att återuppta {{name}}",
+    "service_start_success": "Tjänsten {{name}} startad",
+    "service_start_failed": "Kunde inte starta tjänsten {{name}}",
+    "service_stop_success": "Tjänsten {{name}} stoppad",
+    "service_stop_failed": "Kunde inte stoppa tjänsten {{name}}",
+    "service_restart_success": "Tjänsten {{name}} omstartad",
+    "service_restart_failed": "Kunde inte starta om tjänsten {{name}}"
+  },
+  "service_actions": {
+    "start": "Starta tjänst",
+    "stop": "Stoppa tjänst",
+    "restart": "Starta om tjänst",
+    "logs": "Tjänstloggar"
+  },
+  "scale_modal": {
+    "title": "Skala tjänster — {{name}}",
+    "confirm_title": "Bekräfta skalning — {{name}}",
+    "aria_label": "Modal för tjänstskalning",
+    "sideeffects_title": "Skalning ändrar körande instanser",
+    "sideeffects_body": "Varje tjänstreplika är en separat container som delar samma image och konfiguration. Att öka skalan startar nya containers omedelbart. Att minska skalan stoppar och tar bort överskott. Ändringar i värd-portbindningar, volymmonteringar eller nätverksalias kan orsaka konflikter.",
+    "what_is_scale_title": "Hur docker compose-skalning fungerar",
+    "what_is_scale_body": "Det här kör \"docker compose up -d --scale <service>=<n>\". Docker Compose startar eller stoppar containers för att nå det begärda antalet. Befintliga containers återskapas inte om inte image eller konfiguration har ändrats.",
+    "apply_button": "Tillämpa",
+    "service_label": "Antal replikor av {{service}}",
+    "minus_aria": "Minska replikor för {{service}}",
+    "plus_aria": "Öka replikor för {{service}}",
+    "port_conflict_inline": "Den här tjänsten har statiska värd-portbindningar — att skala över 1 replika misslyckas eftersom bara en container kan binda en värdport åt gången.",
+    "port_conflict_title": "Trolig portkonflikter",
+    "port_conflict_body": "Följande tjänster har statiska värd-portbindningar. Docker kan inte starta mer än en replika eftersom en värdport bara kan bindas av en enda container:",
+    "port_conflict_icon_title": "Har statiska värd-portbindningar"
+  },
+  "background_tasks": {
+    "toggle_button": "Bakgrundsuppgifter",
+    "title": "Bakgrundsuppgifter",
+    "empty_title": "Inga bakgrundsuppgifter",
+    "empty_body": "Uppgifter som skickas till bakgrunden visas här.",
+    "status_pending": "Väntar",
+    "status_running": "Körs",
+    "status_success": "Klar",
+    "status_error": "Misslyckades",
+    "status_stopped": "Stoppad",
+    "stop_button": "Stoppa",
+    "remove_button": "Ta bort",
+    "log_empty": "Väntar på utdata…"
+  },
+  "bulk_confirm_modal": {
+    "aria_label": "Bekräfta massåtgärd",
+    "title_up_one": "Starta {{count}} stack?",
+    "title_up_other": "Starta {{count}} stackar?",
+    "title_pull_one": "Hämta avbilder för {{count}} stack?",
+    "title_pull_other": "Hämta avbilder för {{count}} stackar?",
+    "title_restart_one": "Starta om {{count}} stack?",
+    "title_restart_other": "Starta om {{count}} stackar?",
+    "title_down_one": "Stoppa {{count}} stack?",
+    "title_down_other": "Stoppa {{count}} stackar?",
+    "title_kill_one": "Avsluta {{count}} stack?",
+    "title_kill_other": "Avsluta {{count}} stackar?",
+    "background_notice": "Detta körs som bakgrundsuppgifter. Du kan följa, stoppa eller ta bort dem i panelen för bakgrundsuppgifter.",
+    "warning_up": "Detta kan starta om containrar och hämta nya avbilder om någon tjänsts konfiguration har ändrats.",
+    "warning_restart": "Körande tjänster i de valda stackarna är kortvarigt otillgängliga medan de startas om.",
+    "warning_down_title": "Detta stoppar och tar bort alla containrar i varje vald stack",
+    "warning_down_body": "Volymer behålls, men allt tillstånd utanför dem (t.ex. cachar i minnet) går förlorat. Stackarna försvinner från listan tills de startas igen.",
+    "warning_kill_title": "Detta tvångsavslutar varje container i varje vald stack",
+    "warning_kill_body": "Avsluta skickar SIGKILL direkt — till skillnad från Stoppa får processerna ingen chans att städa upp eller skriva data. Använd bara när Stoppa inte svarar.",
+    "stacks_label": "Berörda stackar:",
+    "confirm_button_up": "Starta",
+    "confirm_button_pull": "Hämta",
+    "confirm_button_restart": "Starta om",
+    "confirm_button_down": "Stoppa",
+    "confirm_button_kill": "Avsluta"
   }
 }

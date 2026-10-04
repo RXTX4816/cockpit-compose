@@ -25,20 +25,21 @@
     "aria_label": "Stive Compose",
     "empty_title": "Nu s-au găsit stive compose",
     "empty_body": "Porniți un proiect cu docker/podman compose up -d și va apărea aici.",
-    "load_failed": "Eroare la încărcarea stivelor",
-    "service_count_one": "{{count}} serviciu",
-    "service_count_other": "{{count}} servicii",
-    "status_running": "în execuție",
-    "status_partial": "parțial",
-    "status_stopped": "oprit",
-    "status_paused": "în pauză",
-    "status_unknown": "necunoscut",
     "empty_create": "Creare stivă",
     "empty_import": "Importare existentă",
     "no_results_title": "Nicio stivă nu corespunde",
     "no_results_body": "Încercați un alt nume sau eliminați filtrele active.",
     "clear_filters": "Ștergere filtre",
+    "load_failed": "Eroare la încărcarea stivelor",
     "refreshing": "Actualizare stive",
+    "service_count_one": "{{count}} serviciu",
+    "service_count_few": "{{count}} servicii",
+    "service_count_other": "{{count}} de servicii",
+    "status_running": "în execuție",
+    "status_partial": "parțial",
+    "status_stopped": "oprit",
+    "status_paused": "în pauză",
+    "status_unknown": "necunoscut",
     "search_placeholder": "Căutare stive…",
     "filter_tooltip_running": "Afișați numai stivele în execuție",
     "filter_tooltip_partial": "Afișați numai stivele parțial în execuție",
@@ -46,8 +47,12 @@
     "filter_tooltip_paused": "Afișați numai stivele în pauză",
     "select_stack": "Selectați {{name}}",
     "select_all": "Selectați tot",
+    "deselect_all": "Deselectați tot",
     "bulk_selected": "{{count}} selectate",
-    "bulk_clear": "Deselectați"
+    "bulk_clear": "Deselectați",
+    "runtime_switch_cancelled_tasks_one": "A fost anulată {{count}} sarcină în fundal în așteptare deoarece runtime-ul s-a schimbat",
+    "runtime_switch_cancelled_tasks_few": "Au fost anulate {{count}} sarcini în fundal în așteptare deoarece runtime-ul s-a schimbat",
+    "runtime_switch_cancelled_tasks_other": "Au fost anulate {{count}} de sarcini în fundal în așteptare deoarece runtime-ul s-a schimbat"
   },
   "actions": {
     "up": "Pornire",
@@ -96,6 +101,9 @@
     "rootless": "Fără root",
     "rootless_help_title": "Modul fără root",
     "rootless_help_body": "Docker sau Podman rulează în modul fără root — containerele rulează ca utilizatorul dvs., nu ca root. Aceasta îmbunătățește securitatea, dar poate limita unele funcții precum legarea porturilor privilegiate (<1024), accesul la căile de sistem sau utilizarea anumitor drivere de rețea.",
+    "rootful": "Cu root",
+    "rootful_help_title": "Modul cu root",
+    "rootful_help_body": "Docker sau Podman rulează în modul cu root (la nivel de sistem) — containerele rulează ca root. Acțiunile sunt elevate prin accesul administrativ Cockpit atunci când este necesar.",
     "help": "Ajutor",
     "feedback": "Feedback / Raportare eroare",
     "source": "Cod sursă",
@@ -119,7 +127,28 @@
     "not_installed": "{{runtime}} nu a fost găsit — instalați-l pentru a comuta",
     "podman_confirm_title": "Comutare la Podman",
     "podman_confirm_body": "Suportul Podman este experimental. În funcție de configurația dumneavoastră, unele funcționalități pot să nu funcționeze conform așteptărilor — inclusiv descoperirea stivelor, streaming de jurnale și anumite comenzi compose.",
-    "podman_suggest_docker_missing": "Docker nu a fost găsit pe acest sistem. Comutați la Podman pentru a vă gestiona containerele."
+    "podman_suggest_docker_missing": "Docker nu a fost găsit pe acest sistem. Comutați la Podman pentru a vă gestiona containerele.",
+    "rootless": "Fără root",
+    "rootful": "Cu root",
+    "socket_mode_toggle_label": "Modul socket",
+    "rootless_help": "Folosiți socket-ul per utilizator (fără root). Containerele rulează ca propriul dvs. utilizator.",
+    "rootful_help": "Folosiți socket-ul de sistem (cu root). Containerele rulează ca root, cu elevare prin accesul administrativ Cockpit.",
+    "socket_not_detected": "Socket nedetectat",
+    "rootful_needs_admin_access": "S-a detectat un socket cu root, dar nu a putut fi confirmat — activați accesul administrativ Cockpit, apoi faceți clic pe Reverificare",
+    "recheck_sockets": "Reverificare disponibilitate socket",
+    "no_socket_detected": "Nu s-a detectat niciun socket al motorului {{runtime}}. Asigurați-vă că {{runtime}} este instalat și rulează.",
+    "no_socket_needs_admin_access": "Niciun socket al motorului {{runtime}} confirmat — s-a găsit un socket cu root, dar necesită accesul administrativ Cockpit. Activați-l, apoi faceți clic pe Reverificare."
+  },
+  "layout": {
+    "toggle_label": "Aspect afișare",
+    "minimal": "Minimal",
+    "minimal_tooltip": "Mod compact: ascunde subsolul, reduce spațierea, axat pe pictograme",
+    "poweruser": "PowerUser",
+    "poweruser_tooltip": "Aspect implicit, cu toate comenzile",
+    "pretty": "Elegant",
+    "pretty_tooltip": "Aspect aerisit, cu umbre fine și tipografie bogată",
+    "unix": "Unix",
+    "unix_tooltip": "Inspirat de terminal, cu font monospațiat și caractere de chenar"
   },
   "error_boundary": {
     "load_stacks_error": "Eroare la încărcarea stivelor"
@@ -133,7 +162,8 @@
     "confirm_button": "Oprire (eliminare)",
     "checking_networks": "Se verifică rețelele partajate…",
     "shared_networks_title": "Rețele partajate detectate",
-    "shared_with": "folosit și de"
+    "shared_with": "folosit și de",
+    "background_label": "Oprire — {{name}}"
   },
   "kill_modal": {
     "aria_label": "Confirmare terminare forțată",
@@ -141,7 +171,8 @@
     "body_prefix": "Executare",
     "body_sigkill": "trimite SIGKILL tuturor containerelor din",
     "body_suffix": ", terminându-le forțat imediat. Spre deosebire de Oprire, procesele nu au șansa de a face curățenie. Folosiți doar când Oprire nu răspunde.",
-    "confirm_button": "Terminare toate containerele"
+    "confirm_button": "Terminare toate containerele",
+    "background_label": "Terminare — {{name}}"
   },
   "leftovers": {
     "remaining_title": "Docker încă listează containere pentru {{name}}",
@@ -164,7 +195,8 @@
     "aria_label": "Confirmare repornire",
     "title": "Repornire \"{{name}}\"?",
     "body": "Aceasta va reporni toate serviciile în execuție. Serviciile vor fi indisponibile pentru scurt timp.",
-    "confirm_button": "Repornire"
+    "confirm_button": "Repornire",
+    "background_label": "Repornire — {{name}}"
   },
   "delete_modal": {
     "aria_label": "Ștergere stivă compose — {{name}}",
@@ -183,6 +215,7 @@
     "target_folder": "folderul {{folder}}",
     "target_file": "fișierul {{file}}",
     "error_default": "Ștergere eșuată",
+    "retry_sudo_button": "Reîncercați cu sudo?",
     "checking_networks": "Se verifică rețelele partajate…",
     "shared_networks_title": "Rețele partajate detectate",
     "shared_with": "folosit și de"
@@ -217,9 +250,11 @@
     "errors_found_title": "Erori găsite",
     "warnings_found_title": "Avertismente găsite",
     "error_count_one": "Există {{count}} eroare în fișierul compose.",
-    "error_count_other": "Există {{count}} erori în fișierul compose.",
+    "error_count_few": "Există {{count}} erori în fișierul compose.",
+    "error_count_other": "Există {{count}} de erori în fișierul compose.",
     "warning_count_one": "Există {{count}} avertisment în fișierul compose.",
-    "warning_count_other": "Există {{count}} avertismente în fișierul compose.",
+    "warning_count_few": "Există {{count}} avertismente în fișierul compose.",
+    "warning_count_other": "Există {{count}} de avertismente în fișierul compose.",
     "validation_name_required": "Numele este obligatoriu",
     "validation_name_slashes": "Numele nu trebuie să conțină bare oblice",
     "validation_name_spaces": "Numele nu trebuie să conțină spații",
@@ -245,6 +280,7 @@
   "yaml_modal": {
     "aria_label": "Fișier Compose — {{name}}",
     "title": "{{name}} — fișier compose",
+    "unsaved_changes": "Modificări nesalvate",
     "env_file_button": "Fișier env",
     "history_button": "Istoric ({{count}})",
     "edit_button": "Editare",
@@ -265,9 +301,11 @@
     "errors_found_title": "Erori găsite",
     "warnings_found_title": "Avertismente găsite",
     "error_count_one": "Există {{count}} eroare în fișierul compose.",
-    "error_count_other": "Există {{count}} erori în fișierul compose.",
+    "error_count_few": "Există {{count}} erori în fișierul compose.",
+    "error_count_other": "Există {{count}} de erori în fișierul compose.",
     "warning_count_one": "Există {{count}} avertisment în fișierul compose.",
-    "warning_count_other": "Există {{count}} avertismente în fișierul compose.",
+    "warning_count_few": "Există {{count}} avertismente în fișierul compose.",
+    "warning_count_other": "Există {{count}} de avertismente în fișierul compose.",
     "file_tab_aria": "Editare {{name}}",
     "add_file_button": "Adăugare",
     "add_file_title": "Adăugare fișier compose",
@@ -295,8 +333,7 @@
     "import_file_title": "Import fișier existent",
     "import_file_select_label": "Fișiere disponibile",
     "import_file_none": "Nu s-au găsit fișiere YAML suplimentare în acest director.",
-    "import_file_confirm_button": "Import",
-    "unsaved_changes": "Modificări nesalvate"
+    "import_file_confirm_button": "Import"
   },
   "env_modal": {
     "aria_label": "Fișier env — {{name}}",
@@ -335,6 +372,7 @@
     "level_warn": "Avertisment",
     "level_info": "Informație",
     "download_tooltip": "Descărcare jurnale",
+    "download_saved": "Jurnale salvate în {{path}} (Firefox nu poate descărca fișiere direct din această interfață)",
     "timestamps_tooltip": "Comutare marcaje de timp",
     "scroll_top": "Salt la început",
     "scroll_bottom": "Salt la final",
@@ -344,23 +382,26 @@
   "run_modal": {
     "aria_label": "Executare — {{name}}",
     "title": "Executare — {{name}}",
+    "warning_title": "Serviciile de lungă durată vor bloca",
+    "warning_body": "compose run pornește un container nou pentru serviciul selectat. Dacă acel serviciu nu are o comandă de suprascris (de ex. un server web sau o bază de date), containerul va porni serviciul și va rămâne în execuție — nu se va opri singur. Poate fi necesar să anulați aici și apoi să forțați oprirea stivei pentru a recupera.",
     "field_service": "Serviciu",
     "field_service_placeholder": "nume serviciu",
     "group_services": "Servicii",
     "group_jobs": "Joburi",
     "field_command": "Comandă",
     "field_command_placeholder": "echo hello",
+    "field_command_help_args": "Transmis ca argumente către entrypoint-ul imaginii (de ex. tastați „--help”).",
+    "field_command_help_override": "Primul cuvânt înlocuiește complet entrypoint-ul imaginii (de ex. tastați calea completă a unui binar, ca la un exec în terminal). Restul sunt transmise ca argumentele acestuia.",
+    "field_command_job_hint": "Pentru un job, lăsați gol pentru a rula comanda proprie a jobului.",
+    "field_override_entrypoint": "Suprascrie entrypoint",
     "field_rm": "Eliminare container după executare (--rm)",
     "run_button": "Executare",
     "running": "Se execută comanda în {{name}}…",
     "initializing": "Se inițializează…",
     "complete": "✓ Comandă finalizată",
     "failed": "✗ Comandă eșuată",
-    "warning_title": "Serviciile de lungă durată vor bloca",
-    "warning_body": "compose run pornește un container nou pentru serviciul selectat. Dacă acel serviciu nu are o comandă de suprascris (de ex. un server web sau o bază de date), containerul va porni serviciul și va rămâne în execuție — nu se va opri singur. Poate fi necesar să anulați aici și apoi să forțați oprirea stivei pentru a recupera.",
     "force_kill_button": "Forțare eliminare container",
-    "force_kill_tooltip": "Elimină forțat containerul blocat. Folosiți când serviciul nu se oprește singur.",
-    "field_command_job_hint": "Pentru un job, lăsați gol pentru a rula comanda proprie a jobului."
+    "force_kill_tooltip": "Elimină forțat containerul blocat. Folosiți când serviciul nu se oprește singur."
   },
   "exec_modal": {
     "aria_label": "Terminal — {{name}}",
@@ -404,7 +445,9 @@
     "pulling": "Se descarcă imaginile pentru {{name}}…",
     "complete": "✓ Descărcare finalizată",
     "failed": "✗ Descărcare eșuată",
-    "starting": "Se inițiază descărcarea…"
+    "starting": "Se inițiază descărcarea…",
+    "background_button": "Rulare în fundal",
+    "background_label": "Descărcare — {{name}}"
   },
   "pull_confirm_modal": {
     "aria_label": "Confirmare descărcare — {{name}}",
@@ -423,7 +466,9 @@
     "starting": "Se pornește {{name}}…",
     "initializing": "Se inițializează…",
     "complete": "✓ Pornire finalizată",
-    "failed": "✗ Pornire eșuată"
+    "failed": "✗ Pornire eșuată",
+    "background_button": "Rulare în fundal",
+    "background_label": "Pornire — {{name}}"
   },
   "compose_warnings": {
     "title": "Docker Compose a raportat avertismente"
@@ -505,6 +550,26 @@
     "prune_button": "Curățare selectate",
     "nothing_to_remove": "Nimic de eliminat."
   },
+  "prune_global": {
+    "button": "Curățare imagini",
+    "aria_label": "Curățare imagini nefolosite (toate stivele)",
+    "title": "Curățare imagini nefolosite",
+    "body_intro": "Caută imagini nefolosite în prezent de niciun container, pe întreaga gazdă — nu doar într-o stivă. Include imaginile stivelor complet oprite (niciun container nu le ține „în uz”) și versiunile vechi rămase când o etichetă flotantă precum :latest este descărcată din nou.",
+    "loading": "Se caută imagini nefolosite…",
+    "nothing_found": "Nu s-au găsit imagini nefolosite — nimic de recuperat.",
+    "column_id": "ID",
+    "column_repo_tag": "Depozit:Etichetă",
+    "column_size": "Dimensiune",
+    "column_age": "Creată",
+    "total_reclaimable": "Total recuperabil: {{size}}",
+    "confirm_title": "Aceste imagini vor fi șterse definitiv",
+    "confirm_body": "Vor fi eliminate {{count}} imagini. Dacă vreuna aparține unei stive oprite în prezent, acea stivă va trebui să o descarce din nou la următoarea pornire. Acțiunea nu poate fi anulată.",
+    "confirm_checkbox": "Înțeleg că imaginile de mai sus vor fi șterse definitiv",
+    "prune_button": "Curățare",
+    "pruning": "Se curăță…",
+    "result_title": "Gata",
+    "error_title": "Curățarea a eșuat"
+  },
   "downed_section": {
     "create_button": "Creare",
     "import_button": "Import",
@@ -522,7 +587,9 @@
     "depth_aria": "Adâncime maximă de scanare",
     "depth_minus_aria": "Scădere adâncime scanare",
     "depth_plus_aria": "Creștere adâncime scanare",
-    "restore_button": "Restaurare"
+    "restore_button": "Restaurare",
+    "admin_mismatch_badge": "Nepotrivire mod administrativ Cockpit",
+    "admin_mismatch_tooltip": "Directorul scanat se află în folderul dvs. personal, dar Cockpit este în modul administrativ. Fișierele create aici pot aparține lui root, cauzând erori de permisiuni."
   },
   "stack_row": {
     "no_containers": "Nu s-au găsit containere.",
@@ -592,23 +659,6 @@
     "col_image": "Imagine",
     "col_uptime": "Timp activ"
   },
-  "scale_modal": {
-    "title": "Scalare servicii — {{name}}",
-    "confirm_title": "Confirmare scalare — {{name}}",
-    "aria_label": "Modal scalare servicii",
-    "sideeffects_title": "Scalarea modifică instanțele în execuție",
-    "sideeffects_body": "Fiecare replică de serviciu este un container separat care partajează aceeași imagine și configurație. Creșterea scalei pornește containere noi imediat. Scăderea scalei oprește și elimină excedentele. Modificările la legăturile de port gazdă, montările de volum sau aliasurile de rețea pot cauza conflicte.",
-    "what_is_scale_title": "Cum funcționează scalarea docker compose",
-    "what_is_scale_body": "Aceasta execută „docker compose up -d --scale <service>=<n> Docker Compose va porni sau opri containere pentru a atinge numărul solicitat. Containerele existente nu sunt recreate dacă imaginea sau configurația nu s-a schimbat.",
-    "apply_button": "Aplicare",
-    "service_label": "Număr de replici {{service}}",
-    "minus_aria": "Scădere replici pentru {{service}}",
-    "plus_aria": "Creștere replici pentru {{service}}",
-    "port_conflict_inline": "Acest serviciu are legături de port gazdă statice — scalarea peste 1 replică va eșua deoarece un singur container poate lega un port gazdă odată.",
-    "port_conflict_title": "Conflict de port probabil",
-    "port_conflict_body": "Următoarele servicii au legături de port gazdă statice. Docker nu va putea porni mai mult de o replică deoarece un port gazdă poate fi legat doar de un singur container:",
-    "port_conflict_icon_title": "Are legături de port gazdă statice"
-  },
   "settings": {
     "title": "Setări",
     "open_button": "Setări",
@@ -635,6 +685,80 @@
     "pause_success": "{{name}} în pauză",
     "pause_failed": "Punerea în pauză a {{name}} a eșuat",
     "unpause_success": "{{name}} reluat",
-    "unpause_failed": "Reluarea {{name}} a eșuat"
+    "unpause_failed": "Reluarea {{name}} a eșuat",
+    "service_start_success": "Serviciul {{name}} a pornit",
+    "service_start_failed": "Pornirea serviciului {{name}} a eșuat",
+    "service_stop_success": "Serviciul {{name}} a fost oprit",
+    "service_stop_failed": "Oprirea serviciului {{name}} a eșuat",
+    "service_restart_success": "Serviciul {{name}} a fost repornit",
+    "service_restart_failed": "Repornirea serviciului {{name}} a eșuat"
+  },
+  "service_actions": {
+    "start": "Pornire serviciu",
+    "stop": "Oprire serviciu",
+    "restart": "Repornire serviciu",
+    "logs": "Jurnale serviciu"
+  },
+  "scale_modal": {
+    "title": "Scalare servicii — {{name}}",
+    "confirm_title": "Confirmare scalare — {{name}}",
+    "aria_label": "Modal scalare servicii",
+    "sideeffects_title": "Scalarea modifică instanțele în execuție",
+    "sideeffects_body": "Fiecare replică de serviciu este un container separat care partajează aceeași imagine și configurație. Creșterea scalei pornește containere noi imediat. Scăderea scalei oprește și elimină excedentele. Modificările la legăturile de port gazdă, montările de volum sau aliasurile de rețea pot cauza conflicte.",
+    "what_is_scale_title": "Cum funcționează scalarea docker compose",
+    "what_is_scale_body": "Aceasta execută „docker compose up -d --scale <service>=<n> Docker Compose va porni sau opri containere pentru a atinge numărul solicitat. Containerele existente nu sunt recreate dacă imaginea sau configurația nu s-a schimbat.",
+    "apply_button": "Aplicare",
+    "service_label": "Număr de replici {{service}}",
+    "minus_aria": "Scădere replici pentru {{service}}",
+    "plus_aria": "Creștere replici pentru {{service}}",
+    "port_conflict_inline": "Acest serviciu are legături de port gazdă statice — scalarea peste 1 replică va eșua deoarece un singur container poate lega un port gazdă odată.",
+    "port_conflict_title": "Conflict de port probabil",
+    "port_conflict_body": "Următoarele servicii au legături de port gazdă statice. Docker nu va putea porni mai mult de o replică deoarece un port gazdă poate fi legat doar de un singur container:",
+    "port_conflict_icon_title": "Are legături de port gazdă statice"
+  },
+  "background_tasks": {
+    "toggle_button": "Sarcini în fundal",
+    "title": "Sarcini în fundal",
+    "empty_title": "Nicio sarcină în fundal",
+    "empty_body": "Sarcinile trimise în fundal vor apărea aici.",
+    "status_pending": "În așteptare",
+    "status_running": "În execuție",
+    "status_success": "Finalizată",
+    "status_error": "Eșuată",
+    "status_stopped": "Oprită",
+    "stop_button": "Oprire",
+    "remove_button": "Eliminare",
+    "log_empty": "Se așteaptă ieșirea…"
+  },
+  "bulk_confirm_modal": {
+    "aria_label": "Confirmare acțiune în bloc",
+    "title_up_one": "Porniți {{count}} stivă?",
+    "title_up_few": "Porniți {{count}} stive?",
+    "title_up_other": "Porniți {{count}} de stive?",
+    "title_pull_one": "Descărcați imaginile pentru {{count}} stivă?",
+    "title_pull_few": "Descărcați imaginile pentru {{count}} stive?",
+    "title_pull_other": "Descărcați imaginile pentru {{count}} de stive?",
+    "title_restart_one": "Reporniți {{count}} stivă?",
+    "title_restart_few": "Reporniți {{count}} stive?",
+    "title_restart_other": "Reporniți {{count}} de stive?",
+    "title_down_one": "Opriți {{count}} stivă?",
+    "title_down_few": "Opriți {{count}} stive?",
+    "title_down_other": "Opriți {{count}} de stive?",
+    "title_kill_one": "Terminați {{count}} stivă?",
+    "title_kill_few": "Terminați {{count}} stive?",
+    "title_kill_other": "Terminați {{count}} de stive?",
+    "background_notice": "Se va rula ca sarcini în fundal. Le puteți urmări, opri sau elimina din panoul de sarcini în fundal.",
+    "warning_up": "Poate reporni containere și descărca imagini noi dacă s-a schimbat configurația vreunui serviciu.",
+    "warning_restart": "Serviciile care rulează în stivele selectate vor fi indisponibile pentru scurt timp în timpul repornirii.",
+    "warning_down_title": "Aceasta oprește și elimină toate containerele fiecărei stive selectate",
+    "warning_down_body": "Volumele sunt păstrate, dar orice stare din afara lor (de ex. cache-uri în memorie) se pierde. Stivele vor dispărea din listă până când vor fi pornite din nou.",
+    "warning_kill_title": "Aceasta termină forțat fiecare container din fiecare stivă selectată",
+    "warning_kill_body": "Terminarea trimite imediat SIGKILL — spre deosebire de Oprire, procesele nu au nicio șansă să facă curat sau să salveze datele. Folosiți doar când Oprire nu răspunde.",
+    "stacks_label": "Stive afectate:",
+    "confirm_button_up": "Pornire",
+    "confirm_button_pull": "Descărcare",
+    "confirm_button_restart": "Repornire",
+    "confirm_button_down": "Oprire",
+    "confirm_button_kill": "Terminare"
   }
 }

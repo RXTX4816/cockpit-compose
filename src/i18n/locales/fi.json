@@ -25,7 +25,13 @@
     "aria_label": "Compose-pinot",
     "empty_title": "Compose-pinoja ei löydetty",
     "empty_body": "Käynnistä projekti komennolla docker/podman compose up -d ja se näkyy täällä.",
+    "empty_create": "Luo pino",
+    "empty_import": "Tuo olemassa oleva",
+    "no_results_title": "Ei vastaavia pinoja",
+    "no_results_body": "Kokeile eri nimeä tai poista aktiiviset suodattimet.",
+    "clear_filters": "Tyhjennä suodattimet",
     "load_failed": "Pinojen lataaminen epäonnistui",
+    "refreshing": "Päivitetään pinoja",
     "service_count_one": "{{count}} palvelu",
     "service_count_other": "{{count}} palvelua",
     "status_running": "käynnissä",
@@ -33,12 +39,6 @@
     "status_stopped": "pysäytetty",
     "status_paused": "tauolla",
     "status_unknown": "tuntematon",
-    "empty_create": "Luo pino",
-    "empty_import": "Tuo olemassa oleva",
-    "no_results_title": "Ei vastaavia pinoja",
-    "no_results_body": "Kokeile eri nimeä tai poista aktiiviset suodattimet.",
-    "clear_filters": "Tyhjennä suodattimet",
-    "refreshing": "Päivitetään pinoja",
     "search_placeholder": "Hae pinoja…",
     "filter_tooltip_running": "Näytä vain käynnissä olevat pinot",
     "filter_tooltip_partial": "Näytä vain osittain käynnissä olevat pinot",
@@ -46,8 +46,11 @@
     "filter_tooltip_paused": "Näytä vain tauolla olevat pinot",
     "select_stack": "Valitse {{name}}",
     "select_all": "Valitse kaikki",
+    "deselect_all": "Poista kaikki valinnat",
     "bulk_selected": "{{count}} valittu",
-    "bulk_clear": "Tyhjennä valinta"
+    "bulk_clear": "Tyhjennä valinta",
+    "runtime_switch_cancelled_tasks_one": "{{count}} odottava taustatehtävä peruttiin, koska ajoympäristö vaihtui",
+    "runtime_switch_cancelled_tasks_other": "{{count}} odottavaa taustatehtävää peruttiin, koska ajoympäristö vaihtui"
   },
   "actions": {
     "up": "Käynnistä",
@@ -96,6 +99,9 @@
     "rootless": "Ilman root-oikeuksia",
     "rootless_help_title": "Rootless-tila",
     "rootless_help_body": "Docker tai Podman toimii rootless-tilassa — kontit toimivat käyttäjänäsi, ei rootina. Tämä parantaa tietoturvaa, mutta saattaa rajoittaa joitakin ominaisuuksia, kuten etuoikeutettujen porttien (<1024) sitomista, järjestelmäpolkuihin pääsyä tai tiettyjen verkkoajureiden käyttöä.",
+    "rootful": "Root-oikeuksin",
+    "rootful_help_title": "Rootful-tila",
+    "rootful_help_body": "Docker tai Podman toimii rootful-tilassa (koko järjestelmän laajuisesti) — kontit ajetaan root-käyttäjänä. Toiminnot korotetaan tarvittaessa Cockpitin ylläpitäjän oikeuksilla.",
     "help": "Ohje",
     "feedback": "Palaute / Ilmoita virheestä",
     "source": "Lähdekoodi",
@@ -119,7 +125,28 @@
     "not_installed": "{{runtime}} ei löydy — asenna se vaihtaaksesi",
     "podman_confirm_title": "Vaihda Podmaniin",
     "podman_confirm_body": "Podman-tuki on kokeellinen. Asetuksistasi riippuen jotkin ominaisuudet eivät välttämättä toimi odotetusti — mukaan lukien pinojen tunnistus, lokien suoratoisto ja tietyt compose-komennot.",
-    "podman_suggest_docker_missing": "Dockeria ei löydetty tältä järjestelmältä. Vaihda Podmaniin hallitaksesi konttejasi."
+    "podman_suggest_docker_missing": "Dockeria ei löydetty tältä järjestelmältä. Vaihda Podmaniin hallitaksesi konttejasi.",
+    "rootless": "Ilman root-oikeuksia",
+    "rootful": "Root-oikeuksin",
+    "socket_mode_toggle_label": "Socket-tila",
+    "rootless_help": "Käytä käyttäjäkohtaista (rootless) socketia. Kontit ajetaan omana käyttäjänäsi.",
+    "rootful_help": "Käytä järjestelmänlaajuista (rootful) socketia. Kontit ajetaan root-käyttäjänä, korotus Cockpitin ylläpitäjän oikeuksilla.",
+    "socket_not_detected": "Socketia ei havaittu",
+    "rootful_needs_admin_access": "Rootful-socket havaittiin, mutta sitä ei voitu vahvistaa — ota Cockpitin ylläpitäjän oikeudet käyttöön ja napsauta sitten Tarkista uudelleen",
+    "recheck_sockets": "Tarkista socketien saatavuus uudelleen",
+    "no_socket_detected": "{{runtime}}-moottorin socketia ei havaittu. Varmista, että {{runtime}} on asennettu ja käynnissä.",
+    "no_socket_needs_admin_access": "{{runtime}}-moottorin socketia ei vahvistettu — rootful-socket löytyi, mutta se vaatii Cockpitin ylläpitäjän oikeudet. Ota ne käyttöön ja napsauta sitten Tarkista uudelleen."
+  },
+  "layout": {
+    "toggle_label": "Näkymän asettelu",
+    "minimal": "Minimaalinen",
+    "minimal_tooltip": "Tiivis tila: alatunniste piilotettu, vähemmän tyhjää tilaa, kuvakepainotteinen",
+    "poweruser": "PowerUser",
+    "poweruser_tooltip": "Oletusasettelu kaikilla säätimillä",
+    "pretty": "Tyylikäs",
+    "pretty_tooltip": "Väljä asettelu pehmeillä varjoilla ja runsaalla typografialla",
+    "unix": "Unix",
+    "unix_tooltip": "Pääteikkunan henkinen, tasalevyinen fontti ja kehysmerkit"
   },
   "error_boundary": {
     "load_stacks_error": "Virhe pinojen lataamisessa"
@@ -133,7 +160,8 @@
     "confirm_button": "Sammuta (poista)",
     "checking_networks": "Tarkistetaan jaettuja verkkoja…",
     "shared_networks_title": "Jaettuja verkkoja havaittu",
-    "shared_with": "käytössä myös"
+    "shared_with": "käytössä myös",
+    "background_label": "Sammuta — {{name}}"
   },
   "kill_modal": {
     "aria_label": "Vahvista pakkolopetus",
@@ -141,7 +169,8 @@
     "body_prefix": "Suorittaminen",
     "body_sigkill": "lähettää SIGKILL-signaalin kaikille konteille kohteessa",
     "body_suffix": ", pakottaen ne lopettamaan välittömästi. Toisin kuin Pysäytys, prosesseilla ei ole mahdollisuutta siivota. Käytä vain, kun Pysäytys ei reagoi.",
-    "confirm_button": "Pakota kaikki kontit lopettamaan"
+    "confirm_button": "Pakota kaikki kontit lopettamaan",
+    "background_label": "Pakota lopetus — {{name}}"
   },
   "leftovers": {
     "remaining_title": "Docker luettelee yhä kontteja kohteelle {{name}}",
@@ -164,7 +193,8 @@
     "aria_label": "Vahvista uudelleenkäynnistys",
     "title": "Käynnistetäänkö \"{{name}}\" uudelleen?",
     "body": "Tämä käynnistää kaikki käynnissä olevat palvelut uudelleen. Palvelut ovat hetkellisesti poissa käytöstä.",
-    "confirm_button": "Käynnistä uudelleen"
+    "confirm_button": "Käynnistä uudelleen",
+    "background_label": "Käynnistä uudelleen — {{name}}"
   },
   "delete_modal": {
     "aria_label": "Poista compose-pino — {{name}}",
@@ -183,6 +213,7 @@
     "target_folder": "kansio {{folder}}",
     "target_file": "tiedosto {{file}}",
     "error_default": "Poistaminen epäonnistui",
+    "retry_sudo_button": "Yritetäänkö uudelleen sudolla?",
     "checking_networks": "Tarkistetaan jaettuja verkkoja…",
     "shared_networks_title": "Jaettuja verkkoja havaittu",
     "shared_with": "käytössä myös"
@@ -335,6 +366,7 @@
     "level_warn": "Varoitus",
     "level_info": "Info",
     "download_tooltip": "Lataa lokit",
+    "download_saved": "Lokit tallennettu sijaintiin {{path}} (Firefox ei voi ladata tiedostoja suoraan tästä käyttöliittymästä)",
     "timestamps_tooltip": "Vaihda aikaleimoja",
     "scroll_top": "Hyppää alkuun",
     "scroll_bottom": "Hyppää loppuun",
@@ -344,23 +376,26 @@
   "run_modal": {
     "aria_label": "Suorita — {{name}}",
     "title": "Suorita — {{name}}",
+    "warning_title": "Pitkäkestoiset palvelut estävät suorituksen",
+    "warning_body": "compose run käynnistää uuden kontin valitulle palvelulle. Jos palvelulla ei ole ohittavaa komentoa (esim. verkkopalvelin tai tietokanta), kontti käynnistää palvelun ja jää käyntiin — se ei sulkeudu itsestään. Saatat joutua peruuttamaan täällä ja pakottamaan pinon pysäytyksen.",
     "field_service": "Palvelu",
     "field_service_placeholder": "palvelun nimi",
     "group_services": "Palvelut",
     "group_jobs": "Työt",
     "field_command": "Komento",
     "field_command_placeholder": "echo hello",
+    "field_command_help_args": "Välitetään argumentteina levykuvan entrypointille (kirjoita esim. \"--help\").",
+    "field_command_help_override": "Ensimmäinen sana korvaa levykuvan entrypointin kokonaan (kirjoita esim. ohjelman koko polku, kuten päätteen exec-komennossa). Loput välitetään sen argumentteina.",
+    "field_command_job_hint": "Työn kohdalla jätä tyhjäksi, niin työn oma komento suoritetaan.",
+    "field_override_entrypoint": "Ohita entrypoint",
     "field_rm": "Poista kontti suorituksen jälkeen (--rm)",
     "run_button": "Suorita",
     "running": "Suoritetaan komentoa kohteessa {{name}}…",
     "initializing": "Käynnistetään…",
     "complete": "✓ Komento valmis",
     "failed": "✗ Komento epäonnistui",
-    "warning_title": "Pitkäkestoiset palvelut estävät suorituksen",
-    "warning_body": "compose run käynnistää uuden kontin valitulle palvelulle. Jos palvelulla ei ole ohittavaa komentoa (esim. verkkopalvelin tai tietokanta), kontti käynnistää palvelun ja jää käyntiin — se ei sulkeudu itsestään. Saatat joutua peruuttamaan täällä ja pakottamaan pinon pysäytyksen.",
     "force_kill_button": "Pakota kontin poisto",
-    "force_kill_tooltip": "Pakottaa jumissa olevan kertakäyttökontin poiston. Käytä, kun palvelu ei sulkeudu itsestään.",
-    "field_command_job_hint": "Työn kohdalla jätä tyhjäksi, niin työn oma komento suoritetaan."
+    "force_kill_tooltip": "Pakottaa jumissa olevan kertakäyttökontin poiston. Käytä, kun palvelu ei sulkeudu itsestään."
   },
   "exec_modal": {
     "aria_label": "Komentorivi — {{name}}",
@@ -404,7 +439,9 @@
     "pulling": "Ladataan levykuvia kohteelle {{name}}…",
     "complete": "✓ Lataus valmis",
     "failed": "✗ Lataus epäonnistui",
-    "starting": "Aloitetaan lataus…"
+    "starting": "Aloitetaan lataus…",
+    "background_button": "Suorita taustalla",
+    "background_label": "Lataa — {{name}}"
   },
   "pull_confirm_modal": {
     "aria_label": "Vahvista lataus — {{name}}",
@@ -423,7 +460,9 @@
     "starting": "Käynnistetään {{name}}…",
     "initializing": "Käynnistetään…",
     "complete": "✓ Käynnistys valmis",
-    "failed": "✗ Käynnistys epäonnistui"
+    "failed": "✗ Käynnistys epäonnistui",
+    "background_button": "Suorita taustalla",
+    "background_label": "Käynnistä — {{name}}"
   },
   "compose_warnings": {
     "title": "Docker Compose ilmoitti varoituksista"
@@ -505,6 +544,26 @@
     "prune_button": "Siivoa valitut",
     "nothing_to_remove": "Ei mitään poistettavaa."
   },
+  "prune_global": {
+    "button": "Siivoa levykuvat",
+    "aria_label": "Siivoa käyttämättömät levykuvat (kaikki pinot)",
+    "title": "Siivoa käyttämättömät levykuvat",
+    "body_intro": "Etsii levykuvia, joita yksikään kontti ei tällä hetkellä käytä, koko isännältä — ei vain yhdestä pinosta. Mukana ovat kokonaan sammutettujen pinojen levykuvat (mikään kontti ei pidä niitä \"käytössä\") ja vanhat versiot, jotka jäävät jäljelle, kun liukuva tunniste kuten :latest ladataan uudelleen.",
+    "loading": "Etsitään käyttämättömiä levykuvia…",
+    "nothing_found": "Käyttämättömiä levykuvia ei löytynyt — ei vapautettavaa.",
+    "column_id": "ID",
+    "column_repo_tag": "Tietovarasto:Tunniste",
+    "column_size": "Koko",
+    "column_age": "Luotu",
+    "total_reclaimable": "Vapautettavissa yhteensä: {{size}}",
+    "confirm_title": "Nämä levykuvat poistetaan pysyvästi",
+    "confirm_body": "{{count}} levykuvaa poistetaan. Jos jokin kuuluu tällä hetkellä sammutettuun pinoon, pino joutuu lataamaan sen uudelleen seuraavan käynnistyksen yhteydessä. Tätä ei voi kumota.",
+    "confirm_checkbox": "Ymmärrän, että yllä luetellut levykuvat poistetaan pysyvästi",
+    "prune_button": "Siivoa",
+    "pruning": "Siivotaan…",
+    "result_title": "Valmis",
+    "error_title": "Siivous epäonnistui"
+  },
   "downed_section": {
     "create_button": "Luo",
     "import_button": "Tuo",
@@ -522,7 +581,9 @@
     "depth_aria": "Enimmäisetsintäsyvyys",
     "depth_minus_aria": "Pienennä etsintäsyvyyttä",
     "depth_plus_aria": "Suurenna etsintäsyvyyttä",
-    "restore_button": "Palauta"
+    "restore_button": "Palauta",
+    "admin_mismatch_badge": "Cockpitin ylläpitotila ei täsmää",
+    "admin_mismatch_tooltip": "Hakuhakemisto on kotikansiossasi, mutta Cockpit on ylläpitotilassa. Tänne luodut tiedostot voivat päätyä root-käyttäjän omistukseen ja aiheuttaa käyttöoikeusvirheitä."
   },
   "stack_row": {
     "no_containers": "Kontteja ei löydetty.",
@@ -592,23 +653,6 @@
     "col_image": "Levykuva",
     "col_uptime": "Käyttöaika"
   },
-  "scale_modal": {
-    "title": "Skaalaa palveluita — {{name}}",
-    "confirm_title": "Vahvista skaalaus — {{name}}",
-    "aria_label": "Palveluiden skaalausikkuna",
-    "sideeffects_title": "Skaalaus muuttaa käynnissä olevia instansseja",
-    "sideeffects_body": "Jokainen palvelureplika on erillinen kontti, joka jakaa saman levykuvan ja konfiguraation. Skaalauksen lisääminen käynnistää uusia kontteja välittömästi. Skaalauksen vähentäminen pysäyttää ja poistaa ylimääräiset. Muutokset isäntäporttisidoksiin, tallennustilamounteeihin tai verkkoaliaksiin voivat aiheuttaa ristiriitoja.",
-    "what_is_scale_title": "Miten docker compose -skaalaus toimii",
-    "what_is_scale_body": "Tämä suorittaa \"docker compose up -d --scale <service>=<n>\". Docker Compose käynnistää tai pysäyttää kontteja saavuttaakseen pyydetyn määrän. Olemassa olevia kontteja ei luoda uudelleen, ellei levykuva tai konfiguraatio ole muuttunut.",
-    "apply_button": "Käytä",
-    "service_label": "{{service}} replikoiden määrä",
-    "minus_aria": "Vähennä replikoita palvelulle {{service}}",
-    "plus_aria": "Lisää replikoita palvelulle {{service}}",
-    "port_conflict_inline": "Tällä palvelulla on staattiset isäntäporttisidokset — skaalaus yli yhden replikan epäonnistuu, koska vain yksi kontti voi sitoa isäntäportin kerrallaan.",
-    "port_conflict_title": "Porttikonflikti todennäköinen",
-    "port_conflict_body": "Seuraavilla palveluilla on staattiset isäntäporttisidokset. Docker ei pysty käynnistämään enemmän kuin yhtä replikaa, koska isäntäportin voi sitoa vain yksi kontti:",
-    "port_conflict_icon_title": "Sisältää staattiset isäntäporttisidokset"
-  },
   "settings": {
     "title": "Asetukset",
     "open_button": "Asetukset",
@@ -635,6 +679,75 @@
     "pause_success": "{{name}} keskeytetty",
     "pause_failed": "{{name}} keskeyttäminen epäonnistui",
     "unpause_success": "{{name}} jatkettu",
-    "unpause_failed": "{{name}} jatkaminen epäonnistui"
+    "unpause_failed": "{{name}} jatkaminen epäonnistui",
+    "service_start_success": "Palvelu {{name}} käynnistetty",
+    "service_start_failed": "Palvelun {{name}} käynnistys epäonnistui",
+    "service_stop_success": "Palvelu {{name}} pysäytetty",
+    "service_stop_failed": "Palvelun {{name}} pysäytys epäonnistui",
+    "service_restart_success": "Palvelu {{name}} käynnistetty uudelleen",
+    "service_restart_failed": "Palvelun {{name}} uudelleenkäynnistys epäonnistui"
+  },
+  "service_actions": {
+    "start": "Käynnistä palvelu",
+    "stop": "Pysäytä palvelu",
+    "restart": "Käynnistä palvelu uudelleen",
+    "logs": "Palvelun lokit"
+  },
+  "scale_modal": {
+    "title": "Skaalaa palveluita — {{name}}",
+    "confirm_title": "Vahvista skaalaus — {{name}}",
+    "aria_label": "Palveluiden skaalausikkuna",
+    "sideeffects_title": "Skaalaus muuttaa käynnissä olevia instansseja",
+    "sideeffects_body": "Jokainen palvelureplika on erillinen kontti, joka jakaa saman levykuvan ja konfiguraation. Skaalauksen lisääminen käynnistää uusia kontteja välittömästi. Skaalauksen vähentäminen pysäyttää ja poistaa ylimääräiset. Muutokset isäntäporttisidoksiin, tallennustilamounteeihin tai verkkoaliaksiin voivat aiheuttaa ristiriitoja.",
+    "what_is_scale_title": "Miten docker compose -skaalaus toimii",
+    "what_is_scale_body": "Tämä suorittaa \"docker compose up -d --scale <service>=<n>\". Docker Compose käynnistää tai pysäyttää kontteja saavuttaakseen pyydetyn määrän. Olemassa olevia kontteja ei luoda uudelleen, ellei levykuva tai konfiguraatio ole muuttunut.",
+    "apply_button": "Käytä",
+    "service_label": "{{service}} replikoiden määrä",
+    "minus_aria": "Vähennä replikoita palvelulle {{service}}",
+    "plus_aria": "Lisää replikoita palvelulle {{service}}",
+    "port_conflict_inline": "Tällä palvelulla on staattiset isäntäporttisidokset — skaalaus yli yhden replikan epäonnistuu, koska vain yksi kontti voi sitoa isäntäportin kerrallaan.",
+    "port_conflict_title": "Porttikonflikti todennäköinen",
+    "port_conflict_body": "Seuraavilla palveluilla on staattiset isäntäporttisidokset. Docker ei pysty käynnistämään enemmän kuin yhtä replikaa, koska isäntäportin voi sitoa vain yksi kontti:",
+    "port_conflict_icon_title": "Sisältää staattiset isäntäporttisidokset"
+  },
+  "background_tasks": {
+    "toggle_button": "Taustatehtävät",
+    "title": "Taustatehtävät",
+    "empty_title": "Ei taustatehtäviä",
+    "empty_body": "Taustalle siirretyt tehtävät näkyvät täällä.",
+    "status_pending": "Odottaa",
+    "status_running": "Käynnissä",
+    "status_success": "Valmis",
+    "status_error": "Epäonnistui",
+    "status_stopped": "Pysäytetty",
+    "stop_button": "Pysäytä",
+    "remove_button": "Poista",
+    "log_empty": "Odotetaan tulostetta…"
+  },
+  "bulk_confirm_modal": {
+    "aria_label": "Vahvista joukkotoiminto",
+    "title_up_one": "Käynnistetäänkö {{count}} pino?",
+    "title_up_other": "Käynnistetäänkö {{count}} pinoa?",
+    "title_pull_one": "Ladataanko levykuvat {{count}} pinolle?",
+    "title_pull_other": "Ladataanko levykuvat {{count}} pinolle?",
+    "title_restart_one": "Käynnistetäänkö {{count}} pino uudelleen?",
+    "title_restart_other": "Käynnistetäänkö {{count}} pinoa uudelleen?",
+    "title_down_one": "Sammutetaanko {{count}} pino?",
+    "title_down_other": "Sammutetaanko {{count}} pinoa?",
+    "title_kill_one": "Pakotetaanko {{count}} pinon lopetus?",
+    "title_kill_other": "Pakotetaanko {{count}} pinon lopetus?",
+    "background_notice": "Tämä suoritetaan taustatehtävinä. Voit seurata, pysäyttää tai poistaa niitä taustatehtävien paneelista.",
+    "warning_up": "Tämä voi käynnistää kontteja uudelleen ja ladata uusia levykuvia, jos jonkin palvelun asetukset ovat muuttuneet.",
+    "warning_restart": "Valittujen pinojen käynnissä olevat palvelut ovat hetken poissa käytöstä uudelleenkäynnistyksen aikana.",
+    "warning_down_title": "Tämä pysäyttää ja poistaa jokaisen valitun pinon kaikki kontit",
+    "warning_down_body": "Taltiot säilyvät, mutta kaikki niiden ulkopuolinen tila (esim. muistissa olevat välimuistit) menetetään. Pinot katoavat listalta, kunnes ne käynnistetään uudelleen.",
+    "warning_kill_title": "Tämä lopettaa väkisin jokaisen kontin jokaisessa valitussa pinossa",
+    "warning_kill_body": "Pakotettu lopetus lähettää SIGKILL-signaalin heti — toisin kuin Pysäytä, prosessit eivät ehdi siivota tai tallentaa tietoja. Käytä vain, jos Pysäytä ei vastaa.",
+    "stacks_label": "Koskee pinoja:",
+    "confirm_button_up": "Käynnistä",
+    "confirm_button_pull": "Lataa",
+    "confirm_button_restart": "Käynnistä uudelleen",
+    "confirm_button_down": "Sammuta",
+    "confirm_button_kill": "Pakota lopetus"
   }
 }

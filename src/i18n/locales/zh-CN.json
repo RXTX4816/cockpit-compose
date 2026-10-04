@@ -25,7 +25,13 @@
     "aria_label": "Compose 堆栈",
     "empty_title": "未找到 compose 堆栈",
     "empty_body": "使用 docker/podman compose up -d 启动项目，它将在此处显示。",
+    "empty_create": "创建堆栈",
+    "empty_import": "导入现有",
+    "no_results_title": "没有匹配的堆栈",
+    "no_results_body": "尝试不同的名称或清除活动过滤器。",
+    "clear_filters": "清除过滤器",
     "load_failed": "加载堆栈失败",
+    "refreshing": "正在刷新堆栈",
     "service_count_one": "{{count}} 个服务",
     "service_count_other": "{{count}} 个服务",
     "status_running": "运行中",
@@ -33,12 +39,6 @@
     "status_stopped": "已停止",
     "status_paused": "已暂停",
     "status_unknown": "未知",
-    "empty_create": "创建堆栈",
-    "empty_import": "导入现有",
-    "no_results_title": "没有匹配的堆栈",
-    "no_results_body": "尝试不同的名称或清除活动过滤器。",
-    "clear_filters": "清除过滤器",
-    "refreshing": "正在刷新堆栈",
     "search_placeholder": "搜索堆栈…",
     "filter_tooltip_running": "仅显示运行中的堆栈",
     "filter_tooltip_partial": "仅显示部分运行的堆栈",
@@ -46,8 +46,11 @@
     "filter_tooltip_paused": "仅显示已暂停的堆栈",
     "select_stack": "选择 {{name}}",
     "select_all": "全选",
+    "deselect_all": "取消全选",
     "bulk_selected": "已选择 {{count}} 个",
-    "bulk_clear": "清除选择"
+    "bulk_clear": "清除选择",
+    "runtime_switch_cancelled_tasks_one": "由于运行时已更改，已取消 {{count}} 个待处理的后台任务",
+    "runtime_switch_cancelled_tasks_other": "由于运行时已更改，已取消 {{count}} 个待处理的后台任务"
   },
   "actions": {
     "up": "启动",
@@ -96,6 +99,9 @@
     "rootless": "无 root",
     "rootless_help_title": "无根模式",
     "rootless_help_body": "Docker 或 Podman 正在无根模式下运行 — 容器以您的用户身份运行，而非 root。这提高了安全性，但可能限制某些功能，例如绑定特权端口（<1024）、访问系统路径或使用某些网络驱动程序。",
+    "rootful": "有根",
+    "rootful_help_title": "有根模式",
+    "rootful_help_body": "Docker 或 Podman 正以有根（系统级）模式运行 — 容器以 root 身份运行。需要时，操作会通过 Cockpit 的管理员访问权限提权执行。",
     "help": "帮助",
     "feedback": "反馈 / 报告问题",
     "source": "源代码",
@@ -119,7 +125,28 @@
     "not_installed": "未找到 {{runtime}} — 请安装后切换",
     "podman_confirm_title": "切换到 Podman",
     "podman_confirm_body": "Podman 支持为实验性功能。根据您的配置，某些功能可能无法按预期工作 — 包括堆栈发现、日志流和某些 compose 命令。",
-    "podman_suggest_docker_missing": "在此系统上未找到 Docker。请切换到 Podman 来管理您的容器。"
+    "podman_suggest_docker_missing": "在此系统上未找到 Docker。请切换到 Podman 来管理您的容器。",
+    "rootless": "无根",
+    "rootful": "有根",
+    "socket_mode_toggle_label": "套接字模式",
+    "rootless_help": "使用每用户（无根）套接字。容器以你自己的用户身份运行。",
+    "rootful_help": "使用系统级（有根）套接字。容器以 root 身份运行，通过 Cockpit 的管理员访问权限提权。",
+    "socket_not_detected": "未检测到套接字",
+    "rootful_needs_admin_access": "检测到有根套接字但无法确认 — 请开启 Cockpit 的管理员访问权限，然后点击“重新检查”",
+    "recheck_sockets": "重新检查套接字可用性",
+    "no_socket_detected": "未检测到 {{runtime}} 引擎套接字。请确保 {{runtime}} 已安装并正在运行。",
+    "no_socket_needs_admin_access": "未能确认 {{runtime}} 引擎套接字 — 找到了有根套接字，但需要 Cockpit 的管理员访问权限。请开启该权限，然后点击“重新检查”。"
+  },
+  "layout": {
+    "toggle_label": "显示布局",
+    "minimal": "极简",
+    "minimal_tooltip": "紧凑模式：隐藏页脚，减少留白，以图标为主",
+    "poweruser": "PowerUser",
+    "poweruser_tooltip": "包含全部控件的默认布局",
+    "pretty": "美观",
+    "pretty_tooltip": "宽松布局，柔和阴影与丰富排版",
+    "unix": "Unix",
+    "unix_tooltip": "终端风格，使用等宽字体和制表符边框"
   },
   "error_boundary": {
     "load_stacks_error": "加载堆栈时出错"
@@ -133,7 +160,8 @@
     "confirm_button": "停止（移除）",
     "checking_networks": "正在检查共享网络…",
     "shared_networks_title": "检测到共享网络",
-    "shared_with": "也被以下使用"
+    "shared_with": "也被以下使用",
+    "background_label": "停止 — {{name}}"
   },
   "kill_modal": {
     "aria_label": "确认强制终止",
@@ -141,7 +169,8 @@
     "body_prefix": "运行",
     "body_sigkill": "向所有容器发送 SIGKILL",
     "body_suffix": "，立即强制终止它们。与停止不同，进程没有机会进行清理。仅在停止无响应时使用。",
-    "confirm_button": "终止所有容器"
+    "confirm_button": "终止所有容器",
+    "background_label": "强制终止 — {{name}}"
   },
   "leftovers": {
     "remaining_title": "Docker 仍列出 {{name}} 的容器",
@@ -164,7 +193,8 @@
     "aria_label": "确认重启",
     "title": "重启「{{name}}」？",
     "body": "这将重启所有正在运行的服务。服务将短暂不可用。",
-    "confirm_button": "重启"
+    "confirm_button": "重启",
+    "background_label": "重启 — {{name}}"
   },
   "delete_modal": {
     "aria_label": "删除 compose 堆栈 — {{name}}",
@@ -183,6 +213,7 @@
     "target_folder": "{{folder}} 文件夹",
     "target_file": "{{file}} 文件",
     "error_default": "删除失败",
+    "retry_sudo_button": "使用 sudo 重试？",
     "checking_networks": "正在检查共享网络…",
     "shared_networks_title": "检测到共享网络",
     "shared_with": "也被以下使用"
@@ -335,6 +366,7 @@
     "level_warn": "警告",
     "level_info": "信息",
     "download_tooltip": "下载日志",
+    "download_saved": "日志已保存到 {{path}}（Firefox 无法直接从此界面下载文件）",
     "timestamps_tooltip": "切换时间戳",
     "scroll_top": "跳转到顶部",
     "scroll_bottom": "跳转到底部",
@@ -344,23 +376,26 @@
   "run_modal": {
     "aria_label": "运行 — {{name}}",
     "title": "运行 — {{name}}",
+    "warning_title": "长时间运行的服务将会阻塞",
+    "warning_body": "compose run 会为所选服务启动一个新容器。如果该服务没有覆盖命令（例如 Web 服务器或数据库），容器将启动服务并持续运行 — 它不会自行退出。您可能需要在此取消，然后强制停止堆栈以恢复。",
     "field_service": "服务",
     "field_service_placeholder": "服务名称",
     "group_services": "服务",
     "group_jobs": "作业",
     "field_command": "命令",
     "field_command_placeholder": "echo hello",
+    "field_command_help_args": "作为参数传给镜像的入口点（例如输入“--help”）。",
+    "field_command_help_override": "第一个词会完全替换镜像的入口点（例如输入可执行文件的完整路径，就像在终端中 exec 一样）。其余部分作为它的参数传入。",
+    "field_command_job_hint": "对于作业，留空即可运行作业自身的命令。",
+    "field_override_entrypoint": "覆盖入口点",
     "field_rm": "运行后移除容器（--rm）",
     "run_button": "运行",
     "running": "正在 {{name}} 中执行命令…",
     "initializing": "初始化中…",
     "complete": "✓ 命令已完成",
     "failed": "✗ 命令失败",
-    "warning_title": "长时间运行的服务将会阻塞",
-    "warning_body": "compose run 会为所选服务启动一个新容器。如果该服务没有覆盖命令（例如 Web 服务器或数据库），容器将启动服务并持续运行 — 它不会自行退出。您可能需要在此取消，然后强制停止堆栈以恢复。",
     "force_kill_button": "强制移除容器",
-    "force_kill_tooltip": "强制移除卡住的一次性容器。在服务不会自行退出时使用。",
-    "field_command_job_hint": "对于作业，留空即可运行作业自身的命令。"
+    "force_kill_tooltip": "强制移除卡住的一次性容器。在服务不会自行退出时使用。"
   },
   "exec_modal": {
     "aria_label": "终端 — {{name}}",
@@ -404,7 +439,9 @@
     "pulling": "正在拉取 {{name}} 的镜像…",
     "complete": "✓ 拉取完成",
     "failed": "✗ 拉取失败",
-    "starting": "开始拉取…"
+    "starting": "开始拉取…",
+    "background_button": "在后台运行",
+    "background_label": "拉取 — {{name}}"
   },
   "pull_confirm_modal": {
     "aria_label": "确认拉取 — {{name}}",
@@ -423,7 +460,9 @@
     "starting": "正在启动 {{name}}…",
     "initializing": "初始化中…",
     "complete": "✓ 启动完成",
-    "failed": "✗ 启动失败"
+    "failed": "✗ 启动失败",
+    "background_button": "在后台运行",
+    "background_label": "启动 — {{name}}"
   },
   "compose_warnings": {
     "title": "Docker Compose 报告了警告"
@@ -505,6 +544,26 @@
     "prune_button": "清理所选",
     "nothing_to_remove": "没有可删除的内容。"
   },
+  "prune_global": {
+    "button": "清理镜像",
+    "aria_label": "清理未使用的镜像（所有堆栈）",
+    "title": "清理未使用的镜像",
+    "body_intro": "在整个主机上（而不仅是某个堆栈）查找当前没有任何容器使用的镜像。包括已完全停止的堆栈的镜像（没有容器让它们保持“使用中”），以及重新拉取 :latest 等浮动标签后遗留的旧版本。",
+    "loading": "正在查找未使用的镜像…",
+    "nothing_found": "未找到未使用的镜像 — 没有可回收的空间。",
+    "column_id": "ID",
+    "column_repo_tag": "仓库:标签",
+    "column_size": "大小",
+    "column_age": "创建时间",
+    "total_reclaimable": "可回收总计：{{size}}",
+    "confirm_title": "这些镜像将被永久删除",
+    "confirm_body": "将删除 {{count}} 个镜像。如果其中有属于当前已停止堆栈的镜像，该堆栈下次启动时需要重新拉取。此操作无法撤销。",
+    "confirm_checkbox": "我了解上面列出的镜像将被永久删除",
+    "prune_button": "清理",
+    "pruning": "正在清理…",
+    "result_title": "完成",
+    "error_title": "清理失败"
+  },
   "downed_section": {
     "create_button": "创建",
     "import_button": "导入",
@@ -522,7 +581,9 @@
     "depth_aria": "最大扫描深度",
     "depth_minus_aria": "减少扫描深度",
     "depth_plus_aria": "增加扫描深度",
-    "restore_button": "恢复"
+    "restore_button": "恢复",
+    "admin_mismatch_badge": "Cockpit 管理员模式不匹配",
+    "admin_mismatch_tooltip": "扫描目录位于你的主文件夹中，但 Cockpit 处于管理员模式。在此创建的文件可能归 root 所有，从而导致权限错误。"
   },
   "stack_row": {
     "no_containers": "未找到容器。",
@@ -592,23 +653,6 @@
     "col_image": "镜像",
     "col_uptime": "运行时间"
   },
-  "scale_modal": {
-    "title": "扩缩容服务 — {{name}}",
-    "confirm_title": "确认扩缩容 — {{name}}",
-    "aria_label": "服务扩缩容对话框",
-    "sideeffects_title": "扩缩容会更改正在运行的实例",
-    "sideeffects_body": "每个服务副本都是共享相同镜像和配置的独立容器。增加规模会立即启动新容器。减少规模会停止并移除多余的容器。对主机端口绑定、卷挂载或网络别名的更改可能导致冲突。",
-    "what_is_scale_title": "docker compose 扩缩容的工作原理",
-    "what_is_scale_body": "这将运行docker compose up -d --scale <service>=<n>。Docker Compose 将启动或停止容器以达到请求的数量。现有容器不会被重新创建，除非镜像或配置已更改。",
-    "apply_button": "应用",
-    "service_label": "{{service}} 的副本数",
-    "minus_aria": "减少 {{service}} 的副本数",
-    "plus_aria": "增加 {{service}} 的副本数",
-    "port_conflict_inline": "此服务具有静态主机端口绑定 — 扩缩到超过 1 个副本将失败，因为一次只能有一个容器绑定主机端口。",
-    "port_conflict_title": "可能存在端口冲突",
-    "port_conflict_body": "以下服务具有静态主机端口绑定。Docker 无法启动超过一个副本，因为主机端口只能由单个容器绑定：",
-    "port_conflict_icon_title": "具有静态主机端口绑定"
-  },
   "settings": {
     "title": "设置",
     "open_button": "设置",
@@ -635,6 +679,75 @@
     "pause_success": "{{name}} 已暂停",
     "pause_failed": "暂停 {{name}} 失败",
     "unpause_success": "{{name}} 已恢复",
-    "unpause_failed": "恢复 {{name}} 失败"
+    "unpause_failed": "恢复 {{name}} 失败",
+    "service_start_success": "服务 {{name}} 已启动",
+    "service_start_failed": "启动服务 {{name}} 失败",
+    "service_stop_success": "服务 {{name}} 已停止",
+    "service_stop_failed": "停止服务 {{name}} 失败",
+    "service_restart_success": "服务 {{name}} 已重启",
+    "service_restart_failed": "重启服务 {{name}} 失败"
+  },
+  "service_actions": {
+    "start": "启动服务",
+    "stop": "停止服务",
+    "restart": "重启服务",
+    "logs": "服务日志"
+  },
+  "scale_modal": {
+    "title": "扩缩容服务 — {{name}}",
+    "confirm_title": "确认扩缩容 — {{name}}",
+    "aria_label": "服务扩缩容对话框",
+    "sideeffects_title": "扩缩容会更改正在运行的实例",
+    "sideeffects_body": "每个服务副本都是共享相同镜像和配置的独立容器。增加规模会立即启动新容器。减少规模会停止并移除多余的容器。对主机端口绑定、卷挂载或网络别名的更改可能导致冲突。",
+    "what_is_scale_title": "docker compose 扩缩容的工作原理",
+    "what_is_scale_body": "这将运行docker compose up -d --scale <service>=<n>。Docker Compose 将启动或停止容器以达到请求的数量。现有容器不会被重新创建，除非镜像或配置已更改。",
+    "apply_button": "应用",
+    "service_label": "{{service}} 的副本数",
+    "minus_aria": "减少 {{service}} 的副本数",
+    "plus_aria": "增加 {{service}} 的副本数",
+    "port_conflict_inline": "此服务具有静态主机端口绑定 — 扩缩到超过 1 个副本将失败，因为一次只能有一个容器绑定主机端口。",
+    "port_conflict_title": "可能存在端口冲突",
+    "port_conflict_body": "以下服务具有静态主机端口绑定。Docker 无法启动超过一个副本，因为主机端口只能由单个容器绑定：",
+    "port_conflict_icon_title": "具有静态主机端口绑定"
+  },
+  "background_tasks": {
+    "toggle_button": "后台任务",
+    "title": "后台任务",
+    "empty_title": "没有后台任务",
+    "empty_body": "发送到后台的任务会显示在这里。",
+    "status_pending": "等待中",
+    "status_running": "运行中",
+    "status_success": "已完成",
+    "status_error": "失败",
+    "status_stopped": "已停止",
+    "stop_button": "停止",
+    "remove_button": "移除",
+    "log_empty": "正在等待输出…"
+  },
+  "bulk_confirm_modal": {
+    "aria_label": "确认批量操作",
+    "title_up_one": "启动 {{count}} 个堆栈？",
+    "title_up_other": "启动 {{count}} 个堆栈？",
+    "title_pull_one": "拉取 {{count}} 个堆栈的镜像？",
+    "title_pull_other": "拉取 {{count}} 个堆栈的镜像？",
+    "title_restart_one": "重启 {{count}} 个堆栈？",
+    "title_restart_other": "重启 {{count}} 个堆栈？",
+    "title_down_one": "停止 {{count}} 个堆栈？",
+    "title_down_other": "停止 {{count}} 个堆栈？",
+    "title_kill_one": "强制终止 {{count}} 个堆栈？",
+    "title_kill_other": "强制终止 {{count}} 个堆栈？",
+    "background_notice": "这将作为后台任务运行。你可以在后台任务面板中查看、停止或移除它们。",
+    "warning_up": "如果有服务配置发生变化，可能会重启容器并拉取新镜像。",
+    "warning_restart": "所选堆栈中正在运行的服务在重启期间会短暂不可用。",
+    "warning_down_title": "这将停止并删除每个所选堆栈的所有容器",
+    "warning_down_body": "卷会保留，但卷之外的任何状态（例如内存缓存）都会丢失。这些堆栈会从列表中消失，直到再次启动。",
+    "warning_kill_title": "这将强制终止每个所选堆栈中的每个容器",
+    "warning_kill_body": "强制终止会立即发送 SIGKILL — 与停止不同，进程没有机会清理或写入数据。仅在停止无响应时使用。",
+    "stacks_label": "受影响的堆栈：",
+    "confirm_button_up": "启动",
+    "confirm_button_pull": "拉取",
+    "confirm_button_restart": "重启",
+    "confirm_button_down": "停止",
+    "confirm_button_kill": "强制终止"
   }
 }
