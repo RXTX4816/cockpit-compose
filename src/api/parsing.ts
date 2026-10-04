@@ -104,16 +104,65 @@ export function getServiceProfileMapFromCompose(composeContent: string): Record<
 export function getProfilesFromCompose(composeContent: string): string[] {
   try {
     const compose = loadYaml(composeContent);
-    if (!compose || typeof compose !== "object" || !("services" in compose)) return [];
-    const services = (compose as Record<string, unknown>).services;
-    if (typeof services !== "object" || services === null) return [];
+    if (!compose || typeof compose !== "object") return [];
     const profiles = new Set<string>();
-    for (const svc of Object.values(services)) {
-      const p = (svc as Record<string, unknown>)?.profiles;
-      if (Array.isArray(p)) p.forEach(name => { if (typeof name === "string") profiles.add(name); });
+    // Jobs (Compose 5.6.0) carry profiles too; a profile used only by a job still has to
+    // be selectable, or that job could never become active.
+    for (const key of ["services", "jobs"]) {
+      const entries = (compose as Record<string, unknown>)[key];
+      if (typeof entries !== "object" || entries === null) continue;
+      for (const entry of Object.values(entries)) {
+        const p = (entry as Record<string, unknown>)?.profiles;
+        if (Array.isArray(p)) p.forEach(name => { if (typeof name === "string") profiles.add(name); });
+      }
     }
     return [...profiles].sort();
   } catch { return []; }
+}
+
+/** A job from the top-level `jobs:` element (Compose 5.6.0): a container run to completion. */
+export interface ComposeJob {
+  name: string;
+  profiles: string[];
+  /** False only when `triggers.manual` is explicitly false, which forbids `compose run`. */
+  manual: boolean;
+  /** Cron expressions, or schedule objects shown by their `cron`/`interval` field. */
+  schedules: string[];
+}
+
+export function getJobsFromCompose(composeContent: string): ComposeJob[] {
+  try {
+    const compose = loadYaml(composeContent);
+    if (!compose || typeof compose !== "object") return [];
+    const jobs = (compose as Record<string, unknown>).jobs;
+    if (typeof jobs !== "object" || jobs === null) return [];
+    return Object.entries(jobs as Record<string, unknown>).map(([name, raw]) => {
+      const job = (raw ?? {}) as Record<string, unknown>;
+      const triggers = (job.triggers ?? {}) as Record<string, unknown>;
+      // The spec types `manual` as boolean or string (interpolated values).
+      const manual = !(triggers.manual === false || String(triggers.manual).toLowerCase() === "false");
+      const schedules = Array.isArray(triggers.schedule)
+        ? triggers.schedule.map(sch => {
+          if (typeof sch === "string") return sch;
+          const obj = (sch ?? {}) as Record<string, unknown>;
+          return String(obj.cron ?? obj.interval ?? JSON.stringify(sch));
+        })
+        : [];
+      const profiles = Array.isArray(job.profiles) ? job.profiles.filter((p): p is string => typeof p === "string") : [];
+      return { name, profiles, manual, schedules };
+    });
+  } catch { return []; }
+}
+
+/**
+ * Whether a job takes part in a run with the given profiles: a job without profiles always
+ * does, one with profiles only when one of them is selected. Mirrors how Compose activates
+ * services, and decides whether a scheduled job makes `up` refuse to start.
+ */
+export function isJobActive(job: ComposeJob, selectedProfiles: Iterable<string>): boolean {
+  if (job.profiles.length === 0) return true;
+  const selected = new Set(selectedProfiles);
+  return job.profiles.some(p => selected.has(p));
 }
 
 export function getImagesFromCompose(composeContent: string): string[] {

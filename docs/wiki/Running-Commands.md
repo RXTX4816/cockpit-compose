@@ -32,6 +32,14 @@ Click the **⋮ more** menu on any running stack row, then select **Run**.
 
 Click **Run** to start. The button is disabled until both **Service** and **Command** are filled in.
 
+### Jobs (Docker Compose 5.6.0+)
+
+If the compose file declares [jobs](https://github.com/docker/compose/releases/tag/v5.6.0) under a top-level `jobs:` key, the **Service** dropdown lists them in a separate **Jobs** group. Running one is `docker compose run <job>`, exactly what Compose expects for triggering a job manually. Its `depends_on` services start first.
+
+- **Command** may stay empty for a job: the job then runs the command it declares. Typing a command overrides it, as for a service.
+- Jobs with `triggers: { manual: false }` are not listed, since Compose refuses to run them manually.
+- Jobs are not offered on podman-compose, which does not support them.
+
 > **Why "Override entrypoint" exists:** `docker compose run` only replaces a container's `CMD`, not its `ENTRYPOINT`. If an image's entrypoint is already the binary you want to run (common for single-purpose images), typing that binary's own path in **Command** — the way you would with `docker exec` — collides with the entrypoint and fails with an error like `unknown command "/app/mybinary" for "mybinary"`. Checking **Override entrypoint** runs your command as-is instead of appending it to the existing entrypoint, avoiding the collision.
 
 ## Output

@@ -331,6 +331,8 @@
     "title": "הרצה — {{name}}",
     "field_service": "שירות",
     "field_service_placeholder": "שם שירות",
+    "group_services": "שירותים",
+    "group_jobs": "משימות",
     "field_command": "פקודה",
     "field_command_placeholder": "echo hello",
     "field_rm": "הסר מכולה לאחר הרצה (--rm)",
@@ -342,7 +344,8 @@
     "warning_title": "שירותים ממושכים יחסמו",
     "warning_body": "הפקודה compose run מפעילה מכולה חדשה עבור השירות הנבחר. אם לשירות אין פקודה עוקפת (למשל שרת אינטרנט או מסד נתונים), המכולה תפעיל את השירות ותישאר פועלת — היא לא תצא מעצמה. ייתכן שתצטרך לבטל כאן ואז לכבות את הערימה בכפייה כדי להתאושש.",
     "force_kill_button": "הסר מכולה בכפייה",
-    "force_kill_tooltip": "מסיר בכפייה את המכולה החד-פעמית התקועה. השתמש כאשר השירות לא יוצא מעצמו."
+    "force_kill_tooltip": "מסיר בכפייה את המכולה החד-פעמית התקועה. השתמש כאשר השירות לא יוצא מעצמו.",
+    "field_command_job_hint": "עבור משימה, השאר ריק כדי להריץ את הפקודה שלה עצמה."
   },
   "exec_modal": {
     "aria_label": "מסוף — {{name}}",
@@ -417,6 +420,10 @@
     "services_title": "שירותים:",
     "unpinned_label": "⚠ לא מקובע",
     "unpinned_notice": "תמונות לא מקובעות עלולות למשוך את מה שהרשם רואה כ\"עדכני ביותר\" וסביר ביותר שישנו התנהגות בצורה בלתי צפויה.",
+    "jobs_title": "משימות",
+    "jobs_hint": "Up אינו מפעיל משימות. הפעל משימה מתפריט ⋮ של הערימה ← הרצה.",
+    "scheduled_jobs_title": "Docker Compose יסרב להפעיל את הערימה הזו",
+    "scheduled_jobs_body": "משימות מתוזמנות עדיין אינן נתמכות, ואלה פעילות: {{jobs}}. בטל את בחירת הפרופיל שלהן או הסר את התזמון לפני הפעלת Up.",
     "profiles_title": "פרופילים אופציונליים",
     "profiles_hint": "רק שירותים המתויגים בפרופיל נבחר יופעלו.",
     "up_button": "הפעל"
@@ -444,6 +451,10 @@
     "vol_col_driver": "מנהל התקן",
     "vol_col_mountpoint": "נקודת עיגון",
     "section_networks": "רשתות",
+    "section_jobs": "משימות",
+    "job_trigger_manual": "ידני (דרך הרצה)",
+    "job_trigger_schedule": "מתוזמן: {{schedule}}",
+    "job_trigger_none": "ללא טריגר",
     "no_networks": "לא נמצאו רשתות.",
     "network_error_title": "לא ניתן לטעון רשתות",
     "net_col_name": "רשת",

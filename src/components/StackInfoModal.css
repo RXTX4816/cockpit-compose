@@ -89,3 +89,18 @@
   font-size: 0.75rem;
   color: var(--pf-t--global--text--color--subtle);
 }
+
+.sim-job-list {
+  margin: 0;
+  padding-left: 1.25rem;
+  font-size: 0.875rem;
+}
+
+.sim-job-list li {
+  margin-bottom: 0.25rem;
+}
+
+.sim-job-profiles {
+  margin-left: 0.5rem;
+  color: var(--pf-t--global--text--color--subtle);
+}

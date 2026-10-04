@@ -331,6 +331,8 @@
     "title": "Exécuter — {{name}}",
     "field_service": "Service",
     "field_service_placeholder": "nom du service",
+    "group_services": "Services",
+    "group_jobs": "Tâches",
     "field_command": "Commande",
     "field_command_placeholder": "echo hello",
     "field_rm": "Supprimer le conteneur après l'exécution (--rm)",
@@ -342,7 +344,8 @@
     "warning_title": "Les services de longue durée bloqueront",
     "warning_body": "compose run démarre un nouveau conteneur pour le service sélectionné. Si ce service n'a pas de commande de remplacement (par ex. un serveur web ou une base de données), le conteneur démarrera le service et restera actif — il ne se terminera pas de lui-même. Vous devrez peut-être annuler ici puis forcer l'arrêt de la pile pour récupérer.",
     "force_kill_button": "Forcer la suppression du conteneur",
-    "force_kill_tooltip": "Force la suppression du conteneur ponctuel bloqué. À utiliser quand le service ne se termine pas de lui-même."
+    "force_kill_tooltip": "Force la suppression du conteneur ponctuel bloqué. À utiliser quand le service ne se termine pas de lui-même.",
+    "field_command_job_hint": "Pour une tâche, laissez vide pour exécuter sa propre commande."
   },
   "exec_modal": {
     "aria_label": "Terminal — {{name}}",
@@ -417,6 +420,10 @@
     "services_title": "Services :",
     "unpinned_label": "⚠ non épinglé",
     "unpinned_notice": "Les images non épinglées peuvent télécharger ce que le registre considère comme \"la plus récente\" et sont les plus susceptibles de changer de comportement de manière inattendue.",
+    "jobs_title": "Tâches",
+    "jobs_hint": "Up ne démarre pas les tâches. Lancez-en une via le menu ⋮ de la pile → Exécuter.",
+    "scheduled_jobs_title": "Docker Compose refusera de démarrer cette pile",
+    "scheduled_jobs_body": "Les tâches planifiées ne sont pas encore prises en charge, et celles-ci sont actives : {{jobs}}. Désélectionnez leur profil ou supprimez la planification avant de lancer Up.",
     "profiles_title": "Profils optionnels",
     "profiles_hint": "Seuls les services étiquetés avec un profil sélectionné démarreront.",
     "up_button": "Démarrer"
@@ -444,6 +451,10 @@
     "vol_col_driver": "Pilote",
     "vol_col_mountpoint": "Point de montage",
     "section_networks": "Réseaux",
+    "section_jobs": "Tâches",
+    "job_trigger_manual": "manuel (via Exécuter)",
+    "job_trigger_schedule": "planifiée : {{schedule}}",
+    "job_trigger_none": "aucun déclencheur",
     "no_networks": "Aucun réseau trouvé.",
     "network_error_title": "Impossible de charger les réseaux",
     "net_col_name": "Réseau",

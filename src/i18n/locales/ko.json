@@ -331,6 +331,8 @@
     "title": "실행 — {{name}}",
     "field_service": "서비스",
     "field_service_placeholder": "서비스 이름",
+    "group_services": "서비스",
+    "group_jobs": "작업",
     "field_command": "명령",
     "field_command_placeholder": "echo hello",
     "field_rm": "실행 후 컨테이너 제거 (--rm)",
@@ -342,7 +344,8 @@
     "warning_title": "장시간 실행되는 서비스는 차단됩니다",
     "warning_body": "compose run은 선택한 서비스를 위해 새 컨테이너를 시작합니다. 해당 서비스에 재정의 명령이 없는 경우(예: 웹 서버 또는 데이터베이스), 컨테이너는 서비스를 시작하고 계속 실행됩니다 — 자체적으로 종료되지 않습니다. 복구하려면 여기서 취소한 다음 스택을 강제 정지해야 할 수 있습니다.",
     "force_kill_button": "컨테이너 강제 제거",
-    "force_kill_tooltip": "멈춘 일회성 컨테이너를 강제로 제거합니다. 서비스가 자체적으로 종료되지 않을 때 사용하세요."
+    "force_kill_tooltip": "멈춘 일회성 컨테이너를 강제로 제거합니다. 서비스가 자체적으로 종료되지 않을 때 사용하세요.",
+    "field_command_job_hint": "작업의 경우 비워 두면 작업 자체의 명령이 실행됩니다."
   },
   "exec_modal": {
     "aria_label": "셸 — {{name}}",
@@ -417,6 +420,10 @@
     "services_title": "서비스:",
     "unpinned_label": "⚠ 고정되지 않음",
     "unpinned_notice": "고정되지 않은 이미지는 레지스트리가 \"최신\"으로 간주하는 것을 풀할 수 있으며 예기치 않게 동작이 변경될 가능성이 가장 높습니다.",
+    "jobs_title": "작업",
+    "jobs_hint": "Up은 작업을 시작하지 않습니다. 스택의 ⋮ 메뉴 → 실행에서 시작하세요.",
+    "scheduled_jobs_title": "Docker Compose가 이 스택의 시작을 거부합니다",
+    "scheduled_jobs_body": "예약된 작업은 아직 지원되지 않으며 다음 작업이 활성 상태입니다: {{jobs}}. Up을 실행하기 전에 해당 프로필 선택을 해제하거나 일정을 제거하세요.",
     "profiles_title": "선택적 프로필",
     "profiles_hint": "선택한 프로필로 태그된 서비스만 시작됩니다.",
     "up_button": "시작"
@@ -444,6 +451,10 @@
     "vol_col_driver": "드라이버",
     "vol_col_mountpoint": "마운트 포인트",
     "section_networks": "네트워크",
+    "section_jobs": "작업",
+    "job_trigger_manual": "수동(실행으로)",
+    "job_trigger_schedule": "예약됨: {{schedule}}",
+    "job_trigger_none": "트리거 없음",
     "no_networks": "네트워크를 찾을 수 없습니다.",
     "network_error_title": "네트워크를 로드할 수 없습니다",
     "net_col_name": "네트워크",

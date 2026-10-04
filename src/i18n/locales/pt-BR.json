@@ -331,6 +331,8 @@
     "title": "Executar — {{name}}",
     "field_service": "Serviço",
     "field_service_placeholder": "nome do serviço",
+    "group_services": "Serviços",
+    "group_jobs": "Jobs",
     "field_command": "Comando",
     "field_command_placeholder": "echo hello",
     "field_rm": "Remover contêiner após a execução (--rm)",
@@ -342,7 +344,8 @@
     "warning_title": "Serviços de longa duração irão bloquear",
     "warning_body": "compose run inicia um novo contêiner para o serviço selecionado. Se esse serviço não tiver um comando substituto (p. ex. um servidor web ou banco de dados), o contêiner iniciará o serviço e continuará em execução — não encerrará por conta própria. Talvez seja necessário cancelar aqui e depois forçar a parada da pilha para recuperar.",
     "force_kill_button": "Forçar remoção do contêiner",
-    "force_kill_tooltip": "Remove forçosamente o contêiner travado. Use quando o serviço não encerrar por conta própria."
+    "force_kill_tooltip": "Remove forçosamente o contêiner travado. Use quando o serviço não encerrar por conta própria.",
+    "field_command_job_hint": "Para um job, deixe vazio para executar o comando do próprio job."
   },
   "exec_modal": {
     "aria_label": "Terminal — {{name}}",
@@ -417,6 +420,10 @@
     "services_title": "Serviços:",
     "unpinned_label": "⚠ não fixada",
     "unpinned_notice": "Imagens não fixadas podem baixar o que o registro considera \"mais recente\" e têm maior probabilidade de mudar de comportamento inesperadamente.",
+    "jobs_title": "Jobs",
+    "jobs_hint": "Up não inicia jobs. Dispare um pelo menu ⋮ da pilha → Executar.",
+    "scheduled_jobs_title": "O Docker Compose se recusará a iniciar esta pilha",
+    "scheduled_jobs_body": "Jobs agendados ainda não são suportados, e estes estão ativos: {{jobs}}. Desmarque o perfil deles ou remova o agendamento antes de executar Up.",
     "profiles_title": "Perfis opcionais",
     "profiles_hint": "Somente serviços marcados com um perfil selecionado serão iniciados.",
     "up_button": "Iniciar"
@@ -444,6 +451,10 @@
     "vol_col_driver": "Driver",
     "vol_col_mountpoint": "Ponto de montagem",
     "section_networks": "Redes",
+    "section_jobs": "Jobs",
+    "job_trigger_manual": "manual (via Executar)",
+    "job_trigger_schedule": "agendado: {{schedule}}",
+    "job_trigger_none": "sem gatilho",
     "no_networks": "Nenhuma rede encontrada.",
     "network_error_title": "Não foi possível carregar redes",
     "net_col_name": "Rede",

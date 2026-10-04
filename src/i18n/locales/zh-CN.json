@@ -331,6 +331,8 @@
     "title": "运行 — {{name}}",
     "field_service": "服务",
     "field_service_placeholder": "服务名称",
+    "group_services": "服务",
+    "group_jobs": "作业",
     "field_command": "命令",
     "field_command_placeholder": "echo hello",
     "field_rm": "运行后移除容器（--rm）",
@@ -342,7 +344,8 @@
     "warning_title": "长时间运行的服务将会阻塞",
     "warning_body": "compose run 会为所选服务启动一个新容器。如果该服务没有覆盖命令（例如 Web 服务器或数据库），容器将启动服务并持续运行 — 它不会自行退出。您可能需要在此取消，然后强制停止堆栈以恢复。",
     "force_kill_button": "强制移除容器",
-    "force_kill_tooltip": "强制移除卡住的一次性容器。在服务不会自行退出时使用。"
+    "force_kill_tooltip": "强制移除卡住的一次性容器。在服务不会自行退出时使用。",
+    "field_command_job_hint": "对于作业，留空即可运行作业自身的命令。"
   },
   "exec_modal": {
     "aria_label": "终端 — {{name}}",
@@ -417,6 +420,10 @@
     "services_title": "服务：",
     "unpinned_label": "⚠ 未固定",
     "unpinned_notice": "未固定的镜像可能拉取仓库认为最新的版本，更可能意外改变行为。",
+    "jobs_title": "作业",
+    "jobs_hint": "Up 不会启动作业。请通过堆栈的 ⋮ 菜单 → 运行 来触发。",
+    "scheduled_jobs_title": "Docker Compose 将拒绝启动此堆栈",
+    "scheduled_jobs_body": "尚不支持计划作业，而以下作业处于活动状态：{{jobs}}。运行 Up 前请取消选择其配置文件或删除计划。",
     "profiles_title": "可选配置文件",
     "profiles_hint": "仅启动标记了所选配置文件的服务。",
     "up_button": "启动"
@@ -444,6 +451,10 @@
     "vol_col_driver": "驱动",
     "vol_col_mountpoint": "挂载点",
     "section_networks": "网络",
+    "section_jobs": "作业",
+    "job_trigger_manual": "手动（通过运行）",
+    "job_trigger_schedule": "计划：{{schedule}}",
+    "job_trigger_none": "无触发器",
     "no_networks": "未找到网络。",
     "network_error_title": "无法加载网络",
     "net_col_name": "网络",
