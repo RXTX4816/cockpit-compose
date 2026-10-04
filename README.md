@@ -170,7 +170,7 @@ The UI language follows Cockpit's language setting.
 | Coverage | Languages |
 |---|---|
 | 100% | English (`en`) — source |
-| 85% | `de`, `pl` |
+| 86% | `de`, `pl` |
 | 84% | `ar`, `cs`, `es`, `fi`, `fr`, `he`, `id`, `it`, `ja`, `ka`, `ko`, `nl`, `pt-BR`, `ro`, `ru`, `sk`, `sv`, `tr`, `uk`, `zh-CN`, `zh-TW` |
 <!-- i18n-coverage-end -->
 

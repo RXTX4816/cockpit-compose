@@ -1,6 +1,8 @@
 import { describe, it, expect } from "vitest";
 import {
   getProfilesFromCompose,
+  getJobsFromCompose,
+  isJobActive,
   hasServicesKey,
   parseStackStatus,
   parseServiceCount,
@@ -368,5 +370,55 @@ describe("hasServicesKey", () => {
 
   it("returns false for a plain scalar", () => {
     expect(hasServicesKey("just a string")).toBe(false);
+  });
+});
+
+describe("jobs (Compose 5.6.0)", () => {
+  const yaml = `
+services:
+  web:
+    image: nginx
+jobs:
+  migrate:
+    image: app
+    command: ["migrate"]
+    triggers:
+      manual: true
+  nightly:
+    image: app
+    profiles: [ops]
+    triggers:
+      schedule:
+        - "0 3 * * *"
+        - cron: "*/5 * * * *"
+  locked:
+    image: app
+    triggers:
+      manual: "false"
+      schedule: ["@hourly"]
+`;
+
+  it("reads each job's trigger: manual by default, false only when explicitly disabled", () => {
+    expect(getJobsFromCompose(yaml)).toEqual([
+      { name: "migrate", profiles: [], manual: true, schedules: [] },
+      { name: "nightly", profiles: ["ops"], manual: true, schedules: ["0 3 * * *", "*/5 * * * *"] },
+      { name: "locked", profiles: [], manual: false, schedules: ["@hourly"] },
+    ]);
+  });
+
+  it("returns no jobs for files without the element or with invalid YAML", () => {
+    expect(getJobsFromCompose("services:\n  web:\n    image: x\n")).toEqual([]);
+    expect(getJobsFromCompose("{ invalid: yaml: content:")).toEqual([]);
+  });
+
+  it("offers profiles that only jobs use, so those jobs can be activated", () => {
+    expect(getProfilesFromCompose(yaml)).toEqual(["ops"]);
+  });
+
+  it("treats a job without profiles as always active, one with profiles only when selected", () => {
+    const [migrate, nightly] = getJobsFromCompose(yaml);
+    expect(isJobActive(migrate, [])).toBe(true);
+    expect(isJobActive(nightly, [])).toBe(false);
+    expect(isJobActive(nightly, ["ops"])).toBe(true);
   });
 });

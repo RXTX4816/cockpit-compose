@@ -331,6 +331,8 @@
     "title": "Suorita — {{name}}",
     "field_service": "Palvelu",
     "field_service_placeholder": "palvelun nimi",
+    "group_services": "Palvelut",
+    "group_jobs": "Työt",
     "field_command": "Komento",
     "field_command_placeholder": "echo hello",
     "field_rm": "Poista kontti suorituksen jälkeen (--rm)",
@@ -342,7 +344,8 @@
     "warning_title": "Pitkäkestoiset palvelut estävät suorituksen",
     "warning_body": "compose run käynnistää uuden kontin valitulle palvelulle. Jos palvelulla ei ole ohittavaa komentoa (esim. verkkopalvelin tai tietokanta), kontti käynnistää palvelun ja jää käyntiin — se ei sulkeudu itsestään. Saatat joutua peruuttamaan täällä ja pakottamaan pinon pysäytyksen.",
     "force_kill_button": "Pakota kontin poisto",
-    "force_kill_tooltip": "Pakottaa jumissa olevan kertakäyttökontin poiston. Käytä, kun palvelu ei sulkeudu itsestään."
+    "force_kill_tooltip": "Pakottaa jumissa olevan kertakäyttökontin poiston. Käytä, kun palvelu ei sulkeudu itsestään.",
+    "field_command_job_hint": "Työn kohdalla jätä tyhjäksi, niin työn oma komento suoritetaan."
   },
   "exec_modal": {
     "aria_label": "Komentorivi — {{name}}",
@@ -420,6 +423,10 @@
     "services_title": "Palvelut:",
     "unpinned_label": "⚠ kiinnittämätön",
     "unpinned_notice": "Kiinnittämättömät levykuvat saattavat ladata sen, mitä rekisteri pitää \"uusimpana\", ja muuttavat todennäköisimmin käyttäytymistä odottamattomasti.",
+    "jobs_title": "Työt",
+    "jobs_hint": "Up ei käynnistä töitä. Käynnistä työ pinon ⋮-valikosta → Suorita.",
+    "scheduled_jobs_title": "Docker Compose kieltäytyy käynnistämästä tätä pinoa",
+    "scheduled_jobs_body": "Ajastettuja töitä ei vielä tueta, ja nämä ovat aktiivisia: {{jobs}}. Poista niiden profiilin valinta tai ajastus ennen Up-toimintoa.",
     "profiles_title": "Valinnaiset profiilit",
     "profiles_hint": "Vain valitulla profiililla merkityt palvelut käynnistetään.",
     "up_button": "Käynnistä"
@@ -447,6 +454,10 @@
     "vol_col_driver": "Ohjain",
     "vol_col_mountpoint": "Liityntäpiste",
     "section_networks": "Verkot",
+    "section_jobs": "Työt",
+    "job_trigger_manual": "manuaalinen (Suorita-toiminnolla)",
+    "job_trigger_schedule": "ajastettu: {{schedule}}",
+    "job_trigger_none": "ei käynnistintä",
     "no_networks": "Verkkoja ei löydetty.",
     "network_error_title": "Verkkoja ei voitu ladata",
     "net_col_name": "Verkko",

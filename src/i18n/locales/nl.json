@@ -331,6 +331,8 @@
     "title": "Uitvoeren — {{name}}",
     "field_service": "Dienst",
     "field_service_placeholder": "servicenaam",
+    "group_services": "Services",
+    "group_jobs": "Jobs",
     "field_command": "Opdracht",
     "field_command_placeholder": "echo hello",
     "field_rm": "Container verwijderen na uitvoering (--rm)",
@@ -342,7 +344,8 @@
     "warning_title": "Langlopende services zullen blokkeren",
     "warning_body": "compose run start een nieuwe container voor de geselecteerde service. Als die service geen overschrijvend commando heeft (bijv. een webserver of database), start de container de service en blijft actief — deze sluit niet vanzelf. Mogelijk moet u hier annuleren en vervolgens de stack geforceerd stoppen om te herstellen.",
     "force_kill_button": "Container geforceerd verwijderen",
-    "force_kill_tooltip": "Verwijdert geforceerd de vastgelopen eenmalige container. Gebruik dit wanneer de service niet vanzelf sluit."
+    "force_kill_tooltip": "Verwijdert geforceerd de vastgelopen eenmalige container. Gebruik dit wanneer de service niet vanzelf sluit.",
+    "field_command_job_hint": "Laat dit bij een job leeg om het eigen commando van de job uit te voeren."
   },
   "exec_modal": {
     "aria_label": "Terminal — {{name}}",
@@ -420,6 +423,10 @@
     "services_title": "Services:",
     "unpinned_label": "⚠ niet vastgepind",
     "unpinned_notice": "Niet vastgepinde images kunnen ophalen wat het register als \"nieuwste\" beschouwt en hebben de meeste kans om onverwacht van gedrag te veranderen.",
+    "jobs_title": "Jobs",
+    "jobs_hint": "Up start geen jobs. Start er een via het ⋮-menu van de stack → Uitvoeren.",
+    "scheduled_jobs_title": "Docker Compose zal deze stack niet starten",
+    "scheduled_jobs_body": "Geplande jobs worden nog niet ondersteund, en deze zijn actief: {{jobs}}. Deselecteer hun profiel of verwijder het schema voordat je Up uitvoert.",
     "profiles_title": "Optionele profielen",
     "profiles_hint": "Alleen services die zijn getagd met een geselecteerd profiel worden gestart.",
     "up_button": "Starten"
@@ -447,6 +454,10 @@
     "vol_col_driver": "Stuurprogramma",
     "vol_col_mountpoint": "Koppelpunt",
     "section_networks": "Netwerken",
+    "section_jobs": "Jobs",
+    "job_trigger_manual": "handmatig (via Uitvoeren)",
+    "job_trigger_schedule": "gepland: {{schedule}}",
+    "job_trigger_none": "geen trigger",
     "no_networks": "Geen netwerken gevonden.",
     "network_error_title": "Netwerken kunnen niet worden geladen",
     "net_col_name": "Netwerk",

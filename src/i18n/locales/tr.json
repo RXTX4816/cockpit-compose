@@ -331,6 +331,8 @@
     "title": "Çalıştır — {{name}}",
     "field_service": "Hizmet",
     "field_service_placeholder": "hizmet adı",
+    "group_services": "Servisler",
+    "group_jobs": "İşler",
     "field_command": "Komut",
     "field_command_placeholder": "echo hello",
     "field_rm": "Çalıştırmadan sonra konteyneri kaldır (--rm)",
@@ -342,7 +344,8 @@
     "warning_title": "Uzun süre çalışan hizmetler bloke olacak",
     "warning_body": "compose run, seçili hizmet için yeni bir konteyner başlatır. Bu hizmetin geçersiz kılma komutu yoksa (örn. bir web sunucusu veya veritabanı), konteyner hizmeti başlatıp çalışmaya devam edecek — kendiliğinden çıkmayacak. Kurtarmak için burada iptal edip ardından yığını zorla durdurmanız gerekebilir.",
     "force_kill_button": "Konteyneri zorla kaldır",
-    "force_kill_tooltip": "Takılı kalmış tek seferlik konteyneri zorla kaldırır. Hizmet kendiliğinden çıkmadığında kullanın."
+    "force_kill_tooltip": "Takılı kalmış tek seferlik konteyneri zorla kaldırır. Hizmet kendiliğinden çıkmadığında kullanın.",
+    "field_command_job_hint": "Bir iş için, işin kendi komutunu çalıştırmak üzere boş bırakın."
   },
   "exec_modal": {
     "aria_label": "Terminal — {{name}}",
@@ -420,6 +423,10 @@
     "services_title": "Hizmetler:",
     "unpinned_label": "⚠ sabitlenmemiş",
     "unpinned_notice": "Sabitlenmemiş imajlar, kayıt defterinin \"en son\" kabul ettiğini indirebilir ve beklenmedik biçimde davranışını değiştirme olasılığı daha yüksektir.",
+    "jobs_title": "İşler",
+    "jobs_hint": "Up işleri başlatmaz. Yığının ⋮ menüsünden → Çalıştır ile bir iş başlatın.",
+    "scheduled_jobs_title": "Docker Compose bu yığını başlatmayı reddedecek",
+    "scheduled_jobs_body": "Zamanlanmış işler henüz desteklenmiyor ve şunlar etkin: {{jobs}}. Up çalıştırmadan önce profillerinin seçimini kaldırın veya zamanlamayı silin.",
     "profiles_title": "İsteğe bağlı profiller",
     "profiles_hint": "Yalnızca seçili profille etiketlenmiş hizmetler başlatılır.",
     "up_button": "Başlat"
@@ -447,6 +454,10 @@
     "vol_col_driver": "Sürücü",
     "vol_col_mountpoint": "Bağlama Noktası",
     "section_networks": "Ağlar",
+    "section_jobs": "İşler",
+    "job_trigger_manual": "elle (Çalıştır ile)",
+    "job_trigger_schedule": "zamanlanmış: {{schedule}}",
+    "job_trigger_none": "tetikleyici yok",
     "no_networks": "Hiç ağ bulunamadı.",
     "network_error_title": "Ağlar yüklenemedi",
     "net_col_name": "Ağ",

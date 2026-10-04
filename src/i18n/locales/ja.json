@@ -331,6 +331,8 @@
     "title": "実行 — {{name}}",
     "field_service": "サービス",
     "field_service_placeholder": "サービス名",
+    "group_services": "サービス",
+    "group_jobs": "ジョブ",
     "field_command": "コマンド",
     "field_command_placeholder": "echo hello",
     "field_rm": "実行後にコンテナを削除 (--rm)",
@@ -342,7 +344,8 @@
     "warning_title": "長時間実行のサービスはブロックします",
     "warning_body": "compose run は選択したサービス用に新しいコンテナを起動します。そのサービスにオーバーライドコマンドがない場合（例: ウェブサーバーやデータベース）、コンテナはサービスを起動したまま実行し続け、自動的に終了しません。ここでキャンセルし、スタックを強制停止して復旧する必要がある場合があります。",
     "force_kill_button": "コンテナを強制削除",
-    "force_kill_tooltip": "スタックした one-off コンテナを強制削除します。サービスが自動的に終了しない場合に使用してください。"
+    "force_kill_tooltip": "スタックした one-off コンテナを強制削除します。サービスが自動的に終了しない場合に使用してください。",
+    "field_command_job_hint": "ジョブの場合は空のままにすると、ジョブ自身のコマンドを実行します。"
   },
   "exec_modal": {
     "aria_label": "シェル — {{name}}",
@@ -420,6 +423,10 @@
     "services_title": "サービス:",
     "unpinned_label": "⚠ 固定なし",
     "unpinned_notice": "固定されていないイメージはレジストリが「最新」と見なすものをプルする可能性があり、予期せず動作が変わる可能性が最も高いです。",
+    "jobs_title": "ジョブ",
+    "jobs_hint": "Up はジョブを開始しません。スタックの ⋮ メニュー → 実行 から起動してください。",
+    "scheduled_jobs_title": "Docker Compose はこのスタックの起動を拒否します",
+    "scheduled_jobs_body": "スケジュールされたジョブはまだサポートされておらず、次のジョブが有効です: {{jobs}}。Up を実行する前に、それらのプロファイルの選択を解除するかスケジュールを削除してください。",
     "profiles_title": "オプションのプロファイル",
     "profiles_hint": "選択したプロファイルでタグ付けされたサービスのみが起動します。",
     "up_button": "起動"
@@ -447,6 +454,10 @@
     "vol_col_driver": "ドライバー",
     "vol_col_mountpoint": "マウントポイント",
     "section_networks": "ネットワーク",
+    "section_jobs": "ジョブ",
+    "job_trigger_manual": "手動（実行から）",
+    "job_trigger_schedule": "スケジュール: {{schedule}}",
+    "job_trigger_none": "トリガーなし",
     "no_networks": "ネットワークが見つかりません。",
     "network_error_title": "ネットワークを読み込めませんでした",
     "net_col_name": "ネットワーク",

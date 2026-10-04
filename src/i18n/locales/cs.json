@@ -331,6 +331,8 @@
     "title": "Spustit — {{name}}",
     "field_service": "Služba",
     "field_service_placeholder": "název služby",
+    "group_services": "Služby",
+    "group_jobs": "Úlohy",
     "field_command": "Příkaz",
     "field_command_placeholder": "echo hello",
     "field_rm": "Odebrat kontejner po spuštění (--rm)",
@@ -342,7 +344,8 @@
     "warning_title": "Varování: compose run spouští nový kontejner",
     "warning_body": "compose run vytvoří a spustí nový kontejner pro zadanou službu. Tento kontejner není spravován jako součást zásobníku a nebude mít stejné chování jako běžné kontejnery služby. Pokud příkaz nezahrnuje dlouhotrvající process, kontejner se po dokončení příkazu okamžitě zastaví, ale zůstane v systému jako \"stuck\" kontejner, dokud jej ručně neodstraníte nebo nezvolíte možnost odebrat kontejner po spuštění (--rm). Pokud příkaz zahrnuje dlouhotrvající process, bude pokračovat v běhu i po zavření tohoto dialogu, ale nebude spravován jako součást zásobníku.",
     "force_kill_button": "Násilně ukončit stuck kontejner",
-    "force_kill_tooltip": "Toto odešle SIGKILL kontejneru, což je nejrychlejší způsob, jak jej odstranit. Použijte pouze pokud běžné odstranění selže, protože tento kontejner může být stále užitečný pro ladění selhávajícího příkazu run."
+    "force_kill_tooltip": "Toto odešle SIGKILL kontejneru, což je nejrychlejší způsob, jak jej odstranit. Použijte pouze pokud běžné odstranění selže, protože tento kontejner může být stále užitečný pro ladění selhávajícího příkazu run.",
+    "field_command_job_hint": "U úlohy nechte prázdné, aby se spustil její vlastní příkaz."
   },
   "exec_modal": {
     "aria_label": "Terminál — {{name}}",
@@ -420,6 +423,10 @@
     "services_title": "Služby:",
     "unpinned_label": "⚠ nepřipnuté",
     "unpinned_notice": "Nepřipnuté obrazy mohou stáhnout to, co registr považuje za \"nejnovější\", a nejpravděpodobněji neočekávaně změní chování.",
+    "jobs_title": "Úlohy",
+    "jobs_hint": "Up nespouští úlohy. Spusťte ji z nabídky ⋮ zásobníku → Spustit.",
+    "scheduled_jobs_title": "Docker Compose odmítne tento zásobník spustit",
+    "scheduled_jobs_body": "Plánované úlohy zatím nejsou podporovány a tyto jsou aktivní: {{jobs}}. Před spuštěním Up zrušte výběr jejich profilu nebo odstraňte plán.",
     "profiles_title": "Volitelné profily",
     "profiles_hint": "Spustí se pouze služby označené vybraným profilem.",
     "up_button": "Spustit"
@@ -447,6 +454,10 @@
     "vol_col_driver": "Ovladač",
     "vol_col_mountpoint": "Bod připojení",
     "section_networks": "Sítě",
+    "section_jobs": "Úlohy",
+    "job_trigger_manual": "ručně (přes Spustit)",
+    "job_trigger_schedule": "plánováno: {{schedule}}",
+    "job_trigger_none": "bez spouštěče",
     "no_networks": "Nebyly nalezeny žádné sítě.",
     "network_error_title": "Sítě nelze načíst",
     "net_col_name": "Síť",

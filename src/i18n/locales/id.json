@@ -331,6 +331,8 @@
     "title": "Jalankan — {{name}}",
     "field_service": "Layanan",
     "field_service_placeholder": "nama layanan",
+    "group_services": "Layanan",
+    "group_jobs": "Job",
     "field_command": "Perintah",
     "field_command_placeholder": "echo hello",
     "field_rm": "Hapus kontainer setelah dijalankan (--rm)",
@@ -342,7 +344,8 @@
     "warning_title": "Layanan yang berjalan lama akan memblokir",
     "warning_body": "compose run memulai kontainer baru untuk layanan yang dipilih. Jika layanan tersebut tidak memiliki perintah pengganti (misalnya web server atau database), kontainer akan memulai layanan dan tetap berjalan — tidak akan keluar sendiri. Anda mungkin perlu membatalkan di sini lalu menghentikan paksa tumpukan untuk memulihkan.",
     "force_kill_button": "Paksa hapus kontainer",
-    "force_kill_tooltip": "Menghapus paksa kontainer satu kali yang terjebak. Gunakan saat layanan tidak keluar sendiri."
+    "force_kill_tooltip": "Menghapus paksa kontainer satu kali yang terjebak. Gunakan saat layanan tidak keluar sendiri.",
+    "field_command_job_hint": "Untuk job, biarkan kosong untuk menjalankan perintah job itu sendiri."
   },
   "exec_modal": {
     "aria_label": "Terminal — {{name}}",
@@ -420,6 +423,10 @@
     "services_title": "Layanan:",
     "unpinned_label": "⚠ tidak dipatokkan",
     "unpinned_notice": "Image yang tidak dipatokkan mungkin menarik apa yang dianggap registri sebagai \"terbaru\" dan paling mungkin mengubah perilaku secara tak terduga.",
+    "jobs_title": "Job",
+    "jobs_hint": "Up tidak memulai job. Jalankan dari menu ⋮ tumpukan → Jalankan.",
+    "scheduled_jobs_title": "Docker Compose akan menolak menjalankan tumpukan ini",
+    "scheduled_jobs_body": "Job terjadwal belum didukung, dan job berikut aktif: {{jobs}}. Batalkan pilihan profilnya atau hapus jadwalnya sebelum menjalankan Up.",
     "profiles_title": "Profil opsional",
     "profiles_hint": "Hanya layanan yang diberi tag dengan profil yang dipilih yang akan dimulai.",
     "up_button": "Jalankan"
@@ -447,6 +454,10 @@
     "vol_col_driver": "Driver",
     "vol_col_mountpoint": "Titik mount",
     "section_networks": "Jaringan",
+    "section_jobs": "Job",
+    "job_trigger_manual": "manual (melalui Jalankan)",
+    "job_trigger_schedule": "terjadwal: {{schedule}}",
+    "job_trigger_none": "tanpa pemicu",
     "no_networks": "Tidak ada jaringan ditemukan.",
     "network_error_title": "Tidak dapat memuat jaringan",
     "net_col_name": "Jaringan",

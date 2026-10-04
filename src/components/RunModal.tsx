@@ -18,6 +18,8 @@ import {
   type ComposeStack,
   readComposeFile,
   getServicesFromCompose,
+  getJobsFromCompose,
+  composeIsLimitedBackend,
   composeRunStream,
   stackSuperuser,
   snapshotProjectContainerIds,
@@ -41,6 +43,9 @@ export function RunModal({ stack, onClose }: Props) {
   const configFile = configFiles[0];
 
   const [services, setServices] = useState<string[]>([]);
+  // Jobs (Compose 5.6.0) run through `compose run <job>` like a service. Only those that
+  // allow manual triggering, and not on podman-compose, which has no notion of jobs.
+  const [jobs, setJobs] = useState<string[]>([]);
   const [selectedService, setSelectedService] = useState("");
   const [command, setCommand] = useState("");
   const [removeContainer, setRemoveContainer] = useState(true);
@@ -66,18 +71,26 @@ export function RunModal({ stack, onClose }: Props) {
     proc
       .then(() => {
         const names = getServicesFromCompose(raw);
+        const jobNames = composeIsLimitedBackend()
+          ? []
+          : getJobsFromCompose(raw).filter(j => j.manual).map(j => j.name);
         setServices(names);
-        if (names.length > 0) setSelectedService(names[0]);
+        setJobs(jobNames);
+        const first = names[0] ?? jobNames[0];
+        if (first) setSelectedService(first);
       })
       .catch(() => {});
   }, [configFile]);
 
+  const isJob = jobs.includes(selectedService.trim());
+
   const handleRun = useCallback(async () => {
     const service = selectedService.trim();
     const cmd = command.trim();
-    if (!service || !cmd) return;
+    // A job may run with no command at all: it then runs the command it declares.
+    if (!service || (!cmd && !isJob)) return;
 
-    recordCommand(cmd);
+    if (cmd) recordCommand(cmd);
     setStep("running");
     const files = splitConfigFiles(stack.ConfigFiles);
     const [su, preRunIds] = await Promise.all([
@@ -86,10 +99,10 @@ export function RunModal({ stack, onClose }: Props) {
     ]);
     preRunIdsRef.current = preRunIds;
 
-    const tokens = tokenizeCommand(cmd);
+    const tokens = cmd ? tokenizeCommand(cmd) : [];
     const proc = composeRunStream(
       stack.Name, files, service,
-      overrideEntrypoint ? { mode: "override", command: tokens } : { mode: "args", command: tokens },
+      overrideEntrypoint && tokens.length > 0 ? { mode: "override", command: tokens } : { mode: "args", command: tokens },
       removeContainer, su,
     );
     procRef.current = proc;
@@ -116,7 +129,7 @@ export function RunModal({ stack, onClose }: Props) {
         }
         procRef.current = null;
       });
-  }, [selectedService, command, removeContainer, overrideEntrypoint, stack.Name, stack.ConfigFiles, recordCommand]);
+  }, [selectedService, command, isJob, removeContainer, overrideEntrypoint, stack.Name, stack.ConfigFiles, recordCommand]);
 
   const handleClose = useCallback(() => {
     procRef.current?.close();
@@ -144,16 +157,27 @@ export function RunModal({ stack, onClose }: Props) {
               {t("run_modal.warning_body")}
             </Alert>
             <FormGroup label={t("run_modal.field_service")} fieldId="rm-service">
-              {services.length > 0 ? (
+              {services.length + jobs.length > 0 ? (
                 <select
                   id="rm-service"
                   className="rm-select"
                   value={selectedService}
                   onChange={e => setSelectedService(e.target.value)}
                 >
-                  {services.map(s => (
-                    <option key={s} value={s}>{s}</option>
-                  ))}
+                  {jobs.length === 0
+                    ? services.map(s => <option key={s} value={s}>{s}</option>)
+                    : (
+                      <>
+                        {services.length > 0 && (
+                          <optgroup label={t("run_modal.group_services")}>
+                            {services.map(s => <option key={s} value={s}>{s}</option>)}
+                          </optgroup>
+                        )}
+                        <optgroup label={t("run_modal.group_jobs")}>
+                          {jobs.map(j => <option key={`job-${j}`} value={j}>{j}</option>)}
+                        </optgroup>
+                      </>
+                    )}
                 </select>
               ) : (
                 <TextInput
@@ -176,6 +200,7 @@ export function RunModal({ stack, onClose }: Props) {
               <HistoryDatalist id="rm-command-history" history={commandHistory} />
               <div className="rm-command-help">
                 {overrideEntrypoint ? t("run_modal.field_command_help_override") : t("run_modal.field_command_help_args")}
+                {isJob && <> {t("run_modal.field_command_job_hint")}</>}
               </div>
             </FormGroup>
 
@@ -231,7 +256,7 @@ export function RunModal({ stack, onClose }: Props) {
               variant="primary"
               icon={<PlayIcon />}
               onClick={() => void handleRun()}
-              isDisabled={!selectedService.trim() || !command.trim()}
+              isDisabled={!selectedService.trim() || (!command.trim() && !isJob)}
             >
               {t("run_modal.run_button")}
             </Button>

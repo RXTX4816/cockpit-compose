@@ -10,7 +10,15 @@ import {
   Alert,
   Checkbox,
 } from "@patternfly/react-core";
-import { type ComposeStack, readComposeFile, getProfilesFromCompose } from "../api";
+import {
+  type ComposeStack,
+  type ComposeJob,
+  readComposeFile,
+  getProfilesFromCompose,
+  getJobsFromCompose,
+  isJobActive,
+  composeIsLimitedBackend,
+} from "../api";
 import { splitConfigFiles } from "../lib/configFiles";
 import { parseServiceImages, type ServiceImage } from "../lib/serviceImages";
 
@@ -26,6 +34,7 @@ export function UpConfirmModal({ stack, onConfirm, onClose }: Props) {
   const [images, setImages] = useState<ServiceImage[]>([]);
   const [profiles, setProfiles] = useState<string[]>([]);
   const [selectedProfiles, setSelectedProfiles] = useState<Set<string>>(new Set());
+  const [jobs, setJobs] = useState<ComposeJob[]>([]);
 
   useEffect(() => {
     let content = "";
@@ -34,6 +43,8 @@ export function UpConfirmModal({ stack, onConfirm, onClose }: Props) {
     void proc.then(() => {
       setImages(parseServiceImages(content));
       setProfiles(getProfilesFromCompose(content));
+      // podman-compose has no notion of jobs, so there is nothing to explain or warn about.
+      setJobs(composeIsLimitedBackend() ? [] : getJobsFromCompose(content));
     });
   }, [configFile]);
 
@@ -47,6 +58,12 @@ export function UpConfirmModal({ stack, onConfirm, onClose }: Props) {
   };
 
   const hasRisky = images.some(i => i.risky);
+  // Compose 5.6.0 refuses to start a project with an active scheduled job ("scheduled jobs
+  // are not supported in this version"). Say so before the user confirms, and update as
+  // profiles are toggled, since a profile can switch such a job on or off.
+  const blockingJobs = jobs
+    .filter(j => j.schedules.length > 0 && isJobActive(j, selectedProfiles))
+    .map(j => j.name);
 
   return (
     <Modal isOpen onClose={onClose} variant="small" aria-label={t("up_confirm_modal.aria_label", { name: stack.Name })}>
@@ -93,6 +110,29 @@ export function UpConfirmModal({ stack, onConfirm, onClose }: Props) {
               </p>
             )}
           </div>
+        )}
+
+        {jobs.length > 0 && (
+          <div style={{ fontSize: "0.875rem", marginTop: "1rem" }}>
+            <strong>{t("up_confirm_modal.jobs_title")}</strong>
+            <ul style={{ margin: "0.5rem 0 0 1.25rem", padding: 0 }}>
+              {jobs.map(j => <li key={j.name} style={{ marginBottom: "0.25rem" }}><code>{j.name}</code></li>)}
+            </ul>
+            <p style={{ marginTop: "0.5rem", color: "var(--pf-t--global--text--color--subtle)", fontSize: "0.8rem" }}>
+              {t("up_confirm_modal.jobs_hint")}
+            </p>
+          </div>
+        )}
+
+        {blockingJobs.length > 0 && (
+          <Alert
+            variant="danger"
+            isInline
+            title={t("up_confirm_modal.scheduled_jobs_title")}
+            style={{ marginTop: "1rem" }}
+          >
+            {t("up_confirm_modal.scheduled_jobs_body", { jobs: blockingJobs.join(", ") })}
+          </Alert>
         )}
 
         {profiles.length > 0 && (

@@ -331,6 +331,8 @@
     "title": "Executare — {{name}}",
     "field_service": "Serviciu",
     "field_service_placeholder": "nume serviciu",
+    "group_services": "Servicii",
+    "group_jobs": "Joburi",
     "field_command": "Comandă",
     "field_command_placeholder": "echo hello",
     "field_rm": "Eliminare container după executare (--rm)",
@@ -342,7 +344,8 @@
     "warning_title": "Serviciile de lungă durată vor bloca",
     "warning_body": "compose run pornește un container nou pentru serviciul selectat. Dacă acel serviciu nu are o comandă de suprascris (de ex. un server web sau o bază de date), containerul va porni serviciul și va rămâne în execuție — nu se va opri singur. Poate fi necesar să anulați aici și apoi să forțați oprirea stivei pentru a recupera.",
     "force_kill_button": "Forțare eliminare container",
-    "force_kill_tooltip": "Elimină forțat containerul blocat. Folosiți când serviciul nu se oprește singur."
+    "force_kill_tooltip": "Elimină forțat containerul blocat. Folosiți când serviciul nu se oprește singur.",
+    "field_command_job_hint": "Pentru un job, lăsați gol pentru a rula comanda proprie a jobului."
   },
   "exec_modal": {
     "aria_label": "Terminal — {{name}}",
@@ -420,6 +423,10 @@
     "services_title": "Servicii:",
     "unpinned_label": "⚠ nefixată",
     "unpinned_notice": "Imaginile nefixate pot descărca ceea ce registrul consideră cel mai recent și au mai multe șanse să-și schimbe comportamentul în mod neașteptat.",
+    "jobs_title": "Joburi",
+    "jobs_hint": "Up nu pornește joburile. Declanșați unul din meniul ⋮ al stivei → Rulare.",
+    "scheduled_jobs_title": "Docker Compose va refuza să pornească această stivă",
+    "scheduled_jobs_body": "Joburile programate nu sunt încă acceptate, iar acestea sunt active: {{jobs}}. Debifați profilul lor sau eliminați programarea înainte de a rula Up.",
     "profiles_title": "Profiluri opționale",
     "profiles_hint": "Numai serviciile marcate cu un profil selectat vor fi pornite.",
     "up_button": "Pornire"
@@ -447,6 +454,10 @@
     "vol_col_driver": "Driver",
     "vol_col_mountpoint": "Punct de montare",
     "section_networks": "Rețele",
+    "section_jobs": "Joburi",
+    "job_trigger_manual": "manual (prin Rulare)",
+    "job_trigger_schedule": "programat: {{schedule}}",
+    "job_trigger_none": "fără declanșator",
     "no_networks": "Nu s-au găsit rețele.",
     "network_error_title": "Nu s-au putut încărca rețelele",
     "net_col_name": "Rețea",

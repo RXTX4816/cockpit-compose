@@ -331,6 +331,8 @@
     "title": "Ejecutar — {{name}}",
     "field_service": "Servicio",
     "field_service_placeholder": "nombre del servicio",
+    "group_services": "Servicios",
+    "group_jobs": "Trabajos",
     "field_command": "Comando",
     "field_command_placeholder": "echo hello",
     "field_rm": "Eliminar contenedor tras la ejecución (--rm)",
@@ -342,7 +344,8 @@
     "warning_title": "Los servicios de larga duración bloquearán",
     "warning_body": "compose run inicia un contenedor nuevo para el servicio seleccionado. Si ese servicio no tiene un comando de reemplazo (p. ej., un servidor web o una base de datos), el contenedor iniciará el servicio y permanecerá en ejecución — no terminará por sí solo. Es posible que necesites cancelar aquí y luego forzar la detención de la pila para recuperarla.",
     "force_kill_button": "Forzar eliminación del contenedor",
-    "force_kill_tooltip": "Fuerza la eliminación del contenedor puntual bloqueado. Úsalo cuando el servicio no termina por sí solo."
+    "force_kill_tooltip": "Fuerza la eliminación del contenedor puntual bloqueado. Úsalo cuando el servicio no termina por sí solo.",
+    "field_command_job_hint": "Para un trabajo, déjalo vacío para ejecutar su propio comando."
   },
   "exec_modal": {
     "aria_label": "Terminal — {{name}}",
@@ -420,6 +423,10 @@
     "services_title": "Servicios:",
     "unpinned_label": "⚠ sin fijar",
     "unpinned_notice": "Las imágenes sin fijar pueden descargar lo que el registro considera \"más reciente\" y son las más propensas a cambiar de comportamiento inesperadamente.",
+    "jobs_title": "Trabajos",
+    "jobs_hint": "Up no inicia trabajos. Lanza uno desde el menú ⋮ de la pila → Ejecutar.",
+    "scheduled_jobs_title": "Docker Compose se negará a iniciar esta pila",
+    "scheduled_jobs_body": "Los trabajos programados aún no son compatibles, y estos están activos: {{jobs}}. Desmarca su perfil o elimina la programación antes de ejecutar Up.",
     "profiles_title": "Perfiles opcionales",
     "profiles_hint": "Solo los servicios etiquetados con un perfil seleccionado se iniciarán.",
     "up_button": "Iniciar"
@@ -447,6 +454,10 @@
     "vol_col_driver": "Controlador",
     "vol_col_mountpoint": "Punto de montaje",
     "section_networks": "Redes",
+    "section_jobs": "Trabajos",
+    "job_trigger_manual": "manual (mediante Ejecutar)",
+    "job_trigger_schedule": "programado: {{schedule}}",
+    "job_trigger_none": "sin disparador",
     "no_networks": "No se encontraron redes.",
     "network_error_title": "No se pudieron cargar las redes",
     "net_col_name": "Red",

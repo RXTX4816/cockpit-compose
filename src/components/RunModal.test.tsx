@@ -1,9 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { act, render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { RunModal } from "./RunModal";
 import { mockSpawn } from "../test/setup";
 import { mockProcess } from "../test/helpers";
 import type { ComposeStack } from "../api";
+import * as cockpitMod from "../api/cockpit";
 
 const stack: ComposeStack = {
   Name: "myapp",
@@ -310,6 +311,67 @@ describe("RunModal", () => {
       const listId = input.getAttribute("list")!;
       const option = document.querySelector(`#${listId} option[value="echo hello"]`);
       expect(option).not.toBeNull();
+    });
+  });
+
+  describe("jobs (Compose 5.6.0)", () => {
+    const withJobs = `
+services:
+  web:
+    image: nginx
+jobs:
+  migrate:
+    image: app
+    command: ["migrate"]
+    triggers:
+      manual: true
+  nightly:
+    image: app
+    triggers:
+      manual: false
+      schedule: ["0 3 * * *"]
+`;
+
+    afterEach(() => vi.restoreAllMocks());
+
+    it("offers manually triggerable jobs in their own group, but not jobs that forbid manual runs", async () => {
+      mockSpawn.mockImplementation(() => mockProcess(withJobs));
+      render(<RunModal stack={stack} onClose={vi.fn()} />);
+      await waitFor(() => expect(screen.getByRole("option", { name: "migrate" })).toBeInTheDocument());
+      expect(screen.getByRole("group", { name: "Jobs" })).toBeInTheDocument();
+      expect(screen.getByRole("group", { name: "Services" })).toBeInTheDocument();
+      expect(screen.queryByRole("option", { name: "nightly" })).not.toBeInTheDocument();
+    });
+
+    it("lets a job run with an empty command, which runs the job's own command", async () => {
+      mockSpawn.mockImplementation(() => mockProcess(withJobs));
+      render(<RunModal stack={stack} onClose={vi.fn()} />);
+      await waitFor(() => screen.getByRole("option", { name: "migrate" }));
+      fireEvent.change(screen.getByRole("combobox", { name: /service/i }), { target: { value: "migrate" } });
+      expect(screen.getByText(/leave it empty to run the job's own command/i)).toBeInTheDocument();
+      const run = screen.getByRole("button", { name: /^Run$/i });
+      expect(run).not.toBeDisabled();
+
+      await act(async () => { fireEvent.click(run); });
+      await waitFor(() => {
+        const runCall = mockSpawn.mock.calls.map(c => c[0] as string[]).find(a => a.includes("run"));
+        expect(runCall?.slice(runCall.indexOf("run"))).toEqual(["run", "--rm", "migrate"]);
+      });
+    });
+
+    it("still requires a command for a service", async () => {
+      mockSpawn.mockImplementation(() => mockProcess(withJobs));
+      render(<RunModal stack={stack} onClose={vi.fn()} />);
+      await waitFor(() => screen.getByRole("option", { name: "web" }));
+      expect(screen.getByRole("button", { name: /^Run$/i })).toBeDisabled();
+    });
+
+    it("hides jobs on podman-compose, which has no notion of them", async () => {
+      vi.spyOn(cockpitMod, "composeIsLimitedBackend").mockReturnValue(true);
+      mockSpawn.mockImplementation(() => mockProcess(withJobs));
+      render(<RunModal stack={stack} onClose={vi.fn()} />);
+      await waitFor(() => screen.getByRole("option", { name: "web" }));
+      expect(screen.queryByRole("option", { name: "migrate" })).not.toBeInTheDocument();
     });
   });
 });

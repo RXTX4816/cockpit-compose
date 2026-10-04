@@ -31,6 +31,10 @@ If the container list is loading, a spinner is shown. If the data cannot be retr
 
 ---
 
+### Jobs
+
+Only shown when the compose file declares jobs (Docker Compose 5.6.0+). Lists each job with its trigger — **manual (via Run)**, **scheduled: <cron>**, or both — and its profiles, if any. Jobs have no long-running containers, so they don't appear under **Services**.
+
 ### Images
 
 A table of Docker images used by the stack's services.
