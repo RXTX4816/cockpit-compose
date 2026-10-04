@@ -6,62 +6,53 @@ The Logs modal streams the output from all containers in a stack in real time.
 
 Click the **Logs** button on any stack row. The modal opens immediately and begins streaming.
 
+To see a single service, expand the stack row and click **Logs** next to that service — the modal opens already filtered to it.
+
 ## Layout
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│  Logs — myapp                                             [✕]   │
-├─────────────────────────────────────────────────────────────────┤
-│  [All services ▼]  [🔍 Search logs…]  ● [Pause]  [↺]  [Clear]  │
-├─────────────────────────────────────────────────────────────────┤
-│  web    │ 2024-01-15 12:00:01 │ GET / 200                       │
-│  db     │ 2024-01-15 12:00:02 │ connection ok                   │
-│  web    │ 2024-01-15 12:00:03 │ GET /api 200                    │
-│  ...                                                            │
-└─────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────┐
+│  Logs — myapp                                                      [✕]   │
+├──────────────────────────────────────────────────────────────────────────┤
+│  [🔍 Search logs…] .* {}  42 lines   [All services ▼]                    │
+│  [All] [Error] [Warn] [Info]  🕒  ●  [✕ Clear]       ⇑ ⇓ [⏸ Pause] ⬇ ↺   │
+├──────────────────────────────────────────────────────────────────────────┤
+│  [web]  GET / 200                                                        │
+│  [db]   connection ok                                                    │
+│  [web]  GET /api 200                                                     │
+│  ...                                                                     │
+└──────────────────────────────────────────────────────────────────────────┘
 ```
 
 ## Toolbar
 
 | Control | Description |
 |---|---|
-| **Service dropdown** | Filter the stream to a single service, or show all. Only visible when the stack has more than one service. |
-| **Search** | Live text filter — only lines containing the search term are shown. Matches are highlighted inline. |
-| **● spinner** | Indicates live data is flowing in |
-| **Pause** | Pauses the log stream — new lines are buffered but not displayed. Auto-scroll stops. |
-| **Continue** | Resumes a paused stream and flushes buffered lines. Replaces **Pause** while paused. |
-| **↺ Refresh** | Restarts the log stream from the beginning. Useful if the stream stalls. |
-| **Clear** | Clears all displayed lines |
-
-## Filtering by service
-
-Use the service dropdown to narrow the output to a single service. Selecting a service restarts the log stream scoped to that service only. Select **All services** to return to the full output.
-
-## Searching
-
-Type in the search box to filter the visible lines in real time. Only lines whose full content contains the search term (case-insensitive) are shown. Matching text is highlighted inline. The stream continues running in the background while you search — new matching lines are added as they arrive.
-
-Clear the search box to return to the full output.
+| **Search** | Live text filter — only matching lines are shown, with matches highlighted. |
+| **.\*** | Treat the search as a regular expression. |
+| **{}** | Pretty-print lines that contain JSON. |
+| **Line count** | Number of lines currently shown. |
+| **Service dropdown** | Show one service, or **All services**. Only visible when the stack has more than one service. Changing it restarts the stream for that service. |
+| **All / Error / Warn / Info** | Filter by log level. **Error** shows only errors; **Warn** shows warnings and errors; **All** and **Info** show everything. |
+| **🕒** | Show or hide timestamps. |
+| **● spinner** | Live data is flowing in. |
+| **Clear** | Clear the displayed lines. The stream keeps running. |
+| **⇑ / ⇓** | Jump to the top or bottom of the output. |
+| **Pause / Resume** | Freeze the output (auto-scroll stops) and pick it up again. |
+| **⬇ Download** | Save the shown lines to a file. In browsers that can't save from inside Cockpit (such as Firefox), the file is written to `~/Downloads/` on the server instead, and a notice shows the path. |
+| **↺ Refresh** | Restart the log stream. Useful if the stream stalls. |
 
 ## Log output
 
-Each parsed line is displayed in three columns:
+- **Service names** are color-coded so you can tell containers apart at a glance.
+- **Error lines** are highlighted in red, **warnings** in yellow/orange.
 
-```
-service_name  │  timestamp  │  message
-```
+The view **auto-scrolls** to the bottom as new lines arrive. Scroll up to review older output; auto-scroll pauses while you are scrolled up and resumes when you scroll back to the bottom.
 
-- **Service names** are color-coded so you can visually distinguish output from different containers at a glance.
-- **Error lines** are highlighted in red.
-- **Warning lines** are highlighted in yellow/orange.
-- Normal lines use the default text color.
+## Line limit
 
-The log view **auto-scrolls** to the bottom as new lines arrive. You can scroll up to review older output; auto-scroll pauses while you are scrolled up and resumes once you scroll back to the bottom. Auto-scroll is also suspended while the stream is paused.
-
-## Buffer limit
-
-The modal stores up to **10,000 lines** of output. When this limit is reached, a notice appears in the toolbar. Click **Clear** if you want to reset and see only new output.
+The modal keeps the most recent **500 lines**. Once the limit is reached, a "showing last 500 lines" notice appears in the toolbar and older lines are dropped as new ones arrive.
 
 ## Closing the modal
 
-Click **✕** in the top-right corner or press **Escape**. The log stream is stopped automatically when the modal closes.
+Click **✕** in the top-right corner or press **Escape**. The log stream stops when the modal closes.

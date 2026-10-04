@@ -126,7 +126,7 @@ If no stacks are found at all, the dashboard shows:
 
 ## Footer
 
-At the bottom of the page you will find version and connection information followed by links to the **Help** wiki and **Feedback / Report bug** on GitHub.
+At the bottom of the page you will find version and connection information, followed by links to the **Help** wiki, **Feedback / Report bug** on GitHub, the **Source code**, and **Open source licenses**, which lists the licenses of all bundled packages in a searchable dialog.
 
 | Badge | Description |
 |---|---|

@@ -86,6 +86,12 @@ mode was actually selected, which was misleading but harmless).
 
 ---
 
+## Stack stays in the list after Down
+
+Docker still lists some of the stack's containers. The Down dialog names them and offers **Force remove**, which removes them by project label even when the compose file is gone. If it says the containers' records are **damaged**, use **Repair** (Docker only) — note that it briefly stops Docker and every container on it. See [Managing Stacks → When containers are left behind](Managing-Stacks#when-containers-are-left-behind).
+
+---
+
 ## Log stream stalls or stops updating
 
 **Symptom:** The Logs modal opens but lines stop arriving after a while.
@@ -94,7 +100,7 @@ mode was actually selected, which was misleading but harmless).
 
 - Click **↺ Refresh** in the Logs toolbar to restart the stream.
 - If the container has stopped, there are no more lines to stream — the stream ends naturally.
-- For very high log volume, the 10,000-line buffer can fill up. Click **Clear** to reset.
+- The modal keeps only the most recent 500 lines, so older output scrolls away on busy services. Use **Download** to keep a copy, or filter by service or level.
 
 ---
 
