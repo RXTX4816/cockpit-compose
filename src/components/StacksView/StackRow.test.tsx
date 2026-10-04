@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, act, within } from "@testing-library/react";
+import { render, screen, fireEvent, act, within, waitFor } from "@testing-library/react";
 import { StackRow } from "./StackRow";
 import type { ComposeStack } from "../../api";
 
@@ -507,6 +507,67 @@ describe("StackRow", () => {
       mockUseServiceActions.mockReturnValue({ actingService: "web", doServiceAction: vi.fn() });
       render(<StackRow {...defaultProps} globalActing />);
       expect(mockUseAutoRefresh).toHaveBeenLastCalledWith(expect.any(Function), 3000, false);
+    });
+  });
+
+  // #334: right-click opens this layout's own kebab menu at the cursor.
+  describe("context menu", () => {
+    const root = (c: HTMLElement) => c.querySelector('[data-stack-name="myapp"]') as HTMLElement;
+
+    it("opens this layout's kebab items on right-click", async () => {
+      const { container } = render(<StackRow {...defaultProps} />);
+      await act(async () => { fireEvent.contextMenu(root(container), { clientX: 120, clientY: 80 }); });
+      expect(await screen.findByRole("menuitem", { name: /^Scale$/i })).toBeInTheDocument();
+    // Restart is an inline button in this layout, not a menu item.
+    expect(screen.queryByRole("menuitem", { name: /^Restart$/i })).not.toBeInTheDocument();
+    });
+
+    it("anchors the menu at the cursor, not the page corner", async () => {
+      const { container } = render(<StackRow {...defaultProps} />);
+      await act(async () => { fireEvent.contextMenu(root(container), { clientX: 321, clientY: 123 }); });
+      await screen.findByRole("menuitem", { name: /^Events$/i });
+      const anchorEl = document.body.querySelector('button[aria-hidden="true"][tabindex="-1"]') as HTMLElement;
+      expect(anchorEl.style.left).toBe("321px");
+      expect(anchorEl.style.top).toBe("123px");
+    });
+
+    it("runs the chosen action and closes", async () => {
+      const onEvents = vi.fn();
+      const { container } = render(<StackRow {...defaultProps} onEvents={onEvents} />);
+      await act(async () => { fireEvent.contextMenu(root(container), { clientX: 120, clientY: 80 }); });
+      await act(async () => { fireEvent.click(await screen.findByRole("menuitem", { name: /^Events$/i })); });
+      expect(onEvents).toHaveBeenCalledOnce();
+      await waitFor(() => expect(screen.queryByRole("menuitem", { name: /^Events$/i })).not.toBeInTheDocument());
+    });
+
+    it("closes on Escape even though focus stayed on the row", async () => {
+      const { container } = render(<StackRow {...defaultProps} />);
+      await act(async () => { fireEvent.contextMenu(root(container), { clientX: 120, clientY: 80 }); });
+      await screen.findByRole("menuitem", { name: /^Events$/i });
+      await act(async () => { fireEvent.keyDown(document.body, { key: "Escape" }); });
+      await waitFor(() => expect(screen.queryByRole("menuitem", { name: /^Events$/i })).not.toBeInTheDocument());
+    });
+
+    it("closes when the page scrolls", async () => {
+      const { container } = render(<StackRow {...defaultProps} />);
+      await act(async () => { fireEvent.contextMenu(root(container), { clientX: 120, clientY: 80 }); });
+      await screen.findByRole("menuitem", { name: /^Events$/i });
+      await act(async () => { fireEvent.scroll(window); });
+      await waitFor(() => expect(screen.queryByRole("menuitem", { name: /^Events$/i })).not.toBeInTheDocument());
+    });
+
+    it("leaves Shift+right-click to the browser", async () => {
+      const { container } = render(<StackRow {...defaultProps} />);
+      const event = new MouseEvent("contextmenu", { bubbles: true, cancelable: true, shiftKey: true });
+      await act(async () => { root(container).dispatchEvent(event); });
+      expect(event.defaultPrevented).toBe(false);
+      await waitFor(() => expect(screen.queryByRole("menuitem", { name: /^Events$/i })).not.toBeInTheDocument());
+    });
+
+    it("opens from the keyboard with Shift+F10", async () => {
+      const { container } = render(<StackRow {...defaultProps} />);
+      await act(async () => { fireEvent.keyDown(root(container), { key: "F10", shiftKey: true }); });
+      expect(await screen.findByRole("menuitem", { name: /^Events$/i })).toBeInTheDocument();
     });
   });
 });
