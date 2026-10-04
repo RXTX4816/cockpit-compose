@@ -1,5 +1,7 @@
 import { useState, useCallback, useEffect, type MouseEvent } from "react";
 import { useTranslation } from "react-i18next";
+import { useContextMenu } from "../../hooks/useContextMenu";
+import { ContextMenu } from "./ContextMenu";
 import {
   DataListItem,
   DataListItemRow,
@@ -138,9 +140,56 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
     handleToggle();
   };
 
+
+  // The context menu (#334) shows exactly this layout's kebab items; choosing one
+  // closes whichever of the two menus it was picked from.
+  const contextMenu = useContextMenu();
+  const closeMenus = () => { setMenuOpen(false); contextMenu.close(); };
+  const menuItems = (
+    <>
+                    <DropdownItem
+                      key="scale"
+                      icon={<ArrowsAltVIcon />}
+                      onClick={() => { closeMenus(); onScale(); }}
+                    >
+                      {t("actions.scale")}
+                    </DropdownItem>
+                    <Divider key="div-scale" component="li" />
+                    <DropdownItem
+                      key="pause"
+                      icon={status === "paused" ? <PlayCircleIcon /> : <PauseCircleIcon />}
+                      isDisabled={status === "stopped" || status === "unknown"}
+                      onClick={() => {
+                        closeMenus();
+                        void doAction(status === "paused" ? "unpause" : "pause", afterAction);
+                      }}
+                    >
+                      {status === "paused" ? t("actions.unpause") : t("actions.pause")}
+                    </DropdownItem>
+                    <DropdownItem key="events" icon={<BellIcon />} onClick={() => { closeMenus(); onEvents(); }}>
+                      {t("actions.events")}
+                    </DropdownItem>
+                    <DropdownItem key="top" icon={<ListAltIcon />} onClick={() => { closeMenus(); onTop(); }}>
+                      {t("actions.top")}
+                    </DropdownItem>
+                    <DropdownItem key="run" icon={<PlayIcon />} onClick={() => { closeMenus(); onRun(); }}>
+                      {t("actions.run")}
+                    </DropdownItem>
+                    <Divider key="div1" component="li" />
+                    <DropdownItem key="prune" icon={<BroomIcon />} isDanger onClick={() => { closeMenus(); onPrune(); }}>
+                      {t("actions.prune")}
+                    </DropdownItem>
+                    <DropdownItem key="kill" icon={<BanIcon />} isDanger onClick={() => { closeMenus(); onKill(); }}>
+                      {t("actions.kill")}
+                    </DropdownItem>
+    </>
+  );
   return (
     <>
-    <DataListItem isExpanded={expanded} aria-labelledby={`stack-${stack.Name}`} data-status={status} data-stack-name={stack.Name}>
+      <ContextMenu position={contextMenu.position} onClose={contextMenu.close} ariaLabel={t("actions.more_actions_for", { name: stack.Name })}>
+        {menuItems}
+      </ContextMenu>
+    <DataListItem onContextMenu={acting ? undefined : contextMenu.onContextMenu} onKeyDown={acting ? undefined : contextMenu.onKeyDown} isExpanded={expanded} aria-labelledby={`stack-${stack.Name}`} data-status={status} data-stack-name={stack.Name}>
       <DataListItemRow onClick={handleRowClick} style={{ cursor: "pointer" }} className={isSelected ? "sr-row--selected" : undefined}>
         {onToggleSelect && (
           <DataListCheck
@@ -324,41 +373,7 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
                   popperProps={{ position: "right" }}
                 >
                   <DropdownList>
-                    <DropdownItem
-                      key="scale"
-                      icon={<ArrowsAltVIcon />}
-                      onClick={() => { setMenuOpen(false); onScale(); }}
-                    >
-                      {t("actions.scale")}
-                    </DropdownItem>
-                    <Divider key="div-scale" component="li" />
-                    <DropdownItem
-                      key="pause"
-                      icon={status === "paused" ? <PlayCircleIcon /> : <PauseCircleIcon />}
-                      isDisabled={status === "stopped" || status === "unknown"}
-                      onClick={() => {
-                        setMenuOpen(false);
-                        void doAction(status === "paused" ? "unpause" : "pause", afterAction);
-                      }}
-                    >
-                      {status === "paused" ? t("actions.unpause") : t("actions.pause")}
-                    </DropdownItem>
-                    <DropdownItem key="events" icon={<BellIcon />} onClick={() => { setMenuOpen(false); onEvents(); }}>
-                      {t("actions.events")}
-                    </DropdownItem>
-                    <DropdownItem key="top" icon={<ListAltIcon />} onClick={() => { setMenuOpen(false); onTop(); }}>
-                      {t("actions.top")}
-                    </DropdownItem>
-                    <DropdownItem key="run" icon={<PlayIcon />} onClick={() => { setMenuOpen(false); onRun(); }}>
-                      {t("actions.run")}
-                    </DropdownItem>
-                    <Divider key="div1" component="li" />
-                    <DropdownItem key="prune" icon={<BroomIcon />} isDanger onClick={() => { setMenuOpen(false); onPrune(); }}>
-                      {t("actions.prune")}
-                    </DropdownItem>
-                    <DropdownItem key="kill" icon={<BanIcon />} isDanger onClick={() => { setMenuOpen(false); onKill(); }}>
-                      {t("actions.kill")}
-                    </DropdownItem>
+                    {menuItems}
                   </DropdownList>
                 </Dropdown>
               </span>

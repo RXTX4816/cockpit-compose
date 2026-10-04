@@ -1,5 +1,7 @@
 import { useState, useCallback, useEffect, useRef, type MouseEvent } from "react";
 import { useTranslation } from "react-i18next";
+import { useContextMenu } from "../../hooks/useContextMenu";
+import { ContextMenu } from "./ContextMenu";
 import {
   Button,
   Dropdown,
@@ -169,9 +171,45 @@ export function MinimalCard({
   const isUp = isStackUp(status);
   const sv = STATUS_VARS[status] ?? STATUS_VARS.unknown;
 
+
+  // The context menu (#334) shows exactly this layout's kebab items; choosing one
+  // closes whichever of the two menus it was picked from.
+  const contextMenu = useContextMenu();
+  const closeMenus = () => { setMenuOpen(false); contextMenu.close(); };
+  const menuItems = (
+    <>
+              {isUp && (
+                <DropdownItem key="stop" onClick={() => { closeMenus(); setConfirmStopOpen(true); }}>{t("actions.stop")}</DropdownItem>
+              )}
+              {status === "stopped" && (
+                <DropdownItem key="start" onClick={() => { closeMenus(); void doAction("start", afterAction); }}>{t("actions.start")}</DropdownItem>
+              )}
+              {(isUp || status === "stopped") && <Divider component="li" />}
+              <DropdownItem key="pull" icon={<DownloadIcon />} onClick={() => { closeMenus(); onPull(); }}>{t("actions.pull_title")}</DropdownItem>
+              <DropdownItem key="shell" icon={<TerminalIcon />} onClick={() => { closeMenus(); onExec(); }}>{t("actions.shell")}</DropdownItem>
+              <DropdownItem key="logs" icon={<FileAltIcon />} onClick={() => { closeMenus(); onLogs(); }}>{t("actions.logs_title")}</DropdownItem>
+              <DropdownItem key="edit" icon={<PencilAltIcon />} onClick={() => { closeMenus(); onYaml(); }}>{t("actions.edit_title")}</DropdownItem>
+              <DropdownItem key="backup" icon={<ArchiveIcon />} onClick={() => { closeMenus(); onBackup(); }}>{t("actions.backup")}</DropdownItem>
+              <DropdownItem key="info" icon={<InfoCircleIcon />} onClick={() => { closeMenus(); onInfo(); }}>{t("actions.info_title")}</DropdownItem>
+              <Divider component="li" />
+              <DropdownItem key="restart" icon={<RedoAltIcon />} isDisabled={status === "stopped" || status === "unknown"} onClick={() => { closeMenus(); void doAction("restart", afterAction); }}>{t("actions.restart")}</DropdownItem>
+              <DropdownItem key="pause" icon={status === "paused" ? <PlayCircleIcon /> : <PauseCircleIcon />} isDisabled={status === "stopped" || status === "unknown"} onClick={() => { closeMenus(); void doAction(status === "paused" ? "unpause" : "pause", afterAction); }}>{status === "paused" ? t("actions.unpause") : t("actions.pause")}</DropdownItem>
+              <DropdownItem key="scale" icon={<ArrowsAltVIcon />} onClick={() => { closeMenus(); onScale(); }}>{t("actions.scale")}</DropdownItem>
+              <DropdownItem key="events" icon={<BellIcon />} onClick={() => { closeMenus(); onEvents(); }}>{t("actions.events")}</DropdownItem>
+              <DropdownItem key="top" icon={<ListAltIcon />} onClick={() => { closeMenus(); onTop(); }}>{t("actions.top")}</DropdownItem>
+              <DropdownItem key="run" icon={<PlayIcon />} onClick={() => { closeMenus(); onRun(); }}>{t("actions.run")}</DropdownItem>
+              <Divider component="li" />
+              <DropdownItem key="prune" icon={<BroomIcon />} isDanger onClick={() => { closeMenus(); onPrune(); }}>{t("actions.prune")}</DropdownItem>
+              <DropdownItem key="kill" icon={<BanIcon />} isDanger onClick={() => { closeMenus(); onKill(); }}>{t("actions.kill")}</DropdownItem>
+    </>
+  );
   return (
     <>
+      <ContextMenu position={contextMenu.position} onClose={contextMenu.close} ariaLabel={t("actions.more_actions_for", { name: stack.Name })}>
+        {menuItems}
+      </ContextMenu>
       <div
+        onContextMenu={acting ? undefined : contextMenu.onContextMenu}
         ref={cardRef}
         className={`mc-card${acting ? " mc-card--acting" : ""}${isSelected ? " mc-card--selected" : ""}${bubblePos ? " mc-card--open" : ""}`}
         style={{ backgroundColor: sv.bg, borderColor: sv.border }}
@@ -184,7 +222,7 @@ export function MinimalCard({
         tabIndex={0}
         aria-pressed={onToggleSelect ? isSelected : undefined}
         aria-label={`${stack.Name} — ${status}`}
-        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") handleCardClick(e as unknown as MouseEvent<HTMLDivElement>); }}
+        onKeyDown={(e) => { if (!acting) contextMenu.onKeyDown(e); if (e.key === "Enter" || e.key === " ") handleCardClick(e as unknown as MouseEvent<HTMLDivElement>); }}
       >
         <div className="mc-kebab" onClick={(e) => e.stopPropagation()}>
           <Dropdown
@@ -205,29 +243,7 @@ export function MinimalCard({
             popperProps={{ position: "right" }}
           >
             <DropdownList>
-              {isUp && (
-                <DropdownItem key="stop" onClick={() => { setMenuOpen(false); setConfirmStopOpen(true); }}>{t("actions.stop")}</DropdownItem>
-              )}
-              {status === "stopped" && (
-                <DropdownItem key="start" onClick={() => { setMenuOpen(false); void doAction("start", afterAction); }}>{t("actions.start")}</DropdownItem>
-              )}
-              {(isUp || status === "stopped") && <Divider component="li" />}
-              <DropdownItem key="pull" icon={<DownloadIcon />} onClick={() => { setMenuOpen(false); onPull(); }}>{t("actions.pull_title")}</DropdownItem>
-              <DropdownItem key="shell" icon={<TerminalIcon />} onClick={() => { setMenuOpen(false); onExec(); }}>{t("actions.shell")}</DropdownItem>
-              <DropdownItem key="logs" icon={<FileAltIcon />} onClick={() => { setMenuOpen(false); onLogs(); }}>{t("actions.logs_title")}</DropdownItem>
-              <DropdownItem key="edit" icon={<PencilAltIcon />} onClick={() => { setMenuOpen(false); onYaml(); }}>{t("actions.edit_title")}</DropdownItem>
-              <DropdownItem key="backup" icon={<ArchiveIcon />} onClick={() => { setMenuOpen(false); onBackup(); }}>{t("actions.backup")}</DropdownItem>
-              <DropdownItem key="info" icon={<InfoCircleIcon />} onClick={() => { setMenuOpen(false); onInfo(); }}>{t("actions.info_title")}</DropdownItem>
-              <Divider component="li" />
-              <DropdownItem key="restart" icon={<RedoAltIcon />} isDisabled={status === "stopped" || status === "unknown"} onClick={() => { setMenuOpen(false); void doAction("restart", afterAction); }}>{t("actions.restart")}</DropdownItem>
-              <DropdownItem key="pause" icon={status === "paused" ? <PlayCircleIcon /> : <PauseCircleIcon />} isDisabled={status === "stopped" || status === "unknown"} onClick={() => { setMenuOpen(false); void doAction(status === "paused" ? "unpause" : "pause", afterAction); }}>{status === "paused" ? t("actions.unpause") : t("actions.pause")}</DropdownItem>
-              <DropdownItem key="scale" icon={<ArrowsAltVIcon />} onClick={() => { setMenuOpen(false); onScale(); }}>{t("actions.scale")}</DropdownItem>
-              <DropdownItem key="events" icon={<BellIcon />} onClick={() => { setMenuOpen(false); onEvents(); }}>{t("actions.events")}</DropdownItem>
-              <DropdownItem key="top" icon={<ListAltIcon />} onClick={() => { setMenuOpen(false); onTop(); }}>{t("actions.top")}</DropdownItem>
-              <DropdownItem key="run" icon={<PlayIcon />} onClick={() => { setMenuOpen(false); onRun(); }}>{t("actions.run")}</DropdownItem>
-              <Divider component="li" />
-              <DropdownItem key="prune" icon={<BroomIcon />} isDanger onClick={() => { setMenuOpen(false); onPrune(); }}>{t("actions.prune")}</DropdownItem>
-              <DropdownItem key="kill" icon={<BanIcon />} isDanger onClick={() => { setMenuOpen(false); onKill(); }}>{t("actions.kill")}</DropdownItem>
+              {menuItems}
             </DropdownList>
           </Dropdown>
         </div>
