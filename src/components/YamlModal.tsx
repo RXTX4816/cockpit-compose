@@ -68,6 +68,8 @@ export function YamlModal({ stack, onClose, onFileAdded, onFileRemoved }: Props)
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [deleteFileSaving, setDeleteFileSaving] = useState(false);
   const [deleteFileError, setDeleteFileError] = useState<string | null>(null);
+  // The snapshot waiting for confirmation to replace unsaved edits, or null.
+  const [snapshotToRestore, setSnapshotToRestore] = useState<Snapshot | null>(null);
   // The snapshot pending deletion, or null when no confirmation is open.
   const [snapshotToDelete, setSnapshotToDelete] = useState<Snapshot | null>(null);
   const [deleteSnapshotSaving, setDeleteSnapshotSaving] = useState(false);
@@ -119,6 +121,13 @@ export function YamlModal({ stack, onClose, onFileAdded, onFileRemoved }: Props)
     } catch (ex: unknown) {
       setError(ex instanceof Error ? ex.message : String(ex));
     }
+  };
+
+  // Restoring replaces the editor's content. Unsaved edits would be lost without a
+  // trace, so ask first, but only when there are any; otherwise restore right away.
+  const requestRestoreSnapshot = (snap: Snapshot) => {
+    if (editing && content !== editedContent) setSnapshotToRestore(snap);
+    else void handleRestoreSnapshot(snap.path);
   };
 
   const handleSnapshotDiff = async (path: string) => {
@@ -418,7 +427,7 @@ export function YamlModal({ stack, onClose, onFileAdded, onFileRemoved }: Props)
                     <Button variant="link" size="sm" isLoading={loadingDiffPath === snap.path} onClick={() => handleSnapshotDiff(snap.path)}>
                       {snapshotDiff?.path === snap.path ? t("yaml_modal.snapshot_hide_diff") : t("yaml_modal.snapshot_show_diff")}
                     </Button>
-                    <Button variant="link" size="sm" onClick={() => handleRestoreSnapshot(snap.path)}>{t("yaml_modal.snapshot_restore")}</Button>
+                    <Button variant="link" size="sm" onClick={() => requestRestoreSnapshot(snap)}>{t("yaml_modal.snapshot_restore")}</Button>
                     <Button variant="link" size="sm" isDanger onClick={() => { setDeleteSnapshotError(null); setSnapshotToDelete(snap); }}>{t("yaml_modal.snapshot_delete")}</Button>
                   </div>
                 </div>
@@ -512,6 +521,30 @@ export function YamlModal({ stack, onClose, onFileAdded, onFileRemoved }: Props)
           </Button>
           <Button variant="danger" icon={<TrashIcon />} onClick={() => void handleDeleteFile()} isLoading={deleteFileSaving}>
             {t("yaml_modal.delete_file_confirm_button")}
+          </Button>
+        </ModalFooter>
+      </Modal>
+    )}
+
+    {snapshotToRestore && (
+      <Modal isOpen variant="small" onClose={() => setSnapshotToRestore(null)} aria-label={t("yaml_modal.restore_snapshot_confirm_aria")}>
+        <ModalHeader title={t("yaml_modal.restore_snapshot_confirm_title", { name: snapshotToRestore.name })} />
+        <ModalBody>
+          <p>{t("yaml_modal.restore_snapshot_confirm_body")}</p>
+        </ModalBody>
+        <ModalFooter>
+          <Button variant="link" onClick={() => setSnapshotToRestore(null)}>
+            {t("common.cancel")}
+          </Button>
+          <Button
+            variant="warning"
+            onClick={() => {
+              const snap = snapshotToRestore;
+              setSnapshotToRestore(null);
+              void handleRestoreSnapshot(snap.path);
+            }}
+          >
+            {t("yaml_modal.restore_snapshot_confirm_button")}
           </Button>
         </ModalFooter>
       </Modal>

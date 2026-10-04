@@ -209,6 +209,49 @@ test('Snapshot history records a real edit, shows a diff, and Restore reverts th
   expect(restoredContent).toBe(originalContent);
 });
 
+// Restoring a snapshot replaces the editor's content, so with unsaved edits it asks first;
+// without any it restores right away (the test above covers that path).
+test('Restoring a snapshot over unsaved edits asks first, and Cancel keeps them', async ({ pluginPage: page }) => {
+  test.setTimeout(60_000);
+  await baseData(page);
+  await openYamlEditor(page, 'gotify');
+  const modal = page.getByRole('dialog').filter({ hasText: 'gotify — compose file' });
+  const editor = modal.locator('.cm-content');
+  const originalContent = await editor.textContent();
+
+  // A saved edit gives us a snapshot of the original to restore.
+  await modal.getByRole('button', { name: 'Edit' }).click();
+  await editor.click();
+  await page.keyboard.press('Control+End');
+  await page.keyboard.type('\n    # e2e-saved-marker');
+  await modal.getByRole('button', { name: 'Save', exact: true }).click();
+  await expect(modal.getByRole('button', { name: 'Edit' })).toBeVisible({ timeout: 10000 });
+
+  // Now an unsaved edit on top.
+  await modal.getByRole('button', { name: 'Edit' }).click();
+  await editor.click();
+  await page.keyboard.press('Control+End');
+  await page.keyboard.type('\n    # e2e-unsaved-marker');
+  await modal.getByRole('button', { name: /History \(\d+\)/ }).click();
+  await modal.getByRole('button', { name: 'Restore', exact: true }).first().click();
+
+  const confirm = page.getByRole('dialog', { name: 'Restore snapshot confirmation' });
+  await expect(confirm).toBeVisible();
+  await confirm.getByRole('button', { name: 'Cancel' }).click();
+  await expect(confirm).toHaveCount(0);
+  await expect(editor).toContainText('e2e-unsaved-marker');
+
+  await modal.getByRole('button', { name: 'Restore', exact: true }).first().click();
+  await confirm.getByRole('button', { name: 'Discard changes and restore' }).click();
+  await expect(editor).not.toContainText('e2e-unsaved-marker', { timeout: 10000 });
+  await expect(editor).not.toContainText('e2e-saved-marker');
+
+  // Save the restored original back so the fixture isn't left modified for other specs.
+  await modal.getByRole('button', { name: 'Save', exact: true }).click();
+  await expect(modal.getByRole('button', { name: 'Edit' })).toBeVisible({ timeout: 10000 });
+  expect(await editor.textContent()).toBe(originalContent);
+});
+
 // Wave 5 (#227): "Import" an existing on-disk file into the stack, which is a
 // different flow from "Add" (create-new, covered above). The multi-file fixture's
 // second file is pre-staged by cloud-init rather than imported through the UI, so
