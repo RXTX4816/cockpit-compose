@@ -75,6 +75,10 @@ The warning shown depends on the action:
 
 Confirming enqueues **one background task per selected stack** into the same queue used by [Background Tasks](Background-Tasks) — they don't run all at once, and you can track, stop, or remove each one individually from the background tasks panel. The selection is cleared and the confirmation modal closes as soon as you confirm.
 
+## Stopped stacks
+
+The **Stopped / offline stacks** section has its own selection: tick several stopped stacks and a bar with **Up** appears. Confirming starts each of them as a background task, the same way as above. See [Importing Stacks](Importing-Stacks).
+
 ## Notes
 
 - Restart, Down, and Kill run for every selected stack regardless of its current state — check the confirmation list before proceeding if you have a mixed selection.

@@ -20,7 +20,7 @@ A confirmation modal appears before the pull begins:
 > Review changelogs before pulling.  
 > Pinning to a specific version tag avoids unexpected updates.
 
-Each service is listed with its current image tag. Services with unpinned images (`:latest` or no tag) are marked with a **⚠** warning and a note explaining that these images always pull whatever the registry currently considers "latest" — which may not be what you expect.
+Each service is listed with its current image tag, and with its `pull_policy` if one is set. Services with unpinned images (`:latest` or no tag) are marked with a **⚠** warning (skipped when `pull_policy` is `never`, or `missing` with the image already on disk) and a note explaining that these images always pull whatever the registry currently considers "latest" — which may not be what you expect.
 
 Click **Pull** to proceed or **Cancel** to abort.
 

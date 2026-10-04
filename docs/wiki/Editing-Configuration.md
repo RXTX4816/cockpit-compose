@@ -66,7 +66,7 @@ While editing, click **Show changes** to open a split diff view showing your edi
 
 ### Saving
 
-Click **Save**. If there are validation errors or warnings, a confirmation prompt appears:
+Click **Save** (or press `Ctrl+S` / `Cmd+S`). If there are validation errors or warnings, a confirmation prompt appears:
 
 > There are N error(s) / warning(s) in the file. Save anyway?
 

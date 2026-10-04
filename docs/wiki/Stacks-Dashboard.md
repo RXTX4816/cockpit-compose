@@ -26,12 +26,14 @@ The page is split into two sections:
 
 ## Toolbar
 
-The toolbar sits above the stack list and contains three controls:
+The toolbar sits above the stack list:
 
 | Element | Description |
 |---|---|
 | **Status filter chips** | Colored chips for Running, Partial, Stopped, and Paused. Click a chip to show only stacks in that state; click again to deactivate. A chip only appears when at least one stack has that status. Multiple chips can be active at once. |
 | **Search** | Live text filter by stack name. Matching is case-insensitive. Click **✕** to clear. |
+| **Cockpit admin mode mismatch** | Orange badge, shown only when the scan directory is in your home folder while Cockpit has administrative access turned on. Files created there would be owned by root and cause permission errors later; turn administrative access off, or scan a system directory. |
+| **Bulk action bar** | Appears when one or more stacks are selected: Up, Restart, Pull, Down and Kill for all of them, plus a button to clear the selection. See [Bulk Actions](Bulk-Actions). |
 | **Layout selector** | Icon button that opens a toggle group with four layout options. The chosen layout is saved in the browser. See [Layout options](#layout-options) below. |
 | **Runtime toggle** | Switch between **Docker** and **Podman** modes. The choice is saved in the browser and persists across sessions. See [Podman Compatibility](Podman-Compatibility). |
 
@@ -99,17 +101,12 @@ If no containers are found (e.g., the stack was just downed), a "No containers f
 
 ## Keyboard shortcuts
 
-When focus is on a stack row (click any row to focus it), single-key shortcuts trigger the most common actions:
-
-| Key | Action |
-|---|---|
-| `U` | Up (open the Up confirmation modal) |
-| `D` | Down (open the Down confirmation dialog) |
-| `L` | Logs (open the log viewer) |
-| `E` | Edit (open the YAML editor) |
-| `I` | Info (open the Stack Info modal) |
-
-Shortcuts are disabled while a modal is open or while the search box / any input has focus.
+| Key | Where | Action |
+|---|---|---|
+| Context-menu key or `Shift+F10` | Focused stack row or card | Open the stack's **⋮** actions menu |
+| `Escape` | Actions menu / search box | Close the menu / clear and close the search |
+| `Ctrl+S` / `Cmd+S` | YAML editor, while editing | Save |
+| `Enter` | Scan directory field | Scan for stacks |
 
 ## Auto-refresh
 
