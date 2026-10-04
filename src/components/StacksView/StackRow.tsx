@@ -224,6 +224,7 @@ export function StackRow({ stack, expanded, onToggle, onLogs, onYaml, onInfo, on
                 {isStackUp(status) ? (
                   <Button
                     variant="secondary"
+                    isDanger
                     size="sm"
                     onClick={() => setConfirmStopOpen(true)}
                     isLoading={acting}

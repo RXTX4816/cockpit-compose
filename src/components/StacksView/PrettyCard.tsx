@@ -260,7 +260,7 @@ export function PrettyCard({
             </Tooltip>
 
             {isUp ? (
-              <Button variant="primary" size="sm" onClick={() => setConfirmStopOpen(true)} isDisabled={acting}>
+              <Button variant="secondary" isDanger size="sm" onClick={() => setConfirmStopOpen(true)} isDisabled={acting}>
                 {t("actions.stop")}
               </Button>
             ) : status === "stopped" ? (
