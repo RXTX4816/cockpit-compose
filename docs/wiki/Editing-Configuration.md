@@ -89,7 +89,7 @@ Click **History (N)** to open the snapshots panel alongside the editor. Each sna
 | Button | Description |
 |---|---|
 | **Changes** | Shows a side-by-side diff of that snapshot vs the current saved file. Click again to dismiss. |
-| **Restore** | Loads the snapshot content into the editor in edit mode (you still need to Save to apply it) |
+| **Restore** | Loads the snapshot content into the editor in edit mode (you still need to Save to apply it). If you have unsaved changes, a confirmation asks first, since restoring would replace them. |
 | **Delete** | Permanently removes this snapshot |
 
 Snapshots are stored locally on the server and do not affect the live compose file until you click **Save**.

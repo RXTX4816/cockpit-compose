@@ -156,6 +156,50 @@ describe("YamlModal", () => {
     expect(screen.queryByText("Snapshots")).toBeNull();
   });
 
+  describe("restoring a snapshot over unsaved changes", () => {
+    const snap = { timestamp: 1700000000000, name: "Jan 1 2024", path: "/path/compose.yml.snapshot.1700000000000" };
+    const restoreContent = "services:\n  api:\n    image: node\n";
+
+    async function openWithEdits(edit: boolean) {
+      const restore = vi.fn().mockResolvedValue(restoreContent);
+      mockUseSnapshots.mockReturnValue({ snapshots: [snap], load: vi.fn().mockResolvedValue(undefined), restore, remove: vi.fn() });
+      mockSpawn.mockImplementation(() => mockProcess(composeContent));
+      render(<YamlModal stack={stack} onClose={vi.fn()} />);
+      await waitFor(() => screen.getByRole("button", { name: /^Edit$/i }));
+      fireEvent.click(screen.getByRole("button", { name: /^Edit$/i }));
+      if (edit) fireEvent.change(screen.getByTestId("yaml-editor"), { target: { value: composeContent + "# typed\n" } });
+      fireEvent.click(screen.getByRole("button", { name: /History/i }));
+      fireEvent.click(screen.getByRole("button", { name: /^Restore$/i }));
+      return restore;
+    }
+
+    it("asks before discarding unsaved edits, and Cancel keeps them", async () => {
+      const restore = await openWithEdits(true);
+      const dialog = await screen.findByRole("dialog", { name: /Restore snapshot confirmation/i });
+      expect(within(dialog).getByText(/unsaved changes will be lost/i)).toBeInTheDocument();
+      expect(restore).not.toHaveBeenCalled();
+
+      fireEvent.click(within(dialog).getByRole("button", { name: /Cancel/i }));
+      await waitFor(() => expect(screen.queryByRole("dialog", { name: /Restore snapshot confirmation/i })).toBeNull());
+      expect(restore).not.toHaveBeenCalled();
+      expect((screen.getByTestId("yaml-editor") as HTMLTextAreaElement).value).toContain("# typed");
+    });
+
+    it("restores after confirming", async () => {
+      const restore = await openWithEdits(true);
+      const dialog = await screen.findByRole("dialog", { name: /Restore snapshot confirmation/i });
+      fireEvent.click(within(dialog).getByRole("button", { name: /Discard changes and restore/i }));
+      await waitFor(() => expect(restore).toHaveBeenCalledWith(snap.path));
+      await waitFor(() => expect((screen.getByTestId("yaml-editor") as HTMLTextAreaElement).value).toBe(restoreContent));
+    });
+
+    it("restores right away when nothing is unsaved, even in edit mode", async () => {
+      const restore = await openWithEdits(false);
+      await waitFor(() => expect(restore).toHaveBeenCalledWith(snap.path));
+      expect(screen.queryByRole("dialog", { name: /Restore snapshot confirmation/i })).toBeNull();
+    });
+  });
+
   it("Restore snapshot enters edit mode with snapshot content", async () => {
     const restoreContent = "services:\n  api:\n    image: node\n";
     const restore = vi.fn().mockResolvedValue(restoreContent);
