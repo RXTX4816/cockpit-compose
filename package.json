@@ -29,7 +29,7 @@
   },
   "devDependencies": {
     "@patternfly/react-core": "^6.6.2",
-    "@playwright/test": "^1.63.0",
+    "@playwright/test": "^1.64.0",
     "@rxtx4816/cockpit-plugin-base-react": "^2.3.0",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
@@ -38,7 +38,7 @@
     "@vitest/coverage-v8": "^4.1.10",
     "esbuild": "^0.28.2",
     "eslint": "^9.39.4",
-    "jsdom": "^30.1.1",
+    "jsdom": "^30.1.2",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "typescript": "^6.0.3",
@@ -70,7 +70,7 @@
     "ajv": "^8.20.0",
     "codemirror": "^6.0.2",
     "i18next": "^26.4.2",
-    "js-yaml": "^5.2.2",
-    "react-i18next": "^17.0.15"
+    "js-yaml": "^5.4.3",
+    "react-i18next": "^17.0.16"
   }
 }
