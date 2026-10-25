@@ -9,7 +9,7 @@ Rules-Requires-Root: no
 
 Package: cockpit-compose
 Architecture: all
-Depends: ${misc:Depends}, cockpit
+Depends: ${misc:Depends}, cockpit-bridge
 Description: Docker Compose management plugin for Cockpit
  A Cockpit plugin for managing Docker Compose stacks from the Cockpit
  web interface. Start, stop, restart stacks, view live container logs,

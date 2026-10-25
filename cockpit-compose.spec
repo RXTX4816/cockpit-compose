@@ -6,7 +6,7 @@ License:        AGPL-3.0-only AND MIT AND BSD-3-Clause AND 0BSD AND OFL-1.1
 URL:            https://github.com/RXTX4816/cockpit-compose
 Source0:        cockpit-compose-%{version}.tar.gz
 BuildArch:      noarch
-Requires:       cockpit
+Requires:       cockpit-bridge
 
 %description
 A Cockpit plugin for managing Docker Compose stacks from the Cockpit web
