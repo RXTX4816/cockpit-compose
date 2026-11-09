@@ -331,6 +331,7 @@ describe("ExecModal", () => {
     const channelArgs = (mockCockpit.channel as ReturnType<typeof vi.fn>).mock.calls[0][0] as { spawn: string[] };
     expect(channelArgs.spawn).toContain("-u");
     expect(channelArgs.spawn).toContain("admin");
+    expect((mockCockpit.channel as ReturnType<typeof vi.fn>).mock.calls[0][0]).toMatchObject({ superuser: "try", pty: true });
     vi.unstubAllGlobals();
     vi.stubGlobal("cockpit", { spawn: mockSpawn, channel: vi.fn().mockReturnValue(mockChannel) });
   });

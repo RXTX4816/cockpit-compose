@@ -20,8 +20,7 @@ import {
   getServicesFromCompose,
   getJobsFromCompose,
   composeIsLimitedBackend,
-  composeRunStream,
-  stackSuperuser,
+  stackOperations,
   snapshotProjectContainerIds,
   forceRemoveOneoffContainers,
 } from "../api";
@@ -92,18 +91,13 @@ export function RunModal({ stack, onClose }: Props) {
 
     if (cmd) recordCommand(cmd);
     setStep("running");
-    const files = splitConfigFiles(stack.ConfigFiles);
-    const [su, preRunIds] = await Promise.all([
-      stackSuperuser(files),
-      snapshotProjectContainerIds(stack.Name),
-    ]);
-    preRunIdsRef.current = preRunIds;
+    preRunIdsRef.current = await snapshotProjectContainerIds(stack.Name);
 
     const tokens = cmd ? tokenizeCommand(cmd) : [];
-    const proc = composeRunStream(
-      stack.Name, files, service,
+    const proc = stackOperations.run(
+      stack, service,
       overrideEntrypoint && tokens.length > 0 ? { mode: "override", command: tokens } : { mode: "args", command: tokens },
-      removeContainer, su,
+      removeContainer,
     );
     procRef.current = proc;
 
@@ -129,7 +123,7 @@ export function RunModal({ stack, onClose }: Props) {
         }
         procRef.current = null;
       });
-  }, [selectedService, command, isJob, removeContainer, overrideEntrypoint, stack.Name, stack.ConfigFiles, recordCommand]);
+  }, [selectedService, command, isJob, removeContainer, overrideEntrypoint, stack, recordCommand]);
 
   const handleClose = useCallback(() => {
     procRef.current?.close();

@@ -4,7 +4,11 @@ import { splitConfigFiles } from "../../lib/configFiles";
 import type { ComposeStack } from "../types";
 import { afterPreparing, makeFakeProcess } from "./internal";
 import { readRunningServiceNames } from "./query";
+import { compose } from "../cockpit";
+import { fileFlags } from "./internal";
+import { composeRunStream, type RunCommand } from "./exec";
 import {
+  startService, stopService, scaleStack,
   startStack, stopStack, restartStack, downStack, upStackStream, pullStack,
   pauseStack, unpauseStack, killStack,
 } from "./lifecycle";
@@ -90,5 +94,35 @@ export const stackOperations = {
   },
   down(stack: ComposeStack, options: StackOperationOptions = {}): CockpitProcess {
     return run(stack, options, r => downStack(r.name, r.configFiles, r.profiles, r.superuser));
+  },
+  startService(stack: ComposeStack, service: string, options: StackOperationOptions = {}): CockpitProcess {
+    return run(stack, options, r => startService(r.name, r.configFiles, service, r.profiles, r.superuser));
+  },
+  stopService(stack: ComposeStack, service: string, options: StackOperationOptions = {}): CockpitProcess {
+    return run(stack, options, r => stopService(r.name, r.configFiles, service, r.profiles, r.superuser));
+  },
+  scale(stack: ComposeStack, scales: Record<string, number>, options: StackOperationOptions = {}): CockpitProcess {
+    return run(stack, options, r => scaleStack(r.name, r.configFiles, scales, r.profiles, r.superuser));
+  },
+  /** One-off `compose run`. Compose enables the service's own profile for a run, so none are passed. */
+  run(stack: ComposeStack, service: string, command: RunCommand, removeAfter: boolean): CockpitProcess {
+    return run(stack, { profiles: [] }, r => composeRunStream(r.name, r.configFiles, service, command, removeAfter, r.superuser));
+  },
+  /**
+   * Prepares an interactive `compose exec` and returns a function that opens its PTY channel.
+   * Opening is separate so the caller can attach listeners in the same tick, before output arrives.
+   */
+  async exec(stack: ComposeStack, target: { service: string; user?: string; command: string[] }, options: StackOperationOptions = {}): Promise<() => CockpitChannel> {
+    const r = await resolve(stack, options);
+    return () => cockpit.channel({
+      payload: "stream",
+      spawn: compose(
+        ...r.profiles.flatMap(p => ["--profile", p]),
+        "-p", r.name, ...fileFlags(r.configFiles),
+        "exec", ...(target.user ? ["-u", target.user] : []), target.service, ...target.command,
+      ),
+      pty: true,
+      superuser: r.superuser,
+    });
   },
 };

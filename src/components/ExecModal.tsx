@@ -18,8 +18,7 @@ import {
   type ComposeStack,
   readComposeFile,
   getServicesFromCompose,
-  compose,
-  stackSuperuser,
+  stackOperations,
 } from "../api";
 import "./ExecModal.css";
 import { splitConfigFiles } from "../lib/configFiles";
@@ -101,7 +100,17 @@ export function ExecModal({ stack, onClose }: Props) {
     setConnectError(null);
     setStep("terminal");
 
-    const su = await stackSuperuser(splitConfigFiles(stack.ConfigFiles));
+    let openChannel: () => CockpitChannel;
+    try {
+      openChannel = await stackOperations.exec(stack, {
+        service,
+        user: user.trim() || undefined,
+        command: tokenizeCommand(shell.trim()),
+      });
+    } catch (ex: unknown) {
+      setConnectError(ex instanceof Error ? ex.message : String(ex));
+      return;
+    }
 
     // Defer mounting until the div is in the DOM
     requestAnimationFrame(() => {
@@ -120,21 +129,7 @@ export function ExecModal({ stack, onClose }: Props) {
       terminalRef.current = term;
       fitAddonRef.current = fitAddon;
 
-      const spawnArgs: string[] = compose(
-        "-p", stack.Name,
-        "-f", configFile,
-        "exec",
-        ...(user.trim() ? ["-u", user.trim()] : []),
-        service,
-        ...tokenizeCommand(shell.trim()),
-      );
-
-      const ch = cockpit.channel({
-        payload: "stream",
-        spawn: spawnArgs,
-        pty: true,
-        superuser: su,
-      });
+      const ch = openChannel();
       channelRef.current = ch;
 
       ch.addEventListener("message", (_e: Event, payload: string) => {
@@ -154,7 +149,7 @@ export function ExecModal({ stack, onClose }: Props) {
         channelRef.current?.send(data);
       });
     });
-  }, [selectedService, shell, user, fontSize, stack.Name, stack.ConfigFiles, configFile, recordCommand]);
+  }, [selectedService, shell, user, fontSize, stack, recordCommand]);
 
   const disconnect = useCallback(() => {
     channelRef.current?.close();

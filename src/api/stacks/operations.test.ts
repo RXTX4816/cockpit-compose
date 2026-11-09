@@ -71,6 +71,40 @@ describe("stackOperations lifecycle", () => {
   });
 });
 
+describe("stackOperations on services, Scale, Run and Exec", () => {
+  it("startService and stopService target one service with the stack's profiles", async () => {
+    await stackOperations.startService(stack, "web");
+    expect(composeCall("up")?.[0]).toEqual(["docker", "compose", "--profile", "dev", "-p", "myapp", "-f", "/srv/myapp/compose.yml", "up", "-d", "web"]);
+    await stackOperations.stopService(stack, "web");
+    expect(composeCall("stop")?.[0]?.slice(-2)).toEqual(["stop", "web"]);
+  });
+
+  it("scale passes the replica counts", async () => {
+    await stackOperations.scale(stack, { web: 3 });
+    expect(composeCall("--scale")?.[0]?.slice(-2)).toEqual(["--scale", "web=3"]);
+  });
+
+  it("run starts a one-off container without reading the compose file for profiles", async () => {
+    await stackOperations.run(stack, "web", { mode: "args", command: ["echo", "hi"] }, true);
+    expect(composeCall("run")?.[0]).toEqual(
+      expect.arrayContaining(["-p", "myapp", "-f", "/srv/myapp/compose.yml", "run", "--rm", "web", "echo", "hi"]));
+    expect(mockSpawn.mock.calls.some(c => (c[0] as string[])[0] === "cat")).toBe(false);
+    expect((composeCall("run")?.[1] as { superuser?: string }).superuser).toBe("try");
+  });
+
+  it("exec opens a PTY channel on the stack's files and profiles, escalated", async () => {
+    const channel = vi.fn().mockReturnValue({});
+    vi.stubGlobal("cockpit", { spawn: mockSpawn, channel });
+    const open = await stackOperations.exec(stack, { service: "web", user: "app", command: ["sh", "-c"] });
+    expect(channel).not.toHaveBeenCalled();
+    open();
+    expect(channel).toHaveBeenCalledWith({
+      payload: "stream", pty: true, superuser: "try",
+      spawn: ["docker", "compose", "--profile", "dev", "-p", "myapp", "-f", "/srv/myapp/compose.yml", "exec", "-u", "app", "web", "sh", "-c"],
+    });
+  });
+});
+
 describe("stackOperations.down", () => {
   it("runs compose down for the stack, with the profiles its compose file declares", async () => {
     await stackOperations.down(stack);

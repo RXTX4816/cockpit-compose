@@ -66,3 +66,5 @@ If the shell cannot be opened (e.g., the service is not running, the command doe
 - Most minimal images only have `/bin/sh`. If you get "command not found" with `/bin/bash`, switch to `/bin/sh`.
 - To install a package temporarily, run as `root` using the **User** field.
 - Changes made inside the shell affect only the running container and are lost when the container is recreated.
+
+The shell is opened against all of the stack's compose files (not only the first) and with the profiles its compose file declares, so a service that sits behind a profile can be reached too.
