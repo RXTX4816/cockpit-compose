@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
 import { ScaleModal } from "./ScaleModal";
 import { mockProcess } from "../test/helpers";
-import type { ComposeStack } from "../api";
+import { stackOperations, type ComposeStack } from "../api";
 
 vi.mock("../api", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../api")>();
@@ -11,9 +11,6 @@ vi.mock("../api", async (importOriginal) => {
     listContainers: vi.fn(),
     readComposeFile: vi.fn(),
     getServicesFromCompose: vi.fn(),
-    scaleStack: vi.fn(),
-    composeFileSuperuser: vi.fn(),
-    readAllProfiles: vi.fn(),
     isRootlessMode: vi.fn(),
   };
 });
@@ -22,18 +19,12 @@ import {
   listContainers,
   readComposeFile,
   getServicesFromCompose,
-  scaleStack,
-  composeFileSuperuser,
-  readAllProfiles,
   isRootlessMode,
 } from "../api";
 
 const mockListContainers = vi.mocked(listContainers);
 const mockReadComposeFile = vi.mocked(readComposeFile);
 const mockGetServicesFromCompose = vi.mocked(getServicesFromCompose);
-const mockScaleStack = vi.mocked(scaleStack);
-const mockComposeFileSuperuser = vi.mocked(composeFileSuperuser);
-const mockReadAllProfiles = vi.mocked(readAllProfiles);
 const mockIsRootlessMode = vi.mocked(isRootlessMode);
 
 const stack: ComposeStack = { Name: "myapp", Status: "running(2)", ConfigFiles: "/myapp/compose.yml" };
@@ -42,9 +33,6 @@ beforeEach(() => {
   mockListContainers.mockReturnValue(mockProcess("[]"));
   mockReadComposeFile.mockReturnValue(mockProcess("services:\n  web: {}\n  worker: {}"));
   mockGetServicesFromCompose.mockReturnValue(["web", "worker"]);
-  mockScaleStack.mockReturnValue(mockProcess(""));
-  mockComposeFileSuperuser.mockResolvedValue(undefined);
-  mockReadAllProfiles.mockResolvedValue([]);
   mockIsRootlessMode.mockReturnValue(false);
 });
 
@@ -82,7 +70,8 @@ describe("ScaleModal", () => {
     await waitFor(() => expect(screen.getByText(/confirm scaling/i)).toBeInTheDocument());
   });
 
-  it("calls scaleStack and onSuccess on apply", async () => {
+  it("scales through the stack operation and calls onSuccess on apply", async () => {
+    const scaleSpy = vi.spyOn(stackOperations, "scale").mockReturnValue(mockProcess(""));
     const onSuccess = vi.fn();
     const onClose = vi.fn();
     render(<ScaleModal stack={stack} onClose={onClose} onSuccess={onSuccess} />);
@@ -91,7 +80,7 @@ describe("ScaleModal", () => {
     fireEvent.click(screen.getByRole("button", { name: /continue/i }));
     await waitFor(() => screen.getByRole("button", { name: /apply/i }));
     await act(async () => { fireEvent.click(screen.getByRole("button", { name: /apply/i })); });
-    await waitFor(() => expect(mockScaleStack).toHaveBeenCalled());
+    await waitFor(() => expect(scaleSpy).toHaveBeenCalledWith(stack, expect.any(Object)));
     expect(onClose).toHaveBeenCalled();
     expect(onSuccess).toHaveBeenCalled();
   });

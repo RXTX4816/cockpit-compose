@@ -31,7 +31,7 @@ describe("useServiceActions", () => {
     mockSpawn.mockReturnValue(mockProcess(""));
     const { result } = renderHook(() => useServiceActions(stack, vi.fn()));
     await act(() => result.current.doServiceAction("start", "web"));
-    const args = mockSpawn.mock.calls[0][0] as string[];
+    const args = mockSpawn.mock.calls.find(c => (c[0] as string[])[1] === "compose")?.[0] as string[];
     expect(args).toContain("up");
     expect(args).toContain("-d");
     expect(args).toContain("web");
@@ -41,7 +41,7 @@ describe("useServiceActions", () => {
     mockSpawn.mockReturnValue(mockProcess(""));
     const { result } = renderHook(() => useServiceActions(stack, vi.fn()));
     await act(() => result.current.doServiceAction("stop", "db"));
-    const args = mockSpawn.mock.calls[0][0] as string[];
+    const args = mockSpawn.mock.calls.find(c => (c[0] as string[])[1] === "compose")?.[0] as string[];
     expect(args).toContain("stop");
     expect(args).toContain("db");
   });
@@ -98,7 +98,7 @@ describe("useServiceActions", () => {
     mockSpawn.mockReturnValue(mockProcess(""));
     const { result } = renderHook(() => useServiceActions(stack, vi.fn()));
     await act(() => result.current.doServiceAction("stop", "web"));
-    const args = mockSpawn.mock.calls[0][0] as string[];
+    const args = mockSpawn.mock.calls.find(c => (c[0] as string[])[1] === "compose")?.[0] as string[];
     expect(args).toContain("myapp");
     expect(args).toContain("/opt/myapp/compose.yml");
   });

@@ -27,9 +27,7 @@ import {
   listContainers,
   readComposeFile,
   getServicesFromCompose,
-  scaleStack,
-  stackSuperuser,
-  readAllProfiles,
+  stackOperations,
   parseJsonOutput,
   parsePortsFull,
 } from "../api";
@@ -115,11 +113,7 @@ export function ScaleModal({ stack, onClose, onSuccess }: Props) {
     setScaling(true);
     setApplyError(null);
     try {
-      const [su, profiles] = await Promise.all([
-        stackSuperuser(configFiles),
-        readAllProfiles(configFiles[0]),
-      ]);
-      await scaleStack(stack.Name, configFiles, counts, profiles, su);
+      await stackOperations.scale(stack, counts);
       onClose();
       onSuccess?.();
     } catch (ex: unknown) {
