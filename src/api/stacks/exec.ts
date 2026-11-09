@@ -1,5 +1,6 @@
-import { compose, cli, getIsPodman, dockerSpawnEnviron, composeSupportsProgress, socketSuperuser } from "../cockpit";
+import { compose, cli, dockerSpawnEnviron, composeSupportsProgress, socketSuperuser } from "../cockpit";
 import { fileFlags } from "./internal";
+import { engine } from "./engine";
 
 export async function snapshotProjectContainerIds(project: string): Promise<Set<string>> {
   let raw = "";
@@ -42,7 +43,7 @@ export function composeRunStream(
   superuser?: "try",
 ): CockpitProcess {
   // Podman Compose run may garble output without -T when no PTY is allocated
-  const noTtyFlag = getIsPodman() ? ["-T"] : [];
+  const noTtyFlag = engine().runFlags;
   const progressFlag = composeSupportsProgress() ? ["--progress", "plain"] : [];
   // "args" (default) appends the typed tokens as CMD arguments to the image's own
   // ENTRYPOINT — this is what makes e.g. typing just "--help" work. "override" instead

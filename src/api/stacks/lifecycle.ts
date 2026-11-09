@@ -1,4 +1,4 @@
-import { compose, cli, dockerSpawnEnviron, composeSupportsProgress, composeIsLimitedBackend } from "../cockpit";
+import { compose, cli, dockerSpawnEnviron, composeSupportsProgress } from "../cockpit";
 import { fileFlags, makeFakeProcess, afterPreparing } from "./internal";
 import { engine } from "./engine";
 
@@ -69,7 +69,7 @@ export function downStack(project: string, configFiles: string[], profiles: stri
 export function upStackStream(project: string, configFiles: string[], profiles: string[], superuser?: "try"): CockpitProcess {
   const profileFlags = profiles.flatMap(p => ["--profile", p]);
   const progressFlag = composeSupportsProgress() ? ["--progress", "plain"] : [];
-  const forceRecreate = composeIsLimitedBackend() ? ["--force-recreate"] : [];
+  const forceRecreate = engine().upFlags;
   return cockpit.spawn(
     compose(...profileFlags, ...progressFlag, "-p", project, ...fileFlags(configFiles), "up", "-d", ...forceRecreate),
     { superuser, err: "out", ...dockerSpawnEnviron() },

@@ -64,4 +64,50 @@ export function afterPreparing(prepare: () => Promise<unknown>, start: () => Coc
   }) as unknown as CockpitProcess;
 }
 
+// podman-compose (Python) is known to record whatever path was passed on the CLI in the
+// com.docker.compose.project.config_files label, without resolving it to an absolute path
+// (unlike docker compose / podman compose v2, which always store the resolved absolute path).
+// If the stack was started from its own directory (e.g. `cd mystack && sudo podman compose up`),
+// that label ends up holding a bare relative filename like "docker-compose.yml" — which then
+// fails every subsequent action, since our own spawns don't share that directory as their cwd.
+// The working_dir label (also standard) records the absolute directory compose was invoked
+// from, so relative config_files entries are resolved against it here, once, at discovery time.
+function resolveConfigFiles(rawConfigFiles: string, workingDir: string): string {
+  if (!rawConfigFiles) return rawConfigFiles;
+  return rawConfigFiles
+    .split(",")
+    .map(f => {
+      const trimmed = f.trim();
+      if (!trimmed || trimmed.startsWith("/") || !workingDir) return trimmed;
+      return `${workingDir.replace(/\/+$/, "")}/${trimmed}`;
+    })
+    .join(",");
+}
+
+export function groupPodmanContainers(containers: PodmanPsContainer[]): { Name: string; Status: string; ConfigFiles: string }[] {
+  const projects = new Map<string, { configFiles: string; states: string[] }>();
+  for (const c of containers) {
+    const name = c.Labels?.["com.docker.compose.project"] ?? "";
+    if (!name) continue;
+    if (!projects.has(name)) {
+      const rawConfigFiles = c.Labels["com.docker.compose.project.config_files"] ?? "";
+      const workingDir = c.Labels["com.docker.compose.project.working_dir"] ?? "";
+      projects.set(name, {
+        configFiles: resolveConfigFiles(rawConfigFiles, workingDir),
+        states: [],
+      });
+    }
+    projects.get(name)!.states.push(c.State);
+  }
+  return Array.from(projects.entries()).map(([name, { configFiles, states }]) => {
+    const stateCounts = new Map<string, number>();
+    for (const s of states) stateCounts.set(s, (stateCounts.get(s) ?? 0) + 1);
+    const status = Array.from(stateCounts.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([state, count]) => `${state}(${count})`)
+      .join(", ");
+    return { Name: name, Status: status, ConfigFiles: configFiles };
+  });
+}
+
 export { dockerSpawnEnviron };
