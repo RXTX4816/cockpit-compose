@@ -4,21 +4,8 @@ import { usePullStream } from "./usePullStream";
 import { mockSpawn } from "../test/setup";
 import { mockProcess } from "../test/helpers";
 
-vi.mock("../api", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("../api")>();
-  return {
-    ...actual,
-    readAllProfiles: vi.fn().mockResolvedValue([]),
-    stackSuperuser: vi.fn().mockResolvedValue(undefined),
-  };
-});
-
-import { stackSuperuser } from "../api";
-const mockStackSuperuser = vi.mocked(stackSuperuser);
-
 beforeEach(() => {
   mockSpawn.mockReset();
-  mockStackSuperuser.mockReset().mockResolvedValue(undefined);
   vi.stubGlobal("cockpit", { spawn: mockSpawn });
 });
 

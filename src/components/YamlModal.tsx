@@ -20,7 +20,7 @@ import { LockIcon, LockOpenIcon, SaveIcon, TrashIcon, PlusCircleIcon } from "@pa
 import { load } from "js-yaml";
 import type { Diagnostic } from "@codemirror/lint";
 import { validateComposeSpec } from "../compose-schema";
-import { type ComposeStack, type Snapshot, readComposeFile, saveComposeFile, saveSnapshot, composeFileSuperuser, removeFile, listYamlFilesInDir } from "../api";
+import { type ComposeStack, type Snapshot, readComposeFile, saveStackFile, addStackFile, removeFile, listYamlFilesInDir } from "../api";
 import { YamlEditor } from "./YamlEditor";
 import { YamlDiffView } from "./YamlDiffView";
 import { EnvModal } from "./EnvModal";
@@ -175,8 +175,7 @@ export function YamlModal({ stack, onClose, onFileAdded, onFileRemoved }: Props)
     setAddFileSaving(true);
     setAddFileError(null);
     try {
-      const su = await composeFileSuperuser(configFiles);
-      await saveComposeFile(newPath, newFileContent, su);
+      await addStackFile(configFiles, newPath, newFileContent);
       const newFiles = [...configFiles, newPath];
       setConfigFiles(newFiles);
       setActiveIdx(newFiles.length - 1);
@@ -277,9 +276,7 @@ export function YamlModal({ stack, onClose, onFileAdded, onFileRemoved }: Props)
     setError(null);
     setConfirmSave(false);
     try {
-      const su = await composeFileSuperuser([configFile]);
-      await saveSnapshot(configFile, content, su);
-      await saveComposeFile(configFile, editedContent, su);
+      await saveStackFile(configFile, content, editedContent);
       setContent(editedContent);
       setEditing(false);
       await loadSnapshots();

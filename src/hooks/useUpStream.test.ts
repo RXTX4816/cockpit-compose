@@ -4,17 +4,8 @@ import { useUpStream } from "./useUpStream";
 import { mockSpawn } from "../test/setup";
 import { mockProcess } from "../test/helpers";
 
-vi.mock("../api", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("../api")>();
-  return { ...actual, stackSuperuser: vi.fn().mockResolvedValue(undefined) };
-});
-
-import { stackSuperuser } from "../api";
-const mockStackSuperuser = vi.mocked(stackSuperuser);
-
 beforeEach(() => {
   mockSpawn.mockReset();
-  mockStackSuperuser.mockReset().mockResolvedValue(undefined);
   vi.stubGlobal("cockpit", { spawn: mockSpawn });
 });
 
@@ -104,13 +95,12 @@ describe("useUpStream", () => {
     expect(result.current.lines).toHaveLength(0);
   });
 
-  it("requests superuser escalation via stackSuperuser and passes it to the spawn", async () => {
-    mockStackSuperuser.mockResolvedValue("try");
+  it("escalates the up (the stack operation decides, failing safe to 'try')", async () => {
     mockSpawn.mockImplementation(() => mockProcess("Up output\n"));
     const { result } = renderHook(() => useUpStream("myapp", ["/path/compose.yml"]));
     await waitFor(() => expect(result.current.done).toBe(true));
-    expect(mockSpawn).toHaveBeenCalledTimes(1);
-    expect(mockSpawn.mock.calls[0][1]).toMatchObject({ superuser: "try" });
+    const up = mockSpawn.mock.calls.find(c => (c[0] as string[]).includes("up"));
+    expect(up?.[1]).toMatchObject({ superuser: "try" });
   });
 
   it("uses String(ex) when rejection is not an Error instance", async () => {

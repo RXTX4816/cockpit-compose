@@ -39,9 +39,13 @@ vi.mock("../api", async (importOriginal) => {
     makeTempDir: mockMakeTempDir,
     fetchComposeFromGit: mockFetchComposeFromGit,
     removeDirectory: mockRemoveDirectory,
-    createDirectory: mockCreateDirectory,
     isRootlessMode: mockIsRootlessMode,
   };
+});
+
+vi.mock("../api/files", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../api/files")>();
+  return { ...actual, createDirectory: mockCreateDirectory };
 });
 
 const { mockInferComposeRoot } = vi.hoisted(() => ({
