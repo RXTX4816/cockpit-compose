@@ -40,6 +40,7 @@ describe("buildUpStarter", () => {
     const launch = vi.fn();
     await starter(launch);
     expect(launch).toHaveBeenCalledOnce();
+    await launch.mock.calls[0][0];
     const args = mockSpawn.mock.calls[mockSpawn.mock.calls.length - 1][0] as string[];
     expect(args).toContain("up");
     expect(args).toContain("myapp");
@@ -54,6 +55,7 @@ describe("buildPullStarter", () => {
     const launch = vi.fn();
     await starter(launch);
     expect(launch).toHaveBeenCalledOnce();
+    await launch.mock.calls[0][0];
     const args = mockSpawn.mock.calls[mockSpawn.mock.calls.length - 1][0] as string[];
     expect(args).toContain("pull");
     expect(args).toContain("myapp");
@@ -75,11 +77,13 @@ describe("buildDownStarter", () => {
 
 describe("buildRestartStarter", () => {
   it("launches restartStack once superuser resolves", async () => {
+    mockSpawn.mockImplementation((argv: string[]) => mockProcess(argv.includes("status=running") ? "web\n" : ""));
     const starter = buildRestartStarter(stack);
     const launch = vi.fn();
     await starter(launch);
     expect(launch).toHaveBeenCalledOnce();
-    const args = mockSpawn.mock.calls[mockSpawn.mock.calls.length - 1][0] as string[];
+    await launch.mock.calls[0][0];
+    const args = mockSpawn.mock.calls.find(c => (c[0] as string[]).includes("compose"))?.[0] as string[];
     expect(args).toContain("restart");
     expect(args).toContain("myapp");
   });
@@ -91,6 +95,7 @@ describe("buildKillStarter", () => {
     const launch = vi.fn();
     await starter(launch);
     expect(launch).toHaveBeenCalledOnce();
+    await launch.mock.calls[0][0];
     const killCall = mockSpawn.mock.calls.find(call => (call[0] as string[]).includes("kill"));
     expect(killCall).toBeTruthy();
     expect((killCall![0] as string[])).toContain("myapp");

@@ -2,12 +2,22 @@ import { stackSuperuser } from "../cockpit";
 import { readAllProfiles } from "../files";
 import { splitConfigFiles } from "../../lib/configFiles";
 import type { ComposeStack } from "../types";
-import { afterPreparing } from "./internal";
-import { downStack } from "./lifecycle";
+import { afterPreparing, makeFakeProcess } from "./internal";
+import { readRunningServiceNames } from "./query";
+import {
+  startStack, stopStack, restartStack, downStack, upStackStream, pullStack,
+  pauseStack, unpauseStack, killStack,
+} from "./lifecycle";
 
 export interface StackOperationOptions {
-  /** Profiles to activate. Defaults to every profile the stack's compose file declares. */
+  /** Profiles to activate. Defaults to every profile the stack's compose file declares
+   *  (for `up`, to none: profile services are opt-in there). */
   profiles?: string[];
+}
+
+export interface RestartOptions extends StackOperationOptions {
+  /** Services to restart. Defaults to the ones currently running; none running restarts nothing. */
+  services?: string[];
 }
 
 interface Resolved {
@@ -44,9 +54,40 @@ function run(
 
 /**
  * Actions on a Stack. Callers pass the stack and never `superuser`, profiles or split config
- * files. Operations move here from the lifecycle functions one at a time.
+ * files.
  */
 export const stackOperations = {
+  up(stack: ComposeStack, options: StackOperationOptions = {}): CockpitProcess {
+    return run(stack, { profiles: options.profiles ?? [] },
+      r => upStackStream(r.name, r.configFiles, r.profiles, r.superuser));
+  },
+  pull(stack: ComposeStack, options: StackOperationOptions = {}): CockpitProcess {
+    return run(stack, options, r => pullStack(r.name, r.configFiles, r.profiles, r.superuser));
+  },
+  start(stack: ComposeStack, options: StackOperationOptions = {}): CockpitProcess {
+    return run(stack, options, r => startStack(r.name, r.configFiles, r.profiles, r.superuser));
+  },
+  stop(stack: ComposeStack, options: StackOperationOptions = {}): CockpitProcess {
+    return run(stack, options, r => stopStack(r.name, r.configFiles, r.profiles, r.superuser));
+  },
+  restart(stack: ComposeStack, options: RestartOptions = {}): CockpitProcess {
+    let services: string[] = [];
+    return afterPreparing(
+      async () => { services = options.services ?? await readRunningServiceNames(stack.Name); },
+      () => services.length === 0
+        ? makeFakeProcess(async () => "")
+        : run(stack, options, r => restartStack(r.name, r.configFiles, r.profiles, services, r.superuser)),
+    );
+  },
+  pause(stack: ComposeStack, options: StackOperationOptions = {}): CockpitProcess {
+    return run(stack, options, r => pauseStack(r.name, r.configFiles, r.profiles, r.superuser));
+  },
+  unpause(stack: ComposeStack, options: StackOperationOptions = {}): CockpitProcess {
+    return run(stack, options, r => unpauseStack(r.name, r.configFiles, r.profiles, r.superuser));
+  },
+  kill(stack: ComposeStack, options: StackOperationOptions = {}): CockpitProcess {
+    return run(stack, options, r => killStack(r.name, r.configFiles, r.profiles, r.superuser));
+  },
   down(stack: ComposeStack, options: StackOperationOptions = {}): CockpitProcess {
     return run(stack, options, r => downStack(r.name, r.configFiles, r.profiles, r.superuser));
   },

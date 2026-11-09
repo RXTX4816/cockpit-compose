@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { startStack, stopStack, restartStack, readRunningServiceNames, pauseStack, unpauseStack, stackSuperuser, readAllProfiles } from "../api";
+import { stackOperations, type ComposeStack } from "../api";
 import { useToast } from "../components/ToastProvider";
 
 export function useStackActions(
@@ -22,17 +22,8 @@ export function useStackActions(
     onActingChange(1);
     setActionError(null);
     try {
-      const [su, profiles] = await Promise.all([
-        stackSuperuser(configFiles),
-        readAllProfiles(configFiles[0]),
-      ]);
-      if (action === "start") await startStack(stackName, configFiles, profiles, su);
-      else if (action === "stop") await stopStack(stackName, configFiles, profiles, su);
-      else if (action === "restart") {
-        const runningServices = await readRunningServiceNames(stackName);
-        if (runningServices.length > 0) await restartStack(stackName, configFiles, profiles, runningServices, su);
-      } else if (action === "pause") await pauseStack(stackName, configFiles, profiles, su);
-      else await unpauseStack(stackName, configFiles, profiles, su);
+      const stack: ComposeStack = { Name: stackName, Status: "", ConfigFiles: configFiles.join(",") };
+      await stackOperations[action](stack);
       await onSuccess?.();
       toast.success(t(`toast.${action}_success`, { name: stackName }));
     } catch (ex: unknown) {

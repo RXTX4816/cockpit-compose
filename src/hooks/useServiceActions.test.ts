@@ -50,7 +50,7 @@ describe("useServiceActions", () => {
     mockSpawn.mockReturnValue(mockProcess(""));
     const { result } = renderHook(() => useServiceActions(stack, vi.fn()));
     await act(() => result.current.doServiceAction("restart", "worker"));
-    const args = mockSpawn.mock.calls[0][0] as string[];
+    const args = mockSpawn.mock.calls.find(c => (c[0] as string[]).includes("restart"))?.[0] as string[];
     expect(args).toContain("restart");
     expect(args).toContain("worker");
   });
