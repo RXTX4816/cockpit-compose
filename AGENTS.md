@@ -29,6 +29,10 @@ Cockpit plugin for managing Docker and Podman Compose stacks from a web UI. Reac
 - One feature per PR. A feature or bugfix needs a regression test. User-facing changes update `docs/wiki/`.
 - Commit messages, PRs and issues are written as the maintainer, with no tool or AI attribution.
 
+## Current refactor
+
+Stack operations, teardown and restore are being moved behind deeper modules; the plan is in issue #371 (its sub-issues are the tickets), and ADR 0004 records the privilege decision. New code should call stack operations with a Stack and never pass `superuser`; don't add new Docker/Podman branches in callers.
+
 ## Agent skills
 
 ### Issue tracker
