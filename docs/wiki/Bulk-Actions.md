@@ -75,6 +75,8 @@ The warning shown depends on the action:
 
 Confirming enqueues **one background task per selected stack** into the same queue used by [Background Tasks](Background-Tasks) — they don't run all at once, and you can track, stop, or remove each one individually from the background tasks panel. The selection is cleared and the confirmation modal closes as soon as you confirm.
 
+A background or bulk run behaves exactly like the same action from its dialog: it uses the stack's own compose files, activates the profiles the compose file declares (Up activates only the profiles you chose, none from a bulk Up), and asks for administrator rights when the stack needs them. Bulk Restart restarts only the services that are running, and does nothing for a stack with none running. Earlier versions ran bulk and background Restart and Kill without the stack's profiles, so services behind a profile could be skipped.
+
 ## Stopped stacks
 
 The **Stopped / offline stacks** section has its own selection: tick several stopped stacks and a bar with **Up** appears. Confirming starts each of them as a background task, the same way as above. See [Importing Stacks](Importing-Stacks).

@@ -34,6 +34,10 @@ _Avoid_: Scan path, base directory
 One action applied to several selected stacks at once.
 _Avoid_: Batch, mass action
 
+**Stack operation**:
+An action on a Stack (Up, Pull, Start, Stop, Restart, Pause, Unpause, Kill, Down) run through `stackOperations`, which resolves the stack's files, profiles and admin rights so the dialog, background drawer and Bulk action all behave the same.
+_Avoid_: Lifecycle function, action
+
 ### Runtime
 
 **Runtime**:
