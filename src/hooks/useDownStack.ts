@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { stackOperations, killStack, findStackLeftovers, stackSuperuser, type ComposeStack, type StackLeftovers } from "../api";
+import { stackOperations, findStackLeftovers, stackSuperuser, type ComposeStack, type StackLeftovers } from "../api";
 import { splitConfigFiles } from "../lib/configFiles";
 
 // What Docker still lists after an attempt, or null if the check itself failed (then
@@ -78,7 +78,7 @@ export function useDownStack(
     setForceRemoving(true);
     onActingChange(1);
     try {
-      await killStack(target.Name, splitConfigFiles(target.ConfigFiles), [], superuser).catch(() => {});
+      await stackOperations.kill(target).catch(() => {});
       setError(null);
       settle(target, await leftoversOf(target.Name, superuser), false);
     } finally {

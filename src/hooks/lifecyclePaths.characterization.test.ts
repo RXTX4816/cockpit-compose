@@ -76,9 +76,11 @@ describe("Up", () => {
   it("drawer and bulk: activate the given profiles, none by default", async () => {
     const launch = vi.fn();
     await buildUpStarter(stack)(launch);
+    await launch.mock.calls[0][0];
     expect(callWith("up")?.[0]).toEqual([...base, "--progress", "plain", "-p", "myapp", "-f", files[0], "up", "-d"]);
     mockSpawn.mockClear();
     await buildUpStarter(stack, ["ops"])(launch);
+    await launch.mock.calls[1][0];
     expect(callWith("up")?.[0]).toEqual([...base, "--profile", "ops", "--progress", "plain", "-p", "myapp", "-f", files[0], "up", "-d"]);
     expect((callWith("up")?.[1] as { superuser?: string }).superuser).toBe("try");
   });
@@ -95,7 +97,9 @@ describe("Pull", () => {
   });
 
   it("drawer and bulk: use the stack's profiles", async () => {
-    await buildPullStarter(stack)(vi.fn());
+    const launch = vi.fn();
+    await buildPullStarter(stack)(launch);
+    await launch.mock.calls[0][0];
     expect(callWith("pull")?.[0]).toEqual(pullArgv);
   });
 });
@@ -120,11 +124,16 @@ describe("Restart", () => {
     expect(callWith("restart")?.[0]).toEqual([...base, ...P, "-p", "myapp", "-f", files[0], "restart", "web"]);
   });
 
-  it("drawer and bulk: restart every service, without profiles", async () => {
+  it("drawer and bulk: restart the running services with the stack's profiles, like the dialog", async () => {
+    mockSpawn.mockImplementation((argv: string[]) => {
+      if (argv[0] === "cat") return mockProcess(COMPOSE);
+      if (argv.includes("ps") && argv.includes("status=running")) return mockProcess("web\n");
+      return mockProcess("");
+    });
     const launch = vi.fn();
     await buildRestartStarter(stack)(launch);
     await launch.mock.calls[0][0];
-    expect(callWith("restart")?.[0]).toEqual([...base, "-p", "myapp", "-f", files[0], "restart"]);
+    expect(callWith("restart")?.[0]).toEqual([...base, ...P, "-p", "myapp", "-f", files[0], "restart", "web"]);
   });
 });
 
@@ -137,10 +146,10 @@ describe("Kill", () => {
     expect(mockSpawn.mock.calls.some(c => (c[0] as string[]).includes("rm") && (c[0] as string[]).includes("-f"))).toBe(true);
   });
 
-  it("drawer and bulk: run without profiles", async () => {
+  it("drawer and bulk: use the stack's profiles, like the dialog", async () => {
     const launch = vi.fn();
     await buildKillStarter(stack)(launch);
     await launch.mock.calls[0][0];
-    expect(callWith("kill")?.[0]).toEqual([...base, "-p", "myapp", "-f", files[0], "kill"]);
+    expect(callWith("kill")?.[0]).toEqual([...base, ...P, "-p", "myapp", "-f", files[0], "kill"]);
   });
 });

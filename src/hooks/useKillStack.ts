@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { killStack, findStackLeftovers, stackSuperuser, readAllProfiles, type ComposeStack, type StackLeftovers } from "../api";
+import { stackOperations, findStackLeftovers, stackSuperuser, type ComposeStack, type StackLeftovers } from "../api";
 import { splitConfigFiles } from "../lib/configFiles";
 
 export function useKillStack(
@@ -50,13 +50,10 @@ export function useKillStack(
     let su: "try" | undefined;
     let failure: string | null = null;
     try {
-      const [resolvedSu, profiles] = await Promise.all([
-        stackSuperuser(configFiles),
-        readAllProfiles(configFiles[0]),
-      ]);
-      su = resolvedSu;
+      // Only for the leftovers check and repair below; Kill itself resolves its own.
+      su = await stackSuperuser(configFiles);
       setSuperuser(su);
-      await killStack(target.Name, configFiles, profiles, su);
+      await stackOperations.kill(target);
     } catch (ex: unknown) {
       failure = ex instanceof Error ? ex.message : String(ex);
     }

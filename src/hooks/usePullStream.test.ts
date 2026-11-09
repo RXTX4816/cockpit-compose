@@ -81,9 +81,9 @@ describe("usePullStream", () => {
       close: vi.fn(),
       input: vi.fn(),
     }) as CockpitProcess;
-    mockSpawn.mockReturnValue(proc);
+    mockSpawn.mockImplementation((argv: string[]) => argv.includes("pull") ? proc : mockProcess(""));
     const { result } = renderHook(() => usePullStream("myapp", ["/path/compose.yml"]));
-    await waitFor(() => expect(mockSpawn).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(mockSpawn.mock.calls.some(c => (c[0] as string[]).includes("pull"))).toBe(true));
     result.current.cancel();
     expect((proc as unknown as { close: ReturnType<typeof vi.fn> }).close).toHaveBeenCalled();
   });
@@ -94,9 +94,9 @@ describe("usePullStream", () => {
       close: vi.fn(),
       input: vi.fn(),
     }) as CockpitProcess;
-    mockSpawn.mockReturnValue(proc);
+    mockSpawn.mockImplementation((argv: string[]) => argv.includes("pull") ? proc : mockProcess(""));
     const { unmount } = renderHook(() => usePullStream("myapp", ["/path/compose.yml"]));
-    await waitFor(() => expect(mockSpawn).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(mockSpawn.mock.calls.some(c => (c[0] as string[]).includes("pull"))).toBe(true));
     unmount();
     expect((proc as unknown as { close: ReturnType<typeof vi.fn> }).close).toHaveBeenCalled();
   });
@@ -108,13 +108,12 @@ describe("usePullStream", () => {
     expect(result.current.lines).toHaveLength(0);
   });
 
-  it("requests superuser escalation via stackSuperuser and passes it to the spawn", async () => {
-    mockStackSuperuser.mockResolvedValue("try");
+  it("escalates the pull (the stack operation decides, failing safe to 'try')", async () => {
     mockSpawn.mockImplementation(() => mockProcess("Pull output\n"));
     const { result } = renderHook(() => usePullStream("myapp", ["/path/compose.yml"]));
     await waitFor(() => expect(result.current.done).toBe(true));
-    expect(mockSpawn).toHaveBeenCalledTimes(1);
-    expect(mockSpawn.mock.calls[0][1]).toMatchObject({ superuser: "try" });
+    const pull = mockSpawn.mock.calls.find(c => (c[0] as string[]).includes("pull"));
+    expect(pull?.[1]).toMatchObject({ superuser: "try" });
   });
 
   it("uses String(ex) when rejection is not an Error instance", async () => {

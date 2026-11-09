@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { startService, stopService, restartStack, stackSuperuser, readAllProfiles } from "../api";
+import { startService, stopService, stackOperations, stackSuperuser, readAllProfiles } from "../api";
 import type { ComposeStack } from "../api";
 import { splitConfigFiles } from "../lib/configFiles";
 import { useToast } from "../components/ToastProvider";
@@ -30,7 +30,7 @@ export function useServiceActions(
       ]);
       if (action === "start") await startService(stack.Name, files, serviceName, profiles, su);
       else if (action === "stop") await stopService(stack.Name, files, serviceName, profiles, su);
-      else await restartStack(stack.Name, files, profiles, [serviceName], su);
+      else await stackOperations.restart({ Name: stack.Name, Status: "", ConfigFiles: configFilesKey }, { services: [serviceName] });
       await onSuccess?.();
       toast.success(t(`toast.service_${action}_success`, { name: serviceName }));
     } catch (ex: unknown) {

@@ -1,52 +1,39 @@
-import {
-  type ComposeStack,
-  upStackStream,
-  pullStack,
-  stackOperations,
-  restartStack,
-  killStack,
-  stackSuperuser,
-  readAllProfiles,
-} from "../api";
-import { splitConfigFiles } from "./configFiles";
+import { type ComposeStack, stackOperations } from "../api";
 
 type Launch = (proc: CockpitProcess) => void;
+type Starter = (launch: Launch) => Promise<void>;
+
+// Every operation starts the same way, so there is one builder; the module resolves the
+// stack's files, profiles and admin rights, so a background run behaves like its dialog.
+function starterFor(start: () => CockpitProcess): Starter {
+  return launch => { launch(start()); return Promise.resolve(); };
+}
 
 /**
  * Builds a background-task starter for `up`, given the stack and (already
  * confirmed) profiles to activate. Shared between the single-stack "Run in
  * Background" buttons (UpModal) and the bulk-action path.
  */
-export function buildUpStarter(stack: ComposeStack, profiles: string[] = []) {
-  const configFiles = splitConfigFiles(stack.ConfigFiles);
-  return (launch: Launch) => stackSuperuser(configFiles)
-    .then(su => { launch(upStackStream(stack.Name, configFiles, profiles, su)); });
+export function buildUpStarter(stack: ComposeStack, profiles?: string[]) {
+  return starterFor(() => stackOperations.up(stack, { profiles }));
 }
 
-/** Builds a background-task starter for `pull`, resolving the stack's profiles itself. */
+/** Builds a background-task starter for `pull`. */
 export function buildPullStarter(stack: ComposeStack) {
-  const configFiles = splitConfigFiles(stack.ConfigFiles);
-  return (launch: Launch) => Promise.all([
-    stackSuperuser(configFiles),
-    readAllProfiles(configFiles[0]),
-  ]).then(([su, profiles]) => { launch(pullStack(stack.Name, configFiles, profiles, su)); });
+  return starterFor(() => stackOperations.pull(stack));
 }
 
 /** Builds a background-task starter for `down`. */
 export function buildDownStarter(stack: ComposeStack) {
-  return (launch: Launch) => { launch(stackOperations.down(stack)); return Promise.resolve(); };
+  return starterFor(() => stackOperations.down(stack));
 }
 
 /** Builds a background-task starter for `restart`. */
 export function buildRestartStarter(stack: ComposeStack) {
-  const configFiles = splitConfigFiles(stack.ConfigFiles);
-  return (launch: Launch) => stackSuperuser(configFiles)
-    .then(su => { launch(restartStack(stack.Name, configFiles, [], [], su)); });
+  return starterFor(() => stackOperations.restart(stack));
 }
 
 /** Builds a background-task starter for `kill`. */
 export function buildKillStarter(stack: ComposeStack) {
-  const configFiles = splitConfigFiles(stack.ConfigFiles);
-  return (launch: Launch) => stackSuperuser(configFiles)
-    .then(su => { launch(killStack(stack.Name, configFiles, [], su)); });
+  return starterFor(() => stackOperations.kill(stack));
 }
