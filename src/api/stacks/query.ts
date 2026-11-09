@@ -1,6 +1,7 @@
 import { compose, cli, getIsPodman, dockerSpawnEnviron, composeIsLimitedBackend, socketSuperuser } from "../cockpit";
-import { fileFlags, makeFakeProcess, type PodmanPsContainer, type PodmanPsForImages, type PodmanImageInspect, type PodmanVolumeJson } from "./internal";
+import { fileFlags, makeFakeProcess, type PodmanPsContainer } from "./internal";
 import { engineHttpGetJson, drainProcess } from "../engineHttp";
+import { engine } from "./engine";
 
 // podman-compose (Python) is known to record whatever path was passed on the CLI in the
 // com.docker.compose.project.config_files label, without resolving it to an absolute path
@@ -148,122 +149,16 @@ export function streamEvents(project: string): CockpitProcess {
   return cockpit.spawn(compose("-p", project, "events", "--json"), { superuser: socketSuperuser(), err: "message", ...dockerSpawnEnviron() });
 }
 
-function composeTopPodmanFallback(project: string): CockpitProcess {
-  return makeFakeProcess(async () => {
-    let psRaw = "";
-    const psProc = cockpit.spawn(
-      cli("ps", "--filter", `label=com.docker.compose.project=${project}`, "--format", "json"),
-      { superuser: socketSuperuser(), err: "message", ...dockerSpawnEnviron() },
-    );
-    psProc.stream((d: string) => { psRaw += d; });
-    await psProc;
-
-    interface PsEntry { Id: string; Names?: string[]; Labels?: Record<string, string>; }
-    const containers = JSON.parse(psRaw) as PsEntry[];
-    if (containers.length === 0) return "";
-
-    const sections: string[] = [];
-    for (const c of containers) {
-      const service = c.Labels?.["com.docker.compose.service"] ?? c.Names?.[0] ?? c.Id.slice(0, 12);
-      let topRaw = "";
-      const topProc = cockpit.spawn(cli("top", c.Id), { superuser: socketSuperuser(), err: "message", ...dockerSpawnEnviron() });
-      topProc.stream((d: string) => { topRaw += d; });
-      try {
-        await topProc;
-        sections.push(service + "\n" + topRaw.trimEnd());
-      } catch { /* container not running */ }
-    }
-    return sections.join("\n\n");
-  });
-}
-
 export function composeTop(project: string): CockpitProcess {
-  if (getIsPodman()) return composeTopPodmanFallback(project);
-  return cockpit.spawn(
-    compose("-p", project, "top"),
-    { superuser: socketSuperuser(), err: "message", ...dockerSpawnEnviron() },
-  );
-}
-
-function listImagesPodmanFallback(project: string): CockpitProcess {
-  return makeFakeProcess(async () => {
-    let psRaw = "";
-    const psProc = cockpit.spawn(
-      cli("ps", "-a", "--filter", `label=com.docker.compose.project=${project}`, "--format", "json"),
-      { superuser: socketSuperuser(), err: "message", ...dockerSpawnEnviron() },
-    );
-    psProc.stream((d: string) => { psRaw += d; });
-    await psProc;
-
-    const containers = JSON.parse(psRaw) as PodmanPsForImages[];
-    if (containers.length === 0) return "[]";
-
-    const seenIds = new Set<string>();
-    const imageIds: string[] = [];
-    const containerByImageId = new Map<string, string>();
-    for (const c of containers) {
-      const id = c.ImageID ?? "";
-      if (id && !seenIds.has(id)) {
-        seenIds.add(id);
-        imageIds.push(id);
-        containerByImageId.set(id, c.Names?.[0] ?? "");
-      }
-    }
-
-    let inspRaw = "";
-    const inspProc = cockpit.spawn(
-      cli("image", "inspect", "--format", "json", ...imageIds),
-      { superuser: socketSuperuser(), err: "message", ...dockerSpawnEnviron() },
-    );
-    inspProc.stream((d: string) => { inspRaw += d; });
-    await inspProc;
-
-    const images = JSON.parse(inspRaw) as PodmanImageInspect[];
-    return JSON.stringify(images.map(img => {
-      const repoTag = img.RepoTags?.[0] ?? "<none>:<none>";
-      const colonIdx = repoTag.lastIndexOf(":");
-      const repo = colonIdx > 0 ? repoTag.slice(0, colonIdx) : repoTag;
-      const tag = colonIdx > 0 ? repoTag.slice(colonIdx + 1) : "<none>";
-      return {
-        ID: img.Id.replace(/^sha256:/, "").slice(0, 12),
-        Repository: repo,
-        Tag: tag,
-        Size: img.Size ?? 0,
-        CreatedAt: img.Created ?? "",
-        ContainerName: containerByImageId.get(img.Id) ?? "",
-      };
-    }));
-  });
-}
-
-function listVolumesPodmanFallback(project: string): CockpitProcess {
-  return makeFakeProcess(async () => {
-    let raw = "";
-    const proc = cockpit.spawn(
-      cli("volume", "ls", "--filter", `label=com.docker.compose.project=${project}`, "--format", "json"),
-      { superuser: socketSuperuser(), err: "message", ...dockerSpawnEnviron() },
-    );
-    proc.stream((d: string) => { raw += d; });
-    await proc;
-    const volumes = JSON.parse(raw) as PodmanVolumeJson[];
-    return JSON.stringify(volumes.map(v => ({ Name: v.Name, Driver: v.Driver, Mountpoint: v.Mountpoint })));
-  });
+  return engine().top(project);
 }
 
 export function listImages(project: string, configFiles: string[]): CockpitProcess {
-  if (composeIsLimitedBackend()) return listImagesPodmanFallback(project);
-  return cockpit.spawn(
-    compose("-p", project, ...fileFlags(configFiles), "images", "--format", "json"),
-    { superuser: socketSuperuser(), err: "message", ...dockerSpawnEnviron() },
-  );
+  return engine().listImages(project, configFiles);
 }
 
 export function listVolumes(project: string, configFiles: string[]): CockpitProcess {
-  if (composeIsLimitedBackend()) return listVolumesPodmanFallback(project);
-  return cockpit.spawn(
-    compose("-p", project, ...fileFlags(configFiles), "volumes", "--format", "json"),
-    { superuser: socketSuperuser(), err: "message", ...dockerSpawnEnviron() },
-  );
+  return engine().listVolumes(project, configFiles);
 }
 
 export function composeVersion(): CockpitProcess {

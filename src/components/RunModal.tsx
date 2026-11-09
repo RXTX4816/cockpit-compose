@@ -18,8 +18,7 @@ import {
   type ComposeStack,
   readComposeFile,
   getServicesFromCompose,
-  getJobsFromCompose,
-  composeIsLimitedBackend,
+  declaredJobs,
   stackOperations,
   snapshotProjectContainerIds,
   forceRemoveOneoffContainers,
@@ -70,9 +69,7 @@ export function RunModal({ stack, onClose }: Props) {
     proc
       .then(() => {
         const names = getServicesFromCompose(raw);
-        const jobNames = composeIsLimitedBackend()
-          ? []
-          : getJobsFromCompose(raw).filter(j => j.manual).map(j => j.name);
+        const jobNames = declaredJobs(raw).filter(j => j.manual).map(j => j.name);
         setServices(names);
         setJobs(jobNames);
         const first = names[0] ?? jobNames[0];

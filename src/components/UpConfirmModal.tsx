@@ -15,9 +15,8 @@ import {
   type ComposeJob,
   readComposeFile,
   getProfilesFromCompose,
-  getJobsFromCompose,
   isJobActive,
-  composeIsLimitedBackend,
+  declaredJobs,
 } from "../api";
 import { splitConfigFiles } from "../lib/configFiles";
 import { parseServiceImages, type ServiceImage } from "../lib/serviceImages";
@@ -43,8 +42,7 @@ export function UpConfirmModal({ stack, onConfirm, onClose }: Props) {
     void proc.then(() => {
       setImages(parseServiceImages(content));
       setProfiles(getProfilesFromCompose(content));
-      // podman-compose has no notion of jobs, so there is nothing to explain or warn about.
-      setJobs(composeIsLimitedBackend() ? [] : getJobsFromCompose(content));
+      setJobs(declaredJobs(content));
     });
   }, [configFile]);
 
