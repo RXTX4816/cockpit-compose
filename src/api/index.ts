@@ -1,6 +1,6 @@
 export type { ComposeStack, ComposeContainer, StackStatus, ContainerStats, Snapshot, ComposeImage, ComposeVolume, SharedNetwork, ComposeEvent, ComposeTopEntry, ComposeVersion, ParsedPort } from "./types";
 export type { Runtime, SocketMode } from "./cockpit";
-export { composeIsLimitedBackend } from "./cockpit";
+export { declaredJobs } from "./compose";
 export {
   detectComposeCommand, detectDockerMode, setRuntime, getIsPodman, cli, compose,
   composeFileSuperuser, stackSuperuser, isRootlessMode, getDockerSocketPath, getPodmanSocketPath,

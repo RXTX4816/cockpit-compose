@@ -1,5 +1,6 @@
-import { compose, cli, getIsPodman, dockerSpawnEnviron, composeSupportsProgress, composeIsLimitedBackend } from "../cockpit";
+import { compose, cli, dockerSpawnEnviron, composeSupportsProgress, composeIsLimitedBackend } from "../cockpit";
 import { fileFlags, makeFakeProcess, afterPreparing } from "./internal";
+import { engine } from "./engine";
 
 export function startStack(project: string, configFiles: string[], profiles: string[] = [], superuser?: "try"): CockpitProcess {
   const profileFlags = profiles.flatMap(p => ["--profile", p]);
@@ -84,50 +85,12 @@ export function pullStack(project: string, configFiles: string[], profiles: stri
   );
 }
 
-function pauseUnpausePodmanFallback(project: string, action: "pause" | "unpause", superuser?: "try"): CockpitProcess {
-  return makeFakeProcess(async () => {
-    let psRaw = "";
-    const psProc = cockpit.spawn(
-      cli("ps", "-a", "--filter", `label=com.docker.compose.project=${project}`, "--format", "json"),
-      { superuser, err: "message", ...dockerSpawnEnviron() },
-    );
-    psProc.stream((d: string) => { psRaw += d; });
-    await psProc;
-    interface PsEntry { Id: string; }
-    const containers = JSON.parse(psRaw) as PsEntry[];
-    if (!Array.isArray(containers) || containers.length === 0) return "";
-    const ids = containers.map(c => c.Id);
-    let out = "";
-    const proc = cockpit.spawn(cli(action, ...ids), { superuser, err: "message", ...dockerSpawnEnviron() });
-    proc.stream((d: string) => { out += d; });
-    try {
-      await proc;
-    } catch (e: unknown) {
-      if (String(e).includes("cgroup")) {
-        throw new Error("Pause is not supported on this system. Enable cgroup v2 delegation for rootless Podman (see /etc/systemd/system/user@.service.d/).");
-      }
-      throw e;
-    }
-    return out;
-  });
-}
-
 export function pauseStack(project: string, configFiles: string[], profiles: string[] = [], superuser?: "try"): CockpitProcess {
-  if (getIsPodman()) return pauseUnpausePodmanFallback(project, "pause", superuser);
-  const profileFlags = profiles.flatMap(p => ["--profile", p]);
-  return cockpit.spawn(
-    compose(...profileFlags, "-p", project, ...fileFlags(configFiles), "pause"),
-    { superuser, err: "message", ...dockerSpawnEnviron() },
-  );
+  return engine().pause(project, configFiles, profiles, superuser);
 }
 
 export function unpauseStack(project: string, configFiles: string[], profiles: string[] = [], superuser?: "try"): CockpitProcess {
-  if (getIsPodman()) return pauseUnpausePodmanFallback(project, "unpause", superuser);
-  const profileFlags = profiles.flatMap(p => ["--profile", p]);
-  return cockpit.spawn(
-    compose(...profileFlags, "-p", project, ...fileFlags(configFiles), "unpause"),
-    { superuser, err: "message", ...dockerSpawnEnviron() },
-  );
+  return engine().unpause(project, configFiles, profiles, superuser);
 }
 
 export function killStack(project: string, configFiles: string[], profiles: string[] = [], superuser?: "try"): CockpitProcess {
@@ -154,53 +117,6 @@ export function killStack(project: string, configFiles: string[], profiles: stri
   });
 }
 
-function scaleStackPodmanFallback(
-  project: string,
-  configFiles: string[],
-  scales: Record<string, number>,
-  profiles: string[] = [],
-  superuser?: "try",
-): CockpitProcess {
-  return makeFakeProcess(async () => {
-    const profileFlags = profiles.flatMap(p => ["--profile", p]);
-    const scaleFlags = Object.entries(scales).flatMap(([svc, n]) => ["--scale", `${svc}=${n}`]);
-    let out = "";
-    const upProc = cockpit.spawn(
-      compose(...profileFlags, "-p", project, ...fileFlags(configFiles), "up", "-d", "--force-recreate", ...scaleFlags),
-      { superuser, err: "message", ...dockerSpawnEnviron() },
-    );
-    upProc.stream(d => { out += d; });
-    await upProc;
-
-    for (const [svc, targetCount] of Object.entries(scales)) {
-      let psRaw = "";
-      const psProc = cockpit.spawn(
-        cli("ps", "-a",
-          "--filter", `label=com.docker.compose.project=${project}`,
-          "--filter", `label=com.docker.compose.service=${svc}`,
-          "--format", "json"),
-        { superuser, err: "message", ...dockerSpawnEnviron() },
-      );
-      psProc.stream(d => { psRaw += d; });
-      await psProc;
-
-      interface PsEntry { Id: string; Names?: string[] }
-      const containers = JSON.parse(psRaw) as PsEntry[];
-      if (containers.length <= targetCount) continue;
-
-      containers.sort((a, b) => {
-        const idx = (c: PsEntry) => { const m = (c.Names?.[0] ?? "").match(/_(\d+)$/); return m ? parseInt(m[1], 10) : 0; };
-        return idx(b) - idx(a);
-      });
-      const excess = containers.slice(0, containers.length - targetCount).map(c => c.Id);
-      await cockpit.spawn(cli("stop", ...excess), { superuser, err: "message", ...dockerSpawnEnviron() });
-      await cockpit.spawn(cli("rm", ...excess), { superuser, err: "message", ...dockerSpawnEnviron() });
-    }
-
-    return out;
-  });
-}
-
 export function scaleStack(
   project: string,
   configFiles: string[],
@@ -208,11 +124,5 @@ export function scaleStack(
   profiles: string[] = [],
   superuser?: "try",
 ): CockpitProcess {
-  if (composeIsLimitedBackend()) return scaleStackPodmanFallback(project, configFiles, scales, profiles, superuser);
-  const profileFlags = profiles.flatMap(p => ["--profile", p]);
-  const scaleFlags = Object.entries(scales).flatMap(([svc, n]) => ["--scale", `${svc}=${n}`]);
-  return cockpit.spawn(
-    compose(...profileFlags, "-p", project, ...fileFlags(configFiles), "up", "-d", ...scaleFlags),
-    { superuser, err: "message", ...dockerSpawnEnviron() },
-  );
+  return engine().scale(project, configFiles, scales, profiles, superuser);
 }
