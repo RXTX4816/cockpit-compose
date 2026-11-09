@@ -16,13 +16,12 @@ import {
   Spinner,
   ExpandableSection,
 } from "@patternfly/react-core";
-import { type ComposeStack } from "../api";
-import { findComposeFiles, saveComposeFile } from "../api";
+import { type ComposeStack, restoreBackup, RestoreError } from "../api";
 import {
   findBackupArchives,
   listArchiveContents,
   readFileFromArchive,
-  extractArchive,
+  pathExists,
   removeFile,
 } from "../api/files";
 import { type DownedStack } from "../hooks/useDownedStacksScan";
@@ -33,19 +32,6 @@ interface Props {
   defaultScanDir: string;
   onClose: () => void;
   onRestored: (stack: DownedStack) => void;
-}
-
-const COMPOSE_PRECEDENCE = new Map(
-  ["compose.yaml", "compose.yml", "docker-compose.yaml", "docker-compose.yml"].map((n, i) => [n, i]),
-);
-
-async function checkPathExists(path: string): Promise<boolean> {
-  try {
-    await cockpit.spawn(["ls", "-d", "--", path], { err: "message" });
-    return true;
-  } catch {
-    return false;
-  }
 }
 
 export function RestoreModal({ existingStacks, defaultScanDir, onClose, onRestored }: Props) {
@@ -151,7 +137,7 @@ export function RestoreModal({ existingStacks, defaultScanDir, onClose, onRestor
       // This avoids falsely warning when the extraction dir exists but the rename dest doesn't.
       const defaultFinalName = conflict ? composeName + "-restored" : composeName;
       const targetPath = `${targetDir.replace(/\/$/, "")}/${defaultFinalName}`;
-      setTargetExists(await checkPathExists(targetPath));
+      setTargetExists(await pathExists(targetPath));
     } catch (e: unknown) {
       setValidationError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -180,7 +166,7 @@ export function RestoreModal({ existingStacks, defaultScanDir, onClose, onRestor
       prevTargetPathRef.current = targetPath;
       setTargetExistsConfirmed(false);
     }
-    void checkPathExists(targetPath).then(setTargetExists);
+    void pathExists(targetPath).then(setTargetExists);
   }, [targetDir, detectedRootDir, detectedName, nameConflict, newName]);
 
   useEffect(() => {
@@ -216,94 +202,23 @@ export function RestoreModal({ existingStacks, defaultScanDir, onClose, onRestor
     if (!effectiveArchive || !detectedRootDir) return;
     setRestoring(true);
     setRestoreError(null);
-    const parent = targetDir === "/" ? "/" : targetDir.replace(/\/$/, "");
-    const extractedPath = `${parent}/${detectedRootDir}`;
-    const renamedPath = `${parent}/${finalName}`;
     try {
-      if (renameNeeded) {
-        // Extract into a temp dir so we never touch parent/detectedRootDir (the live stack folder).
-        let tmpOut = "";
-        const tmpProc = cockpit.spawn(["mktemp", "-d"], { err: "message" });
-        tmpProc.stream((d: string) => { tmpOut += d; });
-        await tmpProc;
-        const tmpDir = tmpOut.trim();
-        try {
-          await extractArchive(effectiveArchive, tmpDir);
-          const tmpSrc = `${tmpDir}/${detectedRootDir}`;
-          if (!await checkPathExists(tmpSrc)) {
-            throw new Error(t("restore_modal.error_src_missing", { path: extractedPath }));
-          }
-          const renamedParent = renamedPath.slice(0, renamedPath.lastIndexOf("/"));
-          await cockpit.spawn(["mkdir", "-p", "--", renamedParent], { superuser: "try", err: "message" });
-
-          // An existing target only gets this far if the user ticked the overwrite
-          // acknowledgement (canRestore requires it), so replace it. This used to throw
-          // unconditionally, which made the overwrite the dialog offers impossible.
-          // Swapped rather than deleted up front: `mv` onto an existing directory nests the
-          // restored copy inside it, and deleting first would lose the old directory if the
-          // move then failed. The old one is only removed once the new one is in place.
-          let displaced: string | null = null;
-          if (await checkPathExists(renamedPath)) {
-            if (!targetExistsConfirmed) {
-              throw new Error(t("restore_modal.error_dest_exists", { path: renamedPath }));
-            }
-            displaced = `${renamedPath}.restore-displaced-${Date.now()}`;
-            await cockpit.spawn(["mv", "--", renamedPath, displaced], { superuser: "try", err: "message" });
-          }
-          try {
-            await cockpit.spawn(["mv", "--", tmpSrc, renamedPath], { superuser: "try", err: "message" });
-          } catch (e) {
-            if (displaced) {
-              await cockpit.spawn(["mv", "--", displaced, renamedPath], { superuser: "try", err: "message" }).catch(() => {});
-            }
-            throw e;
-          }
-          if (displaced) {
-            await cockpit.spawn(["rm", "-rf", "--", displaced], { superuser: "try", err: "message" }).catch(() => {});
-          }
-        } finally {
-          await cockpit.spawn(["rm", "-rf", "--", tmpDir], { err: "message" }).catch(() => {});
-        }
-      } else {
-        await cockpit.spawn(["mkdir", "-p", "--", parent], { superuser: "try", err: "message" });
-        await extractArchive(effectiveArchive, parent, "try");
-      }
-
-      const finalDir = renameNeeded ? renamedPath : extractedPath;
-
-      if (renameNeeded) {
-        let cfOutput = "";
-        const cfProc = findComposeFiles(finalDir, 1);
-        cfProc.stream((d: string) => { cfOutput += d; });
-        await cfProc;
-        const composeFiles = cfOutput.trim().split("\n").filter(l => l.trim()).sort((a, b) => {
-          const pa = COMPOSE_PRECEDENCE.get(a.split("/").pop() ?? "") ?? 99;
-          const pb = COMPOSE_PRECEDENCE.get(b.split("/").pop() ?? "") ?? 99;
-          return pa - pb;
-        });
-        if (composeFiles.length > 0) {
-          let content = "";
-          const catProc = cockpit.spawn(["cat", "--", composeFiles[0]], { err: "message" });
-          catProc.stream((d: string) => { content += d; });
-          await catProc;
-          if (/^name:\s+\S+/m.test(content)) {
-            const updated = content.replace(/^name:\s+\S+/m, `name: ${finalName}`);
-            await saveComposeFile(composeFiles[0], updated);
-          }
-        }
-      }
-
-      let cfOutput = "";
-      const cfProc = findComposeFiles(finalDir, 1);
-      cfProc.stream((d: string) => { cfOutput += d; });
-      await cfProc;
-      const configFiles = cfOutput.trim().split("\n").filter(l => l.trim());
-
+      const { configFiles } = await restoreBackup({
+        archive: effectiveArchive,
+        targetDir,
+        rootDir: detectedRootDir,
+        name: finalName,
+        overwrite: targetExistsConfirmed,
+      });
       onRestored({ name: finalName, configFiles });
       setSuccess(true);
     } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : String(e);
-      setRestoreError(msg || (e as { problem?: string }).problem || t("restore_modal.error_unknown"));
+      if (e instanceof RestoreError) {
+        setRestoreError(t(e.code === "src_missing" ? "restore_modal.error_src_missing" : "restore_modal.error_dest_exists", { path: e.path }));
+      } else {
+        const msg = e instanceof Error ? e.message : String(e);
+        setRestoreError(msg || (e as { problem?: string }).problem || t("restore_modal.error_unknown"));
+      }
     } finally {
       setRestoring(false);
     }

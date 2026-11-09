@@ -14,16 +14,12 @@ vi.mock("../api/files", async (importOriginal) => {
     listArchiveContents: vi.fn(),
     readFileFromArchive: vi.fn(),
     extractArchive: vi.fn(),
+    findComposeFiles: vi.fn(),
+    saveComposeFile: vi.fn(),
   };
 });
 
-vi.mock("../api", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("../api")>();
-  return { ...actual, findComposeFiles: vi.fn(), saveComposeFile: vi.fn() };
-});
-
-import { findBackupArchives, listArchiveContents, readFileFromArchive, extractArchive } from "../api/files";
-import { findComposeFiles, saveComposeFile } from "../api";
+import { findBackupArchives, listArchiveContents, readFileFromArchive, extractArchive, findComposeFiles, saveComposeFile } from "../api/files";
 
 const mockFindBackupArchives = vi.mocked(findBackupArchives);
 const mockListArchiveContents = vi.mocked(listArchiveContents);

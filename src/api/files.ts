@@ -139,6 +139,19 @@ export function removeDirectory(path: string, superuser?: "try"): CockpitProcess
   return cockpit.spawn(["rm", "-rf", "--", path], { superuser, err: "message" });
 }
 
+export async function pathExists(path: string, superuser?: "try"): Promise<boolean> {
+  try {
+    await cockpit.spawn(["ls", "-d", "--", path], { superuser, err: "message" });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function movePath(from: string, to: string, superuser?: "try"): CockpitProcess {
+  return cockpit.spawn(["mv", "--", from, to], { superuser, err: "message" });
+}
+
 export function removeFile(path: string, superuser?: "try"): CockpitProcess {
   return cockpit.spawn(["rm", "--", path], { superuser, err: "message" });
 }
