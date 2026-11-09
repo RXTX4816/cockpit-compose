@@ -692,7 +692,7 @@
     "service_stop_failed": "Échec de l'arrêt du service {{name}}",
     "service_restart_success": "Service {{name}} redémarré",
     "service_restart_failed": "Échec du redémarrage du service {{name}}",
-    "teardown_warning": "{{name}} is gone, but the command reported an error"
+    "teardown_warning": "{{name}} a disparu, mais la commande a signalé une erreur"
   },
   "service_actions": {
     "start": "Démarrer le service",

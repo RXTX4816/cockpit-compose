@@ -686,7 +686,7 @@
     "service_stop_failed": "サービス {{name}} の停止に失敗しました",
     "service_restart_success": "サービス {{name}} を再起動しました",
     "service_restart_failed": "サービス {{name}} の再起動に失敗しました",
-    "teardown_warning": "{{name}} is gone, but the command reported an error"
+    "teardown_warning": "{{name}} は削除されましたが、コマンドはエラーを報告しました"
   },
   "service_actions": {
     "start": "サービスを起動",

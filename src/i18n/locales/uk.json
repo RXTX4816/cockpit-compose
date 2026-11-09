@@ -698,7 +698,7 @@
     "service_stop_failed": "Не вдалося зупинити сервіс {{name}}",
     "service_restart_success": "Сервіс {{name}} перезапущено",
     "service_restart_failed": "Не вдалося перезапустити сервіс {{name}}",
-    "teardown_warning": "{{name}} is gone, but the command reported an error"
+    "teardown_warning": "{{name}} видалено, але команда повідомила про помилку"
   },
   "service_actions": {
     "start": "Запустити сервіс",

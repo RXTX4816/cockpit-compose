@@ -686,7 +686,7 @@
     "service_stop_failed": "Gagal menghentikan layanan {{name}}",
     "service_restart_success": "Layanan {{name}} dimulai ulang",
     "service_restart_failed": "Gagal memulai ulang layanan {{name}}",
-    "teardown_warning": "{{name}} is gone, but the command reported an error"
+    "teardown_warning": "{{name}} sudah tidak ada, tetapi perintah melaporkan kesalahan"
   },
   "service_actions": {
     "start": "Mulai layanan",

@@ -686,7 +686,7 @@
     "service_stop_failed": "Palvelun {{name}} pysäytys epäonnistui",
     "service_restart_success": "Palvelu {{name}} käynnistetty uudelleen",
     "service_restart_failed": "Palvelun {{name}} uudelleenkäynnistys epäonnistui",
-    "teardown_warning": "{{name}} is gone, but the command reported an error"
+    "teardown_warning": "{{name}} on poistunut, mutta komento ilmoitti virheestä"
   },
   "service_actions": {
     "start": "Käynnistä palvelu",

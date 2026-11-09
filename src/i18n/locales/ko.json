@@ -686,7 +686,7 @@
     "service_stop_failed": "서비스 {{name}} 중지 실패",
     "service_restart_success": "서비스 {{name}} 재시작됨",
     "service_restart_failed": "서비스 {{name}} 재시작 실패",
-    "teardown_warning": "{{name}} is gone, but the command reported an error"
+    "teardown_warning": "{{name}}은(는) 사라졌지만 명령이 오류를 보고했습니다"
   },
   "service_actions": {
     "start": "서비스 시작",

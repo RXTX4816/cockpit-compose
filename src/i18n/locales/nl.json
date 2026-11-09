@@ -686,7 +686,7 @@
     "service_stop_failed": "Stoppen van service {{name}} mislukt",
     "service_restart_success": "Service {{name}} opnieuw gestart",
     "service_restart_failed": "Opnieuw starten van service {{name}} mislukt",
-    "teardown_warning": "{{name}} is gone, but the command reported an error"
+    "teardown_warning": "{{name}} is weg, maar de opdracht meldde een fout"
   },
   "service_actions": {
     "start": "Service starten",
