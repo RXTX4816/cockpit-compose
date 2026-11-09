@@ -34,8 +34,7 @@ export function buildPullStarter(stack: ComposeStack) {
 
 /** Builds a background-task starter for `down`. */
 export function buildDownStarter(stack: ComposeStack) {
-  // Explicit empty profiles keeps today's behaviour; the next commit makes this read the stack's.
-  return (launch: Launch) => { launch(stackOperations.down(stack, { profiles: [] })); return Promise.resolve(); };
+  return (launch: Launch) => { launch(stackOperations.down(stack)); return Promise.resolve(); };
 }
 
 /** Builds a background-task starter for `restart`. */

@@ -51,12 +51,11 @@ describe("Down from the background drawer and bulk", () => {
     expect(args).toEqual(expect.arrayContaining(["docker", "compose", "-p", "myapp", "-f", "/srv/myapp/compose.yml", "down"]));
   });
 
-  // Today the drawer ignores the stack's profiles; the dialog above uses them. This pins the
-  // current behaviour; the next commit changes it on purpose.
-  it("does not pass the stack's profiles (current behaviour)", async () => {
+  it("passes the stack's profiles, like the dialog does", async () => {
     const launch = vi.fn();
     await buildDownStarter(stack)(launch);
     await launch.mock.calls[0][0];
-    expect(downCall()?.[0]).not.toContain("--profile");
+    expect(downCall()?.[0]).toEqual(
+      ["docker", "compose", "--profile", "dev", "-p", "myapp", "-f", "/srv/myapp/compose.yml", "down"]);
   });
 });
