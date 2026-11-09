@@ -75,7 +75,7 @@ After Down completes, the stack may reappear in the **Stopped / offline stacks**
 
 ### When containers are left behind
 
-After Down (and Kill), the plugin checks what Docker still lists for the stack. If anything is left, the dialog stays open and names the leftover containers — also when compose itself failed, for example because the stack's folder was deleted. Click **Force remove** to delete them by their project label; this works without the compose file.
+After Down (and Kill), the plugin checks what Docker still lists for the stack. If anything is left, the dialog stays open and names the leftover containers — also when compose itself failed, for example because the stack's folder was deleted. Click **Force remove** to delete them by their project label; this works without the compose file. Down and Kill follow the same rule: a stack is gone when no containers are left, whatever the command reported. If the command failed but nothing is left, the dialog closes and a warning toast shows the error. If **Force remove** fails, the dialog shows why.
 
 If Docker lists containers it cannot open, their records are damaged (usually after a crash or power loss), and Docker can neither start nor remove them. The dialog shows the exact fix for your setup and a **Repair** button. Repair stops Docker, deletes the damaged records and starts Docker again. While Docker is stopped, **every container on that daemon stops**, and containers without a restart policy stay stopped afterwards. Repair is Docker-only; Podman stores its state differently.
 

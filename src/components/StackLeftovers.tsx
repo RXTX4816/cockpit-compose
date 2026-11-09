@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Alert, Button, ClipboardCopy, Modal, ModalBody, ModalFooter, ModalHeader, Spinner } from "@patternfly/react-core";
-import { planDamagedRepair, runDamagedRepair, type RepairPlan, type StackLeftovers } from "../api";
+import { planDamagedRepair, renderRepairCommands, runDamagedRepair, type RepairPlan, type StackLeftovers } from "../api";
 
 interface Props {
   name: string;
@@ -88,7 +88,7 @@ export function StackLeftoversPanel({ name, leftovers, superuser, onForceRemove,
                 clickTip={t("common.copied")}
                 style={{ margin: "0.5rem 0" }}
               >
-                {plan.commands.join("\n")}
+                {renderRepairCommands(plan).join("\n")}
               </ClipboardCopy>
               <Button variant="danger" size="sm" onClick={() => setConfirmRepair(true)} isLoading={repairing} isDisabled={repairing}>
                 {t("leftovers.repair_button")}
