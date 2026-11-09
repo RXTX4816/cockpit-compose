@@ -2,7 +2,7 @@ import {
   type ComposeStack,
   upStackStream,
   pullStack,
-  downStack,
+  stackOperations,
   restartStack,
   killStack,
   stackSuperuser,
@@ -34,9 +34,8 @@ export function buildPullStarter(stack: ComposeStack) {
 
 /** Builds a background-task starter for `down`. */
 export function buildDownStarter(stack: ComposeStack) {
-  const configFiles = splitConfigFiles(stack.ConfigFiles);
-  return (launch: Launch) => stackSuperuser(configFiles)
-    .then(su => { launch(downStack(stack.Name, configFiles, [], su)); });
+  // Explicit empty profiles keeps today's behaviour; the next commit makes this read the stack's.
+  return (launch: Launch) => { launch(stackOperations.down(stack, { profiles: [] })); return Promise.resolve(); };
 }
 
 /** Builds a background-task starter for `restart`. */

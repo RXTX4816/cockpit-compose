@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { downStack, killStack, findStackLeftovers, stackSuperuser, readAllProfiles, type ComposeStack, type StackLeftovers } from "../api";
+import { stackOperations, killStack, findStackLeftovers, stackSuperuser, type ComposeStack, type StackLeftovers } from "../api";
 import { splitConfigFiles } from "../lib/configFiles";
 
 // What Docker still lists after an attempt, or null if the check itself failed (then
@@ -55,13 +55,10 @@ export function useDownStack(
     onActingChange(1);
     let su: "try" | undefined;
     try {
-      const [resolvedSu, profiles] = await Promise.all([
-        stackSuperuser(configFiles),
-        readAllProfiles(configFiles[0]),
-      ]);
-      su = resolvedSu;
+      // Only for the leftovers check and repair below; Down itself resolves its own.
+      su = await stackSuperuser(configFiles);
       setSuperuser(su);
-      await downStack(target.Name, configFiles, profiles, su);
+      await stackOperations.down(target);
       settle(target, await leftoversOf(target.Name, su));
     } catch (ex: unknown) {
       setError(ex instanceof Error ? ex.message : String(ex));
