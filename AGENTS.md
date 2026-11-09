@@ -21,7 +21,7 @@ Cockpit plugin for managing Docker and Podman Compose stacks from a web UI. Reac
 - Never have both `src/api/foo.ts` and `src/api/foo/`. esbuild silently resolves to the file and shadows the directory while typecheck and lint stay green. If a change "isn't taking effect", inspect the esbuild metafile (recipe in `CONTRIBUTING.md`).
 - Never commit `.yalc/` or `yalc.lock`; run `npm run base:reset` before opening a PR.
 - The runtime matrix (Docker / Podman, rootless / rootful, both installed) is where most bugs live. See `docs/wiki/Podman-Compatibility.md`.
-- Add a locale key to `en.json` and every other locale, or the build's i18n coverage check flags it.
+- Add a new key to `en.json` and to every other locale. A missing key doesn't fail the build; it only lowers the coverage table that `npm run build` writes into the README.
 
 ## Conventions
 
