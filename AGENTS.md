@@ -29,9 +29,9 @@ Cockpit plugin for managing Docker and Podman Compose stacks from a web UI. Reac
 - One feature per PR. A feature or bugfix needs a regression test. User-facing changes update `docs/wiki/`.
 - Commit messages, PRs and issues are written as the maintainer, with no tool or AI attribution.
 
-## Current refactor
+## Stack operations
 
-Stack operations, teardown and restore are being moved behind deeper modules; the plan is in issue #371 (its sub-issues are the tickets), and ADR 0004 records the privilege decision. New code should call stack operations with a Stack and never pass `superuser`; don't add new Docker/Podman branches in callers.
+Actions on a Stack go through `stackOperations` (`src/api/stacks/operations.ts`): pass a Stack, never `superuser`, profiles or split config files (ADR 0004). Down and Kill outcomes live in `teardown.ts`, restoring a Backup in `restore.ts`, and writing a stack's files in `stackFiles.ts`. Docker/Podman differences sit in `engine.ts`; don't add Runtime branches in callers. The multi-argument lifecycle functions are internal to the API layer. The plan was issue #371; its remaining Runtime branches are tracked in #368.
 
 ## Agent skills
 

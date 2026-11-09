@@ -17,10 +17,10 @@ import {
   InputGroupItem,
 } from "@patternfly/react-core";
 import { CodeBranchIcon, CubesIcon, PencilAltIcon } from "@patternfly/react-icons";
-import { type ComposeStack, COMPOSE_TEMPLATES, type ComposeTemplate, makeTempDir, fetchComposeFromGit, removeDirectory, createDirectory, isRootlessMode } from "../api";
+import { type ComposeStack, COMPOSE_TEMPLATES, type ComposeTemplate, makeTempDir, fetchComposeFromGit, removeDirectory, isRootlessMode } from "../api";
 import { type DownedStack } from "../hooks/useDownedStacksScan";
 import { inferComposeRoot } from "./DownedStacksSection";
-import { composeFileSuperuser } from "../api";
+import { createStackFiles } from "../api";
 import { YamlEditor } from "./YamlEditor";
 import "./CreateStackModal.css";
 
@@ -255,12 +255,10 @@ export function CreateStackModal({ stacks, onClose, onCreated }: Props) {
     const configFile = `${stackDir}/docker-compose.yml`;
     const extraPaths = additionalFiles.map(e => `${stackDir}/${e.filename.trim()}`);
     try {
-      const su = await composeFileSuperuser([configFile, ...extraPaths]);
-      await createDirectory(stackDir, su);
-      await cockpit.file(configFile, { superuser: su }).replace(getYamlToWrite());
-      for (const entry of additionalFiles) {
-        await cockpit.file(`${stackDir}/${entry.filename.trim()}`, { superuser: su }).replace(entry.content);
-      }
+      await createStackFiles(stackDir, [
+        { path: configFile, content: getYamlToWrite() },
+        ...additionalFiles.map(e => ({ path: `${stackDir}/${e.filename.trim()}`, content: e.content })),
+      ]);
       onCreated({ name: stackName.trim(), configFiles: [configFile, ...extraPaths] });
       onClose();
     } catch (ex: unknown) {
