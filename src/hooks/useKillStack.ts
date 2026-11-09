@@ -1,6 +1,5 @@
 import { useState, useCallback } from "react";
-import { stackOperations, findStackLeftovers, stackSuperuser, type ComposeStack, type StackLeftovers } from "../api";
-import { splitConfigFiles } from "../lib/configFiles";
+import { tearDownStack, recheckStack, type ComposeStack, type StackLeftovers, type TeardownOutcome } from "../api";
 
 export function useKillStack(
   onSuccess: () => void,
@@ -25,50 +24,39 @@ export function useKillStack(
     setLeftovers(null);
   }, []);
 
-  const check = useCallback(async (stack: ComposeStack, su: "try" | undefined, failure: string | null) => {
-    let left: StackLeftovers | null = null;
-    try { left = await findStackLeftovers(stack.Name, su); } catch { /* fall back to the kill's own result */ }
+  const show = useCallback((outcome: TeardownOutcome) => {
     onSuccess();
-    if (left && left.ids.length > 0) {
-      setLeftovers(left);
-      setError(failure);
-    } else if (left || !failure) {
+    if (outcome.state === "remaining") {
+      setLeftovers(outcome.leftovers);
+      setError(outcome.error);
+    } else if (outcome.state === "gone") {
       // Nothing left, so the stack is gone even if part of the kill reported an error.
       setTarget(null);
       setLeftovers(null);
       setError(null);
     } else {
-      setError(failure);
+      setError(outcome.error);
     }
   }, [onSuccess]);
 
   const execute = useCallback(async () => {
     if (!target) return;
-    const configFiles = splitConfigFiles(target.ConfigFiles);
     setKilling(true);
     onActingChange(1);
-    let su: "try" | undefined;
-    let failure: string | null = null;
     try {
-      // Only for the leftovers check and repair below; Kill itself resolves its own.
-      su = await stackSuperuser(configFiles);
+      const { outcome, superuser: su } = await tearDownStack(target, "kill");
       setSuperuser(su);
-      await stackOperations.kill(target);
-    } catch (ex: unknown) {
-      failure = ex instanceof Error ? ex.message : String(ex);
-    }
-    try {
-      await check(target, su, failure);
+      show(outcome);
     } finally {
       setKilling(false);
       onActingChange(-1);
     }
-  }, [target, onActingChange, check]);
+  }, [target, onActingChange, show]);
 
   /** Checks again after a repair of damaged records. */
   const recheck = useCallback(async () => {
-    if (target) await check(target, superuser, null);
-  }, [target, superuser, check]);
+    if (target) show(await recheckStack(target, superuser));
+  }, [target, superuser, show]);
 
   return { target, killing, error, leftovers, superuser, open, close, execute, recheck };
 }

@@ -4,3 +4,4 @@ export { pruneContainers, pruneVolumes, pruneNetworks, removeImages, listAllImag
 export { snapshotProjectContainerIds, forceRemoveOneoffContainers, composeRunStream, type RunCommand } from "./exec";
 export { findStackLeftovers, planDamagedRepair, runDamagedRepair, type StackLeftovers, type RepairPlan } from "./leftovers";
 export { stackOperations, type StackOperationOptions, type RestartOptions } from "./operations";
+export { tearDownStack, forceRemoveStack, recheckStack, settleTeardown, type TeardownOutcome, type TeardownResult } from "./teardown";

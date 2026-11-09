@@ -1,12 +1,5 @@
 import { useState, useCallback } from "react";
-import { stackOperations, findStackLeftovers, stackSuperuser, type ComposeStack, type StackLeftovers } from "../api";
-import { splitConfigFiles } from "../lib/configFiles";
-
-// What Docker still lists after an attempt, or null if the check itself failed (then
-// the attempt's own result decides, as before).
-async function leftoversOf(project: string, su?: "try"): Promise<StackLeftovers | null> {
-  try { return await findStackLeftovers(project, su); } catch { return null; }
-}
+import { tearDownStack, forceRemoveStack, recheckStack, type ComposeStack, type StackLeftovers, type TeardownOutcome } from "../api";
 
 export function useDownStack(
   onSuccess: () => void,
@@ -37,10 +30,12 @@ export function useDownStack(
   // `markDowned` lists the stack under Down afterwards; not after a force remove, whose
   // stack often has no compose file left to list (its folder was deleted, say). A
   // stack whose folder still exists turns up there with the next scan anyway.
-  const settle = useCallback((stack: ComposeStack, left: StackLeftovers | null, markDowned = true) => {
+  const show = useCallback((stack: ComposeStack, outcome: TeardownOutcome, markDowned = true) => {
+    if (outcome.state === "failed") { setError(outcome.error); return; }
     onSuccess();
-    if (left && left.ids.length > 0) {
-      setLeftovers(left);
+    if (outcome.state === "remaining") {
+      setLeftovers(outcome.leftovers);
+      setError(outcome.error);
     } else {
       if (markDowned) onDownComplete?.(stack);
       setTarget(null);
@@ -50,27 +45,17 @@ export function useDownStack(
 
   const execute = useCallback(async () => {
     if (!target) return;
-    const configFiles = splitConfigFiles(target.ConfigFiles);
     setDowning(true);
     onActingChange(1);
-    let su: "try" | undefined;
     try {
-      // Only for the leftovers check and repair below; Down itself resolves its own.
-      su = await stackSuperuser(configFiles);
+      const { outcome, superuser: su } = await tearDownStack(target, "down");
       setSuperuser(su);
-      await stackOperations.down(target);
-      settle(target, await leftoversOf(target.Name, su));
-    } catch (ex: unknown) {
-      setError(ex instanceof Error ? ex.message : String(ex));
-      // Compose failing (say, its file was deleted) is exactly when containers stay
-      // behind; show them with a way out next to the error.
-      const left = await leftoversOf(target.Name, su);
-      if (left && left.ids.length > 0) setLeftovers(left);
+      show(target, outcome);
     } finally {
       setDowning(false);
       onActingChange(-1);
     }
-  }, [target, onActingChange, settle]);
+  }, [target, onActingChange, show]);
 
   /** Removes the leftovers by project label (Kill's path), then checks again. */
   const forceRemove = useCallback(async () => {
@@ -78,21 +63,22 @@ export function useDownStack(
     setForceRemoving(true);
     onActingChange(1);
     try {
-      await stackOperations.kill(target).catch(() => {});
+      const { outcome, superuser: su } = await forceRemoveStack(target);
+      setSuperuser(su);
       setError(null);
-      settle(target, await leftoversOf(target.Name, superuser), false);
+      show(target, outcome, false);
     } finally {
       setForceRemoving(false);
       onActingChange(-1);
     }
-  }, [target, superuser, onActingChange, settle]);
+  }, [target, onActingChange, show]);
 
   /** Checks again after a repair of damaged records. */
   const recheck = useCallback(async () => {
     if (!target) return;
     setError(null);
-    settle(target, await leftoversOf(target.Name, superuser), false);
-  }, [target, superuser, settle]);
+    show(target, await recheckStack(target, superuser), false);
+  }, [target, superuser, show]);
 
   return { target, downing, error, leftovers, superuser, forceRemoving, open, close, execute, forceRemove, recheck };
 }
