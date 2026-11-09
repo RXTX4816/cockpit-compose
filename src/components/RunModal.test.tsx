@@ -253,6 +253,7 @@ describe("RunModal", () => {
       expect(args).toContain("-f");
       expect(args).toContain("/path/docker-compose.yml");
       expect(opts.err).toBe("out");
+      expect(opts.superuser).toBe("try"); // escalation fails safe when ownership can't be looked up
     });
 
     it("does not override the entrypoint by default (regression guard: plain args like --help must keep working)", async () => {

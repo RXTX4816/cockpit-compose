@@ -153,3 +153,16 @@ describe("Kill", () => {
     expect(callWith("kill")?.[0]).toEqual([...base, ...P, "-p", "myapp", "-f", files[0], "kill"]);
   });
 });
+
+describe("Start and Stop of a single service", () => {
+  it.each([
+    ["start", "up", [...base, ...P, "-p", "myapp", "-f", files[0], "up", "-d", "web"]],
+    ["stop", "stop", [...base, ...P, "-p", "myapp", "-f", files[0], "stop", "web"]],
+  ] as const)("%s runs compose for that service, with the stack's profiles, escalated", async (action, verb, argv) => {
+    const { result } = renderHook(() => useServiceActions(stack, vi.fn()));
+    await act(() => result.current.doServiceAction(action, "web"));
+    const call = callWith(verb);
+    expect(call?.[0]).toEqual(argv);
+    expect((call?.[1] as { superuser?: string }).superuser).toBe("try");
+  });
+});
