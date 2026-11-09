@@ -4,7 +4,7 @@ import { mockSpawn } from "../test/setup";
 import { mockProcess } from "../test/helpers";
 import { useDownStack } from "./useDownStack";
 import { buildDownStarter } from "../lib/backgroundActions";
-import { setRuntime } from "../api/cockpit";
+import { setRuntime, detectDockerMode } from "../api/cockpit";
 import type { ComposeStack } from "../api";
 
 // Characterization of Down as observed at the cockpit.spawn seam, across the paths a user
@@ -57,5 +57,22 @@ describe("Down from the background drawer and bulk", () => {
     await launch.mock.calls[0][0];
     expect(downCall()?.[0]).toEqual(
       ["docker", "compose", "--profile", "dev", "-p", "myapp", "-f", "/srv/myapp/compose.yml", "down"]);
+  });
+});
+
+// Kept last: detecting a rootless socket changes module state for any test after it.
+describe("when the ownership lookup for admin rights cannot be made", () => {
+  it("still runs Down from the drawer, escalated", async () => {
+    vi.stubGlobal("cockpit", { spawn: mockSpawn, user: vi.fn().mockResolvedValue({ id: 1000, name: "u", home: "/home/u" }) });
+    mockSpawn.mockImplementation((argv: string[]) => {
+      if (argv[0] === "stat" && argv.includes("%F")) return mockProcess("socket");
+      if (argv[0] === "stat") return mockProcess("", "stat: cannot statx");
+      return mockProcess(argv[0] === "cat" ? COMPOSE : "");
+    });
+    await detectDockerMode();
+    const launch = vi.fn();
+    await buildDownStarter(stack)(launch);
+    await launch.mock.calls[0][0];
+    expect((downCall()?.[1] as { superuser?: string }).superuser).toBe("try");
   });
 });

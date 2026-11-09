@@ -38,6 +38,20 @@ describe("stackOperations.down", () => {
     expect(downCall()).toBeUndefined();
   });
 
+  it("closing the process after it has started stops the running compose down", async () => {
+    let downProc: CockpitProcess | undefined;
+    mockSpawn.mockImplementation((argv: string[]) => {
+      const proc = mockProcess(argv[0] === "cat" ? COMPOSE : "");
+      if (argv.includes("down")) downProc = proc;
+      return proc;
+    });
+    const proc = stackOperations.down(stack);
+    await vi.waitFor(() => expect(downProc).toBeDefined());
+    proc.close();
+    expect(downProc!.close).toHaveBeenCalledOnce();
+    await proc;
+  });
+
   // Kept last: detecting a rootless socket changes module state for the tests after it.
   it("decides escalation itself: rootless Docker and user-owned files need no admin rights", async () => {
     vi.stubGlobal("cockpit", { spawn: mockSpawn, user: vi.fn().mockResolvedValue({ id: 1000, name: "u", home: "/home/u" }) });
