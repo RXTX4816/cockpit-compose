@@ -692,7 +692,7 @@
     "service_stop_failed": "Falha ao parar o serviço {{name}}",
     "service_restart_success": "Serviço {{name}} reiniciado",
     "service_restart_failed": "Falha ao reiniciar o serviço {{name}}",
-    "teardown_warning": "{{name}} is gone, but the command reported an error"
+    "teardown_warning": "{{name}} não existe mais, mas o comando informou um erro"
   },
   "service_actions": {
     "start": "Iniciar serviço",

@@ -686,7 +686,7 @@
     "service_stop_failed": "Kunde inte stoppa tjänsten {{name}}",
     "service_restart_success": "Tjänsten {{name}} omstartad",
     "service_restart_failed": "Kunde inte starta om tjänsten {{name}}",
-    "teardown_warning": "{{name}} is gone, but the command reported an error"
+    "teardown_warning": "{{name}} är borta, men kommandot rapporterade ett fel"
   },
   "service_actions": {
     "start": "Starta tjänst",

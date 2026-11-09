@@ -692,7 +692,7 @@
     "service_stop_failed": "Oprirea serviciului {{name}} a eșuat",
     "service_restart_success": "Serviciul {{name}} a fost repornit",
     "service_restart_failed": "Repornirea serviciului {{name}} a eșuat",
-    "teardown_warning": "{{name}} is gone, but the command reported an error"
+    "teardown_warning": "{{name}} a dispărut, dar comanda a raportat o eroare"
   },
   "service_actions": {
     "start": "Pornire serviciu",

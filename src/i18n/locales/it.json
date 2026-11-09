@@ -692,7 +692,7 @@
     "service_stop_failed": "Impossibile arrestare il servizio {{name}}",
     "service_restart_success": "Servizio {{name}} riavviato",
     "service_restart_failed": "Impossibile riavviare il servizio {{name}}",
-    "teardown_warning": "{{name}} is gone, but the command reported an error"
+    "teardown_warning": "{{name}} non c'è più, ma il comando ha segnalato un errore"
   },
   "service_actions": {
     "start": "Avvia servizio",

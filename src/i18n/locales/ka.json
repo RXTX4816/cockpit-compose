@@ -686,7 +686,7 @@
     "service_stop_failed": "სერვისის {{name}} შეჩერება ვერ მოხერხდა",
     "service_restart_success": "სერვისი {{name}} გადაიტვირთა",
     "service_restart_failed": "სერვისის {{name}} გადატვირთვა ვერ მოხერხდა",
-    "teardown_warning": "{{name}} is gone, but the command reported an error"
+    "teardown_warning": "{{name}} აღარ არსებობს, მაგრამ ბრძანებამ შეცდომა დააფიქსირა"
   },
   "service_actions": {
     "start": "სერვისის გაშვება",

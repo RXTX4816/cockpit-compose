@@ -692,7 +692,7 @@
     "service_stop_failed": "עצירת השירות {{name}} נכשלה",
     "service_restart_success": "השירות {{name}} הופעל מחדש",
     "service_restart_failed": "הפעלה מחדש של השירות {{name}} נכשלה",
-    "teardown_warning": "{{name}} is gone, but the command reported an error"
+    "teardown_warning": "{{name}} כבר לא קיים, אך הפקודה דיווחה על שגיאה"
   },
   "service_actions": {
     "start": "הפעל שירות",

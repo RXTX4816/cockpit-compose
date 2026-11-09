@@ -698,7 +698,7 @@
     "service_stop_failed": "Službu {{name}} se nepodařilo zastavit",
     "service_restart_success": "Služba {{name}} restartována",
     "service_restart_failed": "Službu {{name}} se nepodařilo restartovat",
-    "teardown_warning": "{{name}} is gone, but the command reported an error"
+    "teardown_warning": "{{name}} je pryč, ale příkaz ohlásil chybu"
   },
   "service_actions": {
     "start": "Spustit službu",
