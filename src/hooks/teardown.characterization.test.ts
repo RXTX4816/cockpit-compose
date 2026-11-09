@@ -107,12 +107,22 @@ describe("Kill", () => {
 });
 
 describe("Force remove (from the Down dialog)", () => {
-  it("swallows a failure of the removal", async () => {
+  it("shows the error when the removal fails and containers remain", async () => {
     world.leftover = true;
     const { result } = await down();
     world.listed = true;
     world.rmFails = true;
     await act(() => result.current.forceRemove());
-    expect(result.current.error).toBeNull();
+    expect(result.current.error).toMatch(/rm failed/);
+    expect(result.current.leftovers?.ids).toEqual([ID]);
+  });
+
+  it("closes when the removal succeeds", async () => {
+    world.leftover = true;
+    const { result } = await down();
+    world.leftover = false;
+    world.listed = true;
+    await act(() => result.current.forceRemove());
+    expect(result.current.target).toBeNull();
   });
 });

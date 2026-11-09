@@ -74,6 +74,13 @@ describe("forceRemoveStack and recheckStack", () => {
     expect((await forceRemoveStack(stack)).outcome).toEqual({ state: "gone", warning: null });
   });
 
+  it("force remove reports the error when the removal fails and containers remain", async () => {
+    world.listed = true;
+    world.left = true;
+    world.rmFails = true;
+    expect((await forceRemoveStack(stack)).outcome).toMatchObject({ state: "remaining", error: expect.stringMatching(/rm failed/) });
+  });
+
   it("recheck reports what is left", async () => {
     world.left = true;
     expect(await recheckStack(stack, "try")).toMatchObject({ state: "remaining" });

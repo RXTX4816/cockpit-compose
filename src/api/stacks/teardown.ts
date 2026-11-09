@@ -39,7 +39,7 @@ export function settleTeardown(failure: string | null, left: StackLeftovers | nu
   return { state: "failed", error: failure };
 }
 
-async function attempt(stack: ComposeStack, kind: "down" | "kill", ignoreFailure = false): Promise<TeardownResult> {
+async function attempt(stack: ComposeStack, kind: "down" | "kill"): Promise<TeardownResult> {
   let superuser: "try" | undefined;
   let failure: string | null = null;
   try {
@@ -49,7 +49,7 @@ async function attempt(stack: ComposeStack, kind: "down" | "kill", ignoreFailure
     failure = messageOf(ex);
   }
   const left = await leftoversOf(stack.Name, superuser);
-  return { outcome: settleTeardown(ignoreFailure ? null : failure, left), superuser };
+  return { outcome: settleTeardown(failure, left), superuser };
 }
 
 /** Takes a stack down, then reports whether it is really gone. */
@@ -57,9 +57,9 @@ export function tearDownStack(stack: ComposeStack, kind: "down" | "kill"): Promi
   return attempt(stack, kind);
 }
 
-/** Removes a stack's containers by project label, for leftovers a failed Down could not remove. */
+/** Removes a stack's containers by project label, for leftovers a failed Down could not remove. Its errors are reported like any other attempt's. */
 export function forceRemoveStack(stack: ComposeStack): Promise<TeardownResult> {
-  return attempt(stack, "kill", true);
+  return attempt(stack, "kill");
 }
 
 /** Checks again what a stack has left, e.g. after a repair of damaged records. */
