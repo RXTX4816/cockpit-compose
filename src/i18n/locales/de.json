@@ -685,7 +685,8 @@
     "service_stop_success": "Dienst {{name}} gestoppt",
     "service_stop_failed": "Dienst {{name}} konnte nicht gestoppt werden",
     "service_restart_success": "Dienst {{name}} neu gestartet",
-    "service_restart_failed": "Dienst {{name}} konnte nicht neu gestartet werden"
+    "service_restart_failed": "Dienst {{name}} konnte nicht neu gestartet werden",
+    "teardown_warning": "{{name}} is gone, but the command reported an error"
   },
   "service_actions": {
     "start": "Dienst starten",

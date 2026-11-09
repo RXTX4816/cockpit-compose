@@ -1,4 +1,6 @@
 import { useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
+import { useToast } from "../components/ToastProvider";
 import { tearDownStack, forceRemoveStack, recheckStack, type ComposeStack, type StackLeftovers, type TeardownOutcome } from "../api";
 
 export function useDownStack(
@@ -6,6 +8,8 @@ export function useDownStack(
   onActingChange: (delta: 1 | -1) => void,
   onDownComplete?: (stack: ComposeStack) => void,
 ) {
+  const { t } = useTranslation();
+  const toast = useToast();
   const [target, setTarget] = useState<ComposeStack | null>(null);
   const [downing, setDowning] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -37,11 +41,12 @@ export function useDownStack(
       setLeftovers(outcome.leftovers);
       setError(outcome.error);
     } else {
+      if (outcome.warning) toast.warn(t("toast.teardown_warning", { name: stack.Name }), outcome.warning);
       if (markDowned) onDownComplete?.(stack);
       setTarget(null);
       setLeftovers(null);
     }
-  }, [onSuccess, onDownComplete]);
+  }, [onSuccess, onDownComplete, toast, t]);
 
   const execute = useCallback(async () => {
     if (!target) return;

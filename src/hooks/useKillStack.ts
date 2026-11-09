@@ -1,10 +1,14 @@
 import { useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
+import { useToast } from "../components/ToastProvider";
 import { tearDownStack, recheckStack, type ComposeStack, type StackLeftovers, type TeardownOutcome } from "../api";
 
 export function useKillStack(
   onSuccess: () => void,
   onActingChange: (delta: 1 | -1) => void,
 ) {
+  const { t } = useTranslation();
+  const toast = useToast();
   const [target, setTarget] = useState<ComposeStack | null>(null);
   const [killing, setKilling] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -31,13 +35,14 @@ export function useKillStack(
       setError(outcome.error);
     } else if (outcome.state === "gone") {
       // Nothing left, so the stack is gone even if part of the kill reported an error.
+      if (outcome.warning) toast.warn(t("toast.teardown_warning", { name: target?.Name ?? "" }), outcome.warning);
       setTarget(null);
       setLeftovers(null);
       setError(null);
     } else {
       setError(outcome.error);
     }
-  }, [onSuccess]);
+  }, [onSuccess, target, toast, t]);
 
   const execute = useCallback(async () => {
     if (!target) return;

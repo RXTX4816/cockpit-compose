@@ -709,7 +709,8 @@
     "service_stop_success": "توقفت الخدمة {{name}}",
     "service_stop_failed": "فشل إيقاف الخدمة {{name}}",
     "service_restart_success": "أُعيد تشغيل الخدمة {{name}}",
-    "service_restart_failed": "فشلت إعادة تشغيل الخدمة {{name}}"
+    "service_restart_failed": "فشلت إعادة تشغيل الخدمة {{name}}",
+    "teardown_warning": "{{name}} is gone, but the command reported an error"
   },
   "service_actions": {
     "start": "بدء الخدمة",

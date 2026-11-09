@@ -685,7 +685,8 @@
     "service_stop_success": "服务 {{name}} 已停止",
     "service_stop_failed": "停止服务 {{name}} 失败",
     "service_restart_success": "服务 {{name}} 已重启",
-    "service_restart_failed": "重启服务 {{name}} 失败"
+    "service_restart_failed": "重启服务 {{name}} 失败",
+    "teardown_warning": "{{name}} is gone, but the command reported an error"
   },
   "service_actions": {
     "start": "启动服务",

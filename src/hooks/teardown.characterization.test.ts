@@ -56,11 +56,12 @@ describe("Down", () => {
     expect(onDownComplete).toHaveBeenCalledWith(stack);
   });
 
-  it("stays open with the error when compose fails, even though nothing is left", async () => {
+  it("closes when compose fails but nothing is left (the one rule for done)", async () => {
     world.composeFails = true;
-    const { result } = await down();
-    expect(result.current.target).toBe(stack);
-    expect(result.current.error).toMatch(/compose failed/);
+    const { result, onDownComplete } = await down();
+    expect(result.current.target).toBeNull();
+    expect(result.current.error).toBeNull();
+    expect(onDownComplete).toHaveBeenCalledWith(stack);
   });
 
   it("stays open with the leftovers when containers remain", async () => {
