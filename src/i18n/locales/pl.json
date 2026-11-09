@@ -697,7 +697,8 @@
     "service_stop_success": "Usługa {{name}} zatrzymana",
     "service_stop_failed": "Zatrzymanie usługi {{name}} nie powiodło się",
     "service_restart_success": "Usługa {{name}} uruchomiona ponownie",
-    "service_restart_failed": "Ponowne uruchomienie usługi {{name}} nie powiodło się"
+    "service_restart_failed": "Ponowne uruchomienie usługi {{name}} nie powiodło się",
+    "teardown_warning": "{{name}} is gone, but the command reported an error"
   },
   "service_actions": {
     "start": "Uruchom usługę",

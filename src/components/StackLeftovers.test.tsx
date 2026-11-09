@@ -13,7 +13,7 @@ const GHOST = "b".repeat(64);
 const plan = {
   rootless: true,
   dataRoot: "/home/test/.local/share/docker",
-  commands: ["systemctl --user stop docker", `rm -rf /home/test/.local/share/docker/containers/${GHOST}`, "systemctl --user start docker"],
+  containerIds: [GHOST],
 };
 
 beforeEach(() => {

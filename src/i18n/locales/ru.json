@@ -697,7 +697,8 @@
     "service_stop_success": "Сервис {{name}} остановлен",
     "service_stop_failed": "Не удалось остановить сервис {{name}}",
     "service_restart_success": "Сервис {{name}} перезапущен",
-    "service_restart_failed": "Не удалось перезапустить сервис {{name}}"
+    "service_restart_failed": "Не удалось перезапустить сервис {{name}}",
+    "teardown_warning": "{{name}} is gone, but the command reported an error"
   },
   "service_actions": {
     "start": "Запустить сервис",

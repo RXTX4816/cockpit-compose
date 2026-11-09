@@ -685,7 +685,8 @@
     "service_stop_success": "{{name}} hizmeti durduruldu",
     "service_stop_failed": "{{name}} hizmeti durdurulamadı",
     "service_restart_success": "{{name}} hizmeti yeniden başlatıldı",
-    "service_restart_failed": "{{name}} hizmeti yeniden başlatılamadı"
+    "service_restart_failed": "{{name}} hizmeti yeniden başlatılamadı",
+    "teardown_warning": "{{name}} is gone, but the command reported an error"
   },
   "service_actions": {
     "start": "Hizmeti başlat",

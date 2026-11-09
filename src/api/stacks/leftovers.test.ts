@@ -3,7 +3,7 @@ import { mockSpawn } from "../../test/setup";
 import { mockProcess } from "../../test/helpers";
 import * as cockpitMod from "../cockpit";
 import { setRuntime } from "../cockpit";
-import { findStackLeftovers, planDamagedRepair, runDamagedRepair } from "./leftovers";
+import { findStackLeftovers, planDamagedRepair, renderRepairCommands, runDamagedRepair } from "./leftovers";
 
 const GOOD = "a".repeat(64);
 const GHOST = "b".repeat(64);
@@ -53,7 +53,8 @@ describe("planDamagedRepair", () => {
     vi.spyOn(cockpitMod, "getSocketMode").mockReturnValue("rootless");
     mockSpawn.mockImplementation(() => mockProcess("/home/test/.local/share/docker\n"));
     const plan = await planDamagedRepair([GHOST]);
-    expect(plan.commands).toEqual([
+    expect(plan).toEqual({ rootless: true, dataRoot: "/home/test/.local/share/docker", containerIds: [GHOST] });
+    expect(renderRepairCommands(plan)).toEqual([
       "systemctl --user stop docker",
       `rm -rf /home/test/.local/share/docker/containers/${GHOST}`,
       "systemctl --user start docker",
@@ -64,7 +65,8 @@ describe("planDamagedRepair", () => {
     vi.spyOn(cockpitMod, "getSocketMode").mockReturnValue("rootful");
     mockSpawn.mockImplementation(() => mockProcess("/var/lib/docker\n"));
     const plan = await planDamagedRepair([GHOST]);
-    expect(plan.commands).toEqual([
+    expect(plan).toEqual({ rootless: false, dataRoot: "/var/lib/docker", containerIds: [GHOST] });
+    expect(renderRepairCommands(plan)).toEqual([
       "sudo systemctl stop docker docker.socket",
       `sudo rm -rf /var/lib/docker/containers/${GHOST}`,
       "sudo systemctl start docker",
@@ -75,7 +77,8 @@ describe("planDamagedRepair", () => {
     vi.spyOn(cockpitMod, "getSocketMode").mockReturnValue("rootful");
     mockSpawn.mockImplementation(() => mockProcess("/var/lib/docker\n"));
     const plan = await planDamagedRepair([GHOST, "../../etc", "abc"]);
-    expect(plan.commands.filter(c => c.includes("rm -rf"))).toEqual([`sudo rm -rf /var/lib/docker/containers/${GHOST}`]);
+    expect(plan.containerIds).toEqual([GHOST]);
+    expect(renderRepairCommands(plan).filter(c => c.includes("rm -rf"))).toEqual([`sudo rm -rf /var/lib/docker/containers/${GHOST}`]);
   });
 
   it("refuses a data root that is not a plain absolute path", async () => {
@@ -88,7 +91,7 @@ describe("runDamagedRepair", () => {
   const plan = {
     rootless: false,
     dataRoot: "/var/lib/docker",
-    commands: ["sudo systemctl stop docker docker.socket", `sudo rm -rf /var/lib/docker/containers/${GHOST}`, "sudo systemctl start docker"],
+    containerIds: [GHOST],
   };
 
   it("stops Docker, removes the record and starts Docker again, as admin for rootful", async () => {

@@ -39,12 +39,17 @@ export async function findStackLeftovers(project: string, superuser?: "try"): Pr
   return { ids, damaged };
 }
 
+/**
+ * What a repair will do, as data. The commands shown to the user are a rendering of it
+ * (renderRepairCommands); what runs is built from these fields, never from the display text.
+ */
 export interface RepairPlan {
+  /** Rootless Docker needs no admin rights; rootful needs them for every step. */
   rootless: boolean;
   /** Docker's data root, e.g. /var/lib/docker or ~/.local/share/docker. */
   dataRoot: string;
-  /** The shell commands the repair runs, for showing and copying. */
-  commands: string[];
+  /** Full IDs of the damaged container records to delete. */
+  containerIds: string[];
 }
 
 const FULL_ID = /^[0-9a-f]{64}$/;
@@ -54,20 +59,23 @@ export async function planDamagedRepair(damaged: string[], superuser?: "try"): P
   const dataRoot = (await cockpit.spawn(cli("info", "--format", "{{.DockerRootDir}}"), env(superuser))).trim();
   // Both go into rm -rf paths, so refuse anything that is not exactly what we expect.
   if (!dataRoot.startsWith("/") || dataRoot.includes("..")) throw new Error(`Unexpected Docker data root: ${dataRoot}`);
-  const ids = damaged.filter(id => FULL_ID.test(id));
-  const rootless = getSocketMode("docker") === "rootless";
-  const sudo = rootless ? "" : "sudo ";
-  const systemctl = rootless ? "systemctl --user" : `${sudo}systemctl`;
-  const units = rootless ? "docker" : "docker docker.socket";
   return {
-    rootless,
+    rootless: getSocketMode("docker") === "rootless",
     dataRoot,
-    commands: [
-      `${systemctl} stop ${units}`,
-      ...ids.map(id => `${sudo}rm -rf ${dataRoot}/containers/${id}`),
-      `${systemctl} start docker`,
-    ],
+    containerIds: damaged.filter(id => FULL_ID.test(id)),
   };
+}
+
+/** The shell commands a repair plan runs, for showing and copying. */
+export function renderRepairCommands(plan: RepairPlan): string[] {
+  const sudo = plan.rootless ? "" : "sudo ";
+  const systemctl = plan.rootless ? "systemctl --user" : `${sudo}systemctl`;
+  const units = plan.rootless ? "docker" : "docker docker.socket";
+  return [
+    `${systemctl} stop ${units}`,
+    ...plan.containerIds.map(id => `${sudo}rm -rf ${plan.dataRoot}/containers/${id}`),
+    `${systemctl} start docker`,
+  ];
 }
 
 /**
@@ -79,13 +87,10 @@ export async function runDamagedRepair(plan: RepairPlan): Promise<void> {
   const run = (argv: string[]) => cockpit.spawn(argv, { superuser: plan.rootless ? undefined : "require", err: "message" });
   const systemctl = plan.rootless ? ["systemctl", "--user"] : ["systemctl"];
   const units = plan.rootless ? ["docker"] : ["docker", "docker.socket"];
-  const ids = plan.commands
-    .map(c => /\/containers\/([0-9a-f]{64})$/.exec(c)?.[1])
-    .filter((id): id is string => Boolean(id));
 
   await run([...systemctl, "stop", ...units]);
   try {
-    for (const id of ids) await run(["rm", "-rf", `${plan.dataRoot}/containers/${id}`]);
+    for (const id of plan.containerIds) await run(["rm", "-rf", `${plan.dataRoot}/containers/${id}`]);
   } finally {
     await run([...systemctl, "start", "docker"]);
   }
