@@ -1,20 +1,23 @@
 name: Semantic Release
 
-# Every push to main whose CI passes gets a run that waits for the
-# maintainer's approval on the `release` environment before tagging. A newer
-# main commit cancels the previous pending run, so only the tip is offered.
-# workflow_dispatch re-offers the current tip, e.g. after an approval expired.
+# Releases are started by hand: Actions → Semantic Release → Run workflow (on
+# main), or `gh workflow run semantic-release.yml -f dry_run=false`. With
+# "dry run" checked (the default) the run only computes the next version and
+# writes it, with the commits since the last tag, to the run summary. Unchecked,
+# it tags the tip of main, which starts the Release workflow. Tagging runs in
+# the `release` environment, so its protection rules still apply.
 
 on:
-  workflow_run:
-    workflows: [CI]
-    types: [completed]
-    branches: [main]
   workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Dry run (only show the next version and changelog, do not tag)
+        type: boolean
+        default: true
 
 concurrency:
   group: semantic-release
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 permissions:
   contents: read
@@ -22,10 +25,7 @@ permissions:
 
 jobs:
   semantic-release:
-    if: >-
-      github.event_name == 'workflow_dispatch' ||
-      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
     uses: RXTX4816/cockpit-plugin-base-react/.github/workflows/semantic-release-plugin.yml@main
     with:
-      sha: ${{ github.event.workflow_run.head_sha || github.sha }}
+      dry_run: ${{ inputs.dry_run }}
     secrets: inherit
