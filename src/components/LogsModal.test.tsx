@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
 import { LogsModal } from "./LogsModal";
 import type { ComposeStack } from "../api";
+import { mockProcess } from "../test/helpers";
 
 vi.mock("../hooks/useLogStream", () => ({
   useLogStream: vi.fn(),
@@ -476,7 +477,7 @@ describe("LogsModal", () => {
   it("falls back to cockpit.file when showSaveFilePicker is absent", async () => {
     const mockReplace = vi.fn().mockResolvedValue(undefined);
     vi.stubGlobal("cockpit", {
-      spawn: vi.fn(),
+      spawn: vi.fn(() => mockProcess("")), // the mkdir -p of ~/Downloads
       file: vi.fn().mockReturnValue({ replace: mockReplace }),
       user: vi.fn().mockResolvedValue({ id: 1000, name: "tok", home: "/home/tok" }),
     });
