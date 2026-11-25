@@ -28,13 +28,14 @@ import {
   Checkbox,
 } from "@patternfly/react-core";
 import { Tooltip } from "@rxtx4816/cockpit-plugin-base-react/components";
-import { type ComposeStack, type Runtime } from "../../api";
+import { type ComposeStack, type Runtime, parseStackStatus } from "../../api";
 import {
   TimesCircleIcon, TimesIcon, BanIcon, PlusCircleIcon, FolderOpenIcon, SearchIcon, ExclamationTriangleIcon,
   DownloadIcon, RedoAltIcon, ArrowAltCircleDownIcon,
 } from "@patternfly/react-icons";
 import { type DownedStack } from "../../hooks/useDownedStacksScan";
 import { useComposeStacks } from "../../hooks/useComposeStacks";
+import { StacksLiveProvider } from "../../hooks/useStacksLive";
 import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import { useDownStack } from "../../hooks/useDownStack";
 import { useKillStack } from "../../hooks/useKillStack";
@@ -238,7 +239,7 @@ export function StacksView({ onRuntimeChange, dockerMissing, layout = "poweruser
   );
 
   return (
-    <>
+    <StacksLiveProvider enabled={stacks.some(s => ["running", "partial"].includes(parseStackStatus(s.Status)))}>
       <Toolbar className="sv-toolbar">
         <ToolbarContent>
           <ToolbarItem>
@@ -806,6 +807,6 @@ export function StacksView({ onRuntimeChange, dockerMissing, layout = "poweruser
           </ModalFooter>
         </Modal>
       )}
-    </>
+    </StacksLiveProvider>
   );
 }

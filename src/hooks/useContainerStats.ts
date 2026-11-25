@@ -1,9 +1,9 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { listContainers, getContainerStats, parsePortsFull, parseJsonOutput, parseDockerBytes } from "../api";
+import { listContainers, getContainerStats, parseJsonOutput } from "../api";
 import type { ComposeContainer, ContainerStats, ParsedPort, StackStatus } from "../api";
+import { summarizePorts, sumStats } from "../lib/stackSummary";
 import { useAutoRefresh } from "./useAutoRefresh";
-
-const BIND_PRIORITY: Record<ParsedPort["bindType"], number> = { external: 3, specific: 2, localhost: 1 };
+import { useStackLive, useSharedRead } from "./useStacksLive";
 
 export function useContainerStats(stackName: string, status: StackStatus) {
   const [ports, setPorts] = useState<ParsedPort[]>([]);
@@ -27,32 +27,15 @@ export function useContainerStats(stackName: string, status: StackStatus) {
       await proc;
       const containers = parseJsonOutput<ComposeContainer>(raw);
 
-      const portMap = new Map<string, ParsedPort>();
-      const runningIds: string[] = [];
-      for (const c of containers) {
-        for (const p of parsePortsFull(c.Ports)) {
-          const existing = portMap.get(p.label);
-          if (!existing || BIND_PRIORITY[p.bindType] > BIND_PRIORITY[existing.bindType]) portMap.set(p.label, p);
-        }
-        if (c.State?.toLowerCase() === "running" && c.ID) runningIds.push(c.ID);
-      }
-      if (mountedRef.current) setPorts([...portMap.values()]);
+      const { ports: found, runningIds } = summarizePorts(containers);
+      if (mountedRef.current) setPorts(found);
 
       if (runningIds.length > 0) {
         let statsRaw = "";
         const statsProc = getContainerStats(runningIds);
         statsProc.stream(d => { statsRaw += d; });
         await statsProc;
-        const statsData = parseJsonOutput<ContainerStats>(statsRaw);
-
-        let totalCPU = 0;
-        let totalMem = 0;
-        for (const s of statsData) {
-          totalCPU += parseFloat(s.cpu || "0");
-          const [used] = (s.mem || "0B / 0B").split(" / ");
-          totalMem += parseDockerBytes(used);
-        }
-        if (mountedRef.current) setStats({ cpu: totalCPU, mem: totalMem });
+        if (mountedRef.current) setStats(sumStats(parseJsonOutput<ContainerStats>(statsRaw)));
       } else {
         if (mountedRef.current) setStats(null);
       }
@@ -61,8 +44,15 @@ export function useContainerStats(stackName: string, status: StackStatus) {
     }
   }, [stackName, status]);
 
-  useEffect(() => { void load(); }, [load]);
-  useAutoRefresh(load, 10000, !(status === "running" || status === "partial"));
+  // A stacks list that polls for all its rows at once (StacksLiveProvider) answers for this stack
+  // too; only without one (or when its shared read is unavailable) does the row read for itself.
+  const shared = useStackLive(stackName);
+  const active = status === "running" || status === "partial";
+  const readOwn = !useSharedRead();
 
+  useEffect(() => { if (readOwn) void load(); }, [load, readOwn]);
+  useAutoRefresh(load, 10000, !(active && readOwn));
+
+  if (!readOwn) return active && shared ? shared : { ports: [], stats: null };
   return { ports, stats };
 }

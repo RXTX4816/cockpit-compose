@@ -9,7 +9,7 @@ export {
 } from "./cockpit";
 export { parseStackStatus, parseServiceCount, parsePortsFull, parsePortsDetailed, getServicesFromCompose, getProfilesFromCompose, getJobsFromCompose, isJobActive, getServiceProfileMapFromCompose, getProjectNameFromCompose, getImagesFromCompose, getComposeProjectNameFromEnv, hasServicesKey, parseShortUptime } from "./parsing";
 export { listStacks, streamLogs, listImages, listVolumes, streamEvents, composeTop, composeVersion, containerVersion, listProjectContainerImageRefs, listImagesByRepo, listAllContainerImages, removeImages, listStoppedContainers, listDanglingVolumes, listProjectNetworks, listNetworkConnectedProjects, inspectNetworkContainerCounts, pruneContainers, pruneVolumes, pruneNetworks, listAllImages, listInUseImageIds, pruneImages, snapshotProjectContainerIds, forceRemoveOneoffContainers, type RunCommand, planDamagedRepair, renderRepairCommands, runDamagedRepair, type StackLeftovers, type RepairPlan, stackOperations, type StackOperationOptions, type RestartOptions, tearDownStack, forceRemoveStack, recheckStack, type TeardownOutcome, type TeardownResult } from "./stacks";
-export { listContainers, getContainerStats } from "./containers";
+export { listContainers, getContainerStats, listAllStackContainers, getAllContainerStats } from "./containers";
 export { readComposeFile, listSnapshots, restoreSnapshot, deleteSnapshot, readEnvFile, saveEnvFile, findEnvFiles, findComposeFiles, listYamlFilesInDir, makeTempDir, fetchComposeFromGit, removeDirectory, removeFile, findBackupArchives, listArchiveContents, readFileFromArchive, createBackupArchive } from "./files";
 export { saveStackFile, addStackFile, createStackFiles } from "./stackFiles";
 export { restoreBackup, RestoreError, type RestoreRequest } from "./restore";
