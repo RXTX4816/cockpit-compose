@@ -11,14 +11,11 @@ export default createVitestConfig({
   minWorkers: 2,
   setupFiles: ["./src/test/setup.ts"],
   coverage: {
+    // The shared excludes (tests, src/test, src/index.tsx, src/api/index.ts, src/api/types.ts)
+    // come from the base.
     exclude: [
-      "src/test/**",
-      "src/**/*.test.{ts,tsx}",
-      "src/index.tsx",
       "src/api/stacks/index.ts",
-      "src/api/types.ts",
       "src/api/templates.ts",
-      "src/api/index.ts",
       "src/components/Downed/index.ts",
       "src/components/Modals/index.ts",
     ],
