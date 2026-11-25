@@ -103,10 +103,10 @@ describe("useKillStack", () => {
     expect(spawnArgs).toContain("kill");
   });
 
-  it("execute() uses String(ex) when rejection is not an Error instance", async () => {
+  it("execute() shows the message of a Cockpit failure object (not an Error instance)", async () => {
     mockSpawn.mockReturnValue(
       Object.assign(
-        new Promise<string>((_, reject) => queueMicrotask(() => reject("plain string error"))),
+        new Promise<string>((_, reject) => queueMicrotask(() => reject({ message: "plain string error" }))),
         { stream: vi.fn().mockReturnThis(), close: vi.fn(), input: vi.fn() },
       ) as CockpitProcess,
     );

@@ -1,3 +1,4 @@
+import { getHost } from "@rxtx4816/cockpit-plugin-base-react/host";
 import { compose, cli, dockerSpawnEnviron, composeSupportsProgress } from "../cockpit";
 import { fileFlags, makeFakeProcess, afterPreparing } from "./internal";
 import { engine } from "./engine";
@@ -103,13 +104,10 @@ export function killStack(project: string, configFiles: string[], profiles: stri
       );
     } catch { /* compose kill failing (e.g. no running services) is not fatal */ }
 
-    let raw = "";
-    const psProc = cockpit.spawn(
+    const raw = await getHost().run(
       cli("ps", "-a", "--filter", `label=com.docker.compose.project=${project}`, "--format", "{{.ID}}"),
-      { superuser, err: "message", ...dockerSpawnEnviron() },
+      { superuser, ...dockerSpawnEnviron() },
     );
-    psProc.stream(d => { raw += d; });
-    await psProc;
     const ids = raw.split("\n").map(l => l.trim()).filter(Boolean);
     if (ids.length === 0) return "";
     await cockpit.spawn(cli("rm", "-f", ...ids), { superuser, err: "message", ...dockerSpawnEnviron() });

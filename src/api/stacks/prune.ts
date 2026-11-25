@@ -1,3 +1,4 @@
+import { getHost, type HostProcess } from "@rxtx4816/cockpit-plugin-base-react/host";
 import { cli, dockerSpawnEnviron, socketSuperuser } from "../cockpit";
 import { engine } from "./engine";
 
@@ -15,10 +16,8 @@ export function listAllImages(): CockpitProcess {
   );
 }
 
-async function fetchLines(proc: CockpitProcess): Promise<string[]> {
-  let output = "";
-  proc.stream((data: string) => { output += data; });
-  await proc;
+async function fetchLines(proc: HostProcess): Promise<string[]> {
+  const output = await proc;
   return output.split("\n").map(l => l.trim()).filter(l => l.length > 0);
 }
 
@@ -28,14 +27,14 @@ async function fetchLines(proc: CockpitProcess): Promise<string[]> {
 // currently on disk under that name (a re-pulled ":latest" moves the name to a new ID
 // without updating already-created containers' own image reference).
 export async function listInUseImageIds(): Promise<string[]> {
-  const containerIds = await fetchLines(cockpit.spawn(
+  const containerIds = await fetchLines(getHost().run(
     cli("ps", "-a", "--format", "{{.ID}}"),
-    { superuser: socketSuperuser(), err: "message", ...dockerSpawnEnviron() },
+    { superuser: socketSuperuser(), ...dockerSpawnEnviron() },
   ));
   if (containerIds.length === 0) return [];
-  return fetchLines(cockpit.spawn(
+  return fetchLines(getHost().run(
     cli("inspect", ...containerIds, "--format", "{{.Image}}"),
-    { superuser: socketSuperuser(), err: "message", ...dockerSpawnEnviron() },
+    { superuser: socketSuperuser(), ...dockerSpawnEnviron() },
   ));
 }
 

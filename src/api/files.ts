@@ -1,3 +1,4 @@
+import { getHost } from "@rxtx4816/cockpit-plugin-base-react/host";
 import type { Snapshot } from "./types";
 import { getProfilesFromCompose } from "./parsing";
 import {
@@ -24,10 +25,7 @@ export function readComposeFile(path: string): CockpitProcess {
       if (content === null) throw new Error(`cockpit.file: ${path}: No such file or directory`);
       return content;
     } catch {
-      let content = "";
-      const proc = cockpit.spawn(["cat", path], { err: "message" });
-      proc.stream((d: string) => { content += d; });
-      await proc;
+      const content = await getHost().run(["cat", path]);
       return content;
     }
   });
@@ -70,10 +68,7 @@ export function listSnapshots(composeFilePath: string): CockpitProcess {
 }
 
 export async function restoreSnapshot(snapshotPath: string): Promise<string> {
-  let content = "";
-  const proc = cockpit.spawn(["cat", snapshotPath], { err: "message" });
-  proc.stream(data => { content += data; });
-  await proc;
+  const content = await getHost().run(["cat", snapshotPath]);
   return content;
 }
 
@@ -189,13 +184,10 @@ export async function createBackupArchive(
     // Discover immediate subdirectories via find and exclude each by exact name.
     // Wildcard patterns with trailing slash (gitea/*/) are unreliable across GNU tar versions
     // because tar checks paths during traversal without trailing slashes.
-    let findOut = "";
-    const findProc = cockpit.spawn(
+    const findOut = await getHost().run(
       ["find", `${parentDir}/${dirName}`, "-mindepth", "1", "-maxdepth", "1", "-type", "d"],
-      { superuser, err: "message" },
+      { superuser },
     );
-    findProc.stream((d: string) => { findOut += d; });
-    await findProc;
     for (const line of findOut.trim().split("\n").filter(l => l.trim())) {
       const name = line.substring(line.lastIndexOf("/") + 1);
       exclude.push(`${dirName}/${name}`);
