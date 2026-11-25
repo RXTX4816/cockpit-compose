@@ -1,3 +1,5 @@
+import { getHost } from "@rxtx4816/cockpit-plugin-base-react/host";
+
 export type Runtime = "docker" | "podman";
 export type SocketMode = "rootless" | "rootful";
 
@@ -85,15 +87,11 @@ interface StatResult {
 }
 
 async function statPath(path: string, superuser?: "try"): Promise<StatResult> {
-  let out = "";
-  let errMsg = "";
   try {
-    const proc = cockpit.spawn(["stat", "-c", "%F", "--", path], { superuser, err: "message" });
-    proc.stream(d => { out += d; });
-    await proc;
+    const out = await getHost().run(["stat", "-c", "%F", "--", path], { superuser });
     return { isSocket: out.trim() === "socket", permissionDenied: false };
   } catch (e) {
-    errMsg = e instanceof Error ? e.message : String(e);
+    const errMsg = e instanceof Error ? e.message : String(e);
     return { isSocket: false, permissionDenied: /permission denied/i.test(errMsg) };
   }
 }
@@ -201,7 +199,7 @@ export async function checkSocketHealth(runtime: Runtime, mode: SocketMode): Pro
 
   const probeArgs = runtime === "podman" ? ["podman", "ps"] : ["docker", "version", "--format", "{{.Server.Version}}"];
   try {
-    await cockpit.spawn(probeArgs, { superuser, err: "message", environ: candidate.environ });
+    await getHost().run(probeArgs, { superuser, environ: candidate.environ });
     return { ok: true };
   } catch (e) {
     return { ok: false, reason: e instanceof Error ? e.message : String(e) };
@@ -223,13 +221,13 @@ export async function detectComposeCommand(): Promise<boolean> {
   const superuser = socketSuperuser();
   let found = false;
   try {
-    await cockpit.spawn([r, "compose", "version"], { superuser, err: "message", ...dockerSpawnEnviron() });
+    await getHost().run([r, "compose", "version"], { superuser, ...dockerSpawnEnviron() });
     composePrefix = [r, "compose"];
     found = true;
   } catch {
     try {
       const legacy = r === "docker" ? "docker-compose" : "podman-compose";
-      await cockpit.spawn([legacy, "version"], { superuser, err: "message", ...dockerSpawnEnviron() });
+      await getHost().run([legacy, "version"], { superuser, ...dockerSpawnEnviron() });
       composePrefix = [legacy];
       found = true;
     } catch {
@@ -240,7 +238,7 @@ export async function detectComposeCommand(): Promise<boolean> {
     detectedPrefixes.set(r, composePrefix);
     let progressSupported = false;
     try {
-      await cockpit.spawn([...composePrefix, "--progress", "plain", "version"], { superuser, err: "message", ...dockerSpawnEnviron() });
+      await getHost().run([...composePrefix, "--progress", "plain", "version"], { superuser, ...dockerSpawnEnviron() });
       progressSupported = true;
     } catch { /* --progress not supported */ }
     detectedProgressSupport.set(r, progressSupported);
@@ -327,10 +325,7 @@ export function getPodmanSocketPath(): string | undefined {
 }
 
 async function statOwnerUid(path: string): Promise<number> {
-  let raw = "";
-  const proc = cockpit.spawn(["stat", "-c", "%u", "--", path], { err: "message" });
-  proc.stream(d => { raw += d; });
-  await proc;
+  const raw = await getHost().run(["stat", "-c", "%u", "--", path]);
   return parseInt(raw.trim(), 10);
 }
 

@@ -233,11 +233,11 @@ describe("scaleStack", () => {
     const mockUser = () => Promise.resolve({ id: 1000 });
     vi.stubGlobal("cockpit", { spawn: mockSpawn, user: mockUser });
     mockSpawn
-      .mockRejectedValueOnce(new Error("no socket"))
-      .mockRejectedValueOnce(new Error("no socket"))
-      .mockRejectedValueOnce(new Error("not found"))
-      .mockResolvedValueOnce("")
-      .mockRejectedValueOnce(new Error("unknown flag"));
+      .mockImplementationOnce(() => mockProcess("", "no socket"))
+      .mockImplementationOnce(() => mockProcess("", "no socket"))
+      .mockImplementationOnce(() => mockProcess("", "not found"))
+      .mockImplementationOnce(() => mockProcess(""))
+      .mockImplementationOnce(() => mockProcess("", "unknown flag"));
     setRuntime("podman");
     await detectComposeCommand();
     mockSpawn.mockReset();
