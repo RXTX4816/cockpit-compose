@@ -376,3 +376,30 @@ describe("superuser escalation (rootful Podman)", () => {
     expect(opts.superuser).toBe("try");
   });
 });
+
+describe("listAllStackContainers [engine HTTP API]", () => {
+  it("lists every compose project's containers in one request, grouped by project, without one-off runs", async () => {
+    const cockpitMod = await import("./cockpit");
+    vi.spyOn(cockpitMod, "getDockerSocketPath").mockReturnValue("unix:///var/run/docker.sock");
+    mockHttp.mockReturnValue(mockHttpClient({
+      "/containers/json": JSON.stringify([
+        { Id: "a1", Names: ["/a_web_1"], Image: "nginx", State: "running", Status: "Up", Ports: [], Labels: { "com.docker.compose.project": "a", "com.docker.compose.service": "web" } },
+        { Id: "b1", Names: ["/b_db_1"], Image: "pg", State: "exited", Status: "Exited", Ports: [], Labels: { "com.docker.compose.project": "b", "com.docker.compose.service": "db" } },
+        { Id: "a2", Names: ["/a_run_1"], Image: "nginx", State: "running", Status: "Up", Ports: [], Labels: { "com.docker.compose.project": "a", "com.docker.compose.oneoff": "True" } },
+        { Id: "x1", Names: ["/loose"], Image: "alpine", State: "running", Status: "Up", Ports: [], Labels: {} },
+      ]),
+    }));
+    const { listAllStackContainers } = await import("./containers");
+    const all = await listAllStackContainers();
+    expect([...all.keys()].sort()).toEqual(["a", "b"]);
+    expect(all.get("a")?.map(c => c.ID)).toEqual(["a1"]);
+    expect(all.get("b")?.[0]).toMatchObject({ Service: "db", State: "exited" });
+    expect(mockHttp).toHaveBeenCalledTimes(1);
+    expect(mockSpawn).not.toHaveBeenCalled();
+  });
+
+  it("rejects when the engine socket cannot be used, so the caller falls back to per-stack reads", async () => {
+    const { listAllStackContainers } = await import("./containers");
+    await expect(listAllStackContainers()).rejects.toBeDefined();
+  });
+});

@@ -6,6 +6,9 @@ import {
 } from "./engineJson";
 import { makeFakeProcess } from "./stacks/internal";
 import { engine } from "./stacks/engine";
+import type { ComposeContainer, ContainerStats } from "./types";
+import { groupByProject } from "../lib/stackSummary";
+import { parseJsonOutput } from "../lib/parseJsonOutput";
 
 // Pure read, so it's tried over the engine's REST API first — skips the per-poll cost of
 // spawning a whole new process (and, for compose specifically, a Python interpreter) just to
@@ -83,4 +86,41 @@ export function getContainerStats(containerIds: string[]): CockpitProcess {
       return await drainProcess(getContainerStatsCli(containerIds));
     }
   });
+}
+
+/**
+ * Every compose project's containers in one request, grouped by project, so a page of stacks
+ * needs one read instead of one per stack. Engine REST API only: there is no equivalent CLI
+ * call that returns the same shape on both runtimes, so when the socket cannot be used this
+ * rejects and the caller reads each stack for itself with listContainers().
+ */
+export async function listAllStackContainers(): Promise<Map<string, ComposeContainer[]>> {
+  const items = await engineHttpGetJson<EngineContainerJson[]>("/containers/json", {
+    all: "true",
+    filters: JSON.stringify({ label: ["com.docker.compose.project"] }),
+  });
+  return groupByProject(
+    items
+      .filter(c => !isOneoffContainer(c) && c.Labels?.["com.docker.compose.project"])
+      .filter((c): c is EngineContainerJson & { Labels: Record<string, string> } => !!c.Labels)
+      .map(c => ({
+        project: c.Labels["com.docker.compose.project"],
+        container: {
+          ID: c.Id,
+          Name: engineContainerName(c),
+          Image: c.Image,
+          State: c.State,
+          Status: c.Status,
+          Health: "",
+          Ports: enginePortsToString(c.Ports),
+          Service: c.Labels?.["com.docker.compose.service"] ?? "",
+        },
+      })),
+  );
+}
+
+/** Stats for these containers, parsed (the same call getContainerStats makes, awaited). */
+export async function getAllContainerStats(containerIds: string[]): Promise<ContainerStats[]> {
+  const raw = await drainProcess(getContainerStats(containerIds));
+  return parseJsonOutput<ContainerStats>(raw);
 }
