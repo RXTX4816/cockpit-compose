@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { parseJsonOutput, parseStackStatus, parseServiceCount, parsePorts, parsePortsFull, parsePortsDetailed, getServicesFromCompose, getProjectNameFromCompose, getComposeProjectNameFromEnv } from ".";
+import { parseJsonOutput, parseStackStatus, parseServiceCount, parsePortsFull, parsePortsDetailed, getServicesFromCompose, getProjectNameFromCompose, getComposeProjectNameFromEnv } from ".";
+import { parsePorts } from "./parsing";
 
 describe("parseJsonOutput", () => {
   it("parses JSON array format", () => {
