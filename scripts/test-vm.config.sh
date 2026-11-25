@@ -2,9 +2,7 @@
 # Plugin-specific VM config for cockpit-compose.
 # Sourced by node_modules/@rxtx4816/cockpit-plugin-base/scripts/test-vm.sh
 
-PLUGIN_NAME="cockpit-compose"
-MOUNT_TAG="cockpit_compose"
-INSTALL_PATH="/usr/share/cockpit/cockpit-compose"
+# PLUGIN_NAME, MOUNT_TAG and INSTALL_PATH default from package.json.
 
 ALL_VMS=(
   arch-podman   arch-docker   arch-both
