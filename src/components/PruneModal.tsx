@@ -1,3 +1,4 @@
+import { drainProcess } from "../lib/drainProcess";
 import { useState, useCallback } from "react";
 import { useAsyncAction } from "@rxtx4816/cockpit-plugin-base-react";
 import { BroomIcon } from "@patternfly/react-icons";
@@ -85,10 +86,7 @@ async function findComposeDeclaredImages(configFiles: string[]): Promise<string[
   const images = new Set<string>();
   for (const file of configFiles) {
     try {
-      let content = "";
-      const proc = readComposeFile(file);
-      proc.stream((d: string) => { content += d; });
-      await proc;
+      const content = await drainProcess(readComposeFile(file));
       for (const image of getImagesFromCompose(content)) images.add(image);
     } catch { /* file unreadable — skip, other files may still resolve */ }
   }

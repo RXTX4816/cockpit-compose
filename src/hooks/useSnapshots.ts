@@ -1,3 +1,4 @@
+import { drainProcess } from "../lib/drainProcess";
 import { useState, useCallback } from "react";
 import {
   listSnapshots,
@@ -11,10 +12,7 @@ export function useSnapshots(configFile: string) {
 
   const load = useCallback(async () => {
     try {
-      let raw = "";
-      const proc = listSnapshots(configFile);
-      proc.stream(data => { raw += data; });
-      await proc;
+      const raw = await drainProcess(listSnapshots(configFile));
       const snapshotPaths = raw.trim().split("\n").filter(Boolean);
       const list: Snapshot[] = snapshotPaths
         .map(path => {

@@ -1,3 +1,4 @@
+import { drainProcess } from "../lib/drainProcess";
 import { getHost } from "@rxtx4816/cockpit-plugin-base-react/host";
 import type { Snapshot } from "./types";
 import { getProfilesFromCompose } from "./parsing";
@@ -33,10 +34,7 @@ export function readComposeFile(path: string): CockpitProcess {
 
 export async function readAllProfiles(configFile: string): Promise<string[]> {
   try {
-    let content = "";
-    const proc = readComposeFile(configFile);
-    proc.stream((d: string) => { content += d; });
-    await proc;
+    const content = await drainProcess(readComposeFile(configFile));
     return getProfilesFromCompose(content);
   } catch {
     return [];
