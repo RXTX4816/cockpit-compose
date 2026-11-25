@@ -1,3 +1,4 @@
+import { getHost, type RunOptions } from "@rxtx4816/cockpit-plugin-base-react/host";
 import { cli, getIsPodman, getSocketMode, dockerSpawnEnviron } from "../cockpit";
 
 /**
@@ -16,12 +17,12 @@ export interface StackLeftovers {
   damaged: string[];
 }
 
-function env(superuser?: "try") {
-  return { superuser, err: "message" as const, ...dockerSpawnEnviron() };
+function env(superuser?: "try"): RunOptions {
+  return { superuser, ...dockerSpawnEnviron() };
 }
 
 export async function findStackLeftovers(project: string, superuser?: "try"): Promise<StackLeftovers> {
-  const out = await cockpit.spawn(
+  const out = await getHost().run(
     cli("ps", "-a", "--no-trunc", "--filter", `label=com.docker.compose.project=${project}`, "--format", "{{.ID}}"),
     env(superuser),
   );
@@ -31,7 +32,7 @@ export async function findStackLeftovers(project: string, superuser?: "try"): Pr
   const damaged: string[] = [];
   for (const id of ids) {
     try {
-      await cockpit.spawn(cli("inspect", "--format", "{{.Id}}", id), env(superuser));
+      await getHost().run(cli("inspect", "--format", "{{.Id}}", id), env(superuser));
     } catch (ex: unknown) {
       if (/no such (object|container)/i.test(String(ex instanceof Error ? ex.message : ex))) damaged.push(id);
     }
@@ -56,7 +57,7 @@ const FULL_ID = /^[0-9a-f]{64}$/;
 
 /** Builds the repair for damaged records: stop Docker, delete each record, start Docker. */
 export async function planDamagedRepair(damaged: string[], superuser?: "try"): Promise<RepairPlan> {
-  const dataRoot = (await cockpit.spawn(cli("info", "--format", "{{.DockerRootDir}}"), env(superuser))).trim();
+  const dataRoot = (await getHost().run(cli("info", "--format", "{{.DockerRootDir}}"), env(superuser))).trim();
   // Both go into rm -rf paths, so refuse anything that is not exactly what we expect.
   if (!dataRoot.startsWith("/") || dataRoot.includes("..")) throw new Error(`Unexpected Docker data root: ${dataRoot}`);
   return {
@@ -84,7 +85,7 @@ export function renderRepairCommands(plan: RepairPlan): string[] {
  * before calling this. Docker is started again even if removing a record fails.
  */
 export async function runDamagedRepair(plan: RepairPlan): Promise<void> {
-  const run = (argv: string[]) => cockpit.spawn(argv, { superuser: plan.rootless ? undefined : "require", err: "message" });
+  const run = (argv: string[]) => getHost().run(argv, { superuser: plan.rootless ? undefined : "require" });
   const systemctl = plan.rootless ? ["systemctl", "--user"] : ["systemctl"];
   const units = plan.rootless ? ["docker"] : ["docker", "docker.socket"];
 

@@ -220,7 +220,7 @@ describe("checkSocketHealth() / redetectSockets()", () => {
   });
 
   it("redetectSockets bypasses Podman's normal detect-once cache", async () => {
-    mockSpawn.mockResolvedValue("");
+    mockSpawn.mockImplementation(() => mockProcess(""));
     const { setRuntime, detectComposeCommand, redetectSockets } = await import("./cockpit");
     setRuntime("podman");
     await detectComposeCommand();
@@ -233,7 +233,7 @@ describe("checkSocketHealth() / redetectSockets()", () => {
 
 describe("detectComposeCommand()", () => {
   it("returns true and sets docker compose prefix when found", async () => {
-    mockSpawn.mockResolvedValue("");
+    mockSpawn.mockImplementation(() => mockProcess(""));
     const { detectComposeCommand, compose } = await import("./cockpit");
     expect(await detectComposeCommand()).toBe(true);
     expect(compose("ls")).toEqual(["docker", "compose", "ls"]);
@@ -242,8 +242,8 @@ describe("detectComposeCommand()", () => {
 
   it("returns true and falls back to docker-compose when docker compose version fails", async () => {
     mockSpawn
-      .mockRejectedValueOnce(new Error("not found"))
-      .mockResolvedValueOnce("");
+      .mockImplementationOnce(() => mockProcess("", "not found"))
+      .mockImplementationOnce(() => mockProcess(""));
     const { detectComposeCommand, compose } = await import("./cockpit");
     expect(await detectComposeCommand()).toBe(true);
     expect(compose("ls")).toEqual(["docker-compose", "ls"]);
@@ -251,15 +251,15 @@ describe("detectComposeCommand()", () => {
 
   it("returns false and falls back to docker compose when both commands fail", async () => {
     mockSpawn
-      .mockRejectedValueOnce(new Error("not found"))
-      .mockRejectedValueOnce(new Error("not found"));
+      .mockImplementationOnce(() => mockProcess("", "not found"))
+      .mockImplementationOnce(() => mockProcess("", "not found"));
     const { detectComposeCommand, compose } = await import("./cockpit");
     expect(await detectComposeCommand()).toBe(false);
     expect(compose("ls")).toEqual(["docker", "compose", "ls"]);
   });
 
   it("is idempotent — only spawns for version+progress probe on first call, not second", async () => {
-    mockSpawn.mockResolvedValue("");
+    mockSpawn.mockImplementation(() => mockProcess(""));
     const { detectComposeCommand } = await import("./cockpit");
     await detectComposeCommand();
     await detectComposeCommand();
@@ -273,7 +273,7 @@ describe("detectComposeCommand()", () => {
     const mockUser = vi.fn().mockResolvedValue({ id: 1000 });
     vi.stubGlobal("cockpit", { spawn: mockSpawn, user: mockUser });
     // stat calls return "" (not "socket") → no Podman socket found; compose version succeeds
-    mockSpawn.mockResolvedValue("");
+    mockSpawn.mockImplementation(() => mockProcess(""));
     const { setRuntime, detectComposeCommand, compose } = await import("./cockpit");
     setRuntime("podman");
     expect(await detectComposeCommand()).toBe(true);
@@ -285,11 +285,11 @@ describe("detectComposeCommand()", () => {
     const mockUser = vi.fn().mockResolvedValue({ id: 1000 });
     vi.stubGlobal("cockpit", { spawn: mockSpawn, user: mockUser });
     mockSpawn
-      .mockRejectedValueOnce(new Error("no socket"))  // stat: user podman socket absent
-      .mockRejectedValueOnce(new Error("no socket"))  // stat: system podman socket absent
-      .mockRejectedValueOnce(new Error("not found"))  // podman compose version fails
-      .mockResolvedValueOnce("")                       // podman-compose version succeeds
-      .mockRejectedValueOnce(new Error("unknown flag")); // --progress plain probe fails
+      .mockImplementationOnce(() => mockProcess("", "no socket"))  // stat: user podman socket absent
+      .mockImplementationOnce(() => mockProcess("", "no socket"))  // stat: system podman socket absent
+      .mockImplementationOnce(() => mockProcess("", "not found"))  // podman compose version fails
+      .mockImplementationOnce(() => mockProcess(""))                       // podman-compose version succeeds
+      .mockImplementationOnce(() => mockProcess("", "unknown flag")); // --progress plain probe fails
     const { setRuntime, detectComposeCommand, compose, composeSupportsProgress } = await import("./cockpit");
     setRuntime("podman");
     expect(await detectComposeCommand()).toBe(true);
@@ -303,10 +303,10 @@ describe("detectComposeCommand()", () => {
     const mockUser = vi.fn().mockResolvedValue({ id: 1000 });
     vi.stubGlobal("cockpit", { spawn: mockSpawn, user: mockUser });
     mockSpawn
-      .mockResolvedValueOnce("")                       // stat: user podman socket (not a socket)
-      .mockResolvedValueOnce("")                       // stat: system podman socket (not a socket)
-      .mockResolvedValueOnce("")                       // podman compose version succeeds
-      .mockRejectedValueOnce(new Error("invalid choice: 'plain'")); // --progress plain probe fails
+      .mockImplementationOnce(() => mockProcess(""))                       // stat: user podman socket (not a socket)
+      .mockImplementationOnce(() => mockProcess(""))                       // stat: system podman socket (not a socket)
+      .mockImplementationOnce(() => mockProcess(""))                       // podman compose version succeeds
+      .mockImplementationOnce(() => mockProcess("", "invalid choice: 'plain'")); // --progress plain probe fails
     const { setRuntime, detectComposeCommand, compose, composeSupportsProgress } = await import("./cockpit");
     setRuntime("podman");
     expect(await detectComposeCommand()).toBe(true);
@@ -318,10 +318,10 @@ describe("detectComposeCommand()", () => {
     const mockUser = vi.fn().mockResolvedValue({ id: 1000 });
     vi.stubGlobal("cockpit", { spawn: mockSpawn, user: mockUser });
     mockSpawn
-      .mockRejectedValueOnce(new Error("no socket"))  // stat: user podman socket absent
-      .mockRejectedValueOnce(new Error("no socket"))  // stat: system podman socket absent
-      .mockRejectedValueOnce(new Error("not-found"))  // podman compose version fails
-      .mockRejectedValueOnce(new Error("not-found")); // podman-compose version fails
+      .mockImplementationOnce(() => mockProcess("", "no socket"))  // stat: user podman socket absent
+      .mockImplementationOnce(() => mockProcess("", "no socket"))  // stat: system podman socket absent
+      .mockImplementationOnce(() => mockProcess("", "not-found"))  // podman compose version fails
+      .mockImplementationOnce(() => mockProcess("", "not-found")); // podman-compose version fails
     const { setRuntime, detectComposeCommand } = await import("./cockpit");
     setRuntime("podman");
     expect(await detectComposeCommand()).toBe(false);
@@ -371,8 +371,8 @@ describe("detectPodmanSocket() via detectComposeCommand()", () => {
   it("leaves podman socket unset when no socket exists, and poisons DOCKER_HOST so a delegated compose provider can't silently fall back to a different engine", async () => {
     mockUser.mockResolvedValue({ id: 1000 });
     mockSpawn
-      .mockRejectedValueOnce(new Error("no such file")) // user socket absent
-      .mockRejectedValueOnce(new Error("no such file")) // system socket absent
+      .mockImplementationOnce(() => mockProcess("", "no such file")) // user socket absent
+      .mockImplementationOnce(() => mockProcess("", "no such file")) // system socket absent
       .mockResolvedValue("");                            // compose version succeeds
     const { setRuntime, detectComposeCommand, getPodmanSocketPath, dockerSpawnEnviron } = await import("./cockpit");
     setRuntime("podman");
@@ -388,7 +388,7 @@ describe("detectPodmanSocket() via detectComposeCommand()", () => {
 
   it("is idempotent — socket detection only runs once across multiple calls", async () => {
     mockUser.mockResolvedValue({ id: 1000 });
-    mockSpawn.mockResolvedValue("");
+    mockSpawn.mockImplementation(() => mockProcess(""));
     const { setRuntime, detectComposeCommand } = await import("./cockpit");
     setRuntime("podman");
     await detectComposeCommand();
@@ -401,8 +401,8 @@ describe("detectPodmanSocket() via detectComposeCommand()", () => {
     mockUser.mockRejectedValue(new Error("unavailable"));
     // after user() throws, only the system socket stat is tried
     mockSpawn
-      .mockRejectedValueOnce(new Error("no such file")) // system socket absent
-      .mockResolvedValueOnce("");                        // compose version succeeds
+      .mockImplementationOnce(() => mockProcess("", "no such file")) // system socket absent
+      .mockImplementationOnce(() => mockProcess(""));                        // compose version succeeds
     const { setRuntime, detectComposeCommand, getPodmanSocketPath } = await import("./cockpit");
     setRuntime("podman");
     await detectComposeCommand();
@@ -446,7 +446,7 @@ describe("dockerSpawnEnviron() runtime awareness", () => {
   });
 
   it("returns {} when no socket is configured for the active runtime", async () => {
-    mockSpawn.mockResolvedValue(""); // all stat checks return "" → not a socket
+    mockSpawn.mockImplementation(() => mockProcess("")); // all stat checks return "" → not a socket
     mockUser.mockResolvedValue({ id: 1000 });
     const { detectComposeCommand, dockerSpawnEnviron } = await import("./cockpit");
     await detectComposeCommand(); // docker runtime, no rootless socket
