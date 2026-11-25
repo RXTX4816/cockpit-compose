@@ -1,16 +1,18 @@
+import { getHost } from "@rxtx4816/cockpit-plugin-base-react/host";
 import { compose, cli, dockerSpawnEnviron, composeSupportsProgress, socketSuperuser } from "../cockpit";
 import { fileFlags } from "./internal";
 import { engine } from "./engine";
 
 export async function snapshotProjectContainerIds(project: string): Promise<Set<string>> {
-  let raw = "";
-  const proc = cockpit.spawn(
-    cli("ps", "-a", "--filter", `label=com.docker.compose.project=${project}`, "--format", "{{.ID}}"),
-    { superuser: socketSuperuser(), err: "message", ...dockerSpawnEnviron() },
-  );
-  proc.stream(d => { raw += d; });
-  try { await proc; } catch { return new Set(); }
-  return new Set(raw.split("\n").map(l => l.trim()).filter(Boolean));
+  try {
+    const raw = await getHost().run(
+      cli("ps", "-a", "--filter", `label=com.docker.compose.project=${project}`, "--format", "{{.ID}}"),
+      { superuser: socketSuperuser(), ...dockerSpawnEnviron() },
+    );
+    return new Set(raw.split("\n").map(l => l.trim()).filter(Boolean));
+  } catch {
+    return new Set();
+  }
 }
 
 export async function forceRemoveOneoffContainers(
@@ -18,16 +20,13 @@ export async function forceRemoveOneoffContainers(
   preRunIds: Set<string>,
   superuser?: "try",
 ): Promise<void> {
-  let raw = "";
-  const proc = cockpit.spawn(
+  const raw = await getHost().run(
     cli("ps", "-a", "--filter", `label=com.docker.compose.project=${project}`, "--format", "{{.ID}}"),
-    { superuser, err: "message", ...dockerSpawnEnviron() },
+    { superuser, ...dockerSpawnEnviron() },
   );
-  proc.stream(d => { raw += d; });
-  await proc;
   const ids = raw.split("\n").map(l => l.trim()).filter(id => id && !preRunIds.has(id));
   if (ids.length === 0) return;
-  await cockpit.spawn(cli("rm", "-f", ...ids), { superuser, err: "message", ...dockerSpawnEnviron() });
+  await getHost().run(cli("rm", "-f", ...ids), { superuser, ...dockerSpawnEnviron() });
 }
 
 export type RunCommand =

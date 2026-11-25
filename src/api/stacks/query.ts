@@ -1,3 +1,4 @@
+import { getHost } from "@rxtx4816/cockpit-plugin-base-react/host";
 import { cli, dockerSpawnEnviron, socketSuperuser } from "../cockpit";
 import { makeFakeProcess, groupPodmanContainers, type PodmanPsContainer } from "./internal";
 
@@ -34,14 +35,11 @@ export function listStacks(): CockpitProcess {
 
 export async function readRunningServiceNames(project: string): Promise<string[]> {
   try {
-    let raw = "";
-    const proc = cockpit.spawn(
+    const raw = await getHost().run(
       cli("ps", "--filter", `label=com.docker.compose.project=${project}`, "--filter", "status=running",
         "--format", `{{index .Labels "com.docker.compose.service"}}`),
-      { superuser: socketSuperuser(), err: "message", ...dockerSpawnEnviron() },
+      { superuser: socketSuperuser(), ...dockerSpawnEnviron() },
     );
-    proc.stream((d: string) => { raw += d; });
-    await proc;
     return [...new Set(raw.split("\n").map(l => l.trim()).filter(l => l.length > 0))];
   } catch { return []; }
 }

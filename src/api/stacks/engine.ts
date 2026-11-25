@@ -1,3 +1,4 @@
+import { getHost } from "@rxtx4816/cockpit-plugin-base-react/host";
 import { compose, cli, getIsPodman, dockerSpawnEnviron, composeIsLimitedBackend, socketSuperuser } from "../cockpit";
 import { fileFlags, makeFakeProcess, groupPodmanContainers, type PodmanPsContainer, type PodmanPsForImages, type PodmanImageInspect, type PodmanVolumeJson } from "./internal";
 
@@ -31,13 +32,10 @@ export interface EngineOps {
 
 function podmanPauseUnpause(project: string, action: "pause" | "unpause", superuser?: "try"): CockpitProcess {
   return makeFakeProcess(async () => {
-    let psRaw = "";
-    const psProc = cockpit.spawn(
+    const psRaw = await getHost().run(
       cli("ps", "-a", "--filter", `label=com.docker.compose.project=${project}`, "--format", "json"),
-      { superuser, err: "message", ...dockerSpawnEnviron() },
+      { superuser, ...dockerSpawnEnviron() },
     );
-    psProc.stream((d: string) => { psRaw += d; });
-    await psProc;
     interface PsEntry { Id: string; }
     const containers = JSON.parse(psRaw) as PsEntry[];
     if (!Array.isArray(containers) || containers.length === 0) return "";
@@ -67,25 +65,19 @@ function podmanScale(
   return makeFakeProcess(async () => {
     const profileFlags = profiles.flatMap(p => ["--profile", p]);
     const scaleFlags = Object.entries(scales).flatMap(([svc, n]) => ["--scale", `${svc}=${n}`]);
-    let out = "";
-    const upProc = cockpit.spawn(
+    const out = await getHost().run(
       compose(...profileFlags, "-p", project, ...fileFlags(configFiles), "up", "-d", "--force-recreate", ...scaleFlags),
-      { superuser, err: "message", ...dockerSpawnEnviron() },
+      { superuser, ...dockerSpawnEnviron() },
     );
-    upProc.stream(d => { out += d; });
-    await upProc;
 
     for (const [svc, targetCount] of Object.entries(scales)) {
-      let psRaw = "";
-      const psProc = cockpit.spawn(
+      const psRaw = await getHost().run(
         cli("ps", "-a",
           "--filter", `label=com.docker.compose.project=${project}`,
           "--filter", `label=com.docker.compose.service=${svc}`,
           "--format", "json"),
-        { superuser, err: "message", ...dockerSpawnEnviron() },
+        { superuser, ...dockerSpawnEnviron() },
       );
-      psProc.stream(d => { psRaw += d; });
-      await psProc;
 
       interface PsEntry { Id: string; Names?: string[] }
       const containers = JSON.parse(psRaw) as PsEntry[];
@@ -114,13 +106,10 @@ function podmanScale(
 // preview shows — so what gets removed is exactly what the user was shown.
 function podmanPruneContainers(project: string, superuser?: "try"): CockpitProcess {
   return makeFakeProcess(async () => {
-    let raw = "";
-    const psProc = cockpit.spawn(
+    const raw = await getHost().run(
       cli("ps", "-a", "--filter", "status=exited", "--filter", `label=com.docker.compose.project=${project}`, "--format", "{{.ID}}"),
-      { superuser, err: "message", ...dockerSpawnEnviron() },
+      { superuser, ...dockerSpawnEnviron() },
     );
-    psProc.stream(d => { raw += d; });
-    await psProc;
     const ids = raw.split("\n").map(l => l.trim()).filter(Boolean);
     if (ids.length === 0) return "";
     await cockpit.spawn(cli("rm", ...ids), { superuser, err: "message", ...dockerSpawnEnviron() });
@@ -130,13 +119,10 @@ function podmanPruneContainers(project: string, superuser?: "try"): CockpitProce
 
 function podmanTop(project: string): CockpitProcess {
   return makeFakeProcess(async () => {
-    let psRaw = "";
-    const psProc = cockpit.spawn(
+    const psRaw = await getHost().run(
       cli("ps", "--filter", `label=com.docker.compose.project=${project}`, "--format", "json"),
-      { superuser: socketSuperuser(), err: "message", ...dockerSpawnEnviron() },
+      { superuser: socketSuperuser(), ...dockerSpawnEnviron() },
     );
-    psProc.stream((d: string) => { psRaw += d; });
-    await psProc;
 
     interface PsEntry { Id: string; Names?: string[]; Labels?: Record<string, string>; }
     const containers = JSON.parse(psRaw) as PsEntry[];
@@ -159,13 +145,10 @@ function podmanTop(project: string): CockpitProcess {
 
 function podmanListImages(project: string): CockpitProcess {
   return makeFakeProcess(async () => {
-    let psRaw = "";
-    const psProc = cockpit.spawn(
+    const psRaw = await getHost().run(
       cli("ps", "-a", "--filter", `label=com.docker.compose.project=${project}`, "--format", "json"),
-      { superuser: socketSuperuser(), err: "message", ...dockerSpawnEnviron() },
+      { superuser: socketSuperuser(), ...dockerSpawnEnviron() },
     );
-    psProc.stream((d: string) => { psRaw += d; });
-    await psProc;
 
     const containers = JSON.parse(psRaw) as PodmanPsForImages[];
     if (containers.length === 0) return "[]";
@@ -182,13 +165,10 @@ function podmanListImages(project: string): CockpitProcess {
       }
     }
 
-    let inspRaw = "";
-    const inspProc = cockpit.spawn(
+    const inspRaw = await getHost().run(
       cli("image", "inspect", "--format", "json", ...imageIds),
-      { superuser: socketSuperuser(), err: "message", ...dockerSpawnEnviron() },
+      { superuser: socketSuperuser(), ...dockerSpawnEnviron() },
     );
-    inspProc.stream((d: string) => { inspRaw += d; });
-    await inspProc;
 
     const images = JSON.parse(inspRaw) as PodmanImageInspect[];
     return JSON.stringify(images.map(img => {
@@ -210,13 +190,10 @@ function podmanListImages(project: string): CockpitProcess {
 
 function podmanListVolumes(project: string): CockpitProcess {
   return makeFakeProcess(async () => {
-    let raw = "";
-    const proc = cockpit.spawn(
+    const raw = await getHost().run(
       cli("volume", "ls", "--filter", `label=com.docker.compose.project=${project}`, "--format", "json"),
-      { superuser: socketSuperuser(), err: "message", ...dockerSpawnEnviron() },
+      { superuser: socketSuperuser(), ...dockerSpawnEnviron() },
     );
-    proc.stream((d: string) => { raw += d; });
-    await proc;
     const volumes = JSON.parse(raw) as PodmanVolumeJson[];
     return JSON.stringify(volumes.map(v => ({ Name: v.Name, Driver: v.Driver, Mountpoint: v.Mountpoint })));
   });
@@ -258,13 +235,10 @@ function podmanListStacks(): CockpitProcess {
 
   void (async () => {
     try {
-      let raw = "";
-      const proc = cockpit.spawn(
+      const raw = await getHost().run(
         cli("ps", "--all", "--filter", "label=com.docker.compose.project", "--format", "json"),
-        { superuser: socketSuperuser(), err: "message" },
+        { superuser: socketSuperuser() },
       );
-      proc.stream((d: string) => { raw += d; });
-      await proc;
       const output = JSON.stringify(groupPodmanContainers(JSON.parse(raw) as PodmanPsContainer[]));
       for (const cb of streamCallbacks) cb(output);
       resolveP(output);
@@ -289,13 +263,10 @@ function podmanListStacks(): CockpitProcess {
 // every other podman-specific fallback in this file).
 function podmanNetworkProjects(networkName: string): CockpitProcess {
   return makeFakeProcess(async () => {
-    let raw = "";
-    const proc = cockpit.spawn(
+    const raw = await getHost().run(
       cli("ps", "--filter", `network=${networkName}`, "--format", "json"),
-      { superuser: socketSuperuser(), err: "message", ...dockerSpawnEnviron() },
+      { superuser: socketSuperuser(), ...dockerSpawnEnviron() },
     );
-    proc.stream(d => { raw += d; });
-    await proc;
     interface PsEntry { Labels?: Record<string, string> }
     const containers = JSON.parse(raw) as PsEntry[];
     return containers
@@ -313,13 +284,10 @@ function podmanListContainers(project: string): CockpitProcess {
 
   void (async () => {
     try {
-      let raw = "";
-      const proc = cockpit.spawn(
+      const raw = await getHost().run(
         cli("ps", "-a", "--filter", `label=com.docker.compose.project=${project}`, "--format", "json"),
-        { superuser: socketSuperuser(), err: "message", ...dockerSpawnEnviron() },
+        { superuser: socketSuperuser(), ...dockerSpawnEnviron() },
       );
-      proc.stream((d: string) => { raw += d; });
-      await proc;
       const allItems = JSON.parse(raw) as PodmanPsJson[];
       // Exclude one-off run containers (compose run --rm); they carry
       // com.docker.compose.oneoff=True and would inflate service replica counts.
@@ -420,13 +388,10 @@ const docker: EngineOps = {
     );
   },
   async inspectNetworkContainerCounts(names) {
-    let raw = "";
-    const proc = cockpit.spawn(
+    const raw = await getHost().run(
       cli("network", "inspect", ...names, "--format", "{{.Name}}\t{{len .Containers}}"),
       { superuser: socketSuperuser(), ...ENV() },
     );
-    proc.stream(d => { raw += d; });
-    await proc;
     return raw;
   },
   containerStats: containerStatsWith("{{.CPUPerc}}"),
@@ -463,13 +428,10 @@ const podman: EngineOps = {
   },
   listNetworkConnectedProjects: podmanNetworkProjects,
   async inspectNetworkContainerCounts(names) {
-    let raw = "";
-    const proc = cockpit.spawn(
+    const raw = await getHost().run(
       cli("network", "inspect", "--format", "json", ...names),
       { superuser: socketSuperuser(), ...ENV() },
     );
-    proc.stream(d => { raw += d; });
-    await proc;
     type PodmanNet = { name?: string; Name?: string; containers?: Record<string, unknown> };
     const nets = JSON.parse(raw) as PodmanNet[];
     return nets
