@@ -1,3 +1,4 @@
+import { drainProcess } from "../lib/drainProcess";
 import { useState, useEffect, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -47,19 +48,13 @@ async function loadServiceInfo(
   stackName: string,
   configFiles: string[],
 ): Promise<Record<string, ServiceInfo>> {
-  let raw = "";
-  const proc = listContainers(stackName);
-  proc.stream(d => { raw += d; });
-  await proc;
+  const raw = await drainProcess(listContainers(stackName));
   const running = parseJsonOutput<ComposeContainer>(raw);
 
   const seen = new Set<string>();
   const serviceNames: string[] = [];
   for (const f of configFiles) {
-    let content = "";
-    const cp = readComposeFile(f);
-    cp.stream(d => { content += d; });
-    await cp;
+    const content = await drainProcess(readComposeFile(f));
     for (const name of getServicesFromCompose(content)) {
       if (!seen.has(name)) { seen.add(name); serviceNames.push(name); }
     }

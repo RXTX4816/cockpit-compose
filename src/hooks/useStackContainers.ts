@@ -1,3 +1,4 @@
+import { drainProcess } from "../lib/drainProcess";
 import { useState, useCallback, useEffect, useRef } from "react";
 import {
   type ComposeContainer,
@@ -21,10 +22,7 @@ async function readServiceNames(configFiles: string[]): Promise<string[]> {
   const seen = new Set<string>();
   const result: string[] = [];
   for (const f of configFiles) {
-    let content = "";
-    const cp = readComposeFile(f);
-    cp.stream(d => { content += d; });
-    await cp;
+    const content = await drainProcess(readComposeFile(f));
     for (const name of getServicesFromCompose(content)) {
       if (!seen.has(name)) { seen.add(name); result.push(name); }
     }
@@ -72,10 +70,7 @@ export function useStackContainers(stackName: string, configFiles: string[], sta
   const load = useCallback(async () => {
     if (!hasDataRef.current && !hasContainersRef.current) setLoading(true);
     try {
-      let raw = "";
-      const proc = listContainers(stackName);
-      proc.stream(d => { raw += d; });
-      await proc;
+      const raw = await drainProcess(listContainers(stackName));
       const running = parseJsonOutput<ComposeContainer>(raw);
 
       const serviceNames = await getServiceNames();

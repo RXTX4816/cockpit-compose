@@ -1,3 +1,4 @@
+import { drainProcess } from "../lib/drainProcess";
 import { useState, useCallback } from "react";
 import { type ComposeStack, findComposeFiles, listYamlFilesInDir, readComposeFile, readEnvFile, getProjectNameFromCompose, getComposeProjectNameFromEnv, hasServicesKey } from "../api";
 
@@ -65,10 +66,7 @@ export function useDownedStacksScan(dir: string, maxDepth: number, existingStack
 
           // Prefer name: from the compose file itself
           try {
-            let content = "";
-            const fileProc = readComposeFile(configFile);
-            fileProc.stream((data: string) => { content += data; });
-            await fileProc;
+            const content = await drainProcess(readComposeFile(configFile));
             name = getProjectNameFromCompose(content);
           } catch {
             // ignore read errors, try next source
@@ -93,19 +91,13 @@ export function useDownedStacksScan(dir: string, maxDepth: number, existingStack
               // with a top-level services: key (excludes non-compose YAMLs and empty files)
               const additionalFiles: string[] = [];
               try {
-                let lsRaw = "";
-                const lsProc = listYamlFilesInDir(stackDir);
-                lsProc.stream((d: string) => { lsRaw += d; });
-                await lsProc;
+                const lsRaw = await drainProcess(listYamlFilesInDir(stackDir));
                 const candidates = lsRaw.split("\n").map(l => l.trim()).filter(Boolean)
                   .filter(p => p !== configFile)
                   .sort();
                 for (const candidatePath of candidates) {
                   try {
-                    let content = "";
-                    const fp = readComposeFile(candidatePath);
-                    fp.stream((d: string) => { content += d; });
-                    await fp;
+                    const content = await drainProcess(readComposeFile(candidatePath));
                     if (hasServicesKey(content)) additionalFiles.push(candidatePath);
                   } catch {
                     // skip unreadable files

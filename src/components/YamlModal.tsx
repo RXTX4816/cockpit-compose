@@ -1,3 +1,4 @@
+import { drainProcess } from "../lib/drainProcess";
 import { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -232,10 +233,7 @@ export function YamlModal({ stack, onClose, onFileAdded, onFileRemoved }: Props)
     setImportFileSelected("");
     setAvailableYamls([]);
     try {
-      let raw = "";
-      const proc = listYamlFilesInDir(stackDir);
-      proc.stream((d: string) => { raw += d; });
-      await proc;
+      const raw = await drainProcess(listYamlFilesInDir(stackDir));
       const files = raw.split("\n").map(l => l.trim()).filter(Boolean)
         .filter(f => !configFiles.includes(f))
         .sort();

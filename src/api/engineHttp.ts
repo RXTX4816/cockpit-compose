@@ -42,11 +42,4 @@ export function _resetEngineHttpAvailabilityForTests(): void {
   unavailableSince = undefined;
 }
 
-// Collects a CockpitProcess's streamed output into a single string once it completes — used
-// to fall back to an existing CLI-based implementation from inside an async HTTP-first path.
-export async function drainProcess(proc: CockpitProcess): Promise<string> {
-  let raw = "";
-  proc.stream(d => { raw += d; });
-  await proc;
-  return raw;
-}
+export { drainProcess } from "../lib/drainProcess";

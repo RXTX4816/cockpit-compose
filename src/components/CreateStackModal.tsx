@@ -1,3 +1,4 @@
+import { drainProcess } from "../lib/drainProcess";
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
@@ -151,10 +152,7 @@ export function CreateStackModal({ stacks, onClose, onCreated }: Props) {
     setCheckingDir(true);
     const targetDir = `${composeDir.trim()}/${stackName.trim()}`;
     try {
-      let lsOutput = "";
-      const lsProc = cockpit.spawn(["ls", "-A", "--", targetDir], { err: "message" });
-      lsProc.stream((d: string) => { lsOutput += d; });
-      await lsProc;
+      const lsOutput = await drainProcess(cockpit.spawn(["ls", "-A", "--", targetDir], { err: "message" }));
       if (lsOutput.trim() !== "") {
         setSetupError(t("create_modal.error_dir_exists", { dir: targetDir }));
         setCheckingDir(false);
@@ -185,10 +183,7 @@ export function CreateStackModal({ stacks, onClose, onCreated }: Props) {
     setFetchedYaml(null);
     let tmpDir = "";
     try {
-      let tmpOut = "";
-      const mkProc = makeTempDir();
-      mkProc.stream((d: string) => { tmpOut += d; });
-      await mkProc;
+      const tmpOut = await drainProcess(makeTempDir());
       tmpDir = tmpOut.trim();
 
       const cloneProc = fetchComposeFromGit(url, tmpDir);

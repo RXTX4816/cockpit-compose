@@ -1,3 +1,4 @@
+import { drainProcess } from "../lib/drainProcess";
 import { useState, useEffect, useCallback, type ComponentType, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -156,10 +157,7 @@ export function StackInfoModal({ stack, onClose }: Props) {
 
     async function loadNetworks() {
       try {
-        let raw = "";
-        const proc = listProjectNetworks(stack.Name);
-        proc.stream(d => { raw += d; });
-        await proc;
+        const raw = await drainProcess(listProjectNetworks(stack.Name));
         const networkNames = raw.split("\n").map(l => l.trim()).filter(l => l.length > 0);
 
         const results: SharedNetwork[] = await Promise.all(
