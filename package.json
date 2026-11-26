@@ -71,6 +71,6 @@
     "codemirror": "^6.0.2",
     "i18next": "^26.4.2",
     "js-yaml": "^5.4.3",
-    "react-i18next": "^17.1.13"
+    "react-i18next": "^18.0.1"
   }
 }
