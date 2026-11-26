@@ -68,7 +68,6 @@ export function RestoreModal({ existingStacks, defaultScanDir, onClose, onRestor
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const configSectionRef = useRef<HTMLDivElement>(null);
-  const prevTargetPathRef = useRef<string | null>(null);
 
   const runScan = useCallback(async (dir: string) => {
     if (!dir.trim()) return;
@@ -156,18 +155,30 @@ export function RestoreModal({ existingStacks, defaultScanDir, onClose, onRestor
   }, [effectiveArchive]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Re-check target existence whenever the final destination path could have changed.
-  // Only reset targetExistsConfirmed when the path itself changes — not on every dep change —
-  // to avoid wiping the user's confirmation due to React scheduling the effect after the click.
+  // This effect must not touch targetExistsConfirmed: React runs it in a later task than the
+  // commit that shows the checkbox, so resetting here could undo a click made in between.
+  // The confirmation is cleared where the path actually changes: in runValidation and in the
+  // name / target directory change handlers.
   useEffect(() => {
     if (!detectedRootDir || !detectedName) return;
     const fn = newName.trim() || detectedRootDir;
     const targetPath = `${targetDir.replace(/\/$/, "")}/${fn}`;
-    if (targetPath !== prevTargetPathRef.current) {
-      prevTargetPathRef.current = targetPath;
-      setTargetExistsConfirmed(false);
-    }
-    void pathExists(targetPath).then(setTargetExists);
-  }, [targetDir, detectedRootDir, detectedName, nameConflict, newName]);
+    let cancelled = false;
+    void pathExists(targetPath).then(exists => {
+      if (!cancelled) setTargetExists(exists);
+    });
+    return () => { cancelled = true; };
+  }, [targetDir, detectedRootDir, detectedName, newName]);
+
+  function changeNewName(value: string) {
+    setNewName(value);
+    setTargetExistsConfirmed(false);
+  }
+
+  function changeTargetDir(value: string) {
+    setTargetDir(value);
+    setTargetExistsConfirmed(false);
+  }
 
   useEffect(() => {
     if (!validating) return;
@@ -431,7 +442,7 @@ export function RestoreModal({ existingStacks, defaultScanDir, onClose, onRestor
                       <TextInput
                         id="rm-new-name"
                         value={newName}
-                        onChange={(_e, v) => setNewName(v)}
+                        onChange={(_e, v) => changeNewName(v)}
                         validated={newNameError ? "error" : "default"}
                         isDisabled={restoring}
                       />
@@ -446,7 +457,7 @@ export function RestoreModal({ existingStacks, defaultScanDir, onClose, onRestor
                       <TextInput
                         id="rm-target-dir"
                         value={targetDir}
-                        onChange={(_e, v) => setTargetDir(v)}
+                        onChange={(_e, v) => changeTargetDir(v)}
                         isDisabled={restoring}
                       />
                     </FormGroup>

@@ -241,8 +241,71 @@ describe("RestoreModal — target exists warning", () => {
     expect(screen.getByRole("button", { name: /^Restore$/i })).toBeDisabled();
     fireEvent.click(screen.getByRole("checkbox", { name: /I understand/i }));
     await waitFor(() =>
+      expect(screen.getByRole("checkbox", { name: /I understand/i })).toBeChecked()
+    );
+    await waitFor(() =>
       expect(screen.getByRole("button", { name: /^Restore$/i })).not.toBeDisabled()
     );
+  });
+
+  it("keeps the confirmation ticked when it is clicked the moment it appears", async () => {
+    // Regression: a passive effect used to reset the confirmation the first time it saw the
+    // computed target path. React runs passive effects in a later task than the commit that
+    // shows the checkbox, so a click landing in between was silently undone. A MutationObserver
+    // callback runs right after that commit, before the effect: clicking from it reproduces
+    // the ordering on every run instead of depending on scheduler timing.
+    let clicked = false;
+    const observer = new MutationObserver(() => {
+      const box = document.getElementById("rm-target-confirm");
+      if (box && !clicked) {
+        clicked = true;
+        fireEvent.click(box);
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+    try {
+      render(
+        <RestoreModal
+          existingStacks={existingStacks}
+          defaultScanDir="/home/user/stacks"
+          onClose={vi.fn()}
+          onRestored={vi.fn()}
+        />
+      );
+      await waitFor(() => screen.getByText(/myapp-2026-06-12/));
+      fireEvent.click(screen.getByRole("radio"));
+      await waitFor(() => expect(clicked).toBe(true));
+    } finally {
+      observer.disconnect();
+    }
+    // Let any pending effects and the follow-up existence check settle.
+    await waitFor(() => expect(screen.getByText(/already exists/i)).toBeInTheDocument());
+    await new Promise(resolve => setTimeout(resolve, 50));
+    expect(screen.getByRole("checkbox", { name: /I understand/i })).toBeChecked();
+    expect(screen.getByRole("button", { name: /^Restore$/i })).not.toBeDisabled();
+  });
+
+  it("clears the confirmation when the user changes the stack name", async () => {
+    render(
+      <RestoreModal
+        existingStacks={existingStacks}
+        defaultScanDir="/home/user/stacks"
+        onClose={vi.fn()}
+        onRestored={vi.fn()}
+      />
+    );
+    await waitFor(() => screen.getByText(/myapp-2026-06-12/));
+    fireEvent.click(screen.getByRole("radio"));
+    await waitFor(() => screen.getByText(/already exists/i));
+    fireEvent.click(screen.getByRole("checkbox", { name: /I understand/i }));
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: /^Restore$/i })).not.toBeDisabled()
+    );
+    fireEvent.change(screen.getByLabelText(/Restore as name/i), { target: { value: "myapp2" } });
+    await waitFor(() =>
+      expect(screen.getByRole("checkbox", { name: /I understand/i })).not.toBeChecked()
+    );
+    expect(screen.getByRole("button", { name: /^Restore$/i })).toBeDisabled();
   });
 });
 
